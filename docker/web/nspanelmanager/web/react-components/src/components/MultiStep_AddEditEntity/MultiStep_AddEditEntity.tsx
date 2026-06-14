@@ -9,6 +9,8 @@ import MultiStep_AddEditEntity_Step3_Scene from "./entity_types/step3_edit_scene
 import { useAvailableEntitiesStore } from "../../stores/AvailableEntitiesStore";
 import { useEntitiesPagesStore } from "../../stores/EntitiesPagesStore";
 import { useSettingsStore } from "../../stores/SettingsStore";
+import { AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 // import Step2 from "./step2_select_controller";
 // import Step3 from "./Step3";
 
@@ -76,6 +78,7 @@ const MultiStep_AddOrEditEntity = ({
     if (id != null) {
       const entityData = useEntitiesPagesStore.getState().entities.find((entity) => entity.id == id);
       setFormData({ ...formData, ...entityData });
+      setStep(3); // Entity already has all configuration. Simply show the final step.
     }
     const entityPage = useEntitiesPagesStore.getState().entities_pages.find((page) => page.id == entities_page_id);
     setEntitiesPageType(entityPage?.type ?? "");
@@ -144,85 +147,134 @@ const MultiStep_AddOrEditEntity = ({
         >
           ✕
         </button>
-        {(() => {
-          if (id == null && step == 1 && entitiesPageType == "entity") {
-            return <MultiStep_AddEditEntity_Step1 handleButtonSelectEvent={handleButtonSelectEvent} next_step={nextStep} />;
-          } else if (id == null && step == 1 && entitiesPageType == "scene") {
-            setFormData({ ...formData, entity_type: "scene" });
-            setStep(2);
-          }
 
-          if (id == null && step == 2) {
-            return (
-              <MultiStep_AddEditEntity_Step2
-                handleButtonSelectEvent={handleButtonSelectEvent}
-                entity_type={String(formData.entity_type)}
-                next_step={nextStep}
-              />
-            );
-          } else if (formData.entity_type != "") {
-            switch (formData.entity_type) {
-              case "light":
-                return (
-                  <MultiStep_AddEditEntity_Step3_Light
-                    controller={String(formData.controller)}
-                    room_id={room_id}
-                    entities_page_id={entities_page_id}
-                    room_view_position={room_view_position}
-                    id={id}
-                    onComplete={onComplete}
-                  />
-                );
-              case "switch":
-                return (
-                  <MultiStep_AddEditEntity_Step3_Switch
-                    controller={String(formData.controller)}
-                    room_id={room_id}
-                    id={id}
-                    entities_page_id={entities_page_id}
-                    room_view_position={room_view_position}
-                    onComplete={onComplete}
-                  />
-                );
-              case "button":
-                return (
-                  <MultiStep_AddEditEntity_Step3_Button
-                    controller={String(formData.controller)}
-                    room_id={room_id}
-                    id={id}
-                    entities_page_id={entities_page_id}
-                    room_view_position={room_view_position}
-                    onComplete={onComplete}
-                  />
-                );
-              case "thermostat":
-                return (
-                  <MultiStep_AddEditEntity_Step3_Thermostat
-                    controller={String(formData.controller)}
-                    room_id={room_id}
-                    id={id}
-                    entities_page_id={entities_page_id}
-                    room_view_position={room_view_position}
-                    onComplete={onComplete}
-                  />
-                );
-              case "scene":
-                return (
-                  <MultiStep_AddEditEntity_Step3_Scene
-                    controller={String(formData.controller)}
-                    room_id={room_id}
-                    id={id}
-                    entities_page_id={entities_page_id}
-                    room_view_position={room_view_position}
-                    onComplete={onComplete}
-                  />
-                );
-              default:
-                console.error("Unknown entity type while trying to edit entity. Type: ", formData.entity_type);
-                return <span className="text-lg text-error">Unknown entity type: {formData.entity_type}</span>;
-            }
-          }
+        {(() => {
+          return (
+            <div className="flex justify-center mb-4 w-full">
+              <ul className="steps w-full">
+                <li
+                  className={`step ${step >= 1 ? "step-primary cursor-pointer" : ""}`}
+                  onClick={() => {
+                    setStep(1);
+                  }}
+                >
+                  Type
+                </li>
+                <li
+                  className={`step ${step >= 2 ? "step-primary" : ""} ${formData.entity_type == "" ? "cursor-not-allowed" : "cursor-pointer"}`}
+                  onClick={() => {
+                    if (formData.entity_type != "") {
+                      setStep(2);
+                    }
+                  }}
+                >
+                  Controller
+                </li>
+                <li
+                  className={`step ${step >= 3 ? "step-primary" : ""} ${formData.entity_type == "" ? "cursor-not-allowed" : "cursor-pointer"}`}
+                  onClick={() => {
+                    if (formData.entity_type != "") {
+                      setStep(3);
+                    }
+                  }}
+                >
+                  Configure {formData.entity_type}
+                </li>
+              </ul>
+            </div>
+          );
         })()}
+
+        <AnimatePresence mode="wait">
+          <motion.div
+            layout
+            key={`step.${step}`}
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -30 }}
+            transition={{ duration: 0.1 }}
+          >
+            {(() => {
+              if (id == null && step == 1 && entitiesPageType == "entity") {
+                return <MultiStep_AddEditEntity_Step1 handleButtonSelectEvent={handleButtonSelectEvent} next_step={nextStep} />;
+              } else if (id == null && step == 1 && entitiesPageType == "scene") {
+                setFormData({ ...formData, entity_type: "scene" });
+                setStep(2);
+              }
+
+              if (id == null && step == 2) {
+                return (
+                  <MultiStep_AddEditEntity_Step2
+                    handleButtonSelectEvent={handleButtonSelectEvent}
+                    entity_type={String(formData.entity_type)}
+                    next_step={nextStep}
+                  />
+                );
+              } else if (formData.entity_type != "") {
+                switch (formData.entity_type) {
+                  case "light":
+                    return (
+                      <MultiStep_AddEditEntity_Step3_Light
+                        controller={String(formData.controller)}
+                        room_id={room_id}
+                        entities_page_id={entities_page_id}
+                        room_view_position={room_view_position}
+                        id={id}
+                        onComplete={onComplete}
+                      />
+                    );
+                  case "switch":
+                    return (
+                      <MultiStep_AddEditEntity_Step3_Switch
+                        controller={String(formData.controller)}
+                        room_id={room_id}
+                        id={id}
+                        entities_page_id={entities_page_id}
+                        room_view_position={room_view_position}
+                        onComplete={onComplete}
+                      />
+                    );
+                  case "button":
+                    return (
+                      <MultiStep_AddEditEntity_Step3_Button
+                        controller={String(formData.controller)}
+                        room_id={room_id}
+                        id={id}
+                        entities_page_id={entities_page_id}
+                        room_view_position={room_view_position}
+                        onComplete={onComplete}
+                      />
+                    );
+                  case "thermostat":
+                    return (
+                      <MultiStep_AddEditEntity_Step3_Thermostat
+                        controller={String(formData.controller)}
+                        room_id={room_id}
+                        id={id}
+                        entities_page_id={entities_page_id}
+                        room_view_position={room_view_position}
+                        onComplete={onComplete}
+                      />
+                    );
+                  case "scene":
+                    return (
+                      <MultiStep_AddEditEntity_Step3_Scene
+                        controller={String(formData.controller)}
+                        room_id={room_id}
+                        id={id}
+                        entities_page_id={entities_page_id}
+                        room_view_position={room_view_position}
+                        onComplete={onComplete}
+                      />
+                    );
+                  default:
+                    console.error("Unknown entity type while trying to edit entity. Type: ", formData.entity_type);
+                    return <span className="text-lg text-error">Unknown entity type: {formData.entity_type}</span>;
+                }
+              }
+            })()}
+          </motion.div>
+        </AnimatePresence>
       </div>
       <form method="dialog" className="modal-backdrop">
         <button

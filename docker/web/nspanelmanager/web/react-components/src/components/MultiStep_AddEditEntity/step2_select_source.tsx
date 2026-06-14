@@ -20,14 +20,6 @@ const MultiStep_AddEditEntity_Step2 = ({
 
   return (
     <div>
-      <div className="flex justify-center mb-4 duration-500 transition-transform ease-linear w-full">
-        <ul className="steps">
-          <li className="step step-primary">Type</li>
-          <li className="step step-primary">Controller</li>
-          <li className="step">Entity</li>
-        </ul>
-      </div>
-
       <div className="grid grid-cols-3 gap-4 w-full">
         {available_controllers[entity_type]?.includes("home_assistant") && useSettingsStore.getState().settings?.home_assistant_token_set && (
           <div

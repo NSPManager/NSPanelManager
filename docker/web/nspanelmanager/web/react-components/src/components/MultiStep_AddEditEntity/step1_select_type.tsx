@@ -9,14 +9,6 @@ const MultiStep_AddEditEntity_Step1 = ({ handleButtonSelectEvent, next_step }: {
 
   return (
     <div>
-      <div className="flex justify-center mb-4 duration-500 transition-transform ease-linear w-full">
-        <ul className="steps">
-          <li className="step step-primary">Type</li>
-          <li className="step">Source</li>
-          <li className="step">Entity</li>
-        </ul>
-      </div>
-
       <div className="grid grid-cols-3 gap-4 w-full">
         <div
           onMouseEnter={() => setLightHovered(true)}

@@ -138,14 +138,6 @@ const MultiStep_AddEditEntity_Step3_Switch = ({
       <input type="hidden" {...register("entities_page_id")} />
       <input type="hidden" {...register("room_view_position")} />
 
-      <div className="flex justify-center mb-4 duration-500 transition-transform ease-linear w-full">
-        <ul className="steps">
-          <li className="step step-primary">Type</li>
-          <li className="step step-primary">Controller</li>
-          <li className="step step-primary">Switch</li>
-        </ul>
-      </div>
-
       <div className="w-full">
         <div className="flex justify-center mb-4 duration-500 transition-transform ease-linear">
           {/* Name */}
