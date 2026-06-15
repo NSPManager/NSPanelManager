@@ -14,6 +14,7 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <database_manager/database_manager.hpp>
+#include <exception>
 #include <fmt/core.h>
 #include <fstream>
 #include <mutex>
@@ -125,13 +126,29 @@ void MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING key, std::string 
   if (!result.empty()) {
     result[0].value = value;
     SPDLOG_DEBUG("Set settings key '{}' to value '{}'", setting_db_key, value);
-    database_manager::database.update(result[0]);
+    while (true) {
+      try {
+        database_manager::database.update(result[0]);
+        break;
+      } catch (std::exception &ex) {
+        SPDLOG_WARN("Caught exception while trying to update setting '{}'. Retrying...", setting_db_key);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+      }
+    }
   } else {
     SPDLOG_ERROR("Failed to find existing setting for key '{}'. Will create a new key.", setting_db_key);
     database_manager::SettingHolder setting;
     setting.name = setting_db_key;
     setting.value = value;
-    database_manager::database.insert(setting);
+    while (true) {
+      try {
+        database_manager::database.insert(setting);
+        break;
+      } catch (std::exception &ex) {
+        SPDLOG_WARN("Caught exception while trying to insert setting '{}'. Retrying...", setting_db_key);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+      }
+    }
   }
 
   MqttManagerConfig::_settings_values_cache[key] = value;

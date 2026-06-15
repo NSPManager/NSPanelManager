@@ -27,6 +27,7 @@ interface IEntitiesPages {
   scenes: IEntityOrSceneData[];
   fetchData: (room_id: number) => Promise<void>;
   removeEntitiesPage: (id: number) => void;
+  createEntitiesPage: (room_id: number, is_scenes_page: boolean, is_global_scenes_page: boolean) => void;
   setEntityPosition: (id: number, entities_page_id: number, room_view_position: number) => void;
   setScenePosition: (id: number, entities_page_id: number, room_view_position: number) => void;
   removeEntity: (id: number) => void;
@@ -83,6 +84,14 @@ export const useEntitiesPagesStore = create<IEntitiesPages>((set) => ({
   removeEntitiesPage: (id: number) => {
     set((state) => ({
       entities_pages: state.entities_pages.filter((page) => page.id !== id),
+    }));
+  },
+  createEntitiesPage: (room_id: number, is_scenes_page: boolean) => {
+    set((state) => ({
+      entities_pages: [
+        ...state.entities_pages,
+        { id: state.entities_pages.length + 1, display_order: 0, number_of_entities: 0, type: is_scenes_page ? "scene" : "entity", room_id: room_id },
+      ],
     }));
   },
   setScenePosition: (id: number, entities_page_id: number, room_view_position: number) => {

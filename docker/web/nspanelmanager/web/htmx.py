@@ -574,16 +574,6 @@ def partial_remove_entity_from_page_slot(request, page_id, slot_id):
     )
 
 
-@csrf_exempt
-def partial_add_entities_page_to_room(request, room_id, is_scenes_page, is_global_scenes_page):
-    data = {
-        "room_id": room_id,
-        "is_scenes_page": is_scenes_page,
-        "is_global_scenes_page": is_global_scenes_page,
-    }
-    return render(request, "partial/add_entities_page_to_room.html", data)
-
-
 def partial_edit_entities_page(request, page_id):
     data = {
         "page_id": page_id,

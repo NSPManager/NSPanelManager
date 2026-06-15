@@ -205,7 +205,15 @@ static void init() {
     }
   }
 #else
-  database_manager::database.open_forever();
+  while (true) {
+    try {
+      database_manager::database.open_forever();
+      break;
+    } catch (...) {
+      SPDLOG_ERROR("Failed to open database, retrying...");
+      std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+  }
 #endif
 }
 

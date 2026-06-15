@@ -68,7 +68,7 @@ def send_mqttmanager_reload_command():
         if proc.status() == psutil.STATUS_ZOMBIE:
             print("Found zombie MQTTManager process. Will not process it as it's already dead. Looking for another running MQTTManager process.")
         else:
-            if "/MQTTManager/build/nspm_mqttmanager" in proc.cmdline():
+            if "/MQTTManager/build/nspm_mqttmanager" == proc.cmdline()[0]:
                 logging.info("Found running MQTTManager. Sending reload command via SIGUSR1 signal.")
                 os.kill(proc.pid, signal.SIGUSR1)
 

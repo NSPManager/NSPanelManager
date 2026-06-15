@@ -335,10 +335,8 @@ def rooms_get(request):
         for room in room_objects:
             rooms.append(
                 {
-                    "room_id": room.id,
+                    "id": room.id,
                     "name": room.friendly_name,
-                    "lights": [light.id for light in room.light_set.all()],
-                    "scenes": [scene.id for scene in room.scene_set.all()],
                 }
             )
         return JsonResponse({"status": "ok", "rooms": rooms}, status=200)
@@ -390,6 +388,28 @@ def room_entities_pages(request, room_id):
         except Exception as ex:
             logging.exception(ex)
             return JsonResponse({"status": "error"}, status=500)
+    elif request.method == "PUT":
+        required_fields = ["is_scenes_page", "type"]
+        data = json.loads(request.body)
+
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        room = Room.objects.get(id=room_id)
+        pages = RoomEntitiesPage.objects.filter(room=room).order_by("display_order")
+        new_display_order = 0  # Default to zero of no pages exists
+        if len(pages) > 0:
+            new_display_order = pages[len(pages) - 1].display_order + 1
+
+        new_page = RoomEntitiesPage()
+        new_page.page_type = data["type"]
+        new_page.display_order = new_display_order
+        new_page.is_scenes_page = data["is_scenes_page"]
+        new_page.room = room
+        new_page.save()
+        send_mqttmanager_reload_command()
+        return JsonResponse({"status": "ok"}, status=200)
     else:
         return JsonResponse({"status": "error"}, status=405)
 
@@ -426,6 +446,7 @@ def room_entities_page(request, room_id, page_id):
         try:
             db_page = RoomEntitiesPage.objects.get(id=page_id)
             db_page.delete()
+            send_mqttmanager_reload_command()
             return JsonResponse({"status": "ok"}, status=200)
         except Exception as ex:
             logging.exception(ex)

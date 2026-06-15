@@ -69,7 +69,11 @@ void ThermostatEntity::reload_config() {
 
   if (entity_data.contains("step_size")) {
     try {
-      this->_step_size = std::atof(entity_data.at("step_size").get<std::string>().c_str());
+      if (entity_data.at("step_size").is_number_float()) {
+        this->_step_size = entity_data.at("step_size").get<float>();
+      } else {
+        this->_step_size = std::atof(entity_data.at("step_size").get<std::string>().c_str());
+      }
     } catch (std::exception &ex) {
       SPDLOG_ERROR("Caught exception while trying to set step size for {}::{}. Error: {}", this->_id, this->_name, ex.what());
     }

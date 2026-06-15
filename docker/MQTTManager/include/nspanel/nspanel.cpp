@@ -1,5 +1,4 @@
 #include "nspanel.hpp"
-#include <scenes/scene.hpp>
 #include "database_manager/database_manager.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
@@ -36,6 +35,7 @@
 #include <nlohmann/json_fwd.hpp>
 #include <optional>
 #include <room/room.hpp>
+#include <scenes/scene.hpp>
 #include <spdlog/spdlog.h>
 #include <sqlite3.h>
 #include <sqlite_orm/sqlite_orm.h>
@@ -408,7 +408,7 @@ void NSPanel::send_config() {
         config.add_relay1_relay_group(binding.relay_group_id);
       }
     }
-  } catch (std::system_error) {
+  } catch (...) {
     // Did not find matching relay group binind, relay is not bound.
   }
 
@@ -420,7 +420,7 @@ void NSPanel::send_config() {
         config.add_relay2_relay_group(binding.relay_group_id);
       }
     }
-  } catch (std::system_error) {
+  } catch (...) {
     // Did not find matching relay group binind, relay is not bound.
   }
 

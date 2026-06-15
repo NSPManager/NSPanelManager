@@ -301,7 +301,15 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
   if (MQTT_Manager::_mqtt_client != nullptr) {
     if (MQTT_Manager::is_connected()) {
       SPDLOG_TRACE("Publising '{}' -> '{}'", topic, payload);
-      MQTT_Manager::_mqtt_client->publish(msg);
+      while (MQTT_Manager::is_connected()) {
+        try {
+          MQTT_Manager::_mqtt_client->publish(msg);
+          break;
+        } catch (std::exception &ex) {
+          SPDLOG_WARN("Caught exception while trying to publish '{}' -> '{}'. Retrying...", topic, payload);
+          std::this_thread::sleep_for(std::chrono::seconds(1));
+        }
+      }
 
       // Replicate messages into the websocket STOMP topics.
       // Convert payload to base64 as to be able to send it over the websocket.
