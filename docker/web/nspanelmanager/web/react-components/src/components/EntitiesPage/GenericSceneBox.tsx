@@ -1,16 +1,17 @@
 import { useDraggable } from "@dnd-kit/react";
+import MultiStep_AddOrEditEntity from "../MultiStep_AddEditEntity/MultiStep_AddEditEntity";
 import type { IEntityOrSceneData } from "../../stores/EntitiesPagesStore";
 import { useEntitiesPagesStore } from "../../stores/EntitiesPagesStore";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 // import Step2 from "./step2_select_controller";
 // import Step3 from "./Step3";
 
 const GenericSceneBox = ({ scene }: { scene: IEntityOrSceneData }) => {
   const { ref } = useDraggable({ id: `scene-${scene.id}`, data: { type: "scene", config: scene } });
-  const { entities_pages, removeScene } = useEntitiesPagesStore();
+  const { entities_pages, removeScene, fetchData } = useEntitiesPagesStore();
   const entity_page = entities_pages.find((page) => page.id === scene.entities_page_id);
   const removeSceneDialogRef = useRef<HTMLDialogElement>(null);
-  // const [editDialogOpened, setEditDialogOpened] = useState(false);
+  const [editDialogOpened, setEditDialogOpened] = useState(false);
 
   function getCookie(name: string) {
     let cookieValue = "";
@@ -77,8 +78,25 @@ const GenericSceneBox = ({ scene }: { scene: IEntityOrSceneData }) => {
           <button>close</button>
         </form>
       </dialog>
+      <MultiStep_AddOrEditEntity
+        type="scene"
+        room_id={entity_page.room_id}
+        entities_page_id={scene.entities_page_id}
+        room_view_position={scene.room_view_position}
+        id={scene.id}
+        opened={editDialogOpened}
+        setOpened={setEditDialogOpened}
+        onComplete={() => {
+          fetchData(entity_page.room_id);
+          setEditDialogOpened(false);
+        }}
+      />
       {/*<!-- Box indicators/buttons -->*/}
-      <button className="indicator-item badge badge-info me-8 w-6 h-6 flex items-center justify-center cursor-pointer" title="Edit scene">
+      <button
+        className="indicator-item badge badge-info me-8 w-6 h-6 flex items-center justify-center cursor-pointer"
+        title="Edit scene"
+        onClick={() => setEditDialogOpened(true)}
+      >
         <span className="mdi mdi-pencil"></span>
       </button>
       <button

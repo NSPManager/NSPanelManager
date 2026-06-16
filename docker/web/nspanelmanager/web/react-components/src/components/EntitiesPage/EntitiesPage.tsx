@@ -47,7 +47,7 @@ const EntitiesPage = ({
     setEditPageTypeOpen(false);
 
     // PUT request using fetch with error handling
-    fetch(`/rest/rooms/${pageData.room_id}/entities_pages/${pageData.id}`, {
+    fetch(`/rest/entities_pages/${pageData.id}`, {
       credentials: "same-origin",
       method: "PUT",
       mode: "same-origin",
@@ -77,8 +77,8 @@ const EntitiesPage = ({
     <>
       <dialog ref={dialogRef} className="modal">
         <div className="modal-box">
-          <h3 className="text-lg font-bold">Delete entities page</h3>
-          <p className="py-4">Are you sure you want to delete this entities page and all its entities?</p>
+          <h3 className="text-lg font-bold">Delete {pageData.type} page</h3>
+          <p className="py-4">Are you sure you want to delete this {pageData.type} page and all its entities?</p>
           <div className="flex justify-end join">
             <button onClick={() => dialogRef.current?.close()} className="btn btn-neutral join-item">
               Cancel

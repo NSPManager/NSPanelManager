@@ -10,16 +10,15 @@ import { useEffect } from "react";
 
 const schema = z.object({
   type: z.string(),
-  entity_type: z.string(),
-  room_id: z.number(),
+  controller: z.string(),
+  scene_type: z.string(),
+  room_id: z.number().nullable(), // Room ID is null in case the entity is not associated with a room (ie. global scene)
   entities_page_id: z.number(),
   room_view_position: z.number(),
   friendly_name: z.string(),
-  controller: z.string(),
-  scene_type: z.string(),
   backend_name: z.string().optional(),
 });
-export type SwitchFormData = z.infer<typeof schema>;
+export type SceneFormData = z.infer<typeof schema>;
 
 const CustomOption: React.FC<OptionProps<IOptionType>> = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
   if (isDisabled) {
@@ -60,16 +59,16 @@ const MultiStep_AddEditEntity_Step3_Scene = ({
     getValues,
     setValue,
     formState: { isValid },
-  } = useForm<SwitchFormData>({
+  } = useForm<SceneFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
+      type: "scene",
+      scene_type: "",
       controller: controller,
-      type: "entity",
-      entity_type: "light",
       room_id: room_id,
       entities_page_id: entities_page_id,
       room_view_position: room_view_position,
-      scene_type: "",
+      friendly_name: "",
       backend_name: "",
     },
   });
@@ -99,12 +98,12 @@ const MultiStep_AddEditEntity_Step3_Scene = ({
 
   useEffect(() => {
     if (id != null) {
-      const entityData = useEntitiesPagesStore.getState().entities.find((entity) => entity.id == id);
-      reset(entityData);
+      const sceneData = useEntitiesPagesStore.getState().scenes.find((scene) => scene.id == id);
+      reset(sceneData);
     }
-  }, [id, useEntitiesPagesStore.getState().entities]);
+  }, [id, useEntitiesPagesStore.getState().scenes]);
 
-  function saveEntity(data: SwitchFormData) {
+  function saveEntity(data: SceneFormData) {
     // PUT request using fetch with error handling
     fetch("/rest/entities/scenes", {
       credentials: "same-origin",
@@ -139,9 +138,8 @@ const MultiStep_AddEditEntity_Step3_Scene = ({
 
   return (
     <form onSubmit={handleSubmit(saveEntity)}>
-      <input type="hidden" {...register("controller")} />
       <input type="hidden" {...register("type")} />
-      <input type="hidden" {...register("entity_type")} />
+      <input type="hidden" {...register("scene_type")} />
       <input type="hidden" {...register("room_id")} />
       <input type="hidden" {...register("entities_page_id")} />
       <input type="hidden" {...register("room_view_position")} />
@@ -157,7 +155,6 @@ const MultiStep_AddEditEntity_Step3_Scene = ({
               <input
                 className="outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
                 type="text"
-                id="add_new_switch_name"
                 {...register("friendly_name")}
                 required
               />

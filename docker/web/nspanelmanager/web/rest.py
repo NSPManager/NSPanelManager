@@ -382,6 +382,8 @@ def room_entities_pages(request, room_id):
                         "number_of_entities": page.page_type,
                         "type": "scene" if page.is_scenes_page else "entity",
                         "room_id": room_id,
+                        "entities": [get_rest_entitiy_representation(entity.id) for entity in page.entity_set.all().order_by("room_view_position")],
+                        "scenes": [get_rest_scene_representation(entity.id) for entity in page.scene_set.all().order_by("room_view_position")],
                     }
                 )
             return JsonResponse({"status": "ok", "entities_pages": response}, status=200)
@@ -414,7 +416,7 @@ def room_entities_pages(request, room_id):
         return JsonResponse({"status": "error"}, status=405)
 
 
-def room_entities_page(request, room_id, page_id):
+def room_entities_page(request, page_id):
     if request.method == "GET":
         try:
             page = RoomEntitiesPage.objects.get(id=page_id)
@@ -453,6 +455,62 @@ def room_entities_page(request, room_id, page_id):
             return JsonResponse({"status": "error"}, status=500)
     else:
         return JsonResponse({"status": "error"}, status=405)
+
+
+########################
+### Global functions ###
+########################
+
+
+def global_entities_pages(request):
+    if request.method == "GET":
+        try:
+            pages = RoomEntitiesPage.objects.filter(room=None).order_by("display_order")
+            response = []
+            for page in pages:
+                response.append(
+                    {
+                        "id": page.id,
+                        "display_order": page.display_order,
+                        "number_of_entities": page.page_type,
+                        "type": "scene" if page.is_scenes_page else "entity",
+                        "room_id": None,
+                        "entities": [get_rest_entitiy_representation(entity.id) for entity in page.entity_set.all().order_by("room_view_position")],
+                        "scenes": [get_rest_scene_representation(entity.id) for entity in page.scene_set.all().order_by("room_view_position")],
+                    }
+                )
+            return JsonResponse({"status": "ok", "entities_pages": response}, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
+    elif request.method == "PUT":
+        required_fields = ["is_scenes_page", "type"]
+        data = json.loads(request.body)
+
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        pages = RoomEntitiesPage.objects.filter(room=None).order_by("display_order")
+        new_display_order = 0  # Default to zero of no pages exists
+        if len(pages) > 0:
+            new_display_order = pages[len(pages) - 1].display_order + 1
+
+        new_page = RoomEntitiesPage()
+        new_page.page_type = data["type"]
+        new_page.display_order = new_display_order
+        new_page.is_scenes_page = data["is_scenes_page"]
+        new_page.room = None
+        new_page.save()
+        send_mqttmanager_reload_command()
+        return JsonResponse({"status": "ok"}, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
+
+
+######################
+### Room functions ###
+######################
 
 
 @csrf_exempt
@@ -1007,7 +1065,7 @@ def put_scene_entity(request):
             new_scene = Scene()
 
         new_scene.friendly_name = data["friendly_name"]
-        new_scene.room = Room.objects.get(id=int(data["room_id"]))
+        new_scene.room = Room.objects.get(id=int(data["room_id"])) if data["room_id"] else None
         new_scene.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
         new_scene.room_view_position = int(data["room_view_position"])
 

@@ -25,7 +25,7 @@ interface IEntitiesPages {
   entities_pages: IEntitiesPageData[];
   entities: IEntityOrSceneData[];
   scenes: IEntityOrSceneData[];
-  fetchData: (room_id: number) => Promise<void>;
+  fetchData: (room_id?: number) => Promise<void>;
   removeEntitiesPage: (id: number) => void;
   createEntitiesPage: (room_id: number, is_scenes_page: boolean, is_global_scenes_page: boolean) => void;
   setEntityPosition: (id: number, entities_page_id: number, room_view_position: number) => void;
@@ -55,9 +55,13 @@ export const useEntitiesPagesStore = create<IEntitiesPages>((set) => ({
   entities_pages: [],
   entities: [],
   scenes: [],
-  fetchData: async (room_id: number) => {
+  fetchData: async (room_id?: number) => {
     set({ status: "loading", room_id: room_id });
-    fetch(`/rest/rooms/${room_id}/entities_pages`, {
+    let url = `/rest/global/entities_pages`;
+    if (room_id !== undefined) {
+      url = `/rest/rooms/${room_id}/entities_pages`;
+    }
+    fetch(url, {
       credentials: "same-origin",
       method: "GET",
       mode: "same-origin",
@@ -65,19 +69,10 @@ export const useEntitiesPagesStore = create<IEntitiesPages>((set) => ({
     })
       .then((response) => response.json())
       .then((data) => {
-        set((state) => ({ ...state, status: "loaded", room_id, entities_pages: data.entities_pages }));
+        set((state) => ({ ...state, status: "loaded", room_id, entities_pages: data.entities_pages, entities: [], scenes: [] }));
 
         for (const page of data.entities_pages) {
-          fetch(`/rest/rooms/${page.room_id}/entities_pages/${page.id}`, {
-            credentials: "same-origin",
-            method: "GET",
-            mode: "same-origin",
-            headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              set((state) => ({ ...state, entities: [...state.entities, ...data.entities], scenes: [...state.scenes, ...data.scenes] }));
-            });
+          set((state) => ({ ...state, entities: [...state.entities, ...page.entities], scenes: [...state.scenes, ...page.scenes] }));
         }
       });
   },

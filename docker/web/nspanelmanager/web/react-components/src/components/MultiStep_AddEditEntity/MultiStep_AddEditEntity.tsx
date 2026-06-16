@@ -134,6 +134,16 @@ const MultiStep_AddOrEditEntity = ({
     }
   }, [contentRef]);
 
+  useEffect(() => {
+    if (id == null && step == 1 && entitiesPageType == "scene") {
+      setFormData({ ...formData, entity_type: "scene" });
+      setStep(2);
+    } else if (id != null && entitiesPageType == "scene") {
+      setFormData({ ...formData, entity_type: "scene" });
+      setStep(3);
+    }
+  }, [id, step, entitiesPageType]);
+
   return (
     <dialog ref={dialogRef} open={opened ?? false} onClose={onDialogClose} className="modal duration-200">
       <div ref={contentRef} className={`modal-box max-h-11/12 bg-base-100 text-base-content`}>
@@ -197,9 +207,6 @@ const MultiStep_AddOrEditEntity = ({
             {(() => {
               if (id == null && step == 1 && entitiesPageType == "entity") {
                 return <MultiStep_AddEditEntity_Step1 handleButtonSelectEvent={handleButtonSelectEvent} next_step={nextStep} />;
-              } else if (id == null && step == 1 && entitiesPageType == "scene") {
-                setFormData({ ...formData, entity_type: "scene" });
-                setStep(2);
               }
 
               if (id == null && step == 2) {

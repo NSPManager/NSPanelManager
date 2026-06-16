@@ -4,9 +4,8 @@ import { DragDropProvider } from "@dnd-kit/react";
 import { useEntitiesPagesStore } from "../../stores/EntitiesPagesStore";
 import { useRoomsStore } from "../../stores/RoomsStore";
 import { type IEntityOrSceneData } from "../../stores/EntitiesPagesStore";
-import { number } from "zod/v3";
 
-const EntitiesPagesView = ({ room_id, type }: { room_id: number; type: string }) => {
+const EntitiesPagesView = ({ room_id, type }: { room_id?: number; type: string }) => {
   const { entities_pages, fetchData, removeEntitiesPage, entities, scenes, setScenePosition, setEntityPosition } = useEntitiesPagesStore();
   const [dragingItem, setDragingItem] = useState<IEntityOrSceneData | undefined>(undefined);
   const [addNewPageTypeOpen, setAddNewPageTypeOpen] = useState(false);
@@ -37,7 +36,7 @@ const EntitiesPagesView = ({ room_id, type }: { room_id: number; type: string })
 
   async function deleteEntitiesPage(id: number) {
     console.log("Deleting entities page", id);
-    fetch(`/rest/rooms/${room_id}/entities_pages/${id}`, {
+    fetch(`/rest/entities_pages/${id}`, {
       credentials: "same-origin",
       method: "DELETE",
       mode: "same-origin",
@@ -56,7 +55,11 @@ const EntitiesPagesView = ({ room_id, type }: { room_id: number; type: string })
 
   async function createEntitiesPage(number_of_entities: number) {
     console.log("Creating entities page", type);
-    fetch(`/rest/rooms/${room_id}/entities_pages`, {
+    let url = `/rest/global/entities_pages`;
+    if (room_id !== undefined) {
+      url = `/rest/rooms/${room_id}/entities_pages`;
+    }
+    fetch(url, {
       credentials: "same-origin",
       method: "PUT",
       mode: "same-origin",
