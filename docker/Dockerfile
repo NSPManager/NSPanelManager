@@ -2,13 +2,11 @@ FROM node:20-alpine AS ui-builder
 ARG BUILDTIME
 WORKDIR /ui-app
 
-RUN echo "Building UI at $BUILDTIME" # Used to force rebuild
-
 # Install git to clone your frontend repository
 RUN apk add --no-cache git
 
 # Clone the UI repo
-RUN git clone https://github.com/NSPManager/NSPanelManager-Web-UI.git .
+RUN echo "Building UI at $BUILDTIME" && git clone https://github.com/NSPManager/NSPanelManager-Web-UI.git . # Use the echo to force a rebuild of this step.
 
 # Install dependencies and build
 RUN npm install
