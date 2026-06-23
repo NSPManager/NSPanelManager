@@ -624,7 +624,7 @@ void OpenhabThermostat::openhab_swingh_event_callback(nlohmann::json data) {
     }
   } else if (std::string(data["type"]).compare("ItemStateFetched") == 0) {
     SPDLOG_TRACE("OpenHAB thermostat {}::{} Got initial data from OpenHAB via custom ItemStateFetched event.", this->_id, this->_name);
-    if (this->_openhab_swing_item.compare(data["payload"]["name"]) == 0) {
+    if (data.contains("payload") && data.at("payload").contains("name") && this->_openhab_swing_item.compare(data["payload"]["name"]) == 0) {
       nlohmann::json payload = data["payload"];
       if (payload["state"].is_null()) { // Got state but state is NULL, ignore.
         return;

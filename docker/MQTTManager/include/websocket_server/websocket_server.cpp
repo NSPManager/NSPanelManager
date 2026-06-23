@@ -103,6 +103,12 @@ int StompTopic::get_subscriber_count() {
   return this->_subscribers.size();
 }
 
+/*
+ *********************
+ ** WebsocketServer **
+ *********************
+ */
+
 void WebsocketServer::start() {
   if (WebsocketServer::_server == nullptr) {
     SPDLOG_DEBUG("Creating new ix::WebSocketServer.");
@@ -155,6 +161,8 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
         topic->unsubscribe(webSocket, "");
       }
     } else if (msg->type == ix::WebSocketMessageType::Message) {
+      SPDLOG_DEBUG("Got websocket message: {}", msg->str);
+
       if (std::find(WebsocketServer::_connected_websockets_stomps.begin(), WebsocketServer::_connected_websockets_stomps.end(), &webSocket) != WebsocketServer::_connected_websockets_stomps.end()) {
         // This is a STOMP heartbeat. Ignore it.
         if (msg->str.length() == 1 && *msg->str.data() == '\n') {
@@ -164,6 +172,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
         // STOMP connection
         std::string data = msg->str;
         std::optional<StompFrame> frame = WebsocketServer::decode_stomp_frame(data);
+
         if (frame.has_value()) {
           // Process STOMP frame
 
@@ -241,6 +250,8 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
               }
             }
           } else if (frame->type == StompFrame::SEND) {
+            SPDLOG_TRACE("Received STOMP SEND command for topic '{}', value '{}'", frame->headers["destination"], frame->body);
+
             // Only allow SEND commands to send to already define/existing topics.
             if (frame->headers.find("destination") == frame->headers.end()) [[unlikely]] {
               SPDLOG_WARN("Received a SEND STOMP frame but not destination header was set!");
@@ -249,8 +260,8 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
 
             SPDLOG_TRACE("Received STOMP SEND command for topic '{}', value '{}'", frame->headers["destination"], frame->body);
 
-            std::lock_guard<std::mutex> lock_guard_callbacks(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
             WebsocketServer::_on_global_stomp_send_message_callbacks(*frame);
+            std::lock_guard<std::mutex> lock_guard_callbacks(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
             if (WebsocketServer::_on_stomp_send_message_callbacks.count(frame->headers["destination"]) > 0) [[likely]] {
               SPDLOG_DEBUG("Received STOMP SEND command for existing topic, setting topic '{}' to value '{}'", frame->headers["destination"], frame->body);
               WebsocketServer::_on_stomp_send_message_callbacks[frame->headers["destination"]](frame.value());
@@ -270,6 +281,8 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
         SPDLOG_WARN("Received message from websocket but it's not registered among any protocol lists. Will close websocket.");
         webSocket.close();
       }
+    } else {
+      SPDLOG_ERROR("Unknown websocket packet type! Type: {}", static_cast<int>(msg->type));
     }
   } catch (std::exception ex) {
     SPDLOG_ERROR("Caught std::exception while processing websocket event. Exception: {}", ex.what());

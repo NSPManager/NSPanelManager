@@ -185,12 +185,6 @@ const EntitiesPagesView = ({ room_id, type }: { room_id?: number; type: string }
         </div>
       </div>
       <DragDropProvider
-        // plugins={(defaults) => [
-        //   ...defaults,
-        //   Feedback.configure({
-        //     feedback: "move",
-        //   }),
-        // ]}
         onDragStart={(event) => {
           const { source } = event.operation;
           if (source == null) return;
@@ -272,14 +266,6 @@ const EntitiesPagesView = ({ room_id, type }: { room_id?: number; type: string }
                 return;
               }
 
-              // Move all pages with a higher display_order higher than the index to +1
-              // useEntitiesPagesStore.getState().entities_pages.forEach((page) => {
-              //   if (page.id == sourcePage.id) {
-              //     page.display_order = index;
-              //   } else if (page.display_order >= sourcePage.display_order && page.display_order < sourcePage.display_order) {
-              //     page.display_order += 1;
-              //   }
-              // });
               const newEntitiesPagesOrder = [...useEntitiesPagesStore.getState().entities_pages.filter((page) => page.type == type)];
               const [removed] = newEntitiesPagesOrder.splice(initialIndex, 1);
               newEntitiesPagesOrder.splice(index, 0, removed);

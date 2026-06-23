@@ -1282,7 +1282,7 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
     } else {
       // Get ID of first available room to register to
       auto rooms = EntityManager::get_all_rooms();
-      if (rooms && (*rooms).empty()) {
+      if (rooms && !(*rooms).empty()) {
         panel_settings.room_id = (*rooms).front()->get_id();
       } else {
         SPDLOG_ERROR("Cannot register NSPanel as no rooms are available.");
