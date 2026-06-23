@@ -161,8 +161,6 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
         topic->unsubscribe(webSocket, "");
       }
     } else if (msg->type == ix::WebSocketMessageType::Message) {
-      SPDLOG_DEBUG("Got websocket message: {}", msg->str);
-
       if (std::find(WebsocketServer::_connected_websockets_stomps.begin(), WebsocketServer::_connected_websockets_stomps.end(), &webSocket) != WebsocketServer::_connected_websockets_stomps.end()) {
         // This is a STOMP heartbeat. Ignore it.
         if (msg->str.length() == 1 && *msg->str.data() == '\n') {
