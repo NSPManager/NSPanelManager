@@ -1,10 +1,10 @@
 import { useRef, useState } from "react";
 import { useDraggable } from "@dnd-kit/react";
-import { type IEntityOrSceneData } from "../../stores/EntitiesPagesStore";
+import { type IEntityOrSceneData, type IDragingItemData } from "../../stores/EntitiesPagesStore";
 import { useEntitiesPagesStore } from "../../stores/EntitiesPagesStore";
 import MultiStep_AddOrEditEntity from "../MultiStep_AddEditEntity/MultiStep_AddEditEntity";
 
-const GenericEntityBox = ({ entity }: { entity: IEntityOrSceneData }) => {
+const GenericEntityBox = ({ entity, draging_item }: { entity: IEntityOrSceneData; draging_item: IDragingItemData | undefined | null }) => {
   const { ref } = useDraggable({
     id: `entity-${entity.id}`,
     data: { type: "entity", config: entity },
@@ -56,7 +56,7 @@ const GenericEntityBox = ({ entity }: { entity: IEntityOrSceneData }) => {
   return (
     <div
       ref={ref}
-      className="draggable-entity-item bg-neutral/50 text-neutral-content rounded-box flex items-center justify-center indicator w-full h-full hover:outline-1 hover:outline-accent cursor-grab"
+      className={`draggable-entity-item bg-neutral/50 text-neutral-content rounded-box flex items-center justify-center indicator w-full h-full ${draging_item?.type != "entity_page" ? "hover:outline-1 hover:outline-accent" : ""} cursor-grab`}
       title="Drag & drop to move this entity"
     >
       <dialog ref={removeEntityDialogRef} className="modal">

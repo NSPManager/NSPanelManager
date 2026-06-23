@@ -2,8 +2,8 @@ import { useState, useRef } from "react";
 import GenericEntityBox from "./GenericEntityBox";
 import GenericSceneBox from "./GenericSceneBox";
 import EntitiesPageDropTarget from "./EntitiesPageDropTarget";
-import { useEntitiesPagesStore } from "../../stores/EntitiesPagesStore";
-import { type IEntityOrSceneData } from "../../stores/EntitiesPagesStore";
+import { useEntitiesPagesStore, type IDragingItemData } from "../../stores/EntitiesPagesStore";
+import { useSortable } from "@dnd-kit/react/sortable";
 
 const EntitiesPage = ({
   id,
@@ -11,7 +11,7 @@ const EntitiesPage = ({
   deleteEntitiesPage,
 }: {
   id: number;
-  draging_item?: IEntityOrSceneData | undefined;
+  draging_item?: IDragingItemData | undefined | null;
   deleteEntitiesPage: (id: number) => void;
 }) => {
   const { entities_pages, entities, scenes } = useEntitiesPagesStore();
@@ -26,6 +26,15 @@ const EntitiesPage = ({
   const [editPageTypeOpen, setEditPageTypeOpen] = useState(false);
   const gridRows = pageData.number_of_entities === 12 ? "grid-rows-6" : pageData.number_of_entities === 8 ? "grid-rows-4" : "grid-rows-2";
   const dialogRef = useRef<HTMLDialogElement>(null);
+
+  // Sortable entity page vars
+  const [handle, setHandle] = useState<Element | null>(null);
+  const { ref } = useSortable({
+    id,
+    index: page ? page.display_order : 0,
+    data: { type: "entity_page", entity_page_config: page },
+    handle: handle,
+  });
 
   function getCookie(name: string) {
     let cookieValue = "";
@@ -99,6 +108,7 @@ const EntitiesPage = ({
         </form>
       </dialog>
       <li
+        ref={ref}
         id="nspanel_entities_page_{{ page.id }}"
         hx-swap-oob="true"
         className={`bg-base-200 float-left m-2 rounded-box p-3 grid grid-cols-2 ${gridRows} gap-4 w-full max-w-[24rem] aspect-square indicator nspanel-entities-page`}
@@ -129,13 +139,13 @@ const EntitiesPage = ({
               if (item.type === "scene") {
                 items.push(
                   <EntitiesPageDropTarget key={i} entities_page_id={pageData.id} room_view_position={i} type={pageData.type} draging_item={draging_item}>
-                    <GenericSceneBox key={item.id} scene={item}></GenericSceneBox>
+                    <GenericSceneBox key={item.id} scene={item} draging_item={draging_item}></GenericSceneBox>
                   </EntitiesPageDropTarget>,
                 );
               } else {
                 items.push(
                   <EntitiesPageDropTarget key={i} entities_page_id={pageData.id} room_view_position={i} type={pageData.type} draging_item={draging_item}>
-                    <GenericEntityBox key={item.id} entity={item}></GenericEntityBox>
+                    <GenericEntityBox key={item.id} entity={item} draging_item={draging_item}></GenericEntityBox>
                   </EntitiesPageDropTarget>,
                 );
               }
@@ -192,6 +202,7 @@ const EntitiesPage = ({
           <span
             className="indicator-item indicator-bottom indicator-center badge badge-neutral hover:badge-info w-6 h-6 flex items-center justify-center nspanel-entities-page-move-handle cursor-grab"
             title="Drag & drop to move this page"
+            ref={setHandle}
           >
             <span className="mdi mdi-drag"></span>
           </span>

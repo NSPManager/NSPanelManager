@@ -57,18 +57,17 @@ urlpatterns = [
     # MQTTManager endpoints
     path("rest/mqttmanager/settings/<str:setting_key>", rest.mqttmanager_get_setting, name="rest_mqttmanager_get_setting"),
     path("rest/mqttmanager/settings", rest.mqttmanager_settings_post, name="rest_mqttmanager_settings_post"),
-    # NSPanel URLs
-    path("rest/nspanels", rest.nspanels, name="rest_nspanels"),
     # Relay groups
     path("rest/relay_groups", rest.relay_groups, name="rest_relay_groups"),
     # Global URLs
     path("rest/global/entities_pages", rest.global_entities_pages, name="rest_global_entities_pages"),
+    path("rest/entities_pages/order", rest.room_entities_pages_order, name="rest_room_entities_pages_order"),
     # Room URLs
     path("rest/rooms/<int:room_id>", rest.room_delete, name="rest_room_delete"),
     path("rest/rooms/<int:room_id>/entities", rest.room_entities, name="rest_room_entities"),
     path("rest/rooms/<int:room_id>/entities/order", rest.put_room_entities_order, name="rest_put_room_entities_order"),
     path("rest/rooms/<int:room_id>/entities_pages", rest.room_entities_pages, name="rest_room_entities_pages"),
-    path("rest/entities_pages/<int:page_id>", rest.room_entities_page, name="rest_room_entities_pages"),
+    path("rest/entities_pages/<int:page_id>", rest.room_entities_page, name="rest_room_entities_page"),
     path("rest/rooms", rest.rooms, name="rest_rooms_create"),
     # Settings URLs
     path("rest/settings", rest.settings, name="rest_settings"),

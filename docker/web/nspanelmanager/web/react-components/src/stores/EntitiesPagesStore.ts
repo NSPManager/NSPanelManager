@@ -19,6 +19,20 @@ export interface IEntityOrSceneData {
   controlled_by_nspanel_main_page: boolean;
 }
 
+export interface IEntityPageData {
+  id: number;
+  display_order: number;
+  number_of_entities: number;
+  type: string;
+  room_id: number;
+}
+
+export interface IDragingItemData {
+  type: "entity" | "scene" | "entity_page";
+  config?: IEntityOrSceneData;
+  entity_page_config?: IEntityPageData;
+}
+
 interface IEntitiesPages {
   status: string;
   room_id: number | null;

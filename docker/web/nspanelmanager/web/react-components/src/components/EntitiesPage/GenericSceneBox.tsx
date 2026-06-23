@@ -1,12 +1,12 @@
 import { useDraggable } from "@dnd-kit/react";
 import MultiStep_AddOrEditEntity from "../MultiStep_AddEditEntity/MultiStep_AddEditEntity";
-import type { IEntityOrSceneData } from "../../stores/EntitiesPagesStore";
+import type { IDragingItemData, IEntityOrSceneData } from "../../stores/EntitiesPagesStore";
 import { useEntitiesPagesStore } from "../../stores/EntitiesPagesStore";
 import { useRef, useState } from "react";
 // import Step2 from "./step2_select_controller";
 // import Step3 from "./Step3";
 
-const GenericSceneBox = ({ scene }: { scene: IEntityOrSceneData }) => {
+const GenericSceneBox = ({ scene, draging_item }: { scene: IEntityOrSceneData; draging_item: IDragingItemData | undefined | null }) => {
   const { ref } = useDraggable({ id: `scene-${scene.id}`, data: { type: "scene", config: scene } });
   const { entities_pages, removeScene, fetchData } = useEntitiesPagesStore();
   const entity_page = entities_pages.find((page) => page.id === scene.entities_page_id);
@@ -49,10 +49,11 @@ const GenericSceneBox = ({ scene }: { scene: IEntityOrSceneData }) => {
     }
   }
 
+  if (!entity_page) return null;
   return (
     <div
       ref={ref}
-      className="draggable-entity-item bg-neutral/50 rounded-box text-neutral-content flex items-center justify-center indicator w-full h-full hover:outline-1 hover:outline-accent cursor-grab"
+      className={`draggable-entity-item bg-neutral/50 rounded-box text-neutral-content flex items-center justify-center indicator w-full h-full ${draging_item ? "hover:outline-1 hover:outline-accent" : ""} cursor-grab`}
       title="Drag & drop to move this entity"
     >
       <dialog ref={removeSceneDialogRef} className="modal">
