@@ -8,6 +8,7 @@
 #include "web_helper/WebHelper.hpp"
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/bind.hpp>
 #include <boost/bind/placeholders.hpp>
 #include <boost/exception/diagnostic_information.hpp>
@@ -133,7 +134,7 @@ void NSPanel::reload_config() {
     } else if (panel_settings.model.compare("web") == 0) {
       this->_model = MQTT_MANAGER_NSPANEL_MODEL::WEB;
     } else {
-      SPDLOG_ERROR("Failed to prase panel model for NSPanel {}::{}. Got value '{}'. Will assume sonoff.", panel_settings.model, panel_settings.id, panel_settings.friendly_name);
+      SPDLOG_ERROR("Failed to prase panel model for NSPanel {}::{}. Got value '{}'. Will assume sonoff.", panel_settings.id, panel_settings.friendly_name, panel_settings.model);
       this->_model = MQTT_MANAGER_NSPANEL_MODEL::SONOFF;
     }
 
@@ -263,7 +264,7 @@ void NSPanel::reload_config() {
 
     this->send_config();
   } catch (std::system_error &ex) {
-    SPDLOG_ERROR("Failed to get config for NSPanel {} from database.", this->_id);
+    SPDLOG_ERROR("Failed to get config for NSPanel {} from database. Error: {}", this->_id, ex.what());
   }
   SPDLOG_TRACE("NSPanel {}::{} received config update.", this->_id, this->_name);
 
@@ -1189,25 +1190,122 @@ bool NSPanel::has_registered_to_manager() {
 
 bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload) {
   try {
-    SPDLOG_INFO("Sending registration data to Django for database management.");
-    std::string url = "http://127.0.0.1:8000/rest/nspanels";
-    std::string response_data;
-    std::string payload_data = register_request_payload.dump();
+    SPDLOG_TRACE("Processing register_request. Data: {}", register_request_payload.dump(4));
 
-    if (register_request_payload.contains("md5_firmware")) {
-      this->_current_firmware_md5_checksum = register_request_payload["md5_firmware"];
-    }
-    if (register_request_payload.contains("md5_data_file")) {
-      this->_current_littlefs_md5_checksum = register_request_payload["md5_data_file"];
-    }
-    if (register_request_payload.contains("md5_tft_file")) {
-      this->_current_tft_md5_checksum = register_request_payload["md5_tft_file"];
+    SPDLOG_INFO("Registering NSPanel {}::{} to manager.", this->_id, this->_name);
+    // Verify a valid MAC address was provided in the register_request
+    if (register_request_payload.contains("mac") && register_request_payload.at("mac").is_string()) {
+      this->_mac = register_request_payload.at("mac");
+    } else if (register_request_payload.contains("mac_origin") && register_request_payload.at("mac_origin").is_string()) {
+      this->_mac = register_request_payload.at("mac_origin");
+    } else if (register_request_payload.contains("mac_address") && register_request_payload.at("mac_address").is_string()) {
+      this->_mac = register_request_payload.at("mac_address");
+    } else {
+      SPDLOG_ERROR("Failed to get MAC from register request. Cannot register to manager!");
+      return false;
     }
 
-    if (WebHelper::perform_post_request(&url, &response_data, nullptr, &payload_data)) {
+    if (!register_request_payload.contains("friendly_name") || !register_request_payload.at("friendly_name").is_string()) {
+      SPDLOG_ERROR("Failed to get friendly name from register request. Cannot register to manager!");
+      return false;
+    }
+
+    if (!register_request_payload.contains("model") || !register_request_payload.at("model").is_string()) {
+      SPDLOG_WARN("Failed to get model from register request. Will assume sonoff!");
+      this->_model = MQTT_MANAGER_NSPANEL_MODEL::SONOFF;
+    } else {
+      std::string nspanel_model = register_request_payload.at("model").get<std::string>();
+      if (nspanel_model.compare("sonoff") == 0) {
+        this->_model = MQTT_MANAGER_NSPANEL_MODEL::SONOFF;
+      } else if (nspanel_model.compare("custom") == 0) {
+        this->_model = MQTT_MANAGER_NSPANEL_MODEL::CUSTOM;
+      } else if (nspanel_model.compare("web") == 0) {
+        this->_model = MQTT_MANAGER_NSPANEL_MODEL::WEB;
+      } else {
+        SPDLOG_WARN("Failed to parse panel model for NSPanel {}. Got value '{}'. Will assume sonoff.", register_request_payload.at("friendly_name").get<std::string>(), nspanel_model);
+        this->_model = MQTT_MANAGER_NSPANEL_MODEL::SONOFF;
+      }
+    }
+
+    std::string version = "UNKNOWN";
+    if (!register_request_payload.contains("version") || !register_request_payload.at("version").is_string()) {
+      version = register_request_payload.at("version").get<std::string>();
+    }
+
+    if (register_request_payload.contains("md5_firmware") && register_request_payload.at("md5_firmware").is_string()) {
+      this->_current_firmware_md5_checksum = register_request_payload.at("md5_firmware").get<std::string>();
+    }
+
+    if (register_request_payload.contains("md5_data_file") && register_request_payload.at("md5_data_file").is_string()) {
+      this->_current_littlefs_md5_checksum = register_request_payload.at("md5_data_file").get<std::string>();
+    } else {
+      this->_current_littlefs_md5_checksum = "UNKNOWN";
+    }
+
+    if (register_request_payload.contains("md5_tft_file") && register_request_payload.at("md5_tft_file").is_string()) {
+      this->_current_tft_md5_checksum = register_request_payload.at("md5_tft_file").get<std::string>();
+    } else {
+      this->_current_tft_md5_checksum = "UNKNOWN";
+    }
+
+    bool denied = true;
+    if (register_request_payload.contains("denied") && register_request_payload.at("denied").is_string()) {
+      std::string denied_str = register_request_payload.at("denied").get<std::string>();
+      boost::algorithm::to_lower(denied_str);
+      if (denied_str.compare("true") == 0) {
+        denied = true;
+      } else {
+        denied = false;
+      }
+    }
+
+    if (!register_request_payload.contains("version") || !register_request_payload.at("version").is_string()) {
+      SPDLOG_ERROR("Failed to get version from register request. Cannot register to manager!");
+      return false;
+    }
+
+    bool panel_exists = database_manager::database.count<database_manager::NSPanel>(sqlite_orm::where(sqlite_orm::c(&database_manager::NSPanel::mac_address) == this->_mac)) > 0;
+    database_manager::NSPanel panel_settings;
+    if (panel_exists) {
+      panel_settings = database_manager::database.get<database_manager::NSPanel>(this->_id);
+    }
+    panel_settings.mac_address = this->_mac;
+    panel_settings.friendly_name = register_request_payload.at("friendly_name").get<std::string>();
+    panel_settings.model = register_request_payload.at("model").get<std::string>();
+    panel_settings.version = register_request_payload.at("version").get<std::string>();
+    panel_settings.md5_data_file = this->_current_littlefs_md5_checksum;
+    panel_settings.md5_firmware = this->_current_firmware_md5_checksum;
+    panel_settings.md5_tft_file = this->_current_tft_md5_checksum;
+
+    if (panel_exists) {
+      database_manager::database.update(panel_settings);
+    } else {
+      // Get ID of first available room to register to
+      auto rooms = EntityManager::get_all_rooms();
+      if (rooms && (*rooms).empty()) {
+        panel_settings.room_id = (*rooms).front()->get_id();
+      } else {
+        SPDLOG_ERROR("Cannot register NSPanel as no rooms are available.");
+        return false;
+      }
+
+      this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
+
+      panel_settings.denied = false;
+      panel_settings.accepted = false;
+      panel_settings.button1_detached_mode_entity_id = std::nullopt;
+      panel_settings.button1_mode = 0;
+      panel_settings.button2_detached_mode_entity_id = std::nullopt;
+      panel_settings.button2_mode = 0;
+
+      database_manager::database.insert(panel_settings);
+      this->_id = panel_settings.id;
+    }
+
+    if (!panel_settings.denied && panel_settings.accepted) {
       SPDLOG_INFO("Panel registration OK. Updating internal data.");
       this->reload_config();
-      // Everything was successfull, send registration accept to panel:
+
       nlohmann::json response;
       response["command"] = "register_accept";
       response["address"] = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS);
@@ -1217,11 +1315,6 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
       MQTT_Manager::publish(reply_topic, response.dump());
       reply_topic = fmt::format("nspanel/{}/command", this->_mac);
       MQTT_Manager::publish(reply_topic, response.dump());
-
-      SPDLOG_TRACE("Sending websocket update for NSPanel {}::{} state change.", this->_id, this->_name);
-      nlohmann::json data = nlohmann::json::parse(response_data);
-    } else {
-      SPDLOG_INFO("NSPanel {}::{} has yet to be accepted. Will not answer request.", this->_id, this->_name);
     }
   } catch (const std::exception &e) {
     SPDLOG_ERROR("Caught exception when trying to register NSPanel: {}", boost::diagnostic_information(e, true));

@@ -242,10 +242,12 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
             }
           } else if (frame->type == StompFrame::SEND) {
             // Only allow SEND commands to send to already define/existing topics.
-            if (frame->headers.find("destination") == frame->headers.end()) {
+            if (frame->headers.find("destination") == frame->headers.end()) [[unlikely]] {
               SPDLOG_WARN("Received a SEND STOMP frame but not destination header was set!");
               return;
             }
+
+            SPDLOG_TRACE("Received STOMP SEND command for topic '{}', value '{}'", frame->headers["destination"], frame->body);
 
             std::lock_guard<std::mutex> lock_guard_callbacks(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
             WebsocketServer::_on_global_stomp_send_message_callbacks(*frame);
@@ -277,6 +279,8 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
 }
 
 void WebsocketServer::update_stomp_topic_value(std::string topic_name, std::string value) {
+  SPDLOG_TRACE("Updating STOMP topic '{}' to value '{}'", topic_name, value);
+
   std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
   for (auto &topic : WebsocketServer::_stomp_topics) {
     if (topic->get_name().compare(topic_name) == 0) {
@@ -284,6 +288,7 @@ void WebsocketServer::update_stomp_topic_value(std::string topic_name, std::stri
       return;
     }
   }
+  SPDLOG_WARN("Failed to update STOMP topic '{}'. Topic not found.", topic_name);
 }
 
 void WebsocketServer::update_stomp_topic_value(std::string topic_name, nlohmann::json &value) {
