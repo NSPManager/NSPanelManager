@@ -1,5 +1,8 @@
 FROM node:20-alpine AS ui-builder
+ARG BUILDTIME
 WORKDIR /ui-app
+
+RUN echo "Building UI at $BUILDTIME" # Used to force rebuild
 
 # Install git to clone your frontend repository
 RUN apk add --no-cache git
