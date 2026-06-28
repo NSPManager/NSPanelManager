@@ -38,7 +38,11 @@ def get_openhab_items(request):
         return JsonResponse({"status": "error"}, status=405)
 
     filter_params = json.loads(request.GET.get("filter", "{}"))
-    return JsonResponse(web.openhab_api.get_all_openhab_items(filter_params))
+    openhab_items = web.openhab_api.get_all_openhab_items(filter_params)
+    openhab_scenes = web.openhab_api.get_all_openhab_scenes()
+    openhab_items["items"].extend(openhab_scenes["items"])
+    openhab_items["errors"].extend(openhab_scenes["errors"])
+    return JsonResponse(openhab_items)
 
 
 ##########################
