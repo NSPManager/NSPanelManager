@@ -1,38 +1,39 @@
 {
-  "_MultiStep_AddEditEntity-B5Uy-y-j.js": {
-    "file": "MultiStep_AddEditEntity-B5Uy-y-j.js",
+  "_MultiStep_AddEditEntity-DCRyLnS_.js": {
+    "file": "MultiStep_AddEditEntity-DCRyLnS_.js",
     "name": "MultiStep_AddEditEntity",
     "imports": [
-      "_rolldown-runtime-WP1LmdAG.js",
       "src/main.tsx"
     ]
   },
-  "_rolldown-runtime-WP1LmdAG.js": {
-    "file": "rolldown-runtime-WP1LmdAG.js",
-    "name": "rolldown-runtime"
-  },
   "src/components/EntitiesPage/EntitiesPagesView.tsx": {
-    "file": "EntitiesPagesView-CR0S5KAH.js",
+    "file": "EntitiesPagesView-7wq4gfnS.js",
     "name": "EntitiesPagesView",
     "src": "src/components/EntitiesPage/EntitiesPagesView.tsx",
     "isDynamicEntry": true,
     "imports": [
-      "_rolldown-runtime-WP1LmdAG.js",
       "src/main.tsx",
-      "_MultiStep_AddEditEntity-B5Uy-y-j.js"
+      "_MultiStep_AddEditEntity-DCRyLnS_.js"
+    ]
+  },
+  "src/components/IndexPage/NSPanelsView.tsx": {
+    "file": "NSPanelsView-DfJ4sRef.js",
+    "name": "NSPanelsView",
+    "src": "src/components/IndexPage/NSPanelsView.tsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.tsx"
     ]
   },
   "src/main.tsx": {
-    "file": "main-CfymDSRX.js",
+    "file": "main-C5U55tIh.js",
     "name": "main",
     "src": "src/main.tsx",
     "isEntry": true,
-    "imports": [
-      "_rolldown-runtime-WP1LmdAG.js"
-    ],
     "dynamicImports": [
-      "_MultiStep_AddEditEntity-B5Uy-y-j.js",
-      "src/components/EntitiesPage/EntitiesPagesView.tsx"
+      "_MultiStep_AddEditEntity-DCRyLnS_.js",
+      "src/components/EntitiesPage/EntitiesPagesView.tsx",
+      "src/components/IndexPage/NSPanelsView.tsx"
     ],
     "css": [
       "main-DGNrK5qb.css"
