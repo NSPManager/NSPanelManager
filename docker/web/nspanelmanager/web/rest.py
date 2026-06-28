@@ -679,7 +679,7 @@ def put_light_entity(request):
             "controlled_by_nspanel_main_page": str(data["controlled_by_nspanel_main_page"]).lower() == "true",
         }
         if "id" in data and data["id"]:
-            new_light = Entity.objects.get(id=int(data["base"]["id"]))
+            new_light = Entity.objects.get(id=int(data["id"]))
         else:
             new_light = Entity()
             new_light.entity_type = Entity.EntityType.LIGHT

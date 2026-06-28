@@ -9,6 +9,7 @@ import { useEntitiesPagesStore } from "../../../stores/EntitiesPagesStore";
 import { useEffect } from "react";
 
 const schema = z.object({
+  id: z.number().optional(),
   type: z.string(),
   controller: z.string(),
   scene_type: z.string(),
@@ -138,6 +139,7 @@ const MultiStep_AddEditEntity_Step3_Scene = ({
 
   return (
     <form onSubmit={handleSubmit(saveEntity)}>
+      <input type="hidden" {...register("id")} />
       <input type="hidden" {...register("type")} />
       <input type="hidden" {...register("scene_type")} />
       <input type="hidden" {...register("room_id")} />

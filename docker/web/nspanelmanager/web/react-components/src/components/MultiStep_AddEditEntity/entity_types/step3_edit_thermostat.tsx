@@ -437,6 +437,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
 
   return (
     <form onSubmit={handleSubmit(saveEntity)}>
+      <input type="hidden" {...register("id")} />
       <input type="hidden" {...register("controller")} />
       <input type="hidden" {...register("type")} />
       <input type="hidden" {...register("entity_type")} />

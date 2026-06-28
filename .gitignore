@@ -31,6 +31,9 @@ docker/MQTTManager/env.sh
 docker/MQTTManager/Testing/*
 docker/MQTTManager/compile_commands.json
 
+# Include built react files for WebUI
+!docker/web/nspanelmanager/web/react-components/dist/*
+
 # User/computer specific files that is user depandant
 firmware/NSPanelManagerFirmware/src/CMakeLists.txt
 firmware/NSPanelManagerFirmware/compile_commands.json
