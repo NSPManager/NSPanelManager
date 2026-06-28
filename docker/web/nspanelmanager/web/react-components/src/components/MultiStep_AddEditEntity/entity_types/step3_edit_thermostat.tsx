@@ -200,7 +200,7 @@ const IconSelector = ({ value, onChange }: { value: string; onChange: (icon: str
 
   return (
     <details open={detailsOpen} onToggle={(e) => setDetailsOpen(e.currentTarget.open)} className="dropdown dropdown-end h-auto" id="dropdown_icon_selector">
-      <summary id="icon_selector_button" title="Select icon" className="btn rounded-box h-full border-neutral border-y border-x-0 font-nspm-mdi">
+      <summary id="icon_selector_button" title="Select icon" className="btn rounded-box h-full border-neutral border-y border-x-0 font-nspm-mdi w-full">
         {selectedIcon}
       </summary>
       <div className="dropdown-content bg-base-100 text-base-content rounded-box rounded-tr-none w-56 border border-primary">
@@ -628,7 +628,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
             </div>
           )}
           <div id={`fan_mode_options`}>
-            <div className="grid grid-cols-[1fr_1fr_min-content_min-content] items-stretch justify-center w-full mb-1 gap-1 mt-2">
+            <div className="grid grid-cols-[1fr_1fr_3rem_3rem] items-stretch justify-center w-full mb-1 gap-1 mt-2">
               <span className="text-sm ml-2">Label</span>
               <span className="text-sm ml-2">Value</span>
               <span className="text-sm ml-2">Icon</span>
@@ -715,7 +715,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
             </div>
           )}
           <div id={`hvac_mode_options`}>
-            <div className="grid grid-cols-[1fr_1fr_min-content_min-content] items-stretch justify-center w-full mb-1 gap-1 mt-2">
+            <div className="grid grid-cols-[1fr_1fr_3rem_3rem] items-stretch justify-center w-full mb-1 gap-1 mt-2">
               <span className="text-sm ml-2">Label</span>
               <span className="text-sm ml-2">Value</span>
               <span className="text-sm ml-2">Icon</span>
@@ -802,7 +802,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
             </div>
           )}
           <div id={`preset_mode_options`}>
-            <div className="grid grid-cols-[1fr_1fr_min-content_min-content] items-stretch justify-center w-full mb-1 gap-1 mt-2">
+            <div className="grid grid-cols-[1fr_1fr_3rem_3rem] items-stretch justify-center w-full mb-1 gap-1 mt-2">
               <span className="text-sm ml-2">Label</span>
               <span className="text-sm ml-2">Value</span>
               <span className="text-sm ml-2">Icon</span>
@@ -889,7 +889,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
             </div>
           )}
           <div id={`swing_mode_options`}>
-            <div className="grid grid-cols-[1fr_1fr_min-content_min-content] items-stretch justify-center w-full mb-1 gap-1 mt-2">
+            <div className="grid grid-cols-[1fr_1fr_3rem_3rem] items-stretch justify-center w-full mb-1 gap-1 mt-2">
               <span className="text-sm ml-2">Label</span>
               <span className="text-sm ml-2">Value</span>
               <span className="text-sm ml-2">Icon</span>
@@ -929,7 +929,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
                 return elements;
               })()}
             </div>
-
+            min-content
             <button
               type="button"
               className="btn btn-xs w-full btn-success"
@@ -977,7 +977,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
             </div>
           )}
           <div id={`swing_mode_options`}>
-            <div className="grid grid-cols-[1fr_1fr_min-content_min-content] items-stretch justify-center w-full mb-1 gap-1 mt-2">
+            <div className="grid grid-cols-[1fr_1fr_3rem_3rem] items-stretch justify-center w-full mb-1 gap-1 mt-2">
               <span className="text-sm ml-2">Label</span>
               <span className="text-sm ml-2">Value</span>
               <span className="text-sm ml-2">Icon</span>

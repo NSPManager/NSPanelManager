@@ -6293,6 +6293,18 @@
   .grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+  .grid-cols-\[1fr_1fr_2rem_2rem\] {
+    grid-template-columns: 1fr 1fr 2rem 2rem;
+  }
+  .grid-cols-\[1fr_1fr_3rem_3rem\] {
+    grid-template-columns: 1fr 1fr 3rem 3rem;
+  }
+  .grid-cols-\[1fr_1fr_4_4\] {
+    grid-template-columns: 1fr 1fr 4 4;
+  }
+  .grid-cols-\[1fr_1fr_4rem_4rem\] {
+    grid-template-columns: 1fr 1fr 4rem 4rem;
+  }
   .grid-cols-\[1fr_1fr_min-content_min-content\] {
     grid-template-columns: 1fr 1fr min-content min-content;
   }
