@@ -457,7 +457,7 @@ def get_rest_scene_representation(scene_id):
         "light_states": [],
     }
     for state in scene.lightstate_set.all():
-        scene_info["scene"]["light_states"].append(
+        scene_info["light_states"].append(
             {
                 "light_id": state.light.id,
                 "light_type": state.light.type,
