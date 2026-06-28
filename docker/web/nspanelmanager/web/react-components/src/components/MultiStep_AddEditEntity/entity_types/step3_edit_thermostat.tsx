@@ -340,6 +340,9 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
     if (id != null) {
       const entityData = useEntitiesPagesStore.getState().entities.find((entity) => entity.id == id);
       reset(entityData);
+      if (entityData?.step_size) {
+        setValue("step_size", parseFloat(String(entityData.step_size)));
+      }
     }
   }, [id, useEntitiesPagesStore.getState().entities]);
 
@@ -434,6 +437,8 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
     menu: () => "bg-base-300 p-2.5 rounded-box text-base-content",
     option: (state) => `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`,
   };
+
+  console.log("Data: ", getValues());
 
   return (
     <form onSubmit={handleSubmit(saveEntity)}>
@@ -629,7 +634,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
               <span className="text-sm ml-2">Icon</span>
               <span className="text-sm ml-2"></span>
               {(() => {
-                const elements = [];
+                const elements = [] as React.ReactNode[];
                 fanModeFields.forEach((field, index) => {
                   elements.push(
                     <input
@@ -716,7 +721,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
               <span className="text-sm ml-2">Icon</span>
               <span className="text-sm ml-2"></span>
               {(() => {
-                const elements = [];
+                const elements = [] as React.ReactNode[];
                 hvacModeFields.forEach((field, index) => {
                   elements.push(
                     <input
@@ -803,7 +808,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
               <span className="text-sm ml-2">Icon</span>
               <span className="text-sm ml-2"></span>
               {(() => {
-                const elements = [];
+                const elements = [] as React.ReactNode[];
                 presetModeFields.forEach((field, index) => {
                   elements.push(
                     <input
@@ -890,7 +895,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
               <span className="text-sm ml-2">Icon</span>
               <span className="text-sm ml-2"></span>
               {(() => {
-                const elements = [];
+                const elements = [] as React.ReactNode[];
                 swingModeFields.forEach((field, index) => {
                   elements.push(
                     <input
@@ -978,7 +983,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
               <span className="text-sm ml-2">Icon</span>
               <span className="text-sm ml-2"></span>
               {(() => {
-                const elements = [];
+                const elements = [] as React.ReactNode[];
                 swinghModeFields.forEach((field, index) => {
                   elements.push(
                     <input

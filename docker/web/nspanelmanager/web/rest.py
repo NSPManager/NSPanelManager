@@ -887,7 +887,7 @@ def put_thermostat_entity(request):
             "openhab_swing_mode_item": data.get("openhab_swing_mode_item", ""),
             "openhab_swingh_mode_item": data.get("openhab_swingh_mode_item", ""),
             "openhab_temperature_item": data.get("openhab_temperature_item", ""),
-            "step_size": data.get("step_size", 1),
+            "step_size": float(data.get("step_size", 1)),
         }
         if "id" in data and data["id"]:
             new_thermostat = Entity.objects.get(id=int(data["id"]))
