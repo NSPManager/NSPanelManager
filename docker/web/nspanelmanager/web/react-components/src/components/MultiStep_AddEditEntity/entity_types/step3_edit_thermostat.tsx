@@ -9,13 +9,13 @@ import { useEntitiesPagesStore } from "../../../stores/EntitiesPagesStore";
 import { useEffect, useState } from "react";
 
 const schema = z.object({
-  id: z.number().optional(),
+  id: z.number().nullable(),
   type: z.string(),
   entity_type: z.string(),
   room_id: z.number(),
   entities_page_id: z.number(),
   room_view_position: z.number(),
-  friendly_name: z.string(),
+  friendly_name: z.string().min(1),
   step_size: z.float32(),
   controller: z.string(),
   home_assistant_name: z.string().optional(),
@@ -29,8 +29,8 @@ const schema = z.object({
     z
       .object({
         icon: z.string(),
-        label: z.string(),
-        value: z.string(),
+        label: z.string().min(1),
+        value: z.string().min(1),
       })
       .optional(),
   ),
@@ -38,8 +38,8 @@ const schema = z.object({
     z
       .object({
         icon: z.string(),
-        label: z.string(),
-        value: z.string(),
+        label: z.string().min(1),
+        value: z.string().min(1),
       })
       .optional(),
   ),
@@ -47,8 +47,8 @@ const schema = z.object({
     .array(
       z.object({
         icon: z.string(),
-        label: z.string(),
-        value: z.string(),
+        label: z.string().min(1),
+        value: z.string().min(1),
       }),
     )
     .optional(),
@@ -56,8 +56,8 @@ const schema = z.object({
     .array(
       z.object({
         icon: z.string(),
-        label: z.string(),
-        value: z.string(),
+        label: z.string().min(1),
+        value: z.string().min(1),
       }),
     )
     .optional(),
@@ -65,8 +65,8 @@ const schema = z.object({
     .array(
       z.object({
         icon: z.string(),
-        label: z.string(),
-        value: z.string(),
+        label: z.string().min(1),
+        value: z.string().min(1),
       }),
     )
     .optional(),
@@ -253,7 +253,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
   } = useForm<ThermostatFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      id: id,
+      id: id ?? null,
       controller: controller,
       type: "entity",
       entity_type: "light",

@@ -9,14 +9,14 @@ import { useEntitiesPagesStore } from "../../../stores/EntitiesPagesStore";
 import { useEffect } from "react";
 
 const schema = z.object({
-  id: z.number().optional(),
+  id: z.number().nullable(),
   type: z.string(),
   controller: z.string(),
   scene_type: z.string(),
   room_id: z.number().nullable(), // Room ID is null in case the entity is not associated with a room (ie. global scene)
   entities_page_id: z.number(),
   room_view_position: z.number(),
-  friendly_name: z.string(),
+  friendly_name: z.string().min(1),
   backend_name: z.string().optional(),
 });
 export type SceneFormData = z.infer<typeof schema>;
@@ -63,6 +63,7 @@ const MultiStep_AddEditEntity_Step3_Scene = ({
   } = useForm<SceneFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
+      id: id ?? null,
       type: "scene",
       scene_type: "",
       controller: controller,

@@ -9,13 +9,13 @@ import { type IOptionType } from "../../../stores/AvailableEntitiesStore";
 import { useEntitiesPagesStore } from "../../../stores/EntitiesPagesStore";
 
 const schema = z.object({
-  id: z.number().optional(),
+  id: z.number().nullable(),
   type: z.string(),
   entity_type: z.string(),
   room_id: z.number(),
   entities_page_id: z.number(),
   room_view_position: z.number(),
-  friendly_name: z.string(),
+  friendly_name: z.string().min(1),
   controller: z.string(),
   can_color_temperature: z.boolean().optional(),
   can_dim: z.boolean().optional(),
@@ -71,10 +71,11 @@ const MultiStep_AddEditEntity_Step3_Light = ({
   } = useForm<LightFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
+      id: id ?? null,
       controller: controller,
       type: "entity",
       entity_type: "light",
-      room_id: room_id,
+      room_id: room_id ?? -1,
       entities_page_id: entities_page_id,
       room_view_position: room_view_position,
       can_color_temperature: false,

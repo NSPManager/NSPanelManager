@@ -9,13 +9,13 @@ import { useEntitiesPagesStore } from "../../../stores/EntitiesPagesStore";
 import { useEffect } from "react";
 
 const schema = z.object({
-  id: z.number().optional(),
+  id: z.number().nullable(),
   type: z.string(),
   entity_type: z.string(),
   room_id: z.number(),
   entities_page_id: z.number(),
   room_view_position: z.number(),
-  friendly_name: z.string(),
+  friendly_name: z.string().min(1),
   controller: z.string(),
   home_assistant_name: z.string().optional(),
   mqtt_topic: z.string().optional(),
@@ -65,10 +65,11 @@ const MultiStep_AddEditEntity_Step3_Button = ({
   } = useForm<ButtonFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
+      id: null,
       controller: controller,
       type: "entity",
       entity_type: "light",
-      room_id: room_id,
+      room_id: room_id ?? -1,
       entities_page_id: entities_page_id,
       room_view_position: room_view_position,
       home_assistant_name: "",
