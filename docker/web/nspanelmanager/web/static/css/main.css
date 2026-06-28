@@ -6293,6 +6293,9 @@
   .grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+  .grid-cols-\[1fr_1fr_min-content_min-content\] {
+    grid-template-columns: 1fr 1fr min-content min-content;
+  }
   .grid-cols-none {
     grid-template-columns: none;
   }
@@ -7066,6 +7069,10 @@
   .border-r-0 {
     border-right-style: var(--tw-border-style);
     border-right-width: 0px;
+  }
+  .border-r-2 {
+    border-right-style: var(--tw-border-style);
+    border-right-width: 2px;
   }
   .border-b {
     border-bottom-style: var(--tw-border-style);
