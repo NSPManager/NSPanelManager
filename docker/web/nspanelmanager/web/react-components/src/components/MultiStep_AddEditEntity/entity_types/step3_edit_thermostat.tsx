@@ -6,7 +6,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { useEntitiesPagesStore } from "../../../stores/EntitiesPagesStore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 const schema = z.object({
   id: z.number().nullable(),
@@ -191,6 +191,7 @@ const IconSelector = ({ value, onChange }: { value: string; onChange: (icon: str
   ];
   const [selectedIcon, setSelectedIcon] = useState(value);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const ref = useRef<HTMLDetailsElement | null>(null);
 
   const select_icon = (icon: string) => {
     setSelectedIcon(icon);
@@ -198,8 +199,26 @@ const IconSelector = ({ value, onChange }: { value: string; onChange: (icon: str
     setDetailsOpen(false);
   };
 
+  useEffect(() => {
+    const listener = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setDetailsOpen(false);
+      }
+    };
+    window.addEventListener("click", listener);
+    return () => {
+      window.removeEventListener("click", listener);
+    };
+  }, [ref, detailsOpen]);
+
   return (
-    <details open={detailsOpen} onToggle={(e) => setDetailsOpen(e.currentTarget.open)} className="dropdown dropdown-end h-auto" id="dropdown_icon_selector">
+    <details
+      open={detailsOpen}
+      onToggle={(e) => setDetailsOpen(e.currentTarget.open)}
+      className="dropdown dropdown-end h-auto"
+      id="dropdown_icon_selector"
+      ref={ref}
+    >
       <summary id="icon_selector_button" title="Select icon" className="btn rounded-box h-full border-neutral border-y border-x-0 font-nspm-mdi w-full">
         {selectedIcon}
       </summary>
