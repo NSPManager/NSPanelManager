@@ -1,12 +1,7 @@
-import { useState } from "react";
-import { stomp_subscribe } from "./stomp_wrapper";
+import { useEntityStatesStore } from "../../stores/NSPanelStore";
 
 const NSPanelsIndexView = () => {
-  const [nspanels, setNSPanels] = useState([]);
-
-  stomp_subscribe("entity_states", (message) => {
-    console.log("Got entity states: ", message.body);
-  });
+  const { nspanels } = useEntityStatesStore();
 
   return (
     <div>
