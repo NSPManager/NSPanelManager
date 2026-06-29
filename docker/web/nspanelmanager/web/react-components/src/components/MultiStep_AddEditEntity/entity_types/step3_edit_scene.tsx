@@ -80,7 +80,7 @@ const MultiStep_AddEditEntity_Step3_Scene = ({
   } else if (controller == "openhab") {
     setValue("scene_type", "openhab");
   } else if (controller == "nspm") {
-    setValue("scene_type", "nspm");
+    setValue("scene_type", "nspm_scene");
   }
 
   function getCookie(name: string) {

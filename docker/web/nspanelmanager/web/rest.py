@@ -460,7 +460,6 @@ def get_rest_scene_representation(scene_id):
         scene_info["light_states"].append(
             {
                 "light_id": state.light.id,
-                "light_type": state.light.type,
                 "color_mode": state.color_mode,
                 "light_level": state.light_level,
                 "color_temp": state.color_temperature,
