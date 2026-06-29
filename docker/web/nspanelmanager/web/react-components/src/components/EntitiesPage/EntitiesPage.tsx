@@ -34,6 +34,7 @@ const EntitiesPage = ({
     index: page ? page.display_order : 0,
     data: { type: "entity_page", entity_page_config: page },
     handle: handle,
+    disabled: !pageData.can_remove,
   });
 
   function getCookie(name: string) {

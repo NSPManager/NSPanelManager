@@ -54,11 +54,7 @@ const GenericEntityBox = ({ entity, draging_item }: { entity: IEntityOrSceneData
   }
 
   return (
-    <div
-      ref={ref}
-      className={`draggable-entity-item bg-neutral/50 text-neutral-content rounded-box flex items-center justify-center indicator w-full h-full ${draging_item?.type != "entity_page" ? "hover:outline-1 hover:outline-accent" : ""} cursor-grab`}
-      title="Drag & drop to move this entity"
-    >
+    <>
       <dialog ref={removeEntityDialogRef} className="modal">
         <div className="modal-box">
           <h3 className="text-lg font-bold">Delete entities page</h3>
@@ -95,55 +91,61 @@ const GenericEntityBox = ({ entity, draging_item }: { entity: IEntityOrSceneData
           setEditDialogOpened(false);
         }}
       />
-      {/* Box indicators/buttons */}
-      {(() => {
-        // if (entity.entity === undefined) return null;
-
-        if (entity.controlled_by_nspanel_main_page) {
-          return (
-            <span
-              className="indicator-item badge badge-secondary me-16 w-6 h-6 flex items-center justify-center cursor-default"
-              title="Controlled from main page"
-            >
-              <span className="mdi mdi-home"></span>
-            </span>
-          );
-        }
-        return null;
-      })()}
-      <button
-        className="indicator-item badge badge-info me-8 w-6 h-6 flex items-center justify-center cursor-pointer"
-        title="Edit entity"
-        onClick={() => {
-          setEditDialogOpened(true);
-        }}
+      <div
+        ref={ref}
+        className={`draggable-entity-item bg-neutral/50 text-neutral-content rounded-box flex items-center justify-center indicator w-full h-full ${draging_item?.type != "entity_page" ? "hover:outline-1 hover:outline-accent" : ""} cursor-grab`}
+        title="Drag & drop to move this entity"
       >
-        <span className="mdi mdi-pencil"></span>
-      </button>
-      <button
-        className="indicator-item badge badge-warning hover:badge-error w-6 h-6 flex items-center justify-center cursor-pointer"
-        title="Remove entity from page/room"
-        onClick={() => {
-          removeEntityDialogRef.current?.showModal();
-        }}
-      >
-        <span className="mdi mdi-close"></span>
-      </button>
+        {/* Box indicators/buttons */}
+        {(() => {
+          // if (entity.entity === undefined) return null;
 
-      {/*<!-- "Status badge" (dot) before name to indicate entity controller -->*/}
-      {(() => {
-        if (entity.controller == "home_assistant") {
-          return <div className="status status-info shadow-none absolute top-2 left-2 cursor-default" title="Controlled by Home Assistant"></div>;
-        } else if (entity.controller == "openhab") {
-          return <div className="status status-warning shadow-none absolute top-2 left-2 cursor-default" title="Controlled by OpenHAB"></div>;
-        } else if (entity.controller == "nspm_scene" || entity.controller == "nspm") {
-          return <div className="status status-accent shadow-none absolute top-2 left-2 cursor-default" title="Controlled by NSPanel Manager"></div>;
-        } else {
-          return <div className="status status-error animate-ping absolute top-2 left-2 cursor-default" title="Unknown controller"></div>;
-        }
-      })()}
-      <span className="text-sm m-2">{entity.friendly_name}</span>
-    </div>
+          if (entity.controlled_by_nspanel_main_page) {
+            return (
+              <span
+                className="indicator-item badge badge-secondary me-16 w-6 h-6 flex items-center justify-center cursor-default"
+                title="Controlled from main page"
+              >
+                <span className="mdi mdi-home"></span>
+              </span>
+            );
+          }
+          return null;
+        })()}
+        <button
+          className="indicator-item badge badge-info me-8 w-6 h-6 flex items-center justify-center cursor-pointer"
+          title="Edit entity"
+          onClick={() => {
+            setEditDialogOpened(true);
+          }}
+        >
+          <span className="mdi mdi-pencil"></span>
+        </button>
+        <button
+          className="indicator-item badge badge-warning hover:badge-error w-6 h-6 flex items-center justify-center cursor-pointer"
+          title="Remove entity from page/room"
+          onClick={() => {
+            removeEntityDialogRef.current?.showModal();
+          }}
+        >
+          <span className="mdi mdi-close"></span>
+        </button>
+
+        {/*<!-- "Status badge" (dot) before name to indicate entity controller -->*/}
+        {(() => {
+          if (entity.controller == "home_assistant") {
+            return <div className="status status-info shadow-none absolute top-2 left-2 cursor-default" title="Controlled by Home Assistant"></div>;
+          } else if (entity.controller == "openhab") {
+            return <div className="status status-warning shadow-none absolute top-2 left-2 cursor-default" title="Controlled by OpenHAB"></div>;
+          } else if (entity.controller == "nspm_scene" || entity.controller == "nspm") {
+            return <div className="status status-accent shadow-none absolute top-2 left-2 cursor-default" title="Controlled by NSPanel Manager"></div>;
+          } else {
+            return <div className="status status-error animate-ping absolute top-2 left-2 cursor-default" title="Unknown controller"></div>;
+          }
+        })()}
+        <span className="text-sm m-2">{entity.friendly_name}</span>
+      </div>
+    </>
   );
 };
 
