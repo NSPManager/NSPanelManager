@@ -120,6 +120,7 @@ def nspanel_deny_register_request(request, nspanel_id):
     try:
         if request.method == "POST":
             nspanel = NSPanel.objects.get(id=nspanel_id)
+            nspanel.accepted = False
             nspanel.denied = True
             nspanel.save()
 

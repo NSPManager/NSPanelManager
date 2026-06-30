@@ -116,9 +116,9 @@ const MultiStep_AddOrEditEntity = ({
       if (maxHeightString.endsWith("%")) {
         // Convert percentage to pixels based on window height
         maxHeight = Math.trunc((window.innerHeight * maxHeight) / 100);
-        contentRef.current.classList.toggle("overflow-y-auto", contentRef.current.scrollHeight > maxHeight);
-        contentRef.current.classList.toggle("overflow-y-visible", contentRef.current.scrollHeight <= maxHeight);
       }
+      contentRef.current.classList.toggle("overflow-y-auto", contentRef.current.scrollHeight > maxHeight);
+      contentRef.current.classList.toggle("overflow-y-visible", contentRef.current.scrollHeight <= maxHeight);
     }
   };
 

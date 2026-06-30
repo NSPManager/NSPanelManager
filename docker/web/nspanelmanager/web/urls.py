@@ -59,6 +59,10 @@ urlpatterns = [
     path("rest/mqttmanager/settings", rest.mqttmanager_settings_post, name="rest_mqttmanager_settings_post"),
     # Relay groups
     path("rest/relay_groups", rest.relay_groups, name="rest_relay_groups"),
+    # Delete NSPanel by ID:
+    path("rest/nspanel/<int:nspanel_id>", rest.nspanel_delete, name="delete_nspanel"),
+    path("rest/nspanel/<int:nspanel_id>/accept", rest.nspanel_accept, name="nspanel_accept"),
+    path("rest/nspanel/<int:nspanel_id>/deny", rest.nspanel_deny, name="nspanel_deny"),
     # Global URLs
     path("rest/global/entities_pages", rest.global_entities_pages, name="rest_global_entities_pages"),
     path("rest/entities_pages/order", rest.room_entities_pages_order, name="rest_room_entities_pages_order"),

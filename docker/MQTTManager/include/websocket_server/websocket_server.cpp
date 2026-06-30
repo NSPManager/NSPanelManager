@@ -38,6 +38,7 @@ void StompTopic::subscribe(ix::WebSocket &webSocket, std::string subscription_id
   _subscribers.push_back(std::make_pair(&webSocket, subscription_id));
 
   if (this->_retained) {
+    SPDLOG_DEBUG("Subscribed to retained topic. Will send message.");
     StompFrame frame;
     frame.type = StompFrame::MessageType::MESSAGE;
     frame.headers["message-id"] = boost::uuids::to_string(this->_uuid_generator());
@@ -95,6 +96,7 @@ void StompTopic::update_value(nlohmann::json &data) {
 }
 
 void StompTopic::set_retained(bool retained) {
+  SPDLOG_DEBUG("Setting topic '{}' to retained? {}", this->_topic_name, retained ? "Yes" : "No");
   this->_retained = retained;
 }
 
@@ -236,6 +238,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
             }
 
             // Topic was not found, create topic and subscribe to it
+            SPDLOG_WARN("STOMP Topic '{}' not found in call to subscribe. Will create topic.", frame->headers["destination"]);
             WebsocketServer::_stomp_topics.push_back(std::make_shared<StompTopic>(frame->headers["destination"], ""));
             WebsocketServer::_stomp_topics.back()->subscribe(webSocket, frame->headers["id"]);
           } else if (frame->type == StompFrame::UNSUBSCRIBE) {
@@ -299,7 +302,6 @@ void WebsocketServer::update_stomp_topic_value(std::string topic_name, std::stri
       return;
     }
   }
-  SPDLOG_WARN("Failed to update STOMP topic '{}'. Topic not found.", topic_name);
 }
 
 void WebsocketServer::update_stomp_topic_value(std::string topic_name, nlohmann::json &value) {

@@ -197,7 +197,7 @@ def rooms_get(request):
             rooms.append(
                 {
                     "id": room.id,
-                    "name": room.friendly_name,
+                    "friendly_name": room.friendly_name,
                 }
             )
         return JsonResponse({"status": "ok", "rooms": rooms}, status=200)
@@ -335,6 +335,64 @@ def room_entities_pages_order(request):
             return JsonResponse({"status": "error"}, status=500)
     else:
         return JsonResponse({"status": "error"}, status=405)
+
+
+####################
+# NSPanel REST API #
+####################
+
+
+def nspanel_delete(request, nspanel_id):
+    try:
+        if request.method == "DELETE":
+            nspanel = NSPanel.objects.get(id=nspanel_id)
+            nspanel.delete()
+            response = JsonResponse({"status": "ok"}, status=200)
+            send_mqttmanager_reload_command()
+            return response
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+def nspanel_accept(request, nspanel_id):
+    try:
+        if request.method == "POST":
+            data = json.loads(request.body)
+            if "room_id" not in data:
+                return JsonResponse({"status": "error", "message": "room_id is required"}, status=400)
+            nspanel = NSPanel.objects.get(id=nspanel_id)
+            nspanel.denied = False
+            nspanel.accepted = True
+            nspanel.room = Room.objects.get(id=data["room_id"])
+            nspanel.save()
+            response = JsonResponse({"status": "ok", "id": nspanel.id}, status=200)
+            send_mqttmanager_reload_command()
+            return response
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+def nspanel_deny(request, nspanel_id):
+    try:
+        if request.method == "POST":
+            nspanel = NSPanel.objects.get(id=nspanel_id)
+            nspanel.denied = True
+            nspanel.accepted = False
+            nspanel.save()
+            response = JsonResponse({"status": "ok", "id": nspanel.id}, status=200)
+            send_mqttmanager_reload_command()
+            return response
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
 
 
 ########################

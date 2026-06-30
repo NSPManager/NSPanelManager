@@ -835,14 +835,17 @@ void NSPanel::send_websocket_status_update() {
   SPDLOG_TRACE("Sending websocket status update for {}::{}", this->_id, this->_name);
   nlohmann::json status_data = {
       {"id", this->_id},
+      {"mac", this->_mac},
       {"name", this->_name},
       {"ip_address", this->_ip_address},
       {"rssi", this->_rssi},
       {"temperature", this->_temperature},
+      {"temperature_unit", MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::USE_FAHRENHEIT) ? "°F" : "°C"},
       {"humidity", this->_humidity},
       {"pressure", this->_pressure},
       {"ram_usage", this->_heap_used_pct},
       {"update_progress", this->_update_progress},
+      {"accepted", this->_state != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT},
   };
   status_data["warnings"] = nlohmann::json::array({});
   for (NSPanelWarningWebsocketRepresentation warning : this->_nspanel_warnings) {
@@ -852,13 +855,23 @@ void NSPanel::send_websocket_status_update() {
     });
   }
 
+  if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::WEB) {
+    status_data["model"] = "web";
+  } else if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::SONOFF) {
+    status_data["model"] = "sonoff";
+  } else if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::CUSTOM) {
+    status_data["model"] = "custom";
+  } else {
+    status_data["model"] = "unknown";
+  }
+
   // Check if NSPanel has firmware, littlefs or tft file updates available and set appropriate warning.
   // Only check for models that actually have firmware, littlefs and TFT.
   if (this->_model != MQTT_MANAGER_NSPANEL_MODEL::WEB) {
     if (this->_current_firmware_md5_checksum.empty() || this->_current_littlefs_md5_checksum.empty()) {
       status_data["warnings"].push_back(nlohmann::json{
           {"level", "warning"},
-          {"text", "Manager has no checksum for installed firmware on panel. If this doesn't go away within 5 minutes, try performing a firmware update from the manager."}});
+          {"text", "Manager has no checksum for installed firmware on panel. If this doesn't go away within 5 minutes, try performing a firmware update."}});
     } else if (this->has_firmware_update() || this->has_littlefs_update()) {
       status_data["warnings"].push_back(nlohmann::json{
           {"level", "warning"},
@@ -867,7 +880,7 @@ void NSPanel::send_websocket_status_update() {
     if (this->_current_tft_md5_checksum.empty()) {
       status_data["warnings"].push_back(nlohmann::json{
           {"level", "warning"},
-          {"text", "Manager has no checksum for installed GUI on panel. If this doesn't go away within 5 minutes, try performing a GUI update from the manager."}});
+          {"text", "Manager has no checksum for installed GUI on panel. If this doesn't go away within 5 minutes, try performing a GUI update."}});
     } else if (this->has_tft_update()) {
       status_data["warnings"].push_back(nlohmann::json{
           {"level", "warning"},
@@ -904,6 +917,7 @@ void NSPanel::send_websocket_status_update() {
     status_data["state"] = "unknown";
     break;
   }
+  WebsocketServer::set_stomp_topic_retained(this->_mqtt_status_topic, true);
   WebsocketServer::update_stomp_topic_value(this->_mqtt_status_topic, status_data);
 }
 
