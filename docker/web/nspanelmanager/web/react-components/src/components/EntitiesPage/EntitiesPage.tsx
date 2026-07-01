@@ -85,7 +85,7 @@ const EntitiesPage = ({
   }
 
   useEffect(() => {
-    const listener = (event) => {
+    const listener = (event: any) => {
       if (entitiesPageNumberOfEntitiesDiv.current && !entitiesPageNumberOfEntitiesDiv.current.contains(event.target)) {
         setEditPageTypeOpen(false);
       }

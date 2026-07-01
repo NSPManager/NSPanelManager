@@ -867,15 +867,15 @@ void NSPanel::send_websocket_status_update() {
 
   // Check if NSPanel has firmware, littlefs or tft file updates available and set appropriate warning.
   // Only check for models that actually have firmware, littlefs and TFT.
-  if (this->_model != MQTT_MANAGER_NSPANEL_MODEL::WEB) {
+  if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::SONOFF || this->_model == MQTT_MANAGER_NSPANEL_MODEL::CUSTOM) {
     if (this->_current_firmware_md5_checksum.empty() || this->_current_littlefs_md5_checksum.empty()) {
       status_data["warnings"].push_back(nlohmann::json{
           {"level", "warning"},
           {"text", "Manager has no checksum for installed firmware on panel. If this doesn't go away within 5 minutes, try performing a firmware update."}});
     } else if (this->has_firmware_update() || this->has_littlefs_update()) {
       status_data["warnings"].push_back(nlohmann::json{
-          {"level", "warning"},
-          {"text", "Firmware update available"}});
+          {"level", "info"},
+          {"text", "Firmware update available. Perform firmware update to ensure optimal compatibility with manager."}});
     }
     if (this->_current_tft_md5_checksum.empty()) {
       status_data["warnings"].push_back(nlohmann::json{
@@ -883,8 +883,8 @@ void NSPanel::send_websocket_status_update() {
           {"text", "Manager has no checksum for installed GUI on panel. If this doesn't go away within 5 minutes, try performing a GUI update."}});
     } else if (this->has_tft_update()) {
       status_data["warnings"].push_back(nlohmann::json{
-          {"level", "warning"},
-          {"text", "GUI update available"}});
+          {"level", "info"},
+          {"text", "GUI update available. Perform GUI update to ensure optimal compatibility with new firmware."}});
     }
   }
 

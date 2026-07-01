@@ -2,7 +2,7 @@ import Select, { type OptionProps } from "react-select";
 import { type ClassNamesConfig, type GroupBase } from "react-select";
 import { useEntityStatesStore, type INSPanelStatusData, type INSPanelWarningData } from "../../stores/EntityStore.ts";
 import { stomp_send } from "../../stores/stomp_wrapper";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, forwardRef } from "react";
 
 function getCookie(name: string) {
   let cookieValue = "";
@@ -29,39 +29,44 @@ const delete_nspanel = (nspanel_id: number) => {
     });
 };
 
-const DeleteNSPanelConfirmDialog = ({
-  status,
-  delete_nspanel_dialog_ref,
-}: {
-  status: INSPanelStatusData;
-  delete_nspanel_dialog_ref: React.RefObject<HTMLDialogElement>;
-}) => {
-  return (
-    <dialog ref={delete_nspanel_dialog_ref} className="modal">
-      <div className="modal-box">
-        <h3 className="text-lg font-bold">Delete NSPanel</h3>
-        <p className="py-4">Are you sure you want to delete NSPanel '{status.name}'?</p>
-        <div className="flex justify-end join">
-          <button onClick={() => delete_nspanel_dialog_ref.current?.close()} className="btn btn-neutral join-item">
-            Cancel
-          </button>
-          <button
-            onClick={() => {
-              delete_nspanel_dialog_ref.current?.close();
-              delete_nspanel(status.id);
-            }}
-            className="btn btn-error join-item"
-          >
-            Delete
-          </button>
+const DeleteNSPanelConfirmDialog = forwardRef(
+  (
+    {
+      status,
+      delete_nspanel_dialog_ref,
+    }: {
+      status: INSPanelStatusData;
+      delete_nspanel_dialog_ref: React.RefObject<HTMLDialogElement | null>;
+    },
+    ref: React.Ref<HTMLDialogElement>,
+  ) => {
+    return (
+      <dialog ref={ref} className="modal">
+        <div className="modal-box">
+          <h3 className="text-lg font-bold">Delete NSPanel</h3>
+          <p className="py-4">Are you sure you want to delete NSPanel '{status.name}'?</p>
+          <div className="flex justify-end join">
+            <button onClick={() => delete_nspanel_dialog_ref.current?.close()} className="btn btn-neutral join-item">
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                delete_nspanel_dialog_ref.current?.close();
+                delete_nspanel(status.id);
+              }}
+              className="btn btn-error join-item"
+            >
+              Delete
+            </button>
+          </div>
         </div>
-      </div>
-      <form method="dialog" className="modal-backdrop">
-        <button>close</button>
-      </form>
-    </dialog>
-  );
-};
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+    );
+  },
+);
 
 const NSPanelStatusHeader = ({ state, update_progress }: { state: string; update_progress: number }) => {
   if (state == "online") {
@@ -86,7 +91,7 @@ const NSPanelStatusHeader = ({ state, update_progress }: { state: string; update
     } else {
       return (
         <div
-          className="min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-info rounded-t-field"
+          className="min-h-1 overflow-hidden w-full transition-all ease-linear duration-1000 bg-info rounded-t-field"
           style={{ width: `${update_progress}%` }}
           id="panel_header-${id}"
         ></div>
@@ -114,9 +119,34 @@ const NSPanelStatusHeader = ({ state, update_progress }: { state: string; update
 const NSPanelWarnings = ({ warnings }: { warnings: INSPanelWarningData[] }) => {
   if (warnings.length === 0) return null;
 
+  let highest_warning_level = 5;
+  let badge_color = "status-base-content";
+  warnings.forEach((warning) => {
+    switch (warning.level) {
+      case "error":
+        highest_warning_level = 1;
+        badge_color = "status-error";
+        break;
+      case "warning":
+        if (highest_warning_level > 2) highest_warning_level = 2;
+        badge_color = "status-warning";
+        break;
+      case "info":
+        if (highest_warning_level > 3) highest_warning_level = 3;
+        badge_color = "status-info";
+        break;
+      case "debug":
+        if (highest_warning_level > 4) highest_warning_level = 4;
+        badge_color = "status-base-content";
+        break;
+    }
+  });
+
   return (
     <div className="dropdown dropdown-hover dropdown-end p-0 m-0">
-      <div className="badge badge-warning badge-xs me-2 ms-1" tabIndex={1} role="button"></div>
+      <div className="flex items-end justify-end px-1">
+        <div className={`status ${badge_color} status-lg`} tabIndex={1} role="button"></div>
+      </div>
       <ul tabIndex={-1} className="dropdown-content list bg-base-300 border border-warning/25 w-92 rounded-box shadow-md">
         {warnings.map((warning, index) => (
           <li key={index} className="list-row">
@@ -143,7 +173,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
 
   return (
     <div className="p-2">
-      <DeleteNSPanelConfirmDialog status={status} delete_nspanel_dialog_ref={delete_nspanel_dialog_ref} />
+      <DeleteNSPanelConfirmDialog status={status} ref={delete_nspanel_dialog_ref} delete_nspanel_dialog_ref={delete_nspanel_dialog_ref} />
       <div className="flex justify-between mx-auto">
         <a href={`/nspanel/${status.id}`} className="font-medium text-lg">
           {status.name}
@@ -280,7 +310,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                             <i className="mdi mdi-water-percent"></i>
                           </span>
                           <span id="humidity-${nspanel_id}" className="text-sm">
-                            {status.humidity.toFixed(1)}%
+                            {(status.humidity && `${status.humidity.toFixed(1)}%`) || "-"}
                           </span>
                         </div>
                         <span className="mx-1">|</span>
@@ -289,7 +319,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                             <i className="mdi mdi-arrow-collapse-all"></i>
                           </span>
                           <span id="pressure-${nspanel_id}" className="text-sm">
-                            {(status.pressure / 1000).toFixed(1)} kPa
+                            {(status.pressure && `${(status.pressure / 1000).toFixed(1)} kPa`) || "-"}
                           </span>
                         </div>
                       </>
@@ -332,11 +362,11 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
 
         <div>
           <button
-            className="font-medium text-sm px-1 py-1 text-center inline-flex items-center cursor-pointer"
+            className="font-medium text-sm px-1 py-2 text-center inline-flex items-center cursor-pointer"
             popoverTarget={`nspanel-actions-${status.id}`}
             style={{ anchorName: `--anchor-nspanel-actions-${status.id}` }}
           >
-            <span className="mdi mdi-cog pr-2"></span>
+            <span className="mdi mdi-cog"></span>
           </button>
           <ul
             className="dropdown menu w-52 rounded-box bg-base-100 shadow-sm"
@@ -454,134 +484,140 @@ const accept_nspanel = ({ nspanel_id, room_id }: { nspanel_id: number; room_id: 
     });
 };
 
-const AcceptNewNSPanelDialog = ({
-  status,
-  delete_nspanel_dialog_ref: accept_new_nspanel_dialog_ref,
-}: {
-  status: INSPanelStatusData;
-  delete_nspanel_dialog_ref: React.RefObject<HTMLDialogElement>;
-}) => {
-  interface IOptionType {
-    value: number;
-    label: string;
-  }
-  const [selectedRoom, setSelectedRoom] = useState<IOptionType>(null);
-  const [availableRooms, setAvailableRooms] = useState<IOptionType[]>([]);
-  const classNames: ClassNamesConfig<{ value: number; label: string }, false, GroupBase<{ value: number; label: string }>> = {
-    control: (state) => `${state.isFocused ? "border" : "border-0"} border-accent p-2.5 text-sm rounded-box bg-base-300 rounded-md`,
-    menu: () => "bg-base-300 p-2.5 rounded-box",
-    option: (state) => `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`,
-  };
-  const CustomOption: React.FC<OptionProps<IOptionType>> = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
-    if (isDisabled) {
-      return null;
+const AcceptNewNSPanelDialog = forwardRef(
+  (
+    {
+      status,
+      accept_new_nspanel_dialog_ref,
+    }: {
+      status: INSPanelStatusData;
+      accept_new_nspanel_dialog_ref: React.RefObject<HTMLDialogElement | null>;
+    },
+    ref: React.Ref<HTMLDialogElement>,
+  ) => {
+    interface IOptionType {
+      value: number;
+      label: string;
     }
+    const [selectedRoom, setSelectedRoom] = useState<IOptionType | null>(null);
+    const [availableRooms, setAvailableRooms] = useState<IOptionType[]>([]);
+    const classNames: ClassNamesConfig<{ value: number; label: string }, false, GroupBase<{ value: number; label: string }>> = {
+      control: (state) => `${state.isFocused ? "border" : "border-0"} border-accent p-2.5 text-sm rounded-box bg-base-300 rounded-md`,
+      menu: () => "bg-base-300 p-2.5 rounded-box",
+      option: (state) => `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`,
+    };
+    const CustomOption: React.FC<OptionProps<IOptionType>> = ({ innerProps, isDisabled, isFocused, isSelected, children }) => {
+      if (isDisabled) {
+        return null;
+      }
+
+      return (
+        <div {...innerProps} className={`p-1 ${isSelected ? "bg-primary/20 rounded-sm" : ""} ${isFocused ? "bg-primary/20 rounded-sm" : ""}`}>
+          {children}
+        </div>
+      );
+    };
+
+    if (availableRooms.length === 0) {
+      const rooms = useEntityStatesStore.getState().rooms;
+      for (const room of Object.values(rooms)) {
+        setAvailableRooms((prev) => [...prev, { value: room.id, label: room.friendly_name }]);
+      }
+    }
+
+    // Automatically switch between overflow-y-visible and overflow-y-auto depending on content height and max height
+    const contentRef = useRef<HTMLDivElement>(null);
+    const checkOverflow = () => {
+      if (contentRef.current) {
+        const maxHeightString = window.getComputedStyle(contentRef.current).maxHeight;
+        let maxHeight = parseFloat(maxHeightString);
+        if (maxHeightString.endsWith("%")) {
+          // Convert percentage to pixels based on window height
+          maxHeight = Math.trunc((window.innerHeight * maxHeight) / 100);
+        }
+        contentRef.current.classList.toggle("overflow-y-auto", contentRef.current.scrollHeight > maxHeight);
+        contentRef.current.classList.toggle("overflow-y-visible", contentRef.current.scrollHeight <= maxHeight);
+      }
+    };
+
+    useEffect(() => {
+      const observer = new ResizeObserver((entries) => {
+        entries.forEach(() => {
+          checkOverflow();
+        });
+      });
+
+      if (contentRef.current) {
+        observer.observe(contentRef.current);
+      }
+    }, [contentRef]);
 
     return (
-      <div {...innerProps} className={`p-1 ${isSelected ? "bg-primary/20 rounded-sm" : ""} ${isFocused ? "bg-primary/20 rounded-sm" : ""}`}>
-        {children}
-      </div>
-    );
-  };
-
-  if (availableRooms.length === 0) {
-    const rooms = useEntityStatesStore.getState().rooms;
-    for (const room of Object.values(rooms)) {
-      setAvailableRooms((prev) => [...prev, { value: room.id, label: room.friendly_name }]);
-    }
-  }
-
-  // Automatically switch between overflow-y-visible and overflow-y-auto depending on content height and max height
-  const contentRef = useRef<HTMLDivElement>(null);
-  const checkOverflow = () => {
-    if (contentRef.current) {
-      const maxHeightString = window.getComputedStyle(contentRef.current).maxHeight;
-      let maxHeight = parseFloat(maxHeightString);
-      if (maxHeightString.endsWith("%")) {
-        // Convert percentage to pixels based on window height
-        maxHeight = Math.trunc((window.innerHeight * maxHeight) / 100);
-      }
-      contentRef.current.classList.toggle("overflow-y-auto", contentRef.current.scrollHeight > maxHeight);
-      contentRef.current.classList.toggle("overflow-y-visible", contentRef.current.scrollHeight <= maxHeight);
-    }
-  };
-
-  useEffect(() => {
-    const observer = new ResizeObserver((entries) => {
-      entries.forEach(() => {
-        checkOverflow();
-      });
-    });
-
-    if (contentRef.current) {
-      observer.observe(contentRef.current);
-    }
-  }, [contentRef]);
-
-  return (
-    <dialog ref={accept_new_nspanel_dialog_ref} className="modal">
-      <div className="modal-box" ref={contentRef}>
-        <h3 className="text-lg font-bold">Accept NSPanel</h3>
-        <label className="block mb-2 text-sm font-medium">Select room</label>
-        <Select<IOptionType>
-          options={availableRooms}
-          classNames={classNames}
-          onChange={(newValue) => {
-            setSelectedRoom(newValue);
-          }}
-          value={selectedRoom}
-          unstyled
-          components={{
-            Option: CustomOption,
-          }}
-          styles={{
-            input: (base) => ({
-              ...base,
-              "input:focus": {
-                boxShadow: "none",
-              },
-            }),
-            // On mobile, the label will truncate automatically, so we want to
-            // override that behaviour.
-            multiValueLabel: (base) => ({
-              ...base,
-              whiteSpace: "normal",
-              overflow: "visible",
-            }),
-            control: (base) => ({
-              ...base,
-              transition: "none",
-            }),
-          }}
-        />
-        <div className="flex justify-end join pt-2">
-          <button onClick={() => accept_new_nspanel_dialog_ref.current?.close()} className="btn btn-neutral join-item">
-            Cancel
-          </button>
-          <button
-            onClick={() => {
-              accept_new_nspanel_dialog_ref.current?.close();
-              accept_nspanel({ nspanel_id: status.id, room_id: selectedRoom.value });
+      <dialog ref={ref} className="modal">
+        <div className="modal-box" ref={contentRef}>
+          <h3 className="text-lg font-bold">Accept NSPanel</h3>
+          <label className="block mb-2 text-sm font-medium">Select room</label>
+          <Select<IOptionType>
+            options={availableRooms}
+            classNames={classNames}
+            onChange={(newValue) => {
+              setSelectedRoom(newValue);
             }}
-            className="btn btn-success join-item"
-          >
-            Accept
-          </button>
+            value={selectedRoom}
+            unstyled
+            components={{
+              Option: CustomOption,
+            }}
+            styles={{
+              input: (base) => ({
+                ...base,
+                "input:focus": {
+                  boxShadow: "none",
+                },
+              }),
+              // On mobile, the label will truncate automatically, so we want to
+              // override that behaviour.
+              multiValueLabel: (base) => ({
+                ...base,
+                whiteSpace: "normal",
+                overflow: "visible",
+              }),
+              control: (base) => ({
+                ...base,
+                transition: "none",
+              }),
+            }}
+          />
+          <div className="flex justify-end join pt-2">
+            <button onClick={() => accept_new_nspanel_dialog_ref.current?.close()} className="btn btn-neutral join-item">
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                if (!selectedRoom) return;
+                accept_new_nspanel_dialog_ref.current?.close();
+                accept_nspanel({ nspanel_id: status.id, room_id: selectedRoom.value });
+              }}
+              className="btn btn-success join-item"
+            >
+              Accept
+            </button>
+          </div>
         </div>
-      </div>
-      <form method="dialog" className="modal-backdrop">
-        <button>close</button>
-      </form>
-    </dialog>
-  );
-};
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+    );
+  },
+);
 
 const NewNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
   const accept_new_nspanel_dialog_ref = useRef<HTMLDialogElement>(null);
 
   return (
     <div className="flex items-center justify-center h-full w-full">
-      <AcceptNewNSPanelDialog status={status} delete_nspanel_dialog_ref={accept_new_nspanel_dialog_ref} />
+      <AcceptNewNSPanelDialog status={status} ref={accept_new_nspanel_dialog_ref} accept_new_nspanel_dialog_ref={accept_new_nspanel_dialog_ref} />
       <div>
         <div className="flex w-full items-/center justify-center pt-2">
           <span className="nspanel-name">NSPanel '{status.name}' is awaiting accept.</span>
