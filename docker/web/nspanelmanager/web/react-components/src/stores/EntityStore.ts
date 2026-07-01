@@ -111,7 +111,7 @@ export const useEntityStatesStore = create<IEntityStatesStore>((set) => ({
         console.log("Removing ", panel[0]);
         const current_nspanels = useEntityStatesStore.getState().nspanels;
         delete current_nspanels[panel[0]];
-        stomp_unsubscribe(`nspanel/${panel[0]}/status`);
+        stomp_unsubscribe(`nspanel/${panel[0]}/status`, nspanel_stomp_status_update_callback);
         set({ nspanels: { ...current_nspanels } });
       }
     }
