@@ -17,6 +17,7 @@ export interface IEntityOrSceneData {
   entities_page_id: number;
   controller: string;
   controlled_by_nspanel_main_page: boolean;
+  step_size?: number;
 }
 
 export interface IEntityPageData {

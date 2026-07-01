@@ -6349,6 +6349,9 @@
   .grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
+  .grid-cols-\[1fr_1fr_3rem_3rem\] {
+    grid-template-columns: 1fr 1fr 3rem 3rem;
+  }
   .grid-cols-none {
     grid-template-columns: none;
   }

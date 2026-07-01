@@ -6,16 +6,16 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { useEntitiesPagesStore } from "../../../stores/EntitiesPagesStore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 const schema = z.object({
-  id: z.number().optional(),
+  id: z.number().nullable(),
   type: z.string(),
   entity_type: z.string(),
   room_id: z.number(),
   entities_page_id: z.number(),
   room_view_position: z.number(),
-  friendly_name: z.string(),
+  friendly_name: z.string().min(1),
   step_size: z.float32(),
   controller: z.string(),
   home_assistant_name: z.string().optional(),
@@ -29,8 +29,8 @@ const schema = z.object({
     z
       .object({
         icon: z.string(),
-        label: z.string(),
-        value: z.string(),
+        label: z.string().min(1),
+        value: z.string().min(1),
       })
       .optional(),
   ),
@@ -38,8 +38,8 @@ const schema = z.object({
     z
       .object({
         icon: z.string(),
-        label: z.string(),
-        value: z.string(),
+        label: z.string().min(1),
+        value: z.string().min(1),
       })
       .optional(),
   ),
@@ -47,8 +47,8 @@ const schema = z.object({
     .array(
       z.object({
         icon: z.string(),
-        label: z.string(),
-        value: z.string(),
+        label: z.string().min(1),
+        value: z.string().min(1),
       }),
     )
     .optional(),
@@ -56,8 +56,8 @@ const schema = z.object({
     .array(
       z.object({
         icon: z.string(),
-        label: z.string(),
-        value: z.string(),
+        label: z.string().min(1),
+        value: z.string().min(1),
       }),
     )
     .optional(),
@@ -65,8 +65,8 @@ const schema = z.object({
     .array(
       z.object({
         icon: z.string(),
-        label: z.string(),
-        value: z.string(),
+        label: z.string().min(1),
+        value: z.string().min(1),
       }),
     )
     .optional(),
@@ -191,6 +191,7 @@ const IconSelector = ({ value, onChange }: { value: string; onChange: (icon: str
   ];
   const [selectedIcon, setSelectedIcon] = useState(value);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const ref = useRef<HTMLDetailsElement | null>(null);
 
   const select_icon = (icon: string) => {
     setSelectedIcon(icon);
@@ -198,9 +199,27 @@ const IconSelector = ({ value, onChange }: { value: string; onChange: (icon: str
     setDetailsOpen(false);
   };
 
+  useEffect(() => {
+    const listener = (event) => {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setDetailsOpen(false);
+      }
+    };
+    window.addEventListener("click", listener);
+    return () => {
+      window.removeEventListener("click", listener);
+    };
+  }, [ref, detailsOpen]);
+
   return (
-    <details open={detailsOpen} onToggle={(e) => setDetailsOpen(e.currentTarget.open)} className="dropdown dropdown-end h-auto" id="dropdown_icon_selector">
-      <summary id="icon_selector_button" title="Select icon" className="btn rounded-none h-full border-neutral border-y border-x-0 font-nspm-mdi">
+    <details
+      open={detailsOpen}
+      onToggle={(e) => setDetailsOpen(e.currentTarget.open)}
+      className="dropdown dropdown-end h-auto"
+      id="dropdown_icon_selector"
+      ref={ref}
+    >
+      <summary id="icon_selector_button" title="Select icon" className="btn rounded-box h-full border-neutral border-y border-x-0 font-nspm-mdi w-full">
         {selectedIcon}
       </summary>
       <div className="dropdown-content bg-base-100 text-base-content rounded-box rounded-tr-none w-56 border border-primary">
@@ -253,7 +272,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
   } = useForm<ThermostatFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      id: id,
+      id: id ?? null,
       controller: controller,
       type: "entity",
       entity_type: "light",
@@ -340,6 +359,9 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
     if (id != null) {
       const entityData = useEntitiesPagesStore.getState().entities.find((entity) => entity.id == id);
       reset(entityData);
+      if (entityData?.step_size) {
+        setValue("step_size", parseFloat(String(entityData.step_size)));
+      }
     }
   }, [id, useEntitiesPagesStore.getState().entities]);
 
@@ -434,6 +456,8 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
     menu: () => "bg-base-300 p-2.5 rounded-box text-base-content",
     option: (state) => `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`,
   };
+
+  console.log("Data: ", getValues());
 
   return (
     <form onSubmit={handleSubmit(saveEntity)}>
@@ -623,31 +647,46 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
             </div>
           )}
           <div id={`fan_mode_options`}>
-            {fanModeFields.map((field, index) => (
-              <div key={field.id} className="flex items-stretch justify-center w-full mb-1">
-                <input
-                  type="text"
-                  {...register(`fan_modes.${index}.label`)}
-                  className="rounded-l-box outline-none bg-base-300 text-base-content border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
-                  title="Label"
-                />
-                <input
-                  type="text"
-                  {...register(`fan_modes.${index}.value`)}
-                  className="outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
-                  title="Value"
-                />
-                <IconSelector value={field.icon} onChange={(icon) => setValue(`fan_modes.${index}.icon`, icon)} />
-                <button
-                  type="button"
-                  className="btn h-auto rounded-box rounded-l-none border border-neutral border-l-0 text-base-content bg-error/20 hover:bg-error/70 join-item ring-0 inset-ring-0 focus:ring-0"
-                  title="Remove fan mode"
-                  onClick={() => removeFanModeField(index)}
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
+            <div className="grid grid-cols-[1fr_1fr_3rem_3rem] items-stretch justify-center w-full mb-1 gap-1 mt-2">
+              <span className="text-sm ml-2">Label</span>
+              <span className="text-sm ml-2">Value</span>
+              <span className="text-sm ml-2">Icon</span>
+              <span className="text-sm ml-2"></span>
+              {(() => {
+                const elements = [] as React.ReactNode[];
+                fanModeFields.forEach((field, index) => {
+                  elements.push(
+                    <input
+                      type="text"
+                      {...register(`fan_modes.${index}.label`)}
+                      className="rounded-box outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                      title="Label"
+                    />,
+                  );
+                  elements.push(
+                    <input
+                      type="text"
+                      {...register(`fan_modes.${index}.value`)}
+                      className="rounded-box outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                      title="Value"
+                    />,
+                  );
+                  elements.push(<IconSelector value={field.icon} onChange={(icon) => setValue(`fan_modes.${index}.icon`, icon)} />);
+                  elements.push(
+                    <button
+                      type="button"
+                      className="btn h-auto rounded-box border border-neutral border-l-0 text-base-content bg-error/20 hover:bg-error/70 join-item ring-0 inset-ring-0 focus:ring-0"
+                      title="Remove fan mode"
+                      onClick={() => removeFanModeField(index)}
+                    >
+                      ✕
+                    </button>,
+                  );
+                });
+
+                return elements;
+              })()}
+            </div>
             <button
               type="button"
               className="btn btn-xs w-full btn-success"
@@ -695,31 +734,46 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
             </div>
           )}
           <div id={`hvac_mode_options`}>
-            {hvacModeFields.map((field, index) => (
-              <div key={field.id} className="flex items-stretch justify-center w-full mb-1">
-                <input
-                  type="text"
-                  {...register(`hvac_modes.${index}.label`)}
-                  className="rounded-l-box outline-none bg-base-300 text-base-content border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
-                  title="Label"
-                />
-                <input
-                  type="text"
-                  {...register(`hvac_modes.${index}.value`)}
-                  className="outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
-                  title="Value"
-                />
-                <IconSelector value={field.icon} onChange={(icon) => setValue(`hvac_modes.${index}.icon`, icon)} />
-                <button
-                  type="button"
-                  className="btn h-auto rounded-box rounded-l-none border border-neutral border-l-0 text-base-content bg-error/20 hover:bg-error/70 join-item ring-0 inset-ring-0 focus:ring-0"
-                  title="Remove HVAC mode"
-                  onClick={() => removeHvacModeField(index)}
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
+            <div className="grid grid-cols-[1fr_1fr_3rem_3rem] items-stretch justify-center w-full mb-1 gap-1 mt-2">
+              <span className="text-sm ml-2">Label</span>
+              <span className="text-sm ml-2">Value</span>
+              <span className="text-sm ml-2">Icon</span>
+              <span className="text-sm ml-2"></span>
+              {(() => {
+                const elements = [] as React.ReactNode[];
+                hvacModeFields.forEach((field, index) => {
+                  elements.push(
+                    <input
+                      type="text"
+                      {...register(`hvac_modes.${index}.label`)}
+                      className="rounded-box outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                      title="Label"
+                    />,
+                  );
+                  elements.push(
+                    <input
+                      type="text"
+                      {...register(`hvac_modes.${index}.value`)}
+                      className="rounded-box outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                      title="Value"
+                    />,
+                  );
+                  elements.push(<IconSelector value={field.icon} onChange={(icon) => setValue(`hvac_modes.${index}.icon`, icon)} />);
+                  elements.push(
+                    <button
+                      type="button"
+                      className="btn h-auto rounded-box border border-neutral border-l-0 text-base-content bg-error/20 hover:bg-error/70 join-item ring-0 inset-ring-0 focus:ring-0"
+                      title="Remove HVAC mode"
+                      onClick={() => removeHvacModeField(index)}
+                    >
+                      ✕
+                    </button>,
+                  );
+                });
+
+                return elements;
+              })()}
+            </div>
             <button
               type="button"
               className="btn btn-xs w-full btn-success"
@@ -767,31 +821,46 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
             </div>
           )}
           <div id={`preset_mode_options`}>
-            {presetModeFields.map((field, index) => (
-              <div key={field.id} className="flex items-stretch justify-center w-full mb-1">
-                <input
-                  type="text"
-                  {...register(`preset_modes.${index}.label`)}
-                  className="rounded-l-box outline-none bg-base-300 text-base-content border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
-                  title="Label"
-                />
-                <input
-                  type="text"
-                  {...register(`preset_modes.${index}.value`)}
-                  className="outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
-                  title="Value"
-                />
-                <IconSelector value={field.icon} onChange={(icon) => setValue(`preset_modes.${index}.icon`, icon)} />
-                <button
-                  type="button"
-                  className="btn h-auto rounded-box rounded-l-none border border-neutral border-l-0 text-base-content bg-error/20 hover:bg-error/70 join-item ring-0 inset-ring-0 focus:ring-0"
-                  title="Remove preset mode"
-                  onClick={() => removePresetModeField(index)}
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
+            <div className="grid grid-cols-[1fr_1fr_3rem_3rem] items-stretch justify-center w-full mb-1 gap-1 mt-2">
+              <span className="text-sm ml-2">Label</span>
+              <span className="text-sm ml-2">Value</span>
+              <span className="text-sm ml-2">Icon</span>
+              <span className="text-sm ml-2"></span>
+              {(() => {
+                const elements = [] as React.ReactNode[];
+                presetModeFields.forEach((field, index) => {
+                  elements.push(
+                    <input
+                      type="text"
+                      {...register(`preset_modes.${index}.label`)}
+                      className="rounded-box outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                      title="Label"
+                    />,
+                  );
+                  elements.push(
+                    <input
+                      type="text"
+                      {...register(`preset_modes.${index}.value`)}
+                      className="rounded-box outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                      title="Value"
+                    />,
+                  );
+                  elements.push(<IconSelector value={field.icon} onChange={(icon) => setValue(`preset_modes.${index}.icon`, icon)} />);
+                  elements.push(
+                    <button
+                      type="button"
+                      className="btn h-auto rounded-box border border-neutral border-l-0 text-base-content bg-error/20 hover:bg-error/70 join-item ring-0 inset-ring-0 focus:ring-0"
+                      title="Remove preset mode"
+                      onClick={() => removePresetModeField(index)}
+                    >
+                      ✕
+                    </button>,
+                  );
+                });
+
+                return elements;
+              })()}
+            </div>
             <button
               type="button"
               className="btn btn-xs w-full btn-success"
@@ -839,31 +908,47 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
             </div>
           )}
           <div id={`swing_mode_options`}>
-            {swingModeFields.map((field, index) => (
-              <div key={field.id} className="flex items-stretch justify-center w-full mb-1">
-                <input
-                  type="text"
-                  {...register(`swing_modes.${index}.label`)}
-                  className="rounded-l-box outline-none bg-base-300 text-base-content border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
-                  title="Label"
-                />
-                <input
-                  type="text"
-                  {...register(`swing_modes.${index}.value`)}
-                  className="outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
-                  title="Value"
-                />
-                <IconSelector value={field.icon} onChange={(icon) => setValue(`swing_modes.${index}.icon`, icon)} />
-                <button
-                  type="button"
-                  className="btn h-auto rounded-box rounded-l-none border border-neutral border-l-0 text-base-content bg-error/20 hover:bg-error/70 join-item ring-0 inset-ring-0 focus:ring-0"
-                  title="Remove swing mode"
-                  onClick={() => removeSwingModeField(index)}
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
+            <div className="grid grid-cols-[1fr_1fr_3rem_3rem] items-stretch justify-center w-full mb-1 gap-1 mt-2">
+              <span className="text-sm ml-2">Label</span>
+              <span className="text-sm ml-2">Value</span>
+              <span className="text-sm ml-2">Icon</span>
+              <span className="text-sm ml-2"></span>
+              {(() => {
+                const elements = [] as React.ReactNode[];
+                swingModeFields.forEach((field, index) => {
+                  elements.push(
+                    <input
+                      type="text"
+                      {...register(`swing_modes.${index}.label`)}
+                      className="rounded-box outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                      title="Label"
+                    />,
+                  );
+                  elements.push(
+                    <input
+                      type="text"
+                      {...register(`swing_modes.${index}.value`)}
+                      className="rounded-box outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                      title="Value"
+                    />,
+                  );
+                  elements.push(<IconSelector value={field.icon} onChange={(icon) => setValue(`swing_modes.${index}.icon`, icon)} />);
+                  elements.push(
+                    <button
+                      type="button"
+                      className="btn h-auto rounded-box border border-neutral border-l-0 text-base-content bg-error/20 hover:bg-error/70 join-item ring-0 inset-ring-0 focus:ring-0"
+                      title="Remove swing mode"
+                      onClick={() => removeSwingModeField(index)}
+                    >
+                      ✕
+                    </button>,
+                  );
+                });
+
+                return elements;
+              })()}
+            </div>
+            min-content
             <button
               type="button"
               className="btn btn-xs w-full btn-success"
@@ -911,31 +996,46 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
             </div>
           )}
           <div id={`swing_mode_options`}>
-            {swinghModeFields.map((field, index) => (
-              <div key={field.id} className="flex items-stretch justify-center w-full mb-1">
-                <input
-                  type="text"
-                  {...register(`swingh_modes.${index}.label`)}
-                  className="rounded-l-box outline-none bg-base-300 text-base-content border-neutral border border-r-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
-                  title="Label"
-                />
-                <input
-                  type="text"
-                  {...register(`swingh_modes.${index}.value`)}
-                  className="outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
-                  title="Value"
-                />
-                <IconSelector value={field.icon} onChange={(icon) => setValue(`swingh_modes.${index}.icon`, icon)} />
-                <button
-                  type="button"
-                  className="btn h-auto rounded-box rounded-l-none border border-neutral border-l-0 text-base-content bg-error/20 hover:bg-error/70 join-item ring-0 inset-ring-0 focus:ring-0"
-                  title="Remove swing mode"
-                  onClick={() => removeSwinghModeField(index)}
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
+            <div className="grid grid-cols-[1fr_1fr_3rem_3rem] items-stretch justify-center w-full mb-1 gap-1 mt-2">
+              <span className="text-sm ml-2">Label</span>
+              <span className="text-sm ml-2">Value</span>
+              <span className="text-sm ml-2">Icon</span>
+              <span className="text-sm ml-2"></span>
+              {(() => {
+                const elements = [] as React.ReactNode[];
+                swinghModeFields.forEach((field, index) => {
+                  elements.push(
+                    <input
+                      type="text"
+                      {...register(`swingh_modes.${index}.label`)}
+                      className="rounded-box outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                      title="Label"
+                    />,
+                  );
+                  elements.push(
+                    <input
+                      type="text"
+                      {...register(`swingh_modes.${index}.value`)}
+                      className="rounded-box outline-none bg-base-300 text-base-content border-neutral border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
+                      title="Value"
+                    />,
+                  );
+                  elements.push(<IconSelector value={field.icon} onChange={(icon) => setValue(`swingh_modes.${index}.icon`, icon)} />);
+                  elements.push(
+                    <button
+                      type="button"
+                      className="btn h-auto rounded-box border border-neutral border-l-0 text-base-content bg-error/20 hover:bg-error/70 join-item ring-0 inset-ring-0 focus:ring-0"
+                      title="Remove horizontal swing mode"
+                      onClick={() => removeSwinghModeField(index)}
+                    >
+                      ✕
+                    </button>,
+                  );
+                });
+
+                return elements;
+              })()}
+            </div>
             <button
               type="button"
               className="btn btn-xs w-full btn-success"

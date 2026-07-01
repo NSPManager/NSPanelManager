@@ -38,7 +38,11 @@ def get_openhab_items(request):
         return JsonResponse({"status": "error"}, status=405)
 
     filter_params = json.loads(request.GET.get("filter", "{}"))
-    return JsonResponse(web.openhab_api.get_all_openhab_items(filter_params))
+    openhab_items = web.openhab_api.get_all_openhab_items(filter_params)
+    openhab_scenes = web.openhab_api.get_all_openhab_scenes()
+    openhab_items["items"].extend(openhab_scenes["items"])
+    openhab_items["errors"].extend(openhab_scenes["errors"])
+    return JsonResponse(openhab_items)
 
 
 ##########################
@@ -511,10 +515,9 @@ def get_rest_scene_representation(scene_id):
         "light_states": [],
     }
     for state in scene.lightstate_set.all():
-        scene_info["scene"]["light_states"].append(
+        scene_info["light_states"].append(
             {
                 "light_id": state.light.id,
-                "light_type": state.light.type,
                 "color_mode": state.color_mode,
                 "light_level": state.light_level,
                 "color_temp": state.color_temperature,
@@ -941,7 +944,7 @@ def put_thermostat_entity(request):
             "openhab_swing_mode_item": data.get("openhab_swing_mode_item", ""),
             "openhab_swingh_mode_item": data.get("openhab_swingh_mode_item", ""),
             "openhab_temperature_item": data.get("openhab_temperature_item", ""),
-            "step_size": data.get("step_size", 1),
+            "step_size": float(data.get("step_size", 1)),
         }
         if "id" in data and data["id"]:
             new_thermostat = Entity.objects.get(id=int(data["id"]))

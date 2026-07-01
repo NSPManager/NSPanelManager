@@ -162,24 +162,28 @@ const MultiStep_AddOrEditEntity = ({
           return (
             <div className="flex justify-center mb-4 w-full">
               <ul className="steps w-full">
-                <li
-                  className={`step ${step >= 1 ? "step-primary cursor-pointer" : ""}`}
-                  onClick={() => {
-                    setStep(1);
-                  }}
-                >
-                  Type
-                </li>
-                <li
-                  className={`step ${step >= 2 ? "step-primary" : ""} ${formData.entity_type == "" ? "cursor-not-allowed" : "cursor-pointer"}`}
-                  onClick={() => {
-                    if (formData.entity_type != "") {
-                      setStep(2);
-                    }
-                  }}
-                >
-                  Controller
-                </li>
+                {id == null && (
+                  <li
+                    className={`step ${step >= 1 ? "step-primary cursor-pointer" : ""}`}
+                    onClick={() => {
+                      setStep(1);
+                    }}
+                  >
+                    Type
+                  </li>
+                )}
+                {id == null && (
+                  <li
+                    className={`step ${step >= 2 ? "step-primary" : ""} ${formData.entity_type == "" ? "cursor-not-allowed" : "cursor-pointer"}`}
+                    onClick={() => {
+                      if (formData.entity_type != "") {
+                        setStep(2);
+                      }
+                    }}
+                  >
+                    Controller
+                  </li>
+                )}
                 <li
                   className={`step ${step >= 3 ? "step-primary" : ""} ${formData.entity_type == "" ? "cursor-not-allowed" : "cursor-pointer"}`}
                   onClick={() => {

@@ -9,13 +9,13 @@ import { useEntitiesPagesStore } from "../../../stores/EntitiesPagesStore";
 import { useEffect } from "react";
 
 const schema = z.object({
-  id: z.number().optional(),
+  id: z.number().nullable(),
   type: z.string(),
   entity_type: z.string(),
   room_id: z.number(),
   entities_page_id: z.number(),
   room_view_position: z.number(),
-  friendly_name: z.string(),
+  friendly_name: z.string().min(1),
   controller: z.string(),
   home_assistant_name: z.string().optional(),
   openhab_item_switch: z.string().optional(),
@@ -64,6 +64,7 @@ const MultiStep_AddEditEntity_Step3_Switch = ({
   } = useForm<SwitchFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
+      id: id ?? null,
       controller: controller,
       type: "entity",
       entity_type: "light",

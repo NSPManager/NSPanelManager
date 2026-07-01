@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import GenericEntityBox from "./GenericEntityBox";
 import GenericSceneBox from "./GenericSceneBox";
 import EntitiesPageDropTarget from "./EntitiesPageDropTarget";
@@ -26,6 +26,7 @@ const EntitiesPage = ({
   const [editPageTypeOpen, setEditPageTypeOpen] = useState(false);
   const gridRows = pageData.number_of_entities === 12 ? "grid-rows-6" : pageData.number_of_entities === 8 ? "grid-rows-4" : "grid-rows-2";
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const entitiesPageNumberOfEntitiesDiv = useRef<HTMLDivElement | null>(null);
 
   // Sortable entity page vars
   const [handle, setHandle] = useState<Element | null>(null);
@@ -34,6 +35,7 @@ const EntitiesPage = ({
     index: page ? page.display_order : 0,
     data: { type: "entity_page", entity_page_config: page },
     handle: handle,
+    disabled: !pageData.can_remove,
   });
 
   function getCookie(name: string) {
@@ -81,6 +83,18 @@ const EntitiesPage = ({
         console.error("There was an error!", error);
       });
   }
+
+  useEffect(() => {
+    const listener = (event) => {
+      if (entitiesPageNumberOfEntitiesDiv.current && !entitiesPageNumberOfEntitiesDiv.current.contains(event.target)) {
+        setEditPageTypeOpen(false);
+      }
+    };
+    window.addEventListener("click", listener);
+    return () => {
+      window.removeEventListener("click", listener);
+    };
+  }, [entitiesPageNumberOfEntitiesDiv, editPageTypeOpen]);
 
   return (
     <>
@@ -172,6 +186,7 @@ const EntitiesPage = ({
           ✕
         </button>
         <div
+          ref={entitiesPageNumberOfEntitiesDiv}
           className={`dropdown dropdown-top dropdown-center ${editPageTypeOpen ? "dropdown-open" : ""} me-8 flex indicator-item indicator-bottom indicator-end`}
         >
           <div onClick={() => setEditPageTypeOpen(!editPageTypeOpen)} className="badge badge-info w-6 h-6 flex items-center justify-center cursor-pointer">
