@@ -1,9 +1,9 @@
 import Select, { type OptionProps } from "react-select";
 import { type ClassNamesConfig, type GroupBase } from "react-select";
 import { useEntityStatesStore, type INSPanelStatusData, type INSPanelWarningData } from "../../stores/EntityStore.ts";
-import { stomp_send } from "../../stores/stomp_wrapper";
 import { useRef, useState, useEffect, forwardRef } from "react";
 import { Notify } from "../NSPanelToastContainer.tsx";
+import { useStompStore } from "../../stores/stomp.tsx";
 
 function getCookie(name: string) {
   let cookieValue = "";
@@ -381,7 +381,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                 <li>
                   <button
                     onClick={() => {
-                      stomp_send(`nspanel/${status.mac}/command`, "reboot");
+                      useStompStore.getState().send(`nspanel/${status.mac}/command`, "reboot");
                       Notify({ message: `Send reboot command to ${status.name}.`, level: "success", duration: 2000 });
                       popoverRef.current?.hidePopover();
                     }}
@@ -410,7 +410,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                   <a
                     onClick={() => {
                       if (status.state !== "offline") {
-                        stomp_send(`nspanel/${status.mac}/command`, "firmware_update");
+                        useStompStore.getState().send(`nspanel/${status.mac}/command`, "firmware_update");
                         Notify({ message: `Send FW update command to ${status.name}.`, level: "success", duration: 2000 });
                         popoverRef.current?.hidePopover();
                       }
@@ -426,7 +426,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                   <a
                     onClick={() => {
                       if (status.state !== "offline") {
-                        stomp_send(`nspanel/${status.mac}/command`, "gui_update");
+                        useStompStore.getState().send(`nspanel/${status.mac}/command`, "gui_update");
                         Notify({ message: `Send GUI update command to ${status.name}.`, level: "success", duration: 2000 });
                         popoverRef.current?.hidePopover();
                       }

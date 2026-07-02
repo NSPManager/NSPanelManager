@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { stomp_subscribe, stomp_unsubscribe } from "./stomp_wrapper";
+import { useStompStore } from "./stomp";
 
 export interface IRoomData {
   id: number;
@@ -81,7 +81,10 @@ export const useEntityStatesStore = create<IEntityStatesStore>((set) => ({
   rooms: {},
   fetchData: async () => {
     set({ status: "loading" });
-    stomp_subscribe("entity_states", (message: any) => {
+    if (useStompStore.getState().status == "none") {
+      useStompStore.getState().connect();
+    }
+    useStompStore.getState().subscribe("entity_states", (message) => {
       const json_data = JSON.parse(message.body);
       set({ _nspanels: json_data.nspanels, status: "loaded" });
       useEntityStatesStore.getState()._attachNSPanelStatusDataSubscriptions();
@@ -111,13 +114,13 @@ export const useEntityStatesStore = create<IEntityStatesStore>((set) => ({
         console.log("Removing ", panel[0]);
         const current_nspanels = useEntityStatesStore.getState().nspanels;
         delete current_nspanels[panel[0]];
-        stomp_unsubscribe(`nspanel/${panel[0]}/status`, nspanel_stomp_status_update_callback);
+        useStompStore.getState().unsubscribe(`nspanel/${panel[0]}/status`, nspanel_stomp_status_update_callback);
         set({ nspanels: { ...current_nspanels } });
       }
     }
 
     for (const panel of useEntityStatesStore.getState()._nspanels) {
-      stomp_subscribe(`nspanel/${panel.mac}/status`, nspanel_stomp_status_update_callback);
+      useStompStore.getState().subscribe(`nspanel/${panel.mac}/status`, nspanel_stomp_status_update_callback);
     }
   },
 }));

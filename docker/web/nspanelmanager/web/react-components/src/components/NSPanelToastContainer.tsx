@@ -1,7 +1,6 @@
-import { type HTMLAttributes } from "react";
 import { toast, ToastContainer, Bounce, type TypeOptions, type Id } from "react-toastify";
 
-export const RemoveToast = (toast_id: Id) => {
+export const RemoveNotification = (toast_id: Id) => {
   toast.dismiss(toast_id);
 };
 
@@ -36,13 +35,7 @@ export const Notify = ({
   });
 };
 
-export const CustomToast = ({
-  data,
-  toastProps,
-}: {
-  data: { message: string; level: "error" | "warning" | "info" | "debug" | "success" };
-  toastProps: any;
-}) => {
+export const CustomToast = ({ data }: { data: { message: string; level: "error" | "warning" | "info" | "debug" | "success" } }) => {
   return (
     <div className="pl-1 py-2 me-6">
       <p>{data.message}</p>
