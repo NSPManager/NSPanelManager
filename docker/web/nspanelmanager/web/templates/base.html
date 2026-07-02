@@ -1,4 +1,5 @@
 {% load static %}
+{% load react_tags %}
 
 <!DOCTYPE html>
 <html lang="en" class="min-h-screen bg-base-200">
@@ -48,6 +49,7 @@
 <body class="min-h-screen">
   {% include 'modals.html' %}
   {% include 'partial/error_toast.html' %}
+  {% RC 'NSPanelToastContainer' %}
   {% include 'navbar.html' %}
 
   <div class="w-full flex flex-wrap justify-center mx-auto">

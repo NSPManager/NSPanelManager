@@ -21,6 +21,7 @@
     "react-hook-form": "^7.77.0",
     "react-select": "^5.10.2",
     "react-stomp-hooks": "^3.0.1",
+    "react-toastify": "^11.1.0",
     "zod": "^4.4.3",
     "zustand": "^5.0.13"
   },
