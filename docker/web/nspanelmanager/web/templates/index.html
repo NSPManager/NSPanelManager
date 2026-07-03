@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load react_tags %}
+
+{% block head %}
+{% load static %}
+<script src="{{ ingress_path }}{% static 'index_htmx.js' %}?refresh={% now 'U' %}"></script>
+<link rel="stylesheet" type="text/css" href="{{ ingress_path }}{% static 'index.css' %}?refresh={% now 'U' %}">
+{% if manager_address == "" %}<script src="{{ ingress_path }}{% static 'initial_setup.js' %}?refresh={% now 'U' %}"></script>{% endif %}
+{% endblock %}
+
+{% block content %}
+{% RC 'NSPanelsIndexView' %}
+{% endblock %}

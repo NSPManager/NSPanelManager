@@ -97,48 +97,7 @@ def get_base_data(request):
 
 
 def index(request):
-    if get_setting_with_default("use_fahrenheit") == "True":
-        temperature_unit = "°F"
-    else:
-        temperature_unit = "°C"
-
-    notifications = []
-    if get_setting_with_default("manager_address") == "":
-        notifications.append({"text": "No manager address configured in settings.", "class": "error"})
-
-    nspanels = []
-    for nspanel in NSPanel.objects.filter(denied=False):
-        panel_info = {}
-        panel_info["data"] = nspanel
-        # TODO: Load warnings from MQTTManager.
-        nspanels.append(panel_info)
-
-    data = {
-        "nspanels": nspanels,
-        "notifications": notifications,
-        "temperature_unit": temperature_unit,
-        "manager_address": get_setting_with_default("manager_address"),
-    }
-    data = data | get_base_data(request)
-
-    if data["manager_address"] == "":
-        environment = environ.Env()
-        data = {
-            **data,
-            **{
-                "manager_port": get_setting_with_default("manager_port"),
-                "mqtt_server": get_setting_with_default("mqtt_server"),
-                "mqtt_port": get_setting_with_default("mqtt_port"),
-                "mqtt_username": get_setting_with_default("mqtt_username"),
-                "mqtt_password": get_setting_with_default("mqtt_password"),
-                "home_assistant_address": get_setting_with_default("home_assistant_address"),
-                "home_assistant_token": get_setting_with_default("home_assistant_token"),
-                "openhab_address": get_setting_with_default("openhab_address"),
-                "openhab_token": get_setting_with_default("openhab_token"),
-            },
-        }
-
-    return render(request, "index_htmx.html", data)
+    return render(request, "index.html", get_base_data(request))
 
 
 def rooms(request):

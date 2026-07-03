@@ -96,8 +96,6 @@ urlpatterns = [
     #######################
     ### HTMX "API" URLs ###
     #######################
-    path("htmx/partial/index_nspanels_section/", htmx.partial_index_nspanels_section, name="htmx_partial_index_nspanels_section"),
-    path("htmx/partial/nspanel_index_view/<int:nspanel_id>", htmx.partial_nspanel_index_view, name="htmx_partial_nspanel_index_view"),
     path("htmx/unblock_nspanel/<int:nspanel_id>", htmx.unblock_nspanel, name="htmx_unblock_nspanel"),
     path("htmx/partial/handle_entity_modal_result", htmx.handle_entity_modal_result, name="htmx_handle_entity_modal_result"),
     path("htmx/partial/select_new_entity_type_react/<int:entities_page_id>/<int:room_view_position>", htmx.partial_add_entity_to_entities_page_select_entity_type_react, name="htmx_partial_select_new_entity_type_react"),

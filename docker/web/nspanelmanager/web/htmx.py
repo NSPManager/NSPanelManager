@@ -48,40 +48,6 @@ from .models import (
 )
 
 
-def partial_index_nspanels_section(request):
-    if get_setting_with_default("use_fahrenheit") == "True":
-        temperature_unit = "°F"
-    else:
-        temperature_unit = "°C"
-
-    nspanels = []
-    for nspanel in NSPanel.objects.filter(denied=False):
-        panel_info = {}
-        panel_info["data"] = nspanel
-        nspanels.append(panel_info)
-
-    data = {
-        "nspanels": nspanels,
-        "temperature_unit": temperature_unit,
-    }
-
-    return render(request, "index_htmx_nspanels_section.html", data)
-
-
-def partial_nspanel_index_view(request, nspanel_id):
-    try:
-        if request.method == "GET":
-            data = {
-                "nspanel": {"data": NSPanel.objects.get(id=nspanel_id)},
-            }
-            return render(request, "partial/nspanel_index_view_htmx.html", data)
-        else:
-            return JsonResponse({"status": "error"}, status=405)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
-
-
 @csrf_exempt
 def unblock_nspanel(request, nspanel_id):
     if request.method == "DELETE":

@@ -59,38 +59,45 @@ export const useStompStore = create<IStompStore>((set, get) => ({
   },
   subscribe: (topic: string, callback: (message: IMessage) => void) => {
     if (!get()._subscriptions.has(topic)) {
-      if (get().stompClient) {
-        const subscription = get()
-          .stompClient.watch(topic)
-          .subscribe((message) => {
-            get()._subscriptions.get(topic).last_message = message;
-
-            for (const cb of get()._subscriptions.get(topic)?.callbacks ?? []) {
+      const stompClient = get().stompClient;
+      if (stompClient) {
+        const subscription = stompClient.watch(topic).subscribe((message) => {
+          if (!get()._subscriptions.has(topic)) {
+            get()._subscriptions.set(topic, { topic, callbacks: [], subscription });
+          }
+          const topicData = get()._subscriptions.get(topic);
+          if (topicData) {
+            topicData.last_message = message;
+            for (const cb of topicData.callbacks) {
               cb(message);
             }
-          });
+          }
+        });
 
         get()._subscriptions.set(topic, { topic, callbacks: [callback], subscription });
       } else {
         console.error("Tried to subscribe to ", topic, " but stompClient is null");
       }
     } else {
-      get()._subscriptions.get(topic)?.callbacks.push(callback);
-      if (get()._subscriptions.get(topic)?.last_message) {
-        callback(get()._subscriptions.get(topic)?.last_message);
+      const subscription = get()._subscriptions.get(topic);
+      if (subscription) {
+        subscription.callbacks.push(callback);
+        if (subscription.last_message) {
+          callback(subscription.last_message);
+        }
       }
     }
   },
   unsubscribe: (topic: string, callback: (message: IMessage) => void) => {
     if (get()._subscriptions.has(topic)) {
-      const callbacks = get()._subscriptions.get(topic);
-      if (callbacks) {
-        const index = callbacks.callbacks.indexOf(callback);
+      const subscription = get()._subscriptions.get(topic);
+      if (subscription) {
+        const index = subscription.callbacks.indexOf(callback);
         if (index !== -1) {
-          callbacks.callbacks.splice(index, 1);
+          subscription.callbacks.splice(index, 1);
 
-          if (callbacks.callbacks.length === 0) {
-            get()._subscriptions.get(topic)?.subscription.unsubscribe();
+          if (subscription.callbacks.length === 0) {
+            subscription.subscription?.unsubscribe();
             get()._subscriptions.delete(topic);
           }
         }

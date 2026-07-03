@@ -3508,8 +3508,20 @@
   .right-0 {
     right: calc(var(--spacing) * 0);
   }
+  .right-1 {
+    right: calc(var(--spacing) * 1);
+  }
   .right-2 {
     right: calc(var(--spacing) * 2);
+  }
+  .right-3 {
+    right: calc(var(--spacing) * 3);
+  }
+  .right-\[2rem\] {
+    right: 2rem;
+  }
+  .right-\[3rem\] {
+    right: 3rem;
   }
   .dock-sm {
     height: calc(0.25rem * 14);
@@ -3563,11 +3575,20 @@
   .bottom-0 {
     bottom: calc(var(--spacing) * 0);
   }
+  .bottom-1 {
+    bottom: calc(var(--spacing) * 1);
+  }
+  .bottom-2 {
+    bottom: calc(var(--spacing) * 2);
+  }
   .left-0 {
     left: calc(var(--spacing) * 0);
   }
   .left-2 {
     left: calc(var(--spacing) * 2);
+  }
+  .left-\[3rem\] {
+    left: 3rem;
   }
   .file-input {
     cursor: pointer;
@@ -3729,6 +3750,83 @@
     border-radius: 17px;
     z-index: 1;
     margin-top: 6px;
+  }
+  .\!stack {
+    display: inline-grid !important;
+    grid-template-columns: 3px 4px 1fr 4px 3px !important;
+    grid-template-rows: 3px 4px 1fr 4px 3px !important;
+    & > * {
+      height: 100% !important;
+      width: 100% !important;
+      &:nth-child(n + 2) {
+        width: 100% !important;
+        opacity: 70% !important;
+      }
+      &:nth-child(2) {
+        z-index: 2 !important;
+        opacity: 90% !important;
+      }
+      &:nth-child(1) {
+        z-index: 3 !important;
+        width: 100% !important;
+      }
+    }
+    &, &.stack-bottom {
+      > * {
+        grid-column: 3 / 4 !important;
+        grid-row: 3 / 6 !important;
+        &:nth-child(2) {
+          grid-column: 2 / 5 !important;
+          grid-row: 2 / 5 !important;
+        }
+        &:nth-child(1) {
+          grid-column: 1 / 6 !important;
+          grid-row: 1 / 4 !important;
+        }
+      }
+    }
+    &.stack-top {
+      > * {
+        grid-column: 3 / 4 !important;
+        grid-row: 1 / 4 !important;
+        &:nth-child(2) {
+          grid-column: 2 / 5 !important;
+          grid-row: 2 / 5 !important;
+        }
+        &:nth-child(1) {
+          grid-column: 1 / 6 !important;
+          grid-row: 3 / 6 !important;
+        }
+      }
+    }
+    &.stack-start {
+      > * {
+        grid-column: 1 / 4 !important;
+        grid-row: 3 / 4 !important;
+        &:nth-child(2) {
+          grid-column: 2 / 5 !important;
+          grid-row: 2 / 5 !important;
+        }
+        &:nth-child(1) {
+          grid-column: 3 / 6 !important;
+          grid-row: 1 / 6 !important;
+        }
+      }
+    }
+    &.stack-end {
+      > * {
+        grid-column: 3 / 6 !important;
+        grid-row: 3 / 4 !important;
+        &:nth-child(2) {
+          grid-column: 2 / 5 !important;
+          grid-row: 2 / 5 !important;
+        }
+        &:nth-child(1) {
+          grid-column: 1 / 4 !important;
+          grid-row: 1 / 6 !important;
+        }
+      }
+    }
   }
   .stack {
     display: inline-grid;
@@ -8897,6 +8995,11 @@
   .backdrop-filter {
     -webkit-backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
     backdrop-filter: var(--tw-backdrop-blur,) var(--tw-backdrop-brightness,) var(--tw-backdrop-contrast,) var(--tw-backdrop-grayscale,) var(--tw-backdrop-hue-rotate,) var(--tw-backdrop-invert,) var(--tw-backdrop-opacity,) var(--tw-backdrop-saturate,) var(--tw-backdrop-sepia,);
+  }
+  .\!transition {
+    transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter !important;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function)) !important;
+    transition-duration: var(--tw-duration, var(--default-transition-duration)) !important;
   }
   .transition {
     transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter;

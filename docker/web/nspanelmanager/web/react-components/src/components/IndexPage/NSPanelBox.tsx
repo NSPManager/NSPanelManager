@@ -3,7 +3,7 @@ import { type ClassNamesConfig, type GroupBase } from "react-select";
 import { useEntityStatesStore, type INSPanelStatusData, type INSPanelWarningData } from "../../stores/EntityStore.ts";
 import { useRef, useState, useEffect, forwardRef } from "react";
 import { Notify } from "../NSPanelToastContainer.tsx";
-import { useStompStore } from "../../stores/stomp.tsx";
+import { useStompStore } from "../../stores/StompStore.tsx";
 
 function getCookie(name: string) {
   let cookieValue = "";
@@ -173,7 +173,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
   const delete_nspanel_dialog_ref = useRef<HTMLDialogElement>(null);
 
   return (
-    <div className="p-2">
+    <div className="p-2 relative h-full">
       <DeleteNSPanelConfirmDialog status={status} ref={delete_nspanel_dialog_ref} delete_nspanel_dialog_ref={delete_nspanel_dialog_ref} />
       <div className="flex justify-between mx-auto">
         <a href={`/nspanel/${status.id}`} className="font-medium text-lg">
@@ -206,6 +206,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
         <div>
           <div className="my-1">
             {(() => {
+              if (status.model != "sonoff" && status.model != "custom") return null;
               if (status.state == "offline" || status.state == "unknown" || status.state == "waiting") {
                 return (
                   <span className="icon-text text-sm">
@@ -256,6 +257,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
           </div>
           <div className="my-1">
             {(() => {
+              if (status.model != "sonoff" && status.model != "custom") return null;
               if (status.state == "offline" || status.state == "unknown" || status.state == "waiting") {
                 return (
                   <div className="flex items-center justify-start">
@@ -333,6 +335,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
           </div>
           <div className="my-1">
             {(() => {
+              if (status.model != "sonoff" && status.model != "custom") return null;
               if (status.state == "offline" || status.state == "unknown" || status.state == "waiting") {
                 return (
                   <div className="icon-text">
@@ -360,102 +363,102 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
             })()}
           </div>
         </div>
+      </div>
 
-        <div>
-          <button
-            className="font-medium text-sm px-1 py-2 text-center inline-flex items-center cursor-pointer"
-            popoverTarget={`nspanel-actions-${status.id}`}
-            style={{ anchorName: `--anchor-nspanel-actions-${status.id}` }}
-          >
-            <span className="mdi mdi-cog"></span>
-          </button>
-          <ul
-            className="dropdown menu w-52 rounded-box bg-base-100 shadow-sm"
-            popover="auto"
-            id={`nspanel-actions-${status.id}`}
-            style={{ anchorName: `--anchor-nspanel-actions-${status.id}` }}
-            ref={popoverRef}
-          >
-            {status.model === "sonoff" || status.model === "custom" ? (
-              <>
-                <li>
-                  <button
-                    onClick={() => {
-                      useStompStore.getState().send(`nspanel/${status.mac}/command`, "reboot");
-                      Notify({ message: `Send reboot command to ${status.name}.`, level: "success", duration: 2000 });
+      <div className="absolute right-2 bottom-2">
+        <button
+          className="font-medium text-sm px-1 py-2 text-center inline-flex items-center cursor-pointer"
+          popoverTarget={`nspanel-actions-${status.id}`}
+          style={{ anchorName: `--anchor-nspanel-actions-${status.id}` }}
+        >
+          <span className="mdi mdi-cog"></span>
+        </button>
+        <ul
+          className="dropdown menu w-52 rounded-box bg-base-100 shadow-sm"
+          popover="auto"
+          id={`nspanel-actions-${status.id}`}
+          style={{ anchorName: `--anchor-nspanel-actions-${status.id}` }}
+          ref={popoverRef}
+        >
+          {status.model === "sonoff" || status.model === "custom" ? (
+            <>
+              <li>
+                <button
+                  onClick={() => {
+                    useStompStore.getState().send(`nspanel/${status.mac}/command`, "reboot");
+                    Notify({ message: `Send reboot command to ${status.name}.`, level: "success", duration: 2000 });
+                    popoverRef.current?.hidePopover();
+                  }}
+                  id="reboot-{{ id }}"
+                  hx-swap="none"
+                  className="block px-4 py-2 cursor-pointer nspanel-reboot-button group"
+                >
+                  <span className="mdi mdi-restart pr-2 group-hover:text-warning"></span>Reboot
+                </button>
+              </li>
+              <li>
+                <a
+                  href={status.state === "offline" ? "#" : `http://${status.ip_address}/`}
+                  onClick={() => (status.state != "offline" ? popoverRef.current?.hidePopover() : null)}
+                  id="visit-{{ id }}"
+                  hx-swap="none"
+                  className={`block px-4 py-2 cursor-pointer nspanel-visit-button group ${status.state === "offline" ? "line-through" : ""}`}
+                  target="_blank"
+                  aria-disabled={status.state === "offline"}
+                >
+                  <span className="mdi mdi-web pr-2 group-hover:text-info"></span>Visit
+                </a>
+              </li>
+              <li className="border-t border-neutral-content"></li>
+              <li>
+                <a
+                  onClick={() => {
+                    if (status.state !== "offline") {
+                      useStompStore.getState().send(`nspanel/${status.mac}/command`, "firmware_update");
+                      Notify({ message: `Send FW update command to ${status.name}.`, level: "success", duration: 2000 });
                       popoverRef.current?.hidePopover();
-                    }}
-                    id="reboot-{{ id }}"
-                    hx-swap="none"
-                    className="block px-4 py-2 cursor-pointer nspanel-reboot-button group"
-                  >
-                    <span className="mdi mdi-restart pr-2 group-hover:text-warning"></span>Reboot
-                  </button>
-                </li>
-                <li>
-                  <a
-                    href={status.state === "offline" ? "#" : `http://${status.ip_address}/`}
-                    onClick={() => (status.state != "offline" ? popoverRef.current?.hidePopover() : null)}
-                    id="visit-{{ id }}"
-                    hx-swap="none"
-                    className={`block px-4 py-2 cursor-pointer nspanel-visit-button group ${status.state === "offline" ? "line-through" : ""}`}
-                    target="_blank"
-                    aria-disabled={status.state === "offline"}
-                  >
-                    <span className="mdi mdi-web pr-2 group-hover:text-info"></span>Visit
-                  </a>
-                </li>
-                <li className="border-t border-neutral-content"></li>
-                <li>
-                  <a
-                    onClick={() => {
-                      if (status.state !== "offline") {
-                        useStompStore.getState().send(`nspanel/${status.mac}/command`, "firmware_update");
-                        Notify({ message: `Send FW update command to ${status.name}.`, level: "success", duration: 2000 });
-                        popoverRef.current?.hidePopover();
-                      }
-                    }}
-                    id="firmware-update-{{ nspanel.data.id }}"
-                    className={`block px-4 py-2 cursor-pointer group ${status.state === "offline" ? "line-through" : ""}`}
-                    aria-disabled={status.state === "offline"}
-                  >
-                    <span className="mdi mdi-upload pr-2 group-hover:text-success"></span>Update firmware
-                  </a>
-                </li>
-                <li>
-                  <a
-                    onClick={() => {
-                      if (status.state !== "offline") {
-                        useStompStore.getState().send(`nspanel/${status.mac}/command`, "gui_update");
-                        Notify({ message: `Send GUI update command to ${status.name}.`, level: "success", duration: 2000 });
-                        popoverRef.current?.hidePopover();
-                      }
-                    }}
-                    id="screen-update-{{ nspanel.data.id }}"
-                    className={`block px-4 py-2 cursor-pointer group ${status.state === "offline" ? "line-through" : ""}`}
-                    aria-disabled={status.state === "offline"}
-                  >
-                    <span className="mdi mdi-table-arrow-up pr-2 group-hover:text-success"></span>Update GUI
-                  </a>
-                </li>
-                <li className="border-t border-neutral-content"></li>
-              </>
-            ) : null}
-            <li>
-              <button
-                onClick={() => {
-                  delete_nspanel_dialog_ref.current?.showModal();
-                  popoverRef.current?.hidePopover();
-                }}
-                id="delete-{{ id }}"
-                hx-swap="none"
-                className="block px-4 py-2 cursor-pointer nspanel-delete-button group"
-              >
-                <span className="mdi mdi-delete pr-2 group-hover:text-error"></span>Delete
-              </button>
-            </li>
-          </ul>
-        </div>
+                    }
+                  }}
+                  id="firmware-update-{{ nspanel.data.id }}"
+                  className={`block px-4 py-2 cursor-pointer group ${status.state === "offline" ? "line-through" : ""}`}
+                  aria-disabled={status.state === "offline"}
+                >
+                  <span className="mdi mdi-upload pr-2 group-hover:text-success"></span>Update firmware
+                </a>
+              </li>
+              <li>
+                <a
+                  onClick={() => {
+                    if (status.state !== "offline") {
+                      useStompStore.getState().send(`nspanel/${status.mac}/command`, "gui_update");
+                      Notify({ message: `Send GUI update command to ${status.name}.`, level: "success", duration: 2000 });
+                      popoverRef.current?.hidePopover();
+                    }
+                  }}
+                  id="screen-update-{{ nspanel.data.id }}"
+                  className={`block px-4 py-2 cursor-pointer group ${status.state === "offline" ? "line-through" : ""}`}
+                  aria-disabled={status.state === "offline"}
+                >
+                  <span className="mdi mdi-table-arrow-up pr-2 group-hover:text-success"></span>Update GUI
+                </a>
+              </li>
+              <li className="border-t border-neutral-content"></li>
+            </>
+          ) : null}
+          <li>
+            <button
+              onClick={() => {
+                delete_nspanel_dialog_ref.current?.showModal();
+                popoverRef.current?.hidePopover();
+              }}
+              id="delete-{{ id }}"
+              hx-swap="none"
+              className="block px-4 py-2 cursor-pointer nspanel-delete-button group"
+            >
+              <span className="mdi mdi-delete pr-2 group-hover:text-error"></span>Delete
+            </button>
+          </li>
+        </ul>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { useStompStore } from "./stomp";
+import { useStompStore } from "./StompStore";
 
 export interface IRoomData {
   id: number;
