@@ -3,6 +3,8 @@ import { useEntityStatesStore } from "../../stores/EntityStore.ts";
 import NSPanelBox from "./NSPanelBox.tsx";
 import { useStompStore } from "../../stores/StompStore.tsx";
 import { Notify } from "../NSPanelToastContainer.tsx";
+import { Icon } from "@mdi/react";
+import { mdiMenuDownOutline, mdiRestart, mdiTableArrowUp, mdiUpload } from "@mdi/js";
 
 const NSPanelsIndexView = () => {
   const { nspanels, status, fetchData } = useEntityStatesStore();
@@ -20,7 +22,7 @@ const NSPanelsIndexView = () => {
         <span className="text-2xl">NSPanels</span>
         <div>
           <button className="btn btn-soft font-medium" popoverTarget={`nspanels-actions`} style={{ anchorName: `--anchor-nspanels-actions` }}>
-            Actions<span className="mdi mdi-menu-down-outline"></span>
+            Actions<Icon path={mdiMenuDownOutline} className="w-4"></Icon>
           </button>
           <ul
             className="dropdown menu w-52 rounded-box bg-base-100 shadow-sm"
@@ -33,7 +35,7 @@ const NSPanelsIndexView = () => {
               <button
                 onClick={() => {
                   const nspanels = useEntityStatesStore.getState().nspanels;
-                  for (const [mac, status] of Object.entries(nspanels)) {
+                  for (const mac of Object.entries(nspanels).keys()) {
                     useStompStore.getState().send(`nspanel/${mac}/command`, "reboot");
                   }
                   Notify({ message: `Send reboot command to all NSPanels.`, level: "success", duration: 2000 });
@@ -41,9 +43,9 @@ const NSPanelsIndexView = () => {
                 }}
                 id="reboot-{{ id }}"
                 hx-swap="none"
-                className="block px-4 py-2 cursor-pointer nspanel-reboot-button group"
+                className="block px-4 py-2 group"
               >
-                <span className="mdi mdi-restart pr-2 group-hover:text-warning"></span>Reboot all NSPanels
+                <Icon path={mdiRestart} className="w-6 h-6 inline-block pr-2 group-hover:text-warning"></Icon>Reboot all NSPanels
               </button>
             </li>
             <li className="border-t border-neutral-content"></li>
@@ -62,7 +64,7 @@ const NSPanelsIndexView = () => {
                 id="firmware-update-all"
                 className={`block px-4 py-2 cursor-pointer group`}
               >
-                <span className="mdi mdi-upload pr-2 group-hover:text-success"></span>Update firmware on all NSPanels
+                <Icon path={mdiUpload} className="w-6 h-6 inline-block pr-2 group-hover:text-success"></Icon>Update firmware on all NSPanels
               </a>
             </li>
             <li>
@@ -80,7 +82,7 @@ const NSPanelsIndexView = () => {
                 id="screen-update-all"
                 className={`block px-4 py-2 cursor-pointer group`}
               >
-                <span className="mdi mdi-table-arrow-up pr-2 group-hover:text-success"></span>Update GUI on all NSPanels
+                <Icon path={mdiTableArrowUp} className="w-6 h-6 inline-block pr-2 group-hover:text-success"></Icon>Update GUI on all NSPanels
               </a>
             </li>
             <li className="border-t border-neutral-content"></li>
@@ -104,7 +106,7 @@ const NSPanelsIndexView = () => {
                 id="restart-mqtt-manager"
                 className="block px-4 py-2 cursor-pointer group"
               >
-                <span className="mdi mdi-restart pr-2 group-hover:text-warning"></span>Restart MQTTManager
+                <Icon path={mdiRestart} className="w-6 h-6 inline-block pr-2 group-hover:text-warning"></Icon>Restart MQTTManager
               </button>
             </li>
           </ul>

@@ -4,6 +4,25 @@ import { useEntityStatesStore, type INSPanelStatusData, type INSPanelWarningData
 import { useRef, useState, useEffect, forwardRef } from "react";
 import { Notify } from "../NSPanelToastContainer.tsx";
 import { useStompStore } from "../../stores/StompStore.tsx";
+import { Icon } from "@mdi/react";
+import {
+  mdiAlertCircle,
+  mdiArrowCollapseAll,
+  mdiCog,
+  mdiMemory,
+  mdiMinusCircle,
+  mdiRestart,
+  mdiTableArrowUp,
+  mdiThermometer,
+  mdiUpload,
+  mdiWaterPercent,
+  mdiWeb,
+  mdiWifiStrength1Alert,
+  mdiWifiStrength2,
+  mdiWifiStrength3,
+  mdiWifiStrength4,
+  mdiWifiStrengthAlertOutline,
+} from "@mdi/js";
 
 function getCookie(name: string) {
   let cookieValue = "";
@@ -152,10 +171,10 @@ const NSPanelWarnings = ({ warnings }: { warnings: INSPanelWarningData[] }) => {
         {warnings.map((warning, index) => (
           <li key={index} className="list-row">
             <div>
-              {warning.level == "error" && <span className="text-error mdi mdi-alert-circle"></span>}
-              {warning.level == "warning" && <span className="text-warning mdi mdi-alert-circle"></span>}
-              {warning.level == "info" && <span className="text-info mdi mdi-alert-circle"></span>}
-              {warning.level == "debug" && <span className="text-base-content mdi mdi-alert-circle"></span>}
+              {warning.level == "error" && <Icon path={mdiAlertCircle} className="w-4 h-4 text-error"></Icon>}
+              {warning.level == "warning" && <Icon path={mdiAlertCircle} className="w-4 h-4 text-warning"></Icon>}
+              {warning.level == "info" && <Icon path={mdiAlertCircle} className="w-4 h-4 text-info"></Icon>}
+              {warning.level == "debug" && <Icon path={mdiAlertCircle} className="w-4 h-4 text-base-content"></Icon>}
             </div>
             <div>
               <div>{warning.text}</div>
@@ -210,45 +229,34 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
               if (status.state == "offline" || status.state == "unknown" || status.state == "waiting") {
                 return (
                   <span className="icon-text text-sm">
-                    <span className="icon me-1">
-                      <i className="mdi mdi-wifi-strength-1-alert"></i>
-                    </span>
-                    -
+                    <Icon path={mdiWifiStrengthAlertOutline} className="w-4 h-4 inline-block me-1"></Icon>-
                   </span>
                 );
               } else if (status.rssi <= -80) {
                 return (
                   <span className="icon-text text-sm">
-                    <span className="icon me-1">
-                      <i className="mdi mdi-wifi-strength-1-alert"></i>
-                    </span>
+                    <Icon path={mdiWifiStrength1Alert} className="w-4 h-4 inline-block me-1"></Icon>
                     {status.rssi} dBm
                   </span>
                 );
               } else if (status.rssi <= -70) {
                 return (
                   <span className="icon-text text-sm">
-                    <span className="icon me-1">
-                      <i className="mdi mdi-wifi-strength-2"></i>
-                    </span>
+                    <Icon path={mdiWifiStrength2} className="w-4 h-4 inline-block me-1"></Icon>
                     {status.rssi} dBm
                   </span>
                 );
               } else if (status.rssi <= -55) {
                 return (
                   <span className="icon-text text-sm">
-                    <span className="icon me-1">
-                      <i className="mdi mdi-wifi-strength-3"></i>
-                    </span>
+                    <Icon path={mdiWifiStrength3} className="w-4 h-4 inline-block me-1"></Icon>
                     {status.rssi} dBm
                   </span>
                 );
               } else {
                 return (
                   <span className="icon-text text-sm">
-                    <span className="icon me-1">
-                      <i className="mdi mdi-wifi-strength-4"></i>
-                    </span>
+                    <Icon path={mdiWifiStrength4} className="w-4 h-4 inline-block me-1"></Icon>
                     {status.rssi} dBm
                   </span>
                 );
@@ -262,9 +270,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                 return (
                   <div className="flex items-center justify-start">
                     <div className="icon-text">
-                      <span className="icon me-1">
-                        <i className="mdi mdi-thermometer"></i>
-                      </span>
+                      <Icon path={mdiThermometer} className="w-4 h-4 inline-block me-1"></Icon>-
                       <span id="temperature-${nspanel_id}" className="text-sm">
                         -
                       </span>
@@ -273,18 +279,14 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                       <>
                         <span className="mx-1">|</span>
                         <div className="icon-text">
-                          <span className="icon me-1">
-                            <i className="mdi mdi-water-percent"></i>
-                          </span>
+                          <Icon path={mdiWaterPercent} className="w-4 h-4 inline-block me-1"></Icon>-
                           <span id="humidity-${nspanel_id}" className="text-sm">
                             -
                           </span>
                         </div>
                         <span className="mx-1">|</span>
                         <div className="icon-text">
-                          <span className="icon me-1">
-                            <i className="mdi mdi-arrow-collapse-all"></i>
-                          </span>
+                          <Icon path={mdiArrowCollapseAll} className="w-4 h-4 inline-block me-1"></Icon>-
                           <span id="pressure-${nspanel_id}" className="text-sm">
                             -
                           </span>
@@ -297,9 +299,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                 return (
                   <div className="flex items-center justify-start">
                     <div className="icon-text">
-                      <span className="icon me-1">
-                        <i className="mdi mdi-thermometer"></i>
-                      </span>
+                      <Icon path={mdiThermometer} className="w-4 h-4 inline-block me-1"></Icon>-
                       <span id="temperature-${nspanel_id}" className="text-sm">
                         {status.temperature.toFixed(1)}
                         {status.temperature_unit}
@@ -309,18 +309,14 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                       <>
                         <span className="mx-1">|</span>
                         <div className="icon-text">
-                          <span className="icon me-1">
-                            <i className="mdi mdi-water-percent"></i>
-                          </span>
+                          <Icon path={mdiWaterPercent} className="w-4 h-4 inline-block me-1"></Icon>
                           <span id="humidity-${nspanel_id}" className="text-sm">
                             {(status.humidity && `${status.humidity.toFixed(1)}%`) || "-"}
                           </span>
                         </div>
                         <span className="mx-1">|</span>
                         <div className="icon-text">
-                          <span className="icon me-1">
-                            <i className="mdi mdi-arrow-collapse-all"></i>
-                          </span>
+                          <Icon path={mdiArrowCollapseAll} className="w-4 h-4 inline-block me-1"></Icon>
                           <span id="pressure-${nspanel_id}" className="text-sm">
                             {(status.pressure && `${(status.pressure / 1000).toFixed(1)} kPa`) || "-"}
                           </span>
@@ -339,9 +335,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
               if (status.state == "offline" || status.state == "unknown" || status.state == "waiting") {
                 return (
                   <div className="icon-text">
-                    <span className="icon me-1">
-                      <i className="mdi mdi-memory"></i>
-                    </span>
+                    <Icon path={mdiMemory} className="w-4 h-4 inline-block me-1"></Icon>
                     <span id="ram-${nspanel_id}" className="text-sm">
                       -
                     </span>
@@ -350,9 +344,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
               } else {
                 return (
                   <div className="icon-text">
-                    <span className="icon me-1">
-                      <i className="mdi mdi-memory"></i>
-                    </span>
+                    <Icon path={mdiMemory} className="w-4 h-4 inline-block me-1"></Icon>
                     <span id="ram-${nspanel_id}" className="text-sm">
                       {status.ram_usage.toFixed(0)}%
                     </span>
@@ -371,7 +363,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
           popoverTarget={`nspanel-actions-${status.id}`}
           style={{ anchorName: `--anchor-nspanel-actions-${status.id}` }}
         >
-          <span className="mdi mdi-cog"></span>
+          <Icon path={mdiCog} className="w-4 h-4"></Icon>
         </button>
         <ul
           className="dropdown menu w-52 rounded-box bg-base-100 shadow-sm"
@@ -393,7 +385,8 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                   hx-swap="none"
                   className="block px-4 py-2 cursor-pointer nspanel-reboot-button group"
                 >
-                  <span className="mdi mdi-restart pr-2 group-hover:text-warning"></span>Reboot
+                  <Icon path={mdiRestart} className="w-4 h-4 inline-block me-1 group-hover:text-warning"></Icon>
+                  Reboot
                 </button>
               </li>
               <li>
@@ -406,7 +399,8 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                   target="_blank"
                   aria-disabled={status.state === "offline"}
                 >
-                  <span className="mdi mdi-web pr-2 group-hover:text-info"></span>Visit
+                  <Icon path={mdiWeb} className="w-4 h-4 inline-block me-1 group-hover:text-info"></Icon>
+                  Visit
                 </a>
               </li>
               <li className="border-t border-neutral-content"></li>
@@ -415,7 +409,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                   onClick={() => {
                     if (status.state !== "offline") {
                       useStompStore.getState().send(`nspanel/${status.mac}/command`, "firmware_update");
-                      Notify({ message: `Send FW update command to ${status.name}.`, level: "success", duration: 2000 });
+                      Notify({ message: `Sent firmware update command to ${status.name}.`, level: "success", duration: 2000 });
                       popoverRef.current?.hidePopover();
                     }
                   }}
@@ -423,7 +417,8 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                   className={`block px-4 py-2 cursor-pointer group ${status.state === "offline" ? "line-through" : ""}`}
                   aria-disabled={status.state === "offline"}
                 >
-                  <span className="mdi mdi-upload pr-2 group-hover:text-success"></span>Update firmware
+                  <Icon path={mdiUpload} className="w-4 h-4 inline-block me-1 group-hover:text-success"></Icon>
+                  Update firmware
                 </a>
               </li>
               <li>
@@ -431,7 +426,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                   onClick={() => {
                     if (status.state !== "offline") {
                       useStompStore.getState().send(`nspanel/${status.mac}/command`, "gui_update");
-                      Notify({ message: `Send GUI update command to ${status.name}.`, level: "success", duration: 2000 });
+                      Notify({ message: `Sent GUI update command to ${status.name}.`, level: "success", duration: 2000 });
                       popoverRef.current?.hidePopover();
                     }
                   }}
@@ -439,7 +434,8 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                   className={`block px-4 py-2 cursor-pointer group ${status.state === "offline" ? "line-through" : ""}`}
                   aria-disabled={status.state === "offline"}
                 >
-                  <span className="mdi mdi-table-arrow-up pr-2 group-hover:text-success"></span>Update GUI
+                  <Icon path={mdiTableArrowUp} className="w-4 h-4 inline-block me-1 group-hover:text-success"></Icon>
+                  Update GUI
                 </a>
               </li>
               <li className="border-t border-neutral-content"></li>
@@ -453,9 +449,10 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
               }}
               id="delete-{{ id }}"
               hx-swap="none"
-              className="block px-4 py-2 cursor-pointer nspanel-delete-button group"
+              className="block px-4 py-2 cursor-pointer group"
             >
-              <span className="mdi mdi-delete pr-2 group-hover:text-error"></span>Delete
+              <Icon path={mdiMinusCircle} className="w-4 h-4 inline-block me-1 group-hover:text-error"></Icon>
+              Delete
             </button>
           </li>
         </ul>

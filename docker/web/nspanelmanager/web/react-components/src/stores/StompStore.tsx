@@ -3,6 +3,11 @@ import { RxStomp, RxStompConfig, Versions, type IMessage } from "@stomp/rx-stomp
 import { Notify, RemoveNotification } from "../components/NSPanelToastContainer";
 import type { Subscription } from "rxjs";
 
+export interface IMqttManagerWarningData {
+  level: "error" | "warning" | "info" | "debug";
+  text: string;
+}
+
 const rxStompConfig: RxStompConfig = {
   brokerURL: "/websocket/stomp",
   connectHeaders: {
@@ -29,6 +34,7 @@ export interface IStompStore {
   status: "none" | "connecting" | "connected" | "disconnected";
   stompClient: RxStomp | null;
   setStompClient: (client: RxStomp | null) => void;
+  mqttmanager_warnings: IMqttManagerWarningData[];
   connect: () => void;
   subscribe: (topic: string, callback: (message: IMessage) => void) => void;
   unsubscribe: (topic: string, callback: (message: IMessage) => void) => void;
@@ -40,6 +46,7 @@ export const useStompStore = create<IStompStore>((set, get) => ({
   status: "none",
   stompClient: null as RxStomp | null,
   setStompClient: (client: RxStomp | null) => set({ stompClient: client }),
+  mqttmanager_warnings: [],
   connect: () => {
     set({ status: "connecting" });
     if (!get().stompClient) {
@@ -55,6 +62,11 @@ export const useStompStore = create<IStompStore>((set, get) => ({
     get().stompClient?.webSocketErrors$.subscribe(() => {
       set({ status: "disconnected" });
       Notify({ message: "Disconnected from MQTTManager.", level: "error", toast_id: "stomp_disconnected" });
+    });
+
+    get().subscribe("mqttmanager/warnings", (message) => {
+      const data = JSON.parse(message.body);
+      set({ mqttmanager_warnings: data.warnings });
     });
   },
   subscribe: (topic: string, callback: (message: IMessage) => void) => {
