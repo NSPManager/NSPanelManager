@@ -38,7 +38,7 @@ const NSPanelsIndexView = () => {
                   for (const mac of Object.entries(nspanels).keys()) {
                     useStompStore.getState().send(`nspanel/${mac}/command`, "reboot");
                   }
-                  Notify({ message: `Send reboot command to all NSPanels.`, level: "success", duration: 2000 });
+                  Notify({ message: `Sent reboot command to all NSPanels.`, level: "success", duration: 2000 });
                   popoverRef.current?.hidePopover();
                 }}
                 id="reboot-{{ id }}"
@@ -56,7 +56,7 @@ const NSPanelsIndexView = () => {
                   for (const [mac, status] of Object.entries(nspanels)) {
                     if (status.state == "online") {
                       useStompStore.getState().send(`nspanel/${mac}/command`, "firmware_update");
-                      Notify({ message: `Send FW update command to ${status.name}.`, level: "success", duration: 2000 });
+                      Notify({ message: `Sent FW update command to ${status.name}.`, level: "success", duration: 2000 });
                     }
                   }
                   popoverRef.current?.hidePopover();
@@ -74,7 +74,7 @@ const NSPanelsIndexView = () => {
                   for (const [mac, status] of Object.entries(nspanels)) {
                     if (status.state == "online") {
                       useStompStore.getState().send(`nspanel/${mac}/command`, "gui_update");
-                      Notify({ message: `Send GUI update command to ${status.name}.`, level: "success", duration: 2000 });
+                      Notify({ message: `Sent GUI update command to ${status.name}.`, level: "success", duration: 2000 });
                     }
                   }
                   popoverRef.current?.hidePopover();

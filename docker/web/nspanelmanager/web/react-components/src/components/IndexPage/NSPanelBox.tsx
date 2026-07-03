@@ -378,7 +378,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                 <button
                   onClick={() => {
                     useStompStore.getState().send(`nspanel/${status.mac}/command`, "reboot");
-                    Notify({ message: `Send reboot command to ${status.name}.`, level: "success", duration: 2000 });
+                    Notify({ message: `Sent reboot command to ${status.name}.`, level: "success", duration: 2000 });
                     popoverRef.current?.hidePopover();
                   }}
                   id="reboot-{{ id }}"
