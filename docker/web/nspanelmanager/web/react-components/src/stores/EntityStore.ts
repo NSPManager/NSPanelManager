@@ -31,7 +31,7 @@ export interface INSPanelStatusData {
   warnings: INSPanelWarningData[];
   accepted: boolean;
   model: "web" | "sonoff" | "custom" | "unknown";
-  state: "online" | "offline" | "updating_fw" | "updating_fs" | "updating_tft" | "waiting" | "awaiting_accept" | "unknown";
+  state: "online" | "offline" | "updating_fw" | "updating_fs" | "updating_tft" | "waiting" | "awaiting_accept" | "rebooting" | "unknown";
 }
 
 // interface IEntityStatesData {

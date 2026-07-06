@@ -1,8 +1,8 @@
-import { c as __toESM, i as __commonJSMin, r as require_react, t as require_jsx_runtime } from "./main-qBwBUJJ_.js";
-import { t as create } from "./react-BvgXelu_.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-CWMjcSOP.js";
-import { n as Notify, r as RemoveNotification } from "./NSPanelToastContainer-BY3v55LI.js";
-import { _ as mdiWifiStrength4, a as mdiMemory, c as mdiRestart, d as mdiUpload, g as mdiWifiStrength3, h as mdiWifiStrength2, l as mdiTableArrowUp, m as mdiWifiStrength1Alert, o as mdiMenuDownOutline, p as mdiWeb, r as mdiCog, s as mdiMinusCircle, u as mdiThermometer, v as mdiWifiStrengthAlertOutline, y as require_Icon } from "./mdi-BEHsbKEg.js";
+import { c as __toESM, i as __commonJSMin, r as require_react, t as require_jsx_runtime } from "./main-ZL8y8bxT.js";
+import { t as create } from "./react-09SNKys-.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-CtdpzTRQ.js";
+import { n as Notify, r as RemoveNotification } from "./NSPanelToastContainer-CoQ7ri-y.js";
+import { _ as mdiWifiStrength4, a as mdiMemory, c as mdiRestart, d as mdiUpload, g as mdiWifiStrength3, h as mdiWifiStrength2, l as mdiTableArrowUp, m as mdiWifiStrength1Alert, o as mdiMenuDownOutline, p as mdiWeb, r as mdiCog, s as mdiMinusCircle, u as mdiThermometer, v as mdiWifiStrengthAlertOutline, y as require_Icon } from "./mdi-BoWm9XqF.js";
 //#region node_modules/tslib/tslib.es6.mjs
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -3918,6 +3918,10 @@ var NSPanelStatusHeader = ({ state, update_progress }) => {
 		className: "min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-error rounded-t-field",
 		id: "panel_header-${id}"
 	});
+	else if (state == "rebooting") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "min-h-1 overflow-hidden w-full bg-info rounded-t-field animate-progress-indeterminate origin-left-right",
+		id: "panel_header-${id}"
+	});
 	else if (state == "waiting") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-info animate-pulse rounded-t-field",
 		id: "panel_header-${id}"
@@ -4029,6 +4033,10 @@ var AcceptedNSPanelContent = ({ status }) => {
 							className: "flex items-end justify-end text-right italic font-light text-sm",
 							children: "Offline"
 						});
+						else if (status.state === "rebooting") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "flex items-end justify-end text-right italic font-light text-sm",
+							children: "Rebooting"
+						});
 						else if (status.state === "waiting") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "flex items-end justify-end text-right italic font-light text-sm",
 							children: "Waiting"
@@ -4072,8 +4080,8 @@ var AcceptedNSPanelContent = ({ status }) => {
 						className: "my-1",
 						children: (() => {
 							if (status.model != "sonoff" && status.model != "custom") return null;
-							if (status.state == "offline" || status.state == "unknown" || status.state == "waiting") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-								className: "icon-text text-sm",
+							if (status.state == "offline" || status.state == "unknown" || status.state == "waiting" || status.state == "rebooting") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+								className: "icon-text text-sm text-base-content/50",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_Icon.Icon, {
 									path: mdiWifiStrengthAlertOutline,
 									className: "w-4 h-4 inline-block me-1"
@@ -4129,8 +4137,8 @@ var AcceptedNSPanelContent = ({ status }) => {
 						className: "my-1",
 						children: (() => {
 							if (status.model != "sonoff" && status.model != "custom") return null;
-							if (status.state == "offline" || status.state == "unknown" || status.state == "waiting") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex items-center justify-start",
+							if (status.state == "offline" || status.state == "unknown" || status.state == "waiting" || status.state == "rebooting") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center justify-start text-base-content/50",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 									className: "icon-text",
 									children: [
@@ -4151,7 +4159,7 @@ var AcceptedNSPanelContent = ({ status }) => {
 										children: "|"
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "icon-text",
+										className: "icon-text text-base-content/50",
 										children: [
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_Icon.Icon, {
 												path: "M12,3.25C12,3.25 6,10 6,14C6,17.32 8.69,20 12,20A6,6 0 0,0 18,14C18,10 12,3.25 12,3.25M14.47,9.97L15.53,11.03L9.53,17.03L8.47,15.97M9.75,10A1.25,1.25 0 0,1 11,11.25A1.25,1.25 0 0,1 9.75,12.5A1.25,1.25 0 0,1 8.5,11.25A1.25,1.25 0 0,1 9.75,10M14.25,14.5A1.25,1.25 0 0,1 15.5,15.75A1.25,1.25 0 0,1 14.25,17A1.25,1.25 0 0,1 13,15.75A1.25,1.25 0 0,1 14.25,14.5Z",
@@ -4170,7 +4178,7 @@ var AcceptedNSPanelContent = ({ status }) => {
 										children: "|"
 									}),
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "icon-text",
+										className: "icon-text text-base-content/50",
 										children: [
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_Icon.Icon, {
 												path: "M19.5,3.09L20.91,4.5L16.41,9H20V11H13V4H15V7.59L19.5,3.09M20.91,19.5L19.5,20.91L15,16.41V20H13V13H20V15H16.41L20.91,19.5M4.5,3.09L9,7.59V4H11V11H4V9H7.59L3.09,4.5L4.5,3.09M3.09,19.5L7.59,15H4V13H11V20H9V16.41L4.5,20.91L3.09,19.5Z",
@@ -4242,8 +4250,8 @@ var AcceptedNSPanelContent = ({ status }) => {
 						className: "my-1",
 						children: (() => {
 							if (status.model != "sonoff" && status.model != "custom") return null;
-							if (status.state == "offline" || status.state == "unknown" || status.state == "waiting") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "icon-text",
+							if (status.state == "offline" || status.state == "unknown" || status.state == "waiting" || status.state == "rebooting") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "icon-text text-base-content/50",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_Icon.Icon, {
 									path: mdiMemory,
 									className: "w-4 h-4 inline-block me-1"

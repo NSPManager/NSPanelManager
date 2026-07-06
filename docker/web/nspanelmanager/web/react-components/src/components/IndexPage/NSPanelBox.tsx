@@ -93,6 +93,10 @@ const NSPanelStatusHeader = ({ state, update_progress }: { state: string; update
     return <div className="min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-success rounded-t-field" id="panel_header-${id}"></div>;
   } else if (state == "offline") {
     return <div className="min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-error rounded-t-field" id="panel_header-${id}"></div>;
+  } else if (state == "rebooting") {
+    return (
+      <div className="min-h-1 overflow-hidden w-full bg-info rounded-t-field animate-progress-indeterminate origin-left-right" id="panel_header-${id}"></div>
+    );
   } else if (state == "waiting") {
     return (
       <div
@@ -204,6 +208,8 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
               return null; // No status text to show, panel is working as excpected.
             } else if (status.state === "offline") {
               return <span className="flex items-end justify-end text-right italic font-light text-sm">Offline</span>;
+            } else if (status.state === "rebooting") {
+              return <span className="flex items-end justify-end text-right italic font-light text-sm">Rebooting</span>;
             } else if (status.state === "waiting") {
               return <span className="flex items-end justify-end text-right italic font-light text-sm">Waiting</span>;
             } else if (status.state === "updating_fw") {
@@ -226,9 +232,9 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
           <div className="my-1">
             {(() => {
               if (status.model != "sonoff" && status.model != "custom") return null;
-              if (status.state == "offline" || status.state == "unknown" || status.state == "waiting") {
+              if (status.state == "offline" || status.state == "unknown" || status.state == "waiting" || status.state == "rebooting") {
                 return (
-                  <span className="icon-text text-sm">
+                  <span className="icon-text text-sm text-base-content/50">
                     <Icon path={mdiWifiStrengthAlertOutline} className="w-4 h-4 inline-block me-1"></Icon>-
                   </span>
                 );
@@ -266,9 +272,9 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
           <div className="my-1">
             {(() => {
               if (status.model != "sonoff" && status.model != "custom") return null;
-              if (status.state == "offline" || status.state == "unknown" || status.state == "waiting") {
+              if (status.state == "offline" || status.state == "unknown" || status.state == "waiting" || status.state == "rebooting") {
                 return (
-                  <div className="flex items-center justify-start">
+                  <div className="flex items-center justify-start text-base-content/50">
                     <div className="icon-text">
                       <Icon path={mdiThermometer} className="w-4 h-4 inline-block me-1"></Icon>-
                       <span id="temperature-${nspanel_id}" className="text-sm">
@@ -278,14 +284,14 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                     {status.model == "custom" && (
                       <>
                         <span className="mx-1">|</span>
-                        <div className="icon-text">
+                        <div className="icon-text text-base-content/50">
                           <Icon path={mdiWaterPercent} className="w-4 h-4 inline-block me-1"></Icon>-
                           <span id="humidity-${nspanel_id}" className="text-sm">
                             -
                           </span>
                         </div>
                         <span className="mx-1">|</span>
-                        <div className="icon-text">
+                        <div className="icon-text text-base-content/50">
                           <Icon path={mdiArrowCollapseAll} className="w-4 h-4 inline-block me-1"></Icon>-
                           <span id="pressure-${nspanel_id}" className="text-sm">
                             -
@@ -332,9 +338,9 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
           <div className="my-1">
             {(() => {
               if (status.model != "sonoff" && status.model != "custom") return null;
-              if (status.state == "offline" || status.state == "unknown" || status.state == "waiting") {
+              if (status.state == "offline" || status.state == "unknown" || status.state == "waiting" || status.state == "rebooting") {
                 return (
-                  <div className="icon-text">
+                  <div className="icon-text text-base-content/50">
                     <Icon path={mdiMemory} className="w-4 h-4 inline-block me-1"></Icon>
                     <span id="ram-${nspanel_id}" className="text-sm">
                       -
