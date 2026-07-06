@@ -221,6 +221,7 @@ enum NSPanelStatusReport_state : int {
   NSPanelStatusReport_state_UPDATING_TFT = 2,
   NSPanelStatusReport_state_UPDATING_FIRMWARE = 3,
   NSPanelStatusReport_state_UPDATING_LITTLEFS = 4,
+  NSPanelStatusReport_state_REBOOTING = 5,
   NSPanelStatusReport_state_NSPanelStatusReport_state_INT_MIN_SENTINEL_DO_NOT_USE_ =
       std::numeric_limits<::int32_t>::min(),
   NSPanelStatusReport_state_NSPanelStatusReport_state_INT_MAX_SENTINEL_DO_NOT_USE_ =
@@ -230,8 +231,8 @@ enum NSPanelStatusReport_state : int {
 bool NSPanelStatusReport_state_IsValid(int value);
 extern const uint32_t NSPanelStatusReport_state_internal_data_[];
 constexpr NSPanelStatusReport_state NSPanelStatusReport_state_state_MIN = static_cast<NSPanelStatusReport_state>(0);
-constexpr NSPanelStatusReport_state NSPanelStatusReport_state_state_MAX = static_cast<NSPanelStatusReport_state>(4);
-constexpr int NSPanelStatusReport_state_state_ARRAYSIZE = 4 + 1;
+constexpr NSPanelStatusReport_state NSPanelStatusReport_state_state_MAX = static_cast<NSPanelStatusReport_state>(5);
+constexpr int NSPanelStatusReport_state_state_ARRAYSIZE = 5 + 1;
 const ::google::protobuf::EnumDescriptor*
 NSPanelStatusReport_state_descriptor();
 template <typename T>
@@ -244,7 +245,7 @@ const std::string& NSPanelStatusReport_state_Name(T value) {
 template <>
 inline const std::string& NSPanelStatusReport_state_Name(NSPanelStatusReport_state value) {
   return ::google::protobuf::internal::NameOfDenseEnum<NSPanelStatusReport_state_descriptor,
-                                                 0, 4>(
+                                                 0, 5>(
       static_cast<int>(value));
 }
 inline bool NSPanelStatusReport_state_Parse(absl::string_view name, NSPanelStatusReport_state* value) {
@@ -3631,6 +3632,7 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
   static constexpr state UPDATING_TFT = NSPanelStatusReport_state_UPDATING_TFT;
   static constexpr state UPDATING_FIRMWARE = NSPanelStatusReport_state_UPDATING_FIRMWARE;
   static constexpr state UPDATING_LITTLEFS = NSPanelStatusReport_state_UPDATING_LITTLEFS;
+  static constexpr state REBOOTING = NSPanelStatusReport_state_REBOOTING;
   static inline bool state_IsValid(int value) {
     return NSPanelStatusReport_state_IsValid(value);
   }

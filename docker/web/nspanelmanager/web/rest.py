@@ -5,6 +5,7 @@ import socket
 from pprint import pprint
 from re import A
 
+import requests
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -33,6 +34,25 @@ def get_home_assistant_entities(request):
     return JsonResponse(web.home_assistant_api.get_all_home_assistant_items(filter_params))
 
 
+def test_home_assistant(request):
+    if request.method != "GET":
+        return JsonResponse({"status": "error"}, status=405)
+
+    address = request.GET.get("address")
+    token = request.GET.get("token")
+    if not address or not token:
+        return JsonResponse({"status": "error", "message": "address and token are required"}, status=400)
+
+    try:
+        response = requests.get(f"{address}/api/states", headers={"Authorization": f"Bearer {token}"})
+        if response.ok:
+            return JsonResponse({"status": "success"})
+        else:
+            return JsonResponse({"status": "error", "message": response.text}, status=response.status_code)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+
 def get_openhab_items(request):
     if request.method != "GET":
         return JsonResponse({"status": "error"}, status=405)
@@ -43,6 +63,25 @@ def get_openhab_items(request):
     openhab_items["items"].extend(openhab_scenes["items"])
     openhab_items["errors"].extend(openhab_scenes["errors"])
     return JsonResponse(openhab_items)
+
+
+def test_openhab(request):
+    if request.method != "GET":
+        return JsonResponse({"status": "error"}, status=405)
+
+    address = request.GET.get("address")
+    token = request.GET.get("token")
+    if not address or not token:
+        return JsonResponse({"status": "error", "message": "address and token are required"}, status=400)
+
+    try:
+        response = requests.get(f"{address}/rest/items", headers={"Authorization": f"Bearer {token}"})
+        if response.ok:
+            return JsonResponse({"status": "success"})
+        else:
+            return JsonResponse({"status": "error", "message": response.text}, status=response.status_code)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 
 ##########################
@@ -87,28 +126,24 @@ def mqttmanager_get_setting(request, setting_key):
 
 
 @csrf_exempt
-def mqttmanager_settings_post(request):
-    try:
-        settings = {}
-        if request.method == "POST":
-            data = json.loads(request.body)
-            for setting_key in data["settings"]:
-                if setting_key in banned_setting_keys:
-                    return JsonResponse({"status": "error"}, status=403)  # Return error forbidden
-                settings[setting_key] = get_setting_with_default(setting_key)
-        else:
-            return JsonResponse({"status": "error"}, status=405)
+def test_mqttmanager(request):
+    if request.method != "GET":
+        return JsonResponse({"status": "error"}, status=405)
 
-        return JsonResponse(
-            {
-                "status": "ok",
-                "settings": settings,
-            }
-        )
+    address = request.GET.get("address")
+    port = request.GET.get("port")
+    if not address or not port:
+        return JsonResponse({"status": "error", "message": "address and port are required"}, status=400)
+
+    try:
+        response = requests.get(f"http://{address}:{port}/rest/settings")
+        if response.ok:
+            return JsonResponse({"status": "success"})
+        else:
+            return JsonResponse({"status": "error", "message": response.text}, status=response.status_code)
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error"}, status=500)
 
 
 ######################
@@ -173,6 +208,8 @@ def rooms(request):
 def settings(request):
     if request.method == "GET":
         return settings_get(request)
+    elif request.method == "POST":
+        return settings_post(request)
     else:
         return JsonResponse({"status": "error"}, status=405)
 
@@ -188,6 +225,27 @@ def settings_get(request):
     settings["mqtt_password_set"] = settings.get("mqtt_password", "") != ""
     del settings["mqtt_password"]
     return JsonResponse({"status": "ok", "settings": settings}, status=200)
+
+
+def settings_post(request):
+    try:
+        if request.method == "POST":
+            data = json.loads(request.body)
+            if "settings" not in data:
+                return JsonResponse({"status": "error", "message": "No settings provided"}, status=400)
+            elif not isinstance(data["settings"], dict):
+                return JsonResponse({"status": "error", "message": "Settings must be a dictionary"}, status=400)
+
+            for setting_key in data["settings"]:
+                set_setting_value(setting_key, data["settings"][setting_key])
+
+            send_mqttmanager_reload_command()
+            return JsonResponse({"status": "ok"})
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
 
 
 def rooms_get(request):

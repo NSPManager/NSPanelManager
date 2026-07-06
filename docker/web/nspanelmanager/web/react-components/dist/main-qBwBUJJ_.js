@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["MultiStep_AddEditEntity-DU2Wr4R7.js","react-select.esm-VPhMFm7N.js","EntitiesPagesView-vLftunxO.js","NSPanelsView-BvbkANYS.js","NSPanelToastContainer-DKYiLjKt.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["MultiStep_AddEditEntity-0MAvCYtr.js","react-BvgXelu_.js","proxy-ukcQ6nBw.js","react-select.esm-CWMjcSOP.js","EntitiesPagesView-CxWTxvrM.js","NSPanelsView-H-SWk5Vt.js","NSPanelToastContainer-BY3v55LI.js","mdi-BEHsbKEg.js","InitialSetup-CA4RsihQ.js"])))=>i.map(i=>d[i]);
 //#region \0rolldown/runtime.js
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -9967,10 +9967,11 @@ var __vitePreload = function preload(baseModule, deps, importerUrl) {
 //#endregion
 //#region src/componentMap.tsx
 var componentMap = {
-	MultiStep_AddEditEntity: (0, import_react.lazy)(() => __vitePreload(() => import("./MultiStep_AddEditEntity-DU2Wr4R7.js").then((n) => n.t), __vite__mapDeps([0,1]))),
-	EntitiesPagesView: (0, import_react.lazy)(() => __vitePreload(() => import("./EntitiesPagesView-vLftunxO.js"), __vite__mapDeps([2,1,0]))),
-	NSPanelsIndexView: (0, import_react.lazy)(() => __vitePreload(() => import("./NSPanelsView-BvbkANYS.js"), __vite__mapDeps([3,1,4]))),
-	NSPanelToastContainer: (0, import_react.lazy)(() => __vitePreload(() => import("./NSPanelToastContainer-DKYiLjKt.js"), []))
+	MultiStep_AddEditEntity: (0, import_react.lazy)(() => __vitePreload(() => import("./MultiStep_AddEditEntity-0MAvCYtr.js").then((n) => n.t), __vite__mapDeps([0,1,2,3]))),
+	EntitiesPagesView: (0, import_react.lazy)(() => __vitePreload(() => import("./EntitiesPagesView-CxWTxvrM.js"), __vite__mapDeps([4,1,0,2,3]))),
+	NSPanelsIndexView: (0, import_react.lazy)(() => __vitePreload(() => import("./NSPanelsView-H-SWk5Vt.js"), __vite__mapDeps([5,1,3,6,7]))),
+	NSPanelToastContainer: (0, import_react.lazy)(() => __vitePreload(() => import("./NSPanelToastContainer-BY3v55LI.js").then((n) => n.t), [])),
+	InitialSetup: (0, import_react.lazy)(() => __vitePreload(() => import("./InitialSetup-CA4RsihQ.js"), __vite__mapDeps([8,2,1,6,7])))
 };
 //#endregion
 //#region node_modules/react/cjs/react-jsx-runtime.production.js

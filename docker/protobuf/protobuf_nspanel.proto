@@ -99,6 +99,7 @@ message NSPanelStatusReport {
     UPDATING_TFT = 2;
     UPDATING_FIRMWARE = 3;
     UPDATING_LITTLEFS = 4;
+    REBOOTING = 5;
   }
   state nspanel_state = 1;
   int32 update_progress = 2;

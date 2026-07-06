@@ -85,7 +85,8 @@ export const useSettingsStore = create<ISettingsStore>((set) => ({
     })
       .then((response) => response.json())
       .then((data) => {
-        set((state) => ({ ...state, status: "loaded", settings: data.settings }));
+        set((state) => ({ ...state, settings: data.settings }));
+        set((state) => ({ ...state, status: "loaded" }));
       });
   },
 }));

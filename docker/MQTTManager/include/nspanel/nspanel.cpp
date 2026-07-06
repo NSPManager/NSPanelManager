@@ -642,6 +642,9 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         case NSPanelStatusReport_state_UPDATING_LITTLEFS:
           this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_DATA;
           break;
+        case NSPanelStatusReport_state_REBOOTING:
+          this->_state = MQTT_MANAGER_NSPANEL_STATE::REBOOTING;
+          break;
         case NSPanelStatusReport_state_NSPanelStatusReport_state_INT_MIN_SENTINEL_DO_NOT_USE_:
         case NSPanelStatusReport_state_NSPanelStatusReport_state_INT_MAX_SENTINEL_DO_NOT_USE_:
           break;
@@ -875,7 +878,7 @@ void NSPanel::send_websocket_status_update() {
     } else if (this->has_firmware_update() || this->has_littlefs_update()) {
       status_data["warnings"].push_back(nlohmann::json{
           {"level", "info"},
-          {"text", "Firmware update available. Perform firmware update to ensure optimal compatibility with manager."}});
+          {"text", "Firmware update available. Perform firmware update to ensure optimal compatibility with manager and latest features and bux fixes."}});
     }
     if (this->_current_tft_md5_checksum.empty()) {
       status_data["warnings"].push_back(nlohmann::json{
@@ -912,6 +915,9 @@ void NSPanel::send_websocket_status_update() {
     break;
   case MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT:
     status_data["state"] = "awaiting_accept";
+    break;
+  case MQTT_MANAGER_NSPANEL_STATE::REBOOTING:
+    status_data["state"] = "rebooting";
     break;
   default:
     status_data["state"] = "unknown";
@@ -1112,6 +1118,9 @@ nlohmann::json NSPanel::get_websocket_json_representation() {
     break;
   case MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT:
     data["state"] = "awaiting_accept";
+    break;
+  case MQTT_MANAGER_NSPANEL_STATE::REBOOTING:
+    data["state"] = "rebooting";
     break;
   default:
     data["state"] = "unknown";

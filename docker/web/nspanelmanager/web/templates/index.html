@@ -9,5 +9,11 @@
 {% endblock %}
 
 {% block content %}
+
+<!--Show initial setup if no manager address is set-->
+{% if manager_address == "" %}
+    {% RC 'InitialSetup' opened=True isHomeAssistantAddon=is_home_assistant_addon %}
+{% endif %}
+
 {% RC 'NSPanelsIndexView' %}
 {% endblock %}
