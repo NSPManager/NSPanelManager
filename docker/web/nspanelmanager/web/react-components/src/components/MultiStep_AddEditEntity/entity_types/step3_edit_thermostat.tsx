@@ -200,7 +200,7 @@ const IconSelector = ({ value, onChange }: { value: string; onChange: (icon: str
   };
 
   useEffect(() => {
-    const listener = (event) => {
+    const listener = (event: any) => {
       if (ref.current && !ref.current.contains(event.target)) {
         setDetailsOpen(false);
       }
