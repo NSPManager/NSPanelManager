@@ -7,7 +7,7 @@ import { useStompStore } from "../../stores/StompStore.tsx";
 import { Icon } from "@mdi/react";
 import {
   mdiAlertCircle,
-  mdiArrowCollapseAll,
+  mdiGauge,
   mdiCog,
   mdiMemory,
   mdiMinusCircle,
@@ -292,7 +292,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                         </div>
                         <span className="mx-1">|</span>
                         <div className="icon-text text-base-content/50">
-                          <Icon path={mdiArrowCollapseAll} className="w-4 h-4 inline-block me-1"></Icon>-
+                          <Icon path={mdiGauge} className="w-4 h-4 inline-block me-1"></Icon>-
                           <span id="pressure-${nspanel_id}" className="text-sm">
                             -
                           </span>
@@ -322,7 +322,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                         </div>
                         <span className="mx-1">|</span>
                         <div className="icon-text">
-                          <Icon path={mdiArrowCollapseAll} className="w-4 h-4 inline-block me-1"></Icon>
+                          <Icon path={mdiGauge} className="w-4 h-4 inline-block me-1"></Icon>
                           <span id="pressure-${nspanel_id}" className="text-sm">
                             {(status.pressure && `${(status.pressure / 1000).toFixed(1)} kPa`) || "-"}
                           </span>

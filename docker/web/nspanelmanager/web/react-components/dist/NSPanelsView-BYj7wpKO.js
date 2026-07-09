@@ -1,8 +1,8 @@
-import { c as __toESM, i as __commonJSMin, r as require_react, t as require_jsx_runtime } from "./main-ZL8y8bxT.js";
-import { t as create } from "./react-09SNKys-.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-CtdpzTRQ.js";
-import { n as Notify, r as RemoveNotification } from "./NSPanelToastContainer-CoQ7ri-y.js";
-import { _ as mdiWifiStrength4, a as mdiMemory, c as mdiRestart, d as mdiUpload, g as mdiWifiStrength3, h as mdiWifiStrength2, l as mdiTableArrowUp, m as mdiWifiStrength1Alert, o as mdiMenuDownOutline, p as mdiWeb, r as mdiCog, s as mdiMinusCircle, u as mdiThermometer, v as mdiWifiStrengthAlertOutline, y as require_Icon } from "./mdi-BoWm9XqF.js";
+import { c as __toESM, i as __commonJSMin, r as require_react, t as require_jsx_runtime } from "./main-BJRcRoM_.js";
+import { t as create } from "./react-DpUwt_Dl.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-DzKAUvxI.js";
+import { n as Notify, r as RemoveNotification } from "./NSPanelToastContainer-DgzqSLIV.js";
+import { _ as mdiWifiStrength4, a as mdiMemory, c as mdiRestart, d as mdiUpload, g as mdiWifiStrength3, h as mdiWifiStrength2, l as mdiTableArrowUp, m as mdiWifiStrength1Alert, n as mdiCog, o as mdiMenuDownOutline, p as mdiWeb, s as mdiMinusCircle, u as mdiThermometer, v as mdiWifiStrengthAlertOutline, y as require_Icon } from "./mdi-XYQ7txqZ.js";
 //#region node_modules/tslib/tslib.es6.mjs
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -3731,7 +3731,18 @@ var useStompStore = create((set, get) => ({
 			});
 		});
 		get().subscribe("mqttmanager/warnings", (message) => {
-			set({ mqttmanager_warnings: JSON.parse(message.body).warnings });
+			const data = JSON.parse(message.body);
+			const warnings = data.warnings;
+			const resolvedWarnings = warnings.filter((warning) => {
+				return !warnings.some((new_warnings) => new_warnings.text === warning.text);
+			});
+			for (const warning of resolvedWarnings) RemoveNotification(warning.text);
+			for (const warning of warnings) Notify({
+				message: warning.text,
+				level: warning.level,
+				toast_id: warning.text
+			});
+			set({ mqttmanager_warnings: data.warnings });
 		});
 	},
 	subscribe: (topic, callback) => {
@@ -4181,7 +4192,7 @@ var AcceptedNSPanelContent = ({ status }) => {
 										className: "icon-text text-base-content/50",
 										children: [
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_Icon.Icon, {
-												path: "M19.5,3.09L20.91,4.5L16.41,9H20V11H13V4H15V7.59L19.5,3.09M20.91,19.5L19.5,20.91L15,16.41V20H13V13H20V15H16.41L20.91,19.5M4.5,3.09L9,7.59V4H11V11H4V9H7.59L3.09,4.5L4.5,3.09M3.09,19.5L7.59,15H4V13H11V20H9V16.41L4.5,20.91L3.09,19.5Z",
+												path: "M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12C20,14.4 19,16.5 17.3,18C15.9,16.7 14,16 12,16C10,16 8.2,16.7 6.7,18C5,16.5 4,14.4 4,12A8,8 0 0,1 12,4M14,5.89C13.62,5.9 13.26,6.15 13.1,6.54L11.81,9.77L11.71,10C11,10.13 10.41,10.6 10.14,11.26C9.73,12.29 10.23,13.45 11.26,13.86C12.29,14.27 13.45,13.77 13.86,12.74C14.12,12.08 14,11.32 13.57,10.76L13.67,10.5L14.96,7.29L14.97,7.26C15.17,6.75 14.92,6.17 14.41,5.96C14.28,5.91 14.15,5.89 14,5.89M10,6A1,1 0 0,0 9,7A1,1 0 0,0 10,8A1,1 0 0,0 11,7A1,1 0 0,0 10,6M7,9A1,1 0 0,0 6,10A1,1 0 0,0 7,11A1,1 0 0,0 8,10A1,1 0 0,0 7,9M17,9A1,1 0 0,0 16,10A1,1 0 0,0 17,11A1,1 0 0,0 18,10A1,1 0 0,0 17,9Z",
 												className: "w-4 h-4 inline-block me-1"
 											}),
 											"-",
@@ -4233,7 +4244,7 @@ var AcceptedNSPanelContent = ({ status }) => {
 									/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 										className: "icon-text",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_Icon.Icon, {
-											path: "M19.5,3.09L20.91,4.5L16.41,9H20V11H13V4H15V7.59L19.5,3.09M20.91,19.5L19.5,20.91L15,16.41V20H13V13H20V15H16.41L20.91,19.5M4.5,3.09L9,7.59V4H11V11H4V9H7.59L3.09,4.5L4.5,3.09M3.09,19.5L7.59,15H4V13H11V20H9V16.41L4.5,20.91L3.09,19.5Z",
+											path: "M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12C20,14.4 19,16.5 17.3,18C15.9,16.7 14,16 12,16C10,16 8.2,16.7 6.7,18C5,16.5 4,14.4 4,12A8,8 0 0,1 12,4M14,5.89C13.62,5.9 13.26,6.15 13.1,6.54L11.81,9.77L11.71,10C11,10.13 10.41,10.6 10.14,11.26C9.73,12.29 10.23,13.45 11.26,13.86C12.29,14.27 13.45,13.77 13.86,12.74C14.12,12.08 14,11.32 13.57,10.76L13.67,10.5L14.96,7.29L14.97,7.26C15.17,6.75 14.92,6.17 14.41,5.96C14.28,5.91 14.15,5.89 14,5.89M10,6A1,1 0 0,0 9,7A1,1 0 0,0 10,8A1,1 0 0,0 11,7A1,1 0 0,0 10,6M7,9A1,1 0 0,0 6,10A1,1 0 0,0 7,11A1,1 0 0,0 8,10A1,1 0 0,0 7,9M17,9A1,1 0 0,0 16,10A1,1 0 0,0 17,11A1,1 0 0,0 18,10A1,1 0 0,0 17,9Z",
 											className: "w-4 h-4 inline-block me-1"
 										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 											id: "pressure-${nspanel_id}",

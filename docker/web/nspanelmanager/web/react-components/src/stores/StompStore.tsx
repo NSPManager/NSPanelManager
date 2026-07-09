@@ -66,6 +66,21 @@ export const useStompStore = create<IStompStore>((set, get) => ({
 
     get().subscribe("mqttmanager/warnings", (message) => {
       const data = JSON.parse(message.body);
+      const warnings = data.warnings as IMqttManagerWarningData[];
+
+      // Remove any set warnings that have been resolved
+      const resolvedWarnings = warnings.filter((warning: IMqttManagerWarningData) => {
+        return !warnings.some((new_warnings) => new_warnings.text === warning.text);
+      });
+      for (const warning of resolvedWarnings) {
+        RemoveNotification(warning.text);
+      }
+
+      // Show any warnings currently active
+      for (const warning of warnings) {
+        Notify({ message: warning.text, level: warning.level, toast_id: warning.text });
+      }
+
       set({ mqttmanager_warnings: data.warnings });
     });
   },

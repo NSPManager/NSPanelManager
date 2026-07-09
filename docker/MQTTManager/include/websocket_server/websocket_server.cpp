@@ -533,7 +533,22 @@ void WebsocketServer::_send_active_warnings() {
   base["warnings"] = nlohmann::json::array();
   for (auto &warning : WebsocketServer::_active_warnings) {
     SPDLOG_DEBUG("Sending warnings, found warning: {}", warning.warning_text);
-    base["warnings"].push_back({{"level", warning.level}, {"text", warning.warning_text}});
+    std::string warning_level_str = "unknown";
+    switch (warning.level) {
+    case WebsocketServer::ActiveWarningLevel::ERROR:
+      warning_level_str = "error";
+      break;
+    case WebsocketServer::ActiveWarningLevel::WARNING:
+      warning_level_str = "warning";
+      break;
+    case WebsocketServer::ActiveWarningLevel::INFO:
+      warning_level_str = "info";
+      break;
+    case WebsocketServer::ActiveWarningLevel::DEBUG:
+      warning_level_str = "debug";
+      break;
+    }
+    base["warnings"].push_back({{"level", warning_level_str}, {"text", warning.warning_text}});
   }
   WebsocketServer::update_stomp_topic_value("mqttmanager/warnings", base);
 }

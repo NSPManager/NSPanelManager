@@ -190,7 +190,7 @@ void NSPanel::reload_config() {
 
     if (panel_settings.accepted) {
       SPDLOG_INFO("Loaded accepted NSPanel {}::{}.", this->_id, this->_name);
-      this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
+      this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE; // Assume offline until we have received a state update from the panel.
       rebuilt_mqtt = true;
     }
 
@@ -878,7 +878,7 @@ void NSPanel::send_websocket_status_update() {
     } else if (this->has_firmware_update() || this->has_littlefs_update()) {
       status_data["warnings"].push_back(nlohmann::json{
           {"level", "info"},
-          {"text", "Firmware update available. Perform firmware update to ensure optimal compatibility with manager and latest features and bux fixes."}});
+          {"text", "Firmware update available. Perform firmware update to ensure optimal compatibility with manager and latest features and bug fixes."}});
     }
     if (this->_current_tft_md5_checksum.empty()) {
       status_data["warnings"].push_back(nlohmann::json{
