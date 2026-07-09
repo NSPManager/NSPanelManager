@@ -1098,21 +1098,23 @@ const ProtobufCMessageDescriptor nspanel_warning__descriptor =
   (ProtobufCMessageInit) nspanel_warning__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCEnumValue nspanel_status_report__state__enum_values_by_number[5] =
+static const ProtobufCEnumValue nspanel_status_report__state__enum_values_by_number[6] =
 {
   { "ONLINE", "NSPANEL_STATUS_REPORT__STATE__ONLINE", 0 },
   { "OFFLINE", "NSPANEL_STATUS_REPORT__STATE__OFFLINE", 1 },
   { "UPDATING_TFT", "NSPANEL_STATUS_REPORT__STATE__UPDATING_TFT", 2 },
   { "UPDATING_FIRMWARE", "NSPANEL_STATUS_REPORT__STATE__UPDATING_FIRMWARE", 3 },
   { "UPDATING_LITTLEFS", "NSPANEL_STATUS_REPORT__STATE__UPDATING_LITTLEFS", 4 },
+  { "REBOOTING", "NSPANEL_STATUS_REPORT__STATE__REBOOTING", 5 },
 };
 static const ProtobufCIntRange nspanel_status_report__state__value_ranges[] = {
-{0, 0},{0, 5}
+{0, 0},{0, 6}
 };
-static const ProtobufCEnumValueIndex nspanel_status_report__state__enum_values_by_name[5] =
+static const ProtobufCEnumValueIndex nspanel_status_report__state__enum_values_by_name[6] =
 {
   { "OFFLINE", 1 },
   { "ONLINE", 0 },
+  { "REBOOTING", 5 },
   { "UPDATING_FIRMWARE", 3 },
   { "UPDATING_LITTLEFS", 4 },
   { "UPDATING_TFT", 2 },
@@ -1124,9 +1126,9 @@ const ProtobufCEnumDescriptor nspanel_status_report__state__descriptor =
   "state",
   "NSPanelStatusReport__State",
   "",
-  5,
+  6,
   nspanel_status_report__state__enum_values_by_number,
-  5,
+  6,
   nspanel_status_report__state__enum_values_by_name,
   1,
   nspanel_status_report__state__value_ranges,
