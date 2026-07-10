@@ -14,6 +14,12 @@
 #include <string>
 #include <unordered_map>
 
+struct StompLastWill {
+  std::string topic;
+  std::string message;
+  bool retained;
+};
+
 struct StompFrame {
   enum MessageType {
     // Client commands
@@ -167,6 +173,10 @@ private:
   static inline std::mutex _on_stomp_send_message_callbacks_mutex;
   static inline boost::ptr_map<std::string, boost::signals2::signal<void(StompFrame)>> _on_stomp_send_message_callbacks;
   static inline boost::signals2::signal<void(StompFrame)> _on_global_stomp_send_message_callbacks;
+
+  // Map of last will messages for each connected WebSocket
+  static inline std::mutex _last_will_map_mutex;
+  static inline std::unordered_map<ix::WebSocket *, StompLastWill> _last_will_map;
 
   static inline std::mutex _active_warnings_mutex;
   static inline std::list<ActiveWarning> _active_warnings;
