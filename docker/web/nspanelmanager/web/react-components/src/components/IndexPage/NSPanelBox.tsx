@@ -651,7 +651,7 @@ const NSPanelBox = ({ id: mac }: { id: string }) => {
   const nspanel_status = useEntityStatesStore.getState().nspanels[mac];
 
   return (
-    <div className="text-base-content rounded-b-box rounded-t-field nspanel-box bg-base-100 shadow-xl overflow-visible">
+    <div className="text-base-content rounded-b-box rounded-t-field nspanel-box bg-base-100 shadow-xl overflow-visible h-34">
       <div className="overflow-hidden">
         <NSPanelStatusHeader state={nspanel_status?.state ?? ""} update_progress={nspanel_status?.update_progress ?? 0} />
       </div>

@@ -1,7 +1,7 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-BJRcRoM_.js";
-import { n as AnimatePresence, r as useSettingsStore, t as motion } from "./proxy-BbDts5rB.js";
-import { n as Notify } from "./NSPanelToastContainer-DgzqSLIV.js";
-import { i as mdiInformationOutline, y as require_Icon } from "./mdi-XYQ7txqZ.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-9x8ipey-.js";
+import { n as AnimatePresence, r as useSettingsStore, t as motion } from "./proxy-CW-yjWBc.js";
+import { n as Notify } from "./NSPanelToastContainer-D6GyKWgx.js";
+import { i as mdiInformationOutline, y as require_Icon } from "./mdi-DWCWrizx.js";
 //#region src/components/InitialSetup/Step1_Welcome.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_jsx_runtime = require_jsx_runtime();

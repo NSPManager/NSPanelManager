@@ -1,8 +1,8 @@
-import { c as __toESM, i as __commonJSMin, r as require_react, t as require_jsx_runtime } from "./main-BJRcRoM_.js";
-import { t as create } from "./react-DpUwt_Dl.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-DzKAUvxI.js";
-import { n as Notify, r as RemoveNotification } from "./NSPanelToastContainer-DgzqSLIV.js";
-import { _ as mdiWifiStrength4, a as mdiMemory, c as mdiRestart, d as mdiUpload, g as mdiWifiStrength3, h as mdiWifiStrength2, l as mdiTableArrowUp, m as mdiWifiStrength1Alert, n as mdiCog, o as mdiMenuDownOutline, p as mdiWeb, s as mdiMinusCircle, u as mdiThermometer, v as mdiWifiStrengthAlertOutline, y as require_Icon } from "./mdi-XYQ7txqZ.js";
+import { c as __toESM, i as __commonJSMin, r as require_react, t as require_jsx_runtime } from "./main-9x8ipey-.js";
+import { t as create } from "./react-B_qEgZPG.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-BxtJU9q3.js";
+import { n as Notify, r as RemoveNotification } from "./NSPanelToastContainer-D6GyKWgx.js";
+import { _ as mdiWifiStrength4, a as mdiMemory, c as mdiRestart, d as mdiUpload, g as mdiWifiStrength3, h as mdiWifiStrength2, l as mdiTableArrowUp, m as mdiWifiStrength1Alert, n as mdiCog, o as mdiMenuDownOutline, p as mdiWeb, s as mdiMinusCircle, u as mdiThermometer, v as mdiWifiStrengthAlertOutline, y as require_Icon } from "./mdi-DWCWrizx.js";
 //#region node_modules/tslib/tslib.es6.mjs
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -3711,7 +3711,6 @@ var rxStompConfig = {
 var useStompStore = create((set, get) => ({
 	status: "none",
 	stompClient: null,
-	setStompClient: (client) => set({ stompClient: client }),
 	mqttmanager_warnings: [],
 	connect: () => {
 		set({ status: "connecting" });
@@ -4556,7 +4555,7 @@ var NewNSPanelContent = ({ status }) => {
 var NSPanelBox = ({ id: mac }) => {
 	const nspanel_status = useEntityStatesStore.getState().nspanels[mac];
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "text-base-content rounded-b-box rounded-t-field nspanel-box bg-base-100 shadow-xl overflow-visible",
+		className: "text-base-content rounded-b-box rounded-t-field nspanel-box bg-base-100 shadow-xl overflow-visible h-34",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			className: "overflow-hidden",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NSPanelStatusHeader, {

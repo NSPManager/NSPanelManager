@@ -33,7 +33,6 @@ interface ISubscriptionData {
 export interface IStompStore {
   status: "none" | "connecting" | "connected" | "disconnected";
   stompClient: RxStomp | null;
-  setStompClient: (client: RxStomp | null) => void;
   mqttmanager_warnings: IMqttManagerWarningData[];
   connect: () => void;
   subscribe: (topic: string, callback: (message: IMessage) => void) => void;
@@ -45,7 +44,6 @@ export interface IStompStore {
 export const useStompStore = create<IStompStore>((set, get) => ({
   status: "none",
   stompClient: null as RxStomp | null,
-  setStompClient: (client: RxStomp | null) => set({ stompClient: client }),
   mqttmanager_warnings: [],
   connect: () => {
     set({ status: "connecting" });
