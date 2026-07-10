@@ -1,8 +1,8 @@
-import { c as __toESM, i as __commonJSMin, r as require_react, t as require_jsx_runtime } from "./main-DCuO7i06.js";
-import { t as create } from "./react-5B1MJaM9.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-BN9uPxWh.js";
-import { n as Notify, r as RemoveNotification } from "./NSPanelToastContainer-BVgN4XED.js";
-import { _ as mdiWifiStrength4, a as mdiMemory, c as mdiRestart, d as mdiUpload, g as mdiWifiStrength3, h as mdiWifiStrength2, l as mdiTableArrowUp, m as mdiWifiStrength1Alert, n as mdiCog, o as mdiMenuDownOutline, p as mdiWeb, s as mdiMinusCircle, u as mdiThermometer, v as mdiWifiStrengthAlertOutline, y as require_Icon } from "./mdi-FU-_YQOG.js";
+import { c as __toESM, i as __commonJSMin, r as require_react, t as require_jsx_runtime } from "./main-CyPmyMpS.js";
+import { t as create } from "./react-BlZrgAg3.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-Deo1tWgf.js";
+import { n as Notify, r as RemoveNotification } from "./NSPanelToastContainer-Trjobo9V.js";
+import { _ as mdiWifiStrength4, a as mdiMemory, c as mdiRestart, d as mdiUpload, g as mdiWifiStrength3, h as mdiWifiStrength2, l as mdiTableArrowUp, m as mdiWifiStrength1Alert, n as mdiCog, o as mdiMenuDownOutline, p as mdiWeb, s as mdiMinusCircle, u as mdiThermometer, v as mdiWifiStrengthAlertOutline, y as require_Icon } from "./mdi-CPSauSlt.js";
 //#region node_modules/tslib/tslib.es6.mjs
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -3732,8 +3732,8 @@ var useStompStore = create((set, get) => ({
 		get().subscribe("mqttmanager/warnings", (message) => {
 			const data = JSON.parse(message.body);
 			const warnings = data.warnings;
-			const resolvedWarnings = warnings.filter((warning) => {
-				return !warnings.some((new_warnings) => new_warnings.text === warning.text);
+			const resolvedWarnings = get().mqttmanager_warnings.filter((warning) => {
+				return !warnings.some((new_warning) => new_warning.text == warning.text);
 			});
 			for (const warning of resolvedWarnings) RemoveNotification(warning.text);
 			for (const warning of warnings) Notify({

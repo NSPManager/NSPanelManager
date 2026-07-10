@@ -67,8 +67,8 @@ export const useStompStore = create<IStompStore>((set, get) => ({
       const warnings = data.warnings as IMqttManagerWarningData[];
 
       // Remove any set warnings that have been resolved
-      const resolvedWarnings = warnings.filter((warning: IMqttManagerWarningData) => {
-        return !warnings.some((new_warnings) => new_warnings.text === warning.text);
+      const resolvedWarnings = get().mqttmanager_warnings.filter((warning: IMqttManagerWarningData) => {
+        return !warnings.some((new_warning) => new_warning.text == warning.text);
       });
       for (const warning of resolvedWarnings) {
         RemoveNotification(warning.text);
