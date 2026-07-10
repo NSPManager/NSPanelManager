@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { useEntitiesPagesStore } from "../../../stores/EntitiesPagesStore";
 import { useEffect } from "react";
+import { Notify } from "../../NSPanelToastContainer";
 
 const schema = z.object({
   id: z.number().nullable(),
@@ -111,7 +112,6 @@ const MultiStep_AddEditEntity_Step3_Button = ({
     })
       .then(async (response) => {
         const data = await response.json();
-        console.log("Entity created/updated. Got response:", data);
 
         // check for error response
         if (!response.ok) {
@@ -123,7 +123,7 @@ const MultiStep_AddEditEntity_Step3_Button = ({
       })
       .catch((error) => {
         // setErrorMessage(error);
-        console.error("There was an error!", error);
+        Notify({ message: `Error saving entity. Error: ${error}`, level: "error", duration: 10000 });
       });
   }
 

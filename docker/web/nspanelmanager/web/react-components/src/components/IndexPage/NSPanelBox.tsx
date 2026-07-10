@@ -171,7 +171,7 @@ const NSPanelWarnings = ({ warnings }: { warnings: INSPanelWarningData[] }) => {
       <div className="flex items-end justify-end px-1">
         <div className={`status ${badge_color} status-lg`} tabIndex={1} role="button"></div>
       </div>
-      <ul tabIndex={-1} className="dropdown-content list bg-base-300 border border-warning/25 w-92 rounded-box shadow-md">
+      <ul tabIndex={-1} className="dropdown-content list backdrop-blur-lg backdrop-brightness-50 border border-warning/50 w-92 rounded-box shadow-md">
         {warnings.map((warning, index) => (
           <li key={index} className="list-row">
             <div>

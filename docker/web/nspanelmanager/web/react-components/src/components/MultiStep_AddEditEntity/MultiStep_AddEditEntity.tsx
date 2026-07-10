@@ -11,6 +11,7 @@ import { useEntitiesPagesStore } from "../../stores/EntitiesPagesStore";
 import { useSettingsStore } from "../../stores/SettingsStore";
 import { AnimatePresence } from "framer-motion";
 import { motion } from "framer-motion";
+import { Notify } from "../NSPanelToastContainer";
 // import Step2 from "./step2_select_controller";
 // import Step3 from "./Step3";
 
@@ -279,7 +280,7 @@ const MultiStep_AddOrEditEntity = ({
                       />
                     );
                   default:
-                    console.error("Unknown entity type while trying to edit entity. Type: ", formData.entity_type);
+                    Notify({ message: `Unknown entity type while trying to edit entity. Type: ${formData.entity_type}`, level: "error", duration: 10000 });
                     return <span className="text-lg text-error">Unknown entity type: {formData.entity_type}</span>;
                 }
               }

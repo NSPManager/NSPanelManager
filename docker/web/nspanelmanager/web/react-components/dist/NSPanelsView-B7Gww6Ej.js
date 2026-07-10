@@ -1,8 +1,8 @@
-import { c as __toESM, i as __commonJSMin, r as require_react, t as require_jsx_runtime } from "./main-CyPmyMpS.js";
-import { t as create } from "./react-BlZrgAg3.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-Deo1tWgf.js";
-import { n as Notify, r as RemoveNotification } from "./NSPanelToastContainer-Trjobo9V.js";
-import { _ as mdiWifiStrength4, a as mdiMemory, c as mdiRestart, d as mdiUpload, g as mdiWifiStrength3, h as mdiWifiStrength2, l as mdiTableArrowUp, m as mdiWifiStrength1Alert, n as mdiCog, o as mdiMenuDownOutline, p as mdiWeb, s as mdiMinusCircle, u as mdiThermometer, v as mdiWifiStrengthAlertOutline, y as require_Icon } from "./mdi-CPSauSlt.js";
+import { c as __toESM, i as __commonJSMin, r as require_react, t as require_jsx_runtime } from "./main-BmuG9GCt.js";
+import { t as create } from "./react-BKe9WcBh.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-B6Rb3e2G.js";
+import { n as Notify, r as RemoveNotification } from "./NSPanelToastContainer-CqmYffFx.js";
+import { _ as mdiWifiStrength4, a as mdiMemory, c as mdiRestart, d as mdiUpload, g as mdiWifiStrength3, h as mdiWifiStrength2, l as mdiTableArrowUp, m as mdiWifiStrength1Alert, n as mdiCog, o as mdiMenuDownOutline, p as mdiWeb, s as mdiMinusCircle, u as mdiThermometer, v as mdiWifiStrengthAlertOutline, y as require_Icon } from "./mdi-XX5YhQGy.js";
 //#region node_modules/tslib/tslib.es6.mjs
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -3990,7 +3990,7 @@ var NSPanelWarnings = ({ warnings }) => {
 			})
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
 			tabIndex: -1,
-			className: "dropdown-content list bg-base-300 border border-warning/25 w-92 rounded-box shadow-md",
+			className: "dropdown-content list backdrop-blur-lg backdrop-brightness-50 border border-warning/50 w-92 rounded-box shadow-md",
 			children: warnings.map((warning, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
 				className: "list-row",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [

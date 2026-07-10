@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { useEntitiesPagesStore } from "../../../stores/EntitiesPagesStore";
 import { useEffect, useState, useRef } from "react";
+import { Notify } from "../../NSPanelToastContainer";
 
 const schema = z.object({
   id: z.number().nullable(),
@@ -376,7 +377,6 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
     })
       .then(async (response) => {
         const data = await response.json();
-        console.log("Entity created/updated. Got response:", data);
 
         // check for error response
         if (!response.ok) {
@@ -388,7 +388,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
       })
       .catch((error) => {
         // setErrorMessage(error);
-        console.error("There was an error!", error);
+        Notify({ message: `Error saving entity. Error: ${error}`, level: "error", duration: 10000 });
       });
   }
 
@@ -456,8 +456,6 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
     menu: () => "bg-base-300 p-2.5 rounded-box text-base-content",
     option: (state) => `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`,
   };
-
-  console.log("Data: ", getValues());
 
   return (
     <form onSubmit={handleSubmit(saveEntity)}>

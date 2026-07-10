@@ -1,7 +1,8 @@
-import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-CyPmyMpS.js";
-import { t as create } from "./react-BlZrgAg3.js";
-import { n as AnimatePresence, r as useSettingsStore, t as motion } from "./proxy-BfPA3QMd.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-Deo1tWgf.js";
+import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-BmuG9GCt.js";
+import { t as create } from "./react-BKe9WcBh.js";
+import { n as AnimatePresence, r as useSettingsStore, t as motion } from "./proxy-B5HCG7bP.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-B6Rb3e2G.js";
+import { n as Notify } from "./NSPanelToastContainer-CqmYffFx.js";
 //#region src/stores/EntitiesPagesStore.ts
 function getCookie$1(name) {
 	let cookieValue = "";
@@ -15981,7 +15982,6 @@ var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_
 		if (id != null) reset(useEntitiesPagesStore.getState().entities.find((entity) => entity.id == id));
 	}, [id, useEntitiesPagesStore.getState().entities]);
 	function onSave(values) {
-		console.log("Updating entity with data:", values);
 		fetch("/rest/entities/lights", {
 			credentials: "same-origin",
 			method: "PUT",
@@ -15993,14 +15993,17 @@ var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_
 			body: JSON.stringify({ values })
 		}).then(async (response) => {
 			const data = await response.json();
-			console.log("Entity created/updated. Got response:", data);
 			if (!response.ok) {
 				const error = data && data.message || response.status;
 				return Promise.reject(error);
 			}
 			onComplete?.();
 		}).catch((error) => {
-			console.error("There was an error!", error);
+			Notify({
+				message: `Error saving entity. Error: ${error}`,
+				level: "error",
+				duration: 1e4
+			});
 		});
 	}
 	const classNames = {
@@ -16402,14 +16405,17 @@ var MultiStep_AddEditEntity_Step3_Switch = ({ controller, room_id, entities_page
 			body: JSON.stringify(data)
 		}).then(async (response) => {
 			const data = await response.json();
-			console.log("Entity created/updated. Got response:", data);
 			if (!response.ok) {
 				const error = data && data.message || response.status;
 				return Promise.reject(error);
 			}
 			onComplete?.();
 		}).catch((error) => {
-			console.error("There was an error!", error);
+			Notify({
+				message: `Error saving entity. Error: ${error}`,
+				level: "error",
+				duration: 1e4
+			});
 		});
 	}
 	const classNames = {
@@ -16608,14 +16614,17 @@ var MultiStep_AddEditEntity_Step3_Button = ({ controller, room_id, entities_page
 			body: JSON.stringify(data)
 		}).then(async (response) => {
 			const data = await response.json();
-			console.log("Entity created/updated. Got response:", data);
 			if (!response.ok) {
 				const error = data && data.message || response.status;
 				return Promise.reject(error);
 			}
 			onComplete?.();
 		}).catch((error) => {
-			console.error("There was an error!", error);
+			Notify({
+				message: `Error saving entity. Error: ${error}`,
+				level: "error",
+				duration: 1e4
+			});
 		});
 	}
 	const classNames = {
@@ -17041,14 +17050,17 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 			body: JSON.stringify(data)
 		}).then(async (response) => {
 			const data = await response.json();
-			console.log("Entity created/updated. Got response:", data);
 			if (!response.ok) {
 				const error = data && data.message || response.status;
 				return Promise.reject(error);
 			}
 			onComplete?.();
 		}).catch((error) => {
-			console.error("There was an error!", error);
+			Notify({
+				message: `Error saving entity. Error: ${error}`,
+				level: "error",
+				duration: 1e4
+			});
 		});
 	}
 	function loadHaEntitySettings() {
@@ -17101,7 +17113,6 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 		menu: () => "bg-base-300 p-2.5 rounded-box text-base-content",
 		option: (state) => `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`
 	};
-	console.log("Data: ", getValues());
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
 		onSubmit: handleSubmit(saveEntity),
 		children: [
@@ -17846,14 +17857,17 @@ var MultiStep_AddEditEntity_Step3_Scene = ({ controller, room_id, entities_page_
 			body: JSON.stringify(data)
 		}).then(async (response) => {
 			const data = await response.json();
-			console.log("Entity created/updated. Got response:", data);
 			if (!response.ok) {
 				const error = data && data.message || response.status;
 				return Promise.reject(error);
 			}
 			onComplete?.();
 		}).catch((error) => {
-			console.error("There was an error!", error);
+			Notify({
+				message: `Error saving entity. Error: ${error}`,
+				level: "error",
+				duration: 1e4
+			});
 		});
 	}
 	const classNames = {
@@ -18190,7 +18204,11 @@ var MultiStep_AddOrEditEntity = ({ room_id, entities_page_id, room_view_position
 									onComplete
 								});
 								default:
-									console.error("Unknown entity type while trying to edit entity. Type: ", formData.entity_type);
+									Notify({
+										message: `Unknown entity type while trying to edit entity. Type: ${formData.entity_type}`,
+										level: "error",
+										duration: 1e4
+									});
 									return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 										className: "text-lg text-error",
 										children: ["Unknown entity type: ", formData.entity_type]
