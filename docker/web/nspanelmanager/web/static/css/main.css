@@ -5619,14 +5619,8 @@
   .h-28 {
     height: calc(var(--spacing) * 28);
   }
-  .h-32 {
-    height: calc(var(--spacing) * 32);
-  }
   .h-34 {
     height: calc(var(--spacing) * 34);
-  }
-  .h-42 {
-    height: calc(var(--spacing) * 42);
   }
   .h-64 {
     height: calc(var(--spacing) * 64);
