@@ -21,7 +21,7 @@ else
 fi
 
 
-# Install Node Version Manager (NVM)
+echo "Install Node Version Manager (NVM)"
 touch /root/.bash_env
 echo '. "/root/.bash_env"' >> /etc/bash.bashrc
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | PROFILE="/root/.bash_env" bash

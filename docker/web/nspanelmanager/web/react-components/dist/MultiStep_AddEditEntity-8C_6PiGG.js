@@ -1,7 +1,7 @@
-import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-9x8ipey-.js";
-import { t as create } from "./react-B_qEgZPG.js";
-import { n as AnimatePresence, r as useSettingsStore, t as motion } from "./proxy-CW-yjWBc.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-BxtJU9q3.js";
+import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-DCuO7i06.js";
+import { t as create } from "./react-5B1MJaM9.js";
+import { n as AnimatePresence, r as useSettingsStore, t as motion } from "./proxy-DjM172_t.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-BN9uPxWh.js";
 //#region src/stores/EntitiesPagesStore.ts
 function getCookie$1(name) {
 	let cookieValue = "";
@@ -15955,7 +15955,7 @@ var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_
 			can_color_temperature: false,
 			can_dim: false,
 			can_rgb: false,
-			controlled_by_nspanel_main_page: false,
+			controlled_by_nspanel_main_page: true,
 			is_ceiling_light: false,
 			home_assistant_name: "",
 			openhab_item_color_temp: "",

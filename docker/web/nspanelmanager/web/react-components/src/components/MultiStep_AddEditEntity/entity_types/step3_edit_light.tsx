@@ -81,7 +81,7 @@ const MultiStep_AddEditEntity_Step3_Light = ({
       can_color_temperature: false,
       can_dim: false,
       can_rgb: false,
-      controlled_by_nspanel_main_page: false,
+      controlled_by_nspanel_main_page: true,
       is_ceiling_light: false,
       home_assistant_name: "",
       openhab_item_color_temp: "",

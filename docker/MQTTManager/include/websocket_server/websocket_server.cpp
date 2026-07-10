@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/replace.hpp>
@@ -155,9 +156,20 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
         webSocket.close();
       }
     } else if (msg->type == ix::WebSocketMessageType::Close) {
-      std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
-      SPDLOG_DEBUG("Websocket closed. Code: {}, Reason: {}", msg->closeInfo.code, msg->closeInfo.reason);
-      WebsocketServer::_connected_websockets_stomps.remove(&webSocket);
+      {
+        std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
+        SPDLOG_DEBUG("Websocket closed. Code: {}, Reason: {}", msg->closeInfo.code, msg->closeInfo.reason);
+        WebsocketServer::_connected_websockets_stomps.remove(&webSocket);
+      }
+
+      std::lock_guard<std::mutex> last_will_map_lock_guard(WebsocketServer::_last_will_map_mutex);
+      if (WebsocketServer::_last_will_map.find(&webSocket) != WebsocketServer::_last_will_map.end()) {
+        auto last_will = WebsocketServer::_last_will_map[&webSocket];
+        SPDLOG_DEBUG("Websocket had last will. Will send last will message on '{}' -> '{}'. Retained?", last_will.topic, last_will.message, last_will.retained ? "Yes" : "No");
+        WebsocketServer::_last_will_map.erase(&webSocket);
+        WebsocketServer::set_stomp_topic_retained(last_will.topic, last_will.retained);
+        WebsocketServer::update_stomp_topic_value(last_will.topic, last_will.message);
+      }
 
       for (auto &topic : WebsocketServer::_stomp_topics) {
         topic->unsubscribe(webSocket, "");
@@ -187,6 +199,18 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
                 SPDLOG_WARN("Accepting websocket connection to /websocket/stomp even though accept-version header is empty. Assuming STOMP v1.2.");
               }
 
+              // Check if both last_will_topic and last_will_message are present
+              bool last_will_message_retained = false;
+              StompLastWill last_will = {};
+              if (frame->headers.find("last_will_message_retained") != frame->headers.end() && frame->headers.find("last_will_topic") != frame->headers.end()) {
+                // Last will headers set.
+                std::string last_will_retained = frame->headers["last_will_message_retained"];
+                boost::algorithm::to_lower(last_will_retained);
+                last_will = {frame->headers["last_will_topic"], frame->headers["last_will_message"], last_will_retained.compare("true") == 0};
+
+                SPDLOG_INFO("Client requested last will message '{}' -> '{}' be sent on disconnect. Retained? {}", last_will.topic, last_will.message, last_will.retained ? "Yes" : "No");
+              }
+
               std::string heartbeat_header = "0,0";
               if (frame->headers.find("heart-beat") != frame->headers.end()) {
                 heartbeat_header = frame->headers["heart-beat"];
@@ -208,6 +232,11 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
                 }
 
                 WebsocketServer::send_stomp_frame(connected_frame, webSocket);
+
+                if (last_will.topic.length() > 0) {
+                  std::lock_guard<std::mutex> last_will_map_lock_guard(WebsocketServer::_last_will_map_mutex);
+                  WebsocketServer::_last_will_map[&webSocket] = last_will;
+                }
               } else {
                 SPDLOG_ERROR("STOMP client tried to connect but no supported versions exists. MQTTManager supports version 1.2, client supports {}", accept_version_header);
                 StompFrame error_frame;
@@ -316,6 +345,7 @@ void WebsocketServer::update_stomp_topic_value(std::string topic_name, nlohmann:
 
 void WebsocketServer::set_stomp_topic_retained(std::string topic_name, bool retained) {
   std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
+  SPDLOG_TRACE("Setting STOMP topic '{}' retained? {}", topic_name, retained ? "Yes" : "No");
   for (auto &topic : WebsocketServer::_stomp_topics) {
     if (topic->get_name().compare(topic_name) == 0) {
       topic->set_retained(retained);
