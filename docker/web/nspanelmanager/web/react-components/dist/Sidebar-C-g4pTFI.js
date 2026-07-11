@@ -1,7 +1,7 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-D0_96v3B.js";
-import { n as Notify } from "./NSPanelToastContainer-jR9oXbQm.js";
-import { n as useStompStore, t as useEntityStatesStore } from "./EntityStore-qjiwnTrp.js";
-import { _ as mdiWifiStrength4, a as mdiMemory, c as mdiRestart, d as mdiUpload, f as mdiWaterPercent, g as mdiWifiStrength3, h as mdiWifiStrength2, i as mdiInformationOutline, l as mdiTableArrowUp, m as mdiWifiStrength1Alert, p as mdiWeb, s as mdiMinusCircle, u as mdiThermometer, v as mdiWifiStrengthAlertOutline, y as require_Icon } from "./mdi-DbmG3UAV.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-6uaZvirR.js";
+import { n as Notify } from "./NSPanelToastContainer-Sn3u3Dxk.js";
+import { n as useStompStore, t as useEntityStatesStore } from "./EntityStore-BP9PHS98.js";
+import { _ as mdiWifiStrength4, a as mdiMemory, c as mdiRestart, d as mdiUpload, f as mdiWaterPercent, g as mdiWifiStrength3, h as mdiWifiStrength2, i as mdiInformationOutline, l as mdiTableArrowUp, m as mdiWifiStrength1Alert, p as mdiWeb, s as mdiMinusCircle, u as mdiThermometer, v as mdiWifiStrengthAlertOutline, y as require_Icon } from "./mdi-BW_n1dEu.js";
 //#region src/components/NSPanelPage/Sidebar.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_Icon = require_Icon();
@@ -19,7 +19,7 @@ var NSPanelStatus = ({ status }) => {
 				children: "Online"
 			})]
 		})]
-	});
+	}, `nspanel-status-${status.id}`);
 	else if (status.state == "offline") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "list-row flex items-center justify-start gap-1 py-3 px-2",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_Icon.Icon, {
@@ -32,7 +32,7 @@ var NSPanelStatus = ({ status }) => {
 				children: "Offline"
 			})]
 		})]
-	});
+	}, `nspanel-status-${status.id}`);
 	else if (status.state == "rebooting") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "list-row flex items-center justify-start gap-1 py-3 px-2",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_Icon.Icon, {
@@ -45,7 +45,7 @@ var NSPanelStatus = ({ status }) => {
 				children: "Rebooting"
 			})]
 		})]
-	});
+	}, `nspanel-status-${status.id}`);
 	else if (status.state == "updating_fw") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "list-row flex items-center justify-start gap-1 py-3 px-2 relative",
 		children: [
@@ -55,24 +55,20 @@ var NSPanelStatus = ({ status }) => {
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 				className: "text-base",
-				children: ["State: ", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+				children: ["State: ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 					className: "text-primary",
-					children: [
-						"Updating firmware (",
-						status.update_progress,
-						"%)"
-					]
+					children: "Updating firmware"
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "absolute left-0 bottom-0 w-full",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "min-h-1 bg-primary mx-2",
+					className: "min-h-1 bg-primary mx-2 transition-all ease-linear duration-1000",
 					style: { width: `${status.update_progress}%` }
 				})
 			})
 		]
-	});
+	}, `nspanel-status-${status.id}`);
 	else if (status.state == "updating_fs") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "list-row flex items-center justify-start gap-1 py-3 px-2 relative",
 		children: [
@@ -82,24 +78,20 @@ var NSPanelStatus = ({ status }) => {
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 				className: "text-base",
-				children: ["State: ", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+				children: ["State: ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 					className: "text-primary",
-					children: [
-						"Updating filesystem (",
-						status.update_progress,
-						"%)"
-					]
+					children: "Updating filesystem"
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "absolute left-0 bottom-0 w-full",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "min-h-1 bg-primary mx-2",
+					className: "min-h-1 bg-primary mx-2 transition-all ease-linear duration-1000",
 					style: { width: `${status.update_progress}%` }
 				})
 			})
 		]
-	});
+	}, `nspanel-status-${status.id}`);
 	else if (status.state == "updating_tft") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "list-row flex items-center justify-start gap-1 py-3 px-2 relative",
 		children: [
@@ -109,24 +101,20 @@ var NSPanelStatus = ({ status }) => {
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 				className: "text-base",
-				children: ["State: ", /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+				children: ["State: ", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 					className: "text-primary",
-					children: [
-						"Updating GUI (",
-						status.update_progress,
-						"%)"
-					]
+					children: "Updating GUI"
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 				className: "absolute left-0 bottom-0 w-full",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "min-h-1 bg-primary mx-2",
+					className: "min-h-1 bg-primary mx-2 transition-all ease-linear duration-1000",
 					style: { width: `${status.update_progress}%` }
 				})
 			})
 		]
-	});
+	}, `nspanel-status-${status.id}`);
 	else return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "list-row flex items-center justify-start gap-1 py-3 px-2",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_Icon.Icon, {
@@ -136,7 +124,7 @@ var NSPanelStatus = ({ status }) => {
 			className: "text-base",
 			children: ["UNKNOWN STATE! ", status.state]
 		})]
-	});
+	}, `nspanel-status-${status.id}`);
 };
 var NSPanelWiFiStatus = ({ status }) => {
 	if (status.model != "sonoff" && status.model != "custom") return null;

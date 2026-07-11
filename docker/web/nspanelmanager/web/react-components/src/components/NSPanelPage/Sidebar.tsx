@@ -23,7 +23,7 @@ import { Notify } from "../NSPanelToastContainer";
 const NSPanelStatus = ({ status }: { status: INSPanelStatusData }) => {
   if (status.state == "online") {
     return (
-      <div className="list-row flex items-center justify-start gap-1 py-3 px-2">
+      <div className="list-row flex items-center justify-start gap-1 py-3 px-2" key={`nspanel-status-${status.id}`}>
         <Icon path={mdiInformationOutline} className="ms-2 w-4 h-4 inline-block"></Icon>
         <span className="text-base">
           State: <span className="text-success">Online</span>
@@ -32,7 +32,7 @@ const NSPanelStatus = ({ status }: { status: INSPanelStatusData }) => {
     );
   } else if (status.state == "offline") {
     return (
-      <div className="list-row flex items-center justify-start gap-1 py-3 px-2">
+      <div className="list-row flex items-center justify-start gap-1 py-3 px-2" key={`nspanel-status-${status.id}`}>
         <Icon path={mdiInformationOutline} className="ms-2 w-4 h-4 inline-block"></Icon>
         <span className="text-base">
           State: <span className="text-error">Offline</span>
@@ -41,7 +41,7 @@ const NSPanelStatus = ({ status }: { status: INSPanelStatusData }) => {
     );
   } else if (status.state == "rebooting") {
     return (
-      <div className="list-row flex items-center justify-start gap-1 py-3 px-2">
+      <div className="list-row flex items-center justify-start gap-1 py-3 px-2" key={`nspanel-status-${status.id}`}>
         <Icon path={mdiInformationOutline} className="ms-2 w-4 h-4 inline-block"></Icon>
         <span className="text-base">
           State: <span className="text-info">Rebooting</span>
@@ -50,43 +50,43 @@ const NSPanelStatus = ({ status }: { status: INSPanelStatusData }) => {
     );
   } else if (status.state == "updating_fw") {
     return (
-      <div className="list-row flex items-center justify-start gap-1 py-3 px-2 relative">
+      <div className="list-row flex items-center justify-start gap-1 py-3 px-2 relative" key={`nspanel-status-${status.id}`}>
         <Icon path={mdiInformationOutline} className="ms-2 w-4 h-4 inline-block"></Icon>
         <span className="text-base">
-          State: <span className="text-primary">Updating firmware ({status.update_progress}%)</span>
+          State: <span className="text-primary">Updating firmware</span>
         </span>
         <div className="absolute left-0 bottom-0 w-full">
-          <div className="min-h-1 bg-primary mx-2" style={{ width: `${status.update_progress}%` }}></div>
+          <div className="min-h-1 bg-primary mx-2 transition-all ease-linear duration-1000" style={{ width: `${status.update_progress}%` }}></div>
         </div>
       </div>
     );
   } else if (status.state == "updating_fs") {
     return (
-      <div className="list-row flex items-center justify-start gap-1 py-3 px-2 relative">
+      <div className="list-row flex items-center justify-start gap-1 py-3 px-2 relative" key={`nspanel-status-${status.id}`}>
         <Icon path={mdiInformationOutline} className="ms-2 w-4 h-4 inline-block"></Icon>
         <span className="text-base">
-          State: <span className="text-primary">Updating filesystem ({status.update_progress}%)</span>
+          State: <span className="text-primary">Updating filesystem</span>
         </span>
         <div className="absolute left-0 bottom-0 w-full">
-          <div className="min-h-1 bg-primary mx-2" style={{ width: `${status.update_progress}%` }}></div>
+          <div className="min-h-1 bg-primary mx-2 transition-all ease-linear duration-1000" style={{ width: `${status.update_progress}%` }}></div>
         </div>
       </div>
     );
   } else if (status.state == "updating_tft") {
     return (
-      <div className="list-row flex items-center justify-start gap-1 py-3 px-2 relative">
+      <div className="list-row flex items-center justify-start gap-1 py-3 px-2 relative" key={`nspanel-status-${status.id}`}>
         <Icon path={mdiInformationOutline} className="ms-2 w-4 h-4 inline-block"></Icon>
         <span className="text-base">
-          State: <span className="text-primary">Updating GUI ({status.update_progress}%)</span>
+          State: <span className="text-primary">Updating GUI</span>
         </span>
         <div className="absolute left-0 bottom-0 w-full">
-          <div className="min-h-1 bg-primary mx-2" style={{ width: `${status.update_progress}%` }}></div>
+          <div className="min-h-1 bg-primary mx-2 transition-all ease-linear duration-1000" style={{ width: `${status.update_progress}%` }}></div>
         </div>
       </div>
     );
   } else {
     return (
-      <div className="list-row flex items-center justify-start gap-1 py-3 px-2">
+      <div className="list-row flex items-center justify-start gap-1 py-3 px-2" key={`nspanel-status-${status.id}`}>
         <Icon path={mdiInformationOutline} className="ms-2 w-4 h-4 inline-block"></Icon>
         <span className="text-base">UNKNOWN STATE! {status.state}</span>
       </div>
