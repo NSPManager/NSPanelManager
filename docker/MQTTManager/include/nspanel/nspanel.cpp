@@ -849,6 +849,7 @@ void NSPanel::send_websocket_status_update() {
       {"ram_usage", this->_heap_used_pct},
       {"update_progress", this->_update_progress},
       {"accepted", this->_state != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT},
+      {"denied", this->_state == MQTT_MANAGER_NSPANEL_STATE::DENIED},
   };
   status_data["warnings"] = nlohmann::json::array({});
   for (NSPanelWarningWebsocketRepresentation warning : this->_nspanel_warnings) {

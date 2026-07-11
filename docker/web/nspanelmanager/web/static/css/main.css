@@ -50,6 +50,8 @@
     --text-xs--line-height: calc(1 / 0.75);
     --text-sm: 0.875rem;
     --text-sm--line-height: calc(1.25 / 0.875);
+    --text-base: 1rem;
+    --text-base--line-height: calc(1.5 / 1);
     --text-lg: 1.125rem;
     --text-lg--line-height: calc(1.75 / 1.125);
     --text-xl: 1.25rem;
@@ -4584,6 +4586,9 @@
   .my-2 {
     margin-block: calc(var(--spacing) * 2);
   }
+  .my-3 {
+    margin-block: calc(var(--spacing) * 3);
+  }
   .my-4 {
     margin-block: calc(var(--spacing) * 4);
   }
@@ -4854,6 +4859,9 @@
   }
   .mt-4 {
     margin-top: calc(var(--spacing) * 4);
+  }
+  .mt-6 {
+    margin-top: calc(var(--spacing) * 6);
   }
   .mt-8 {
     margin-top: calc(var(--spacing) * 8);
@@ -7062,6 +7070,10 @@
     border-style: var(--tw-border-style);
     border-width: 2px;
   }
+  .border-4 {
+    border-style: var(--tw-border-style);
+    border-width: 4px;
+  }
   .border-\[0\.5rem\] {
     border-style: var(--tw-border-style);
     border-width: 0.5rem;
@@ -7459,6 +7471,15 @@
   }
   .bg-primary\/20 {
     background-color: color-mix(in oklab, var(--color-primary) 20%, transparent);
+  }
+  .bg-primary\/50 {
+    background-color: color-mix(in oklab, var(--color-primary) 50%, transparent);
+  }
+  .bg-primary\/80 {
+    background-color: color-mix(in oklab, var(--color-primary) 80%, transparent);
+  }
+  .bg-primary\/90 {
+    background-color: color-mix(in oklab, var(--color-primary) 90%, transparent);
   }
   .bg-red-50 {
     background-color: var(--color-red-50);
@@ -8058,6 +8079,10 @@
     font-size: var(--text-5xl);
     line-height: var(--tw-leading, var(--text-5xl--line-height));
   }
+  .text-base {
+    font-size: var(--text-base);
+    line-height: var(--tw-leading, var(--text-base--line-height));
+  }
   .text-lg {
     font-size: var(--text-lg);
     line-height: var(--tw-leading, var(--text-lg--line-height));
@@ -8601,6 +8626,9 @@
   }
   .text-pink-800 {
     color: var(--color-pink-800);
+  }
+  .text-primary {
+    color: var(--color-primary);
   }
   .text-primary-content {
     color: var(--color-primary-content);
@@ -10056,6 +10084,13 @@
     &:hover {
       @media (hover: hover) {
         background-color: var(--color-base-100);
+      }
+    }
+  }
+  .hover\:bg-base-200 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: var(--color-base-200);
       }
     }
   }

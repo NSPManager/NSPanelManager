@@ -20,9 +20,6 @@ from requests.sessions import Request
 
 import web.home_assistant_api
 import web.openhab_api
-from web.components.nspanel_room_entities_pages.nspanel_room_entities_pages import (
-    NSPanelRoomEntitiesPages,
-)
 from web.components.rooms_list.rooms_list import RoomsList
 from web.settings_helper import (
     delete_nspanel_setting,

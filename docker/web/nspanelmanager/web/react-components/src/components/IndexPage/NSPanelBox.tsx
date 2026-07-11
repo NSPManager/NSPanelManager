@@ -45,7 +45,7 @@ const delete_nspanel = (nspanel_id: number) => {
       console.log(response);
     })
     .catch((error) => {
-      console.error(error);
+      Notify({ message: `Failed to delete NSPanel: ${error}`, level: "error", duration: 10000 });
     });
 };
 
@@ -324,7 +324,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                         <div className="icon-text">
                           <Icon path={mdiGauge} className="w-4 h-4 inline-block me-1"></Icon>
                           <span id="pressure-${nspanel_id}" className="text-sm">
-                            {(status.pressure && `${(status.pressure / 1000).toFixed(1)} kPa`) || "-"}
+                            {(status.pressure && `${(status.pressure / 100).toFixed(1)} hPa`) || "-"}
                           </span>
                         </div>
                       </>
@@ -647,7 +647,7 @@ const NewNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
   );
 };
 
-const NSPanelBox = ({ id: mac }: { id: string }) => {
+const NSPanelBox = ({ mac: mac }: { mac: string }) => {
   const nspanel_status = useEntityStatesStore.getState().nspanels[mac];
 
   return (

@@ -35,8 +35,10 @@ const NSPanelsIndexView = () => {
               <button
                 onClick={() => {
                   const nspanels = useEntityStatesStore.getState().nspanels;
-                  for (const mac of Object.entries(nspanels).keys()) {
-                    useStompStore.getState().send(`nspanel/${mac}/command`, "reboot");
+                  for (const [mac, status] of Object.entries(nspanels)) {
+                    if (status.accepted) {
+                      useStompStore.getState().send(`nspanel/${mac}/command`, "reboot");
+                    }
                   }
                   Notify({ message: `Sent reboot command to all NSPanels.`, level: "success", duration: 2000 });
                   popoverRef.current?.hidePopover();
@@ -54,7 +56,7 @@ const NSPanelsIndexView = () => {
                 onClick={() => {
                   const nspanels = useEntityStatesStore.getState().nspanels;
                   for (const [mac, status] of Object.entries(nspanels)) {
-                    if (status.state == "online") {
+                    if (status.state == "online" && status.accepted) {
                       useStompStore.getState().send(`nspanel/${mac}/command`, "firmware_update");
                       Notify({ message: `Sent FW update command to ${status.name}.`, level: "success", duration: 2000 });
                     }
@@ -72,7 +74,7 @@ const NSPanelsIndexView = () => {
                 onClick={() => {
                   const nspanels = useEntityStatesStore.getState().nspanels;
                   for (const [mac, status] of Object.entries(nspanels)) {
-                    if (status.state == "online") {
+                    if (status.state == "online" && status.accepted) {
                       useStompStore.getState().send(`nspanel/${mac}/command`, "gui_update");
                       Notify({ message: `Sent GUI update command to ${status.name}.`, level: "success", duration: 2000 });
                     }
@@ -127,9 +129,11 @@ const NSPanelsIndexView = () => {
           if (nspanels && Object.keys(nspanels).length > 0) {
             return (
               <div className="grid md:grid-cols-3 gap-4 mt-4 items-stretch" id="nspanels_container">
-                {Object.entries(nspanels).map(([mac, _status]) => (
-                  <NSPanelBox key={mac} id={mac} />
-                ))}
+                {Object.entries(nspanels)
+                  .filter(([_mac, status]) => !status.denied)
+                  .map(([mac, status]) => (
+                    <NSPanelBox key={mac} mac={String(status.mac)} />
+                  ))}
               </div>
             );
           } else {

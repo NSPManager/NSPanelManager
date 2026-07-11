@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load react_tags %}
 {% load static %}
 
 {% block head %}
@@ -886,62 +887,8 @@
 
 
   <div class="md:sticky md:top-4 w-full md:w-[22rem]">
-    <div class="block p-4 pb-0 rounded-md">
-      <!-- Status -->
-      <div>
-        <span class="font-medium text-lg">Status</span>
-        <div class="block mt-2 rounded-lg bg-base-100 shadow-lg">
-          <div class="p-3 {% if panel_info.data.model != 'web' %}border-solid border-b-2 border-base-300{% endif %}">
-            {% component "nspanel_status_text" id=panel_info.data.id  %}{% endcomponent %}
-          </div>
-          {% component "nspanel_update_progress" id=panel_info.data.id %}{% endcomponent %}
-          {% if panel_info.data.model != 'web' %}
-            <div class="p-3 border-solid border-b-2 border-base-300">
-                {% component "nspanel_status_wifi_signal_strength" id=panel_info.data.id %}{% endcomponent %}
-            </div>
-            <div class="p-3 border-solid border-b-2 border-base-300">
-                {% component "nspanel_status_ram_usage" id=panel_info.data.id %}{% endcomponent %}
-            </div>
-            <div class="p-3 {% if panel_info.data.model == 'custom' %}border-solid border-b-2 border-base-300{% endif %}">
-                {% component "nspanel_status_temperature" id=panel_info.data.id %}{% endcomponent %}
-            </div>
-            {% if panel_info.data.model == "custom" %}
-                <div class="p-3 border-solid border-b-2 border-base-300">
-                    {% component "nspanel_status_humidity" id=panel_info.data.id %}{% endcomponent %}
-                </div>
-                <div class="p-3 border-solid border-b-2 border-base-300">
-                    {% component "nspanel_status_pressure" id=panel_info.data.id %}{% endcomponent %}
-                </div>
-                <div class="p-3">
-                    {% component "nspanel_status_light" id=panel_info.data.id %}{% endcomponent %}
-                </div>
-            {% endif %}
-          {% endif %}
-        </div>
-      </div>
-
-      <!-- Actions -->
-      <div class="mt-4">
-        <span class="font-medium text-lg">Actions</span>
-        <div class="block mt-2 rounded-lg bg-base-100 shadow-lg">
-          {% component "nspanel_reboot_button" id=panel_info.data.id %}{% endcomponent %}
-          {% component "nspanel_visit_link" id=panel_info.data.id %}{% endcomponent %}
-          <div onclick="stomp_send('nspanel/{{ panel_info.data.mac_address }}/command', 'firmware_update')" class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
-            <span class="mdi mdi-upload me-2"></span><span class="">Update firmware</span>
-          </div>
-          <div onclick="stomp_send('nspanel/{{ panel_info.data.mac_address }}/command', 'firmware_update_force')" class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
-            <span class="mdi mdi-upload me-2"></span><span class="">Force update firmware</span>
-          </div>
-          <div onclick="stomp_send('nspanel/{{ panel_info.data.mac_address }}/command', 'gui_update')" class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
-            <span class="mdi mdi-table-arrow-up me-2"></span><span class="">Update GUI</span>
-          </div>
-          <div hx-delete="{{ ingress_path }}{% url 'htmx_nspanel_delete' nspanel_id=panel_info.data.id %}" hx-trigger="click" class="nspanel-delete-button p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer rounded-b-lg text-red-600">
-            <span class="mdi mdi-table-arrow-up me-2"></span><span class="">Delete</span>
-          </div>
-        </div>
-      </div>
+      {% RC "NSPanelSideBar" nspanel_mac=panel_info.data.mac_address %}
     </div>
-  </div>
 </div>
 
 <!-- Logging -->
