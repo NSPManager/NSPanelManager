@@ -56,7 +56,7 @@ const NSPanelStatus = ({ status }: { status: INSPanelStatusData }) => {
           State: <span className="text-primary">Updating firmware</span>
         </span>
         <div className="absolute left-0 bottom-0 w-full">
-          <div className="min-h-1 bg-primary mx-2 transition-all ease-linear duration-1000" style={{ width: `${status.update_progress}%` }}></div>
+          <div className="min-h-1 bg-primary mx-2 transition-all ease-linear duration-1000 rounded-full" style={{ width: `${status.update_progress}%` }}></div>
         </div>
       </div>
     );
@@ -68,7 +68,7 @@ const NSPanelStatus = ({ status }: { status: INSPanelStatusData }) => {
           State: <span className="text-primary">Updating filesystem</span>
         </span>
         <div className="absolute left-0 bottom-0 w-full">
-          <div className="min-h-1 bg-primary mx-2 transition-all ease-linear duration-1000" style={{ width: `${status.update_progress}%` }}></div>
+          <div className="min-h-1 bg-primary mx-2 transition-all ease-linear duration-1000 rounded-full" style={{ width: `${status.update_progress}%` }}></div>
         </div>
       </div>
     );
@@ -80,7 +80,7 @@ const NSPanelStatus = ({ status }: { status: INSPanelStatusData }) => {
           State: <span className="text-primary">Updating GUI</span>
         </span>
         <div className="absolute left-0 bottom-0 w-full">
-          <div className="min-h-1 bg-primary mx-2 transition-all ease-linear duration-1000" style={{ width: `${status.update_progress}%` }}></div>
+          <div className="min-h-1 bg-primary mx-2 transition-all ease-linear duration-1000 rounded-full" style={{ width: `${status.update_progress}%` }}></div>
         </div>
       </div>
     );
