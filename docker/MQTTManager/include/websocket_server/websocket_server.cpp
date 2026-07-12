@@ -328,7 +328,6 @@ void WebsocketServer::update_stomp_topic_value(std::string topic_name, std::stri
       return;
     }
   }
-  SPDLOG_WARN("Failed to update STOMP topic '{}'. Topic not found.", topic_name);
 }
 
 void WebsocketServer::update_stomp_topic_value(std::string topic_name, nlohmann::json &value) {

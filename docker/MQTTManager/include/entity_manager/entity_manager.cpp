@@ -659,7 +659,7 @@ void EntityManager::update_all_rooms_status() {
 
 void EntityManager::_room_updated_callback(Room *room) {
   {
-    std::unique_lock<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
     EntityManager::_last_room_update_time = std::chrono::system_clock::now();
     EntityManager::_all_rooms_status_updated = false;
   }

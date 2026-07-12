@@ -130,6 +130,19 @@ public:
 
 private:
   /*
+   * Run this in seperate thread to send room state updates with a backoff time to wait for changes to settle in order to minimise flickering.
+   */
+  void _update_room_state();
+
+  std::thread _update_room_state_thread;
+  std::mutex _status_update_mutex;
+  std::condition_variable _room_update_condition_variable;
+  bool _room_status_updated = false;
+
+  // The last time a room status update was triggered from any monitored entitiy
+  std::atomic<std::chrono::time_point<std::chrono::system_clock>> _last_status_update_time;
+
+  /*
    * Create a protobuf room state object and send out to _mqtt_state_topic.
    */
   void _send_room_state_update();

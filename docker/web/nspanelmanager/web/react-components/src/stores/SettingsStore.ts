@@ -31,6 +31,7 @@ interface ISettings {
   outside_temp_sensor_provider: string;
   weather_precipitation_format: string;
   raise_to_100_light_level: boolean;
+  room_status_backoff_time: number;
   all_rooms_status_backoff_time: number;
   reverse_color_temp: boolean;
   screen_dim_level: number;
