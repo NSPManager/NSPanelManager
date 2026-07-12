@@ -36,7 +36,12 @@ Room::Room(uint32_t room_id) {
   this->_send_status_updates = true;
   CommandManager::attach_callback(boost::bind(&Room::command_callback, this, _1));
 
-  this->_send_room_state_update();
+  if (!this->_update_room_state_thread.joinable()) {
+    SPDLOG_INFO("No thread to handle room status updates for room {}::{} starting...", this->_id, this->_name);
+    this->_last_status_update_time = std::chrono::system_clock::now();
+    this->_update_room_state_thread = std::thread(&Room::_update_room_state, this);
+    this->_update_room_state_thread.detach();
+  }
 }
 
 Room::~Room() {
@@ -273,7 +278,12 @@ std::expected<float, std::string> Room::get_temperature() {
 void Room::page_changed_callback(RoomEntitiesPage *page) {
   this->_room_changed_callbacks(this);
   if (this->_send_status_updates) {
-    this->_send_room_state_update();
+    {
+      std::lock_guard<std::mutex> mutex_guard(this->_status_update_mutex);
+      this->_last_status_update_time = std::chrono::system_clock::now();
+      this->_room_status_updated = false;
+    }
+    this->_room_update_condition_variable.notify_all();
   }
 }
 
@@ -348,6 +358,28 @@ void Room::command_callback(NSPanelMQTTManagerCommand &command) {
         light->turn_off(true);
       }
     }
+  }
+}
+
+void Room::_update_room_state() {
+  SPDLOG_INFO("Started thread to handle room status updates for room {}::{}", this->_id, this->_name);
+  for (;;) {
+    // Wait for notification that a room has been updated
+    std::unique_lock<std::mutex> mutex_guard(this->_status_update_mutex);
+    this->_room_update_condition_variable.wait(mutex_guard, [&]() {
+      return !this->_room_status_updated;
+    });
+
+    // Wait until changes has settled as when a user changes light states in "All rooms" mode a burst of changes will occur from all rooms.
+    uint32_t backoff_time = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::ROOM_STATUS_BACKOFF_TIME);
+    while (this->_last_status_update_time.load() + std::chrono::milliseconds(backoff_time) > std::chrono::system_clock::now()) {
+      std::this_thread::sleep_for(this->_last_status_update_time.load() + std::chrono::milliseconds(backoff_time) - std::chrono::system_clock::now());
+    }
+
+    SPDLOG_DEBUG("Updating room status.");
+    this->_room_status_updated = true;
+
+    this->_send_room_state_update();
   }
 }
 

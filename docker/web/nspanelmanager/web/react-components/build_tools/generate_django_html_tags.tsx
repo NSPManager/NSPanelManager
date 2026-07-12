@@ -35,7 +35,7 @@ export default function generate_script_tag_html_file(): Plugin {
         // }
 
         // Add the JS script tag
-        htmlContent += `<script type="module" src="{% static '${mainJsFile}' %}"></script>\n`;
+        htmlContent += `<script rel="modulepreload" type="module" src="{% static '${mainJsFile}' %}"></script>\n`;
 
         // Write the generated HTML to templates/scripts.html
         const outputDir = path.resolve("templates");
