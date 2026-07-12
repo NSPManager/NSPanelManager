@@ -36,6 +36,10 @@ export default function NSPanelWarnings({ nspanel_mac }: { nspanel_mac: string }
     return <span className="text-error text-md">NSPanel state not found for panel with MAC: {nspanel_mac}!</span>;
   }
 
+  if (nspanels[nspanel_mac].warnings.length == 0) {
+    return null;
+  }
+
   return (
     <div className="divide-y divide-neutral w-full backdrop-blur-none backdrop-brightness-75 rounded-box border border-warning/50">
       {nspanels[nspanel_mac].warnings.map((warning) => {

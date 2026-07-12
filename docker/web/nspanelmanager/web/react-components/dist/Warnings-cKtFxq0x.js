@@ -1,6 +1,6 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-D4-XR9wG.js";
-import { t as useEntityStatesStore } from "./EntityStore-BGWLtY3I.js";
-import { y as require_Icon } from "./mdi-OVIfv5IR.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-BqJS64Q7.js";
+import { t as useEntityStatesStore } from "./EntityStore-cK5W15cv.js";
+import { y as require_Icon } from "./mdi-D9uMayo3.js";
 //#region src/components/NSPanelPage/Warnings.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_Icon = require_Icon();
@@ -58,6 +58,7 @@ function NSPanelWarnings({ nspanel_mac }) {
 			"!"
 		]
 	});
+	if (nspanels[nspanel_mac].warnings.length == 0) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "divide-y divide-neutral w-full backdrop-blur-none backdrop-brightness-75 rounded-box border border-warning/50",
 		children: nspanels[nspanel_mac].warnings.map((warning) => {
