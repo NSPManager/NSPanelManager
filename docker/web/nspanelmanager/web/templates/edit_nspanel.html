@@ -891,20 +891,5 @@
     </div>
 </div>
 
-<!-- Logging -->
-<div class="p-4 mb-6 rounded-md shadow-lg bg-base-100 w-full">
-  <span class="block mb-2 text-xl">Logs</span>
-
-  <table class="table table-xs">
-    <thead>
-      <tr>
-        <th class="px-3 py-1">Time</th>
-        <th class="px-3 py-1">Level</th>
-        <th class="px-3 py-1">Message</th>
-      </tr>
-    </thead>
-    <tbody id="log_body" class="">
-    </tbody>
-  </table>
-</div>
+{% RC "NSPanelLogs" nspanel_mac=panel_info.data.mac_address %}
 {% endblock %}

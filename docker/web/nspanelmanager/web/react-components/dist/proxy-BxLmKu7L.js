@@ -1,46 +1,4 @@
-import { a as __esmMin, c as __toESM, o as __exportAll, r as require_react, s as __toCommonJS, t as require_jsx_runtime } from "./main-BqJS64Q7.js";
-import { t as create } from "./react-Bi3UZOsF.js";
-//#region src/stores/SettingsStore.ts
-function getCookie(name) {
-	let cookieValue = "";
-	if (document.cookie && document.cookie !== "") {
-		const cookies = document.cookie.split(";");
-		for (let i = 0; i < cookies.length; i++) {
-			const cookie = cookies[i].trim();
-			if (cookie.substring(0, name.length + 1) === name + "=") {
-				cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-				break;
-			}
-		}
-	}
-	return cookieValue;
-}
-var useSettingsStore = create((set) => ({
-	status: "none",
-	settings: null,
-	fetchData: async () => {
-		set({ status: "loading" });
-		fetch(`/rest/settings`, {
-			credentials: "same-origin",
-			method: "GET",
-			mode: "same-origin",
-			headers: {
-				"Content-Type": "application/json",
-				"X-CSRFToken": getCookie("csrftoken")
-			}
-		}).then((response) => response.json()).then((data) => {
-			set((state) => ({
-				...state,
-				settings: data.settings
-			}));
-			set((state) => ({
-				...state,
-				status: "loaded"
-			}));
-		});
-	}
-}));
-//#endregion
+import { a as __esmMin, c as __toESM, o as __exportAll, r as require_react, s as __toCommonJS, t as require_jsx_runtime } from "./main-B6diILJP.js";
 //#region node_modules/framer-motion/dist/es/context/LayoutGroupContext.mjs
 var import_jsx_runtime = require_jsx_runtime();
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
@@ -9693,4 +9651,4 @@ var motion = /*@__PURE__*/ createMotionProxy({
 	...layout
 }, createDomVisualElement);
 //#endregion
-export { AnimatePresence as n, useSettingsStore as r, motion as t };
+export { AnimatePresence as n, motion as t };

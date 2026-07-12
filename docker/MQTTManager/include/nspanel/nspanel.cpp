@@ -535,7 +535,7 @@ MQTT_MANAGER_NSPANEL_MODEL NSPanel::get_model() {
 }
 
 void NSPanel::mqtt_callback(std::string topic, std::string payload) {
-  if (payload.empty()) {
+  if (payload.empty()) [[unlikely]] {
     return;
   }
 
@@ -555,7 +555,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       }
       message_parts.push_back(message);
 
-      if (message_parts.size() == 3) {
+      if (message_parts.size() == 3) [[likely]] {
         std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         std::tm tm = *std::localtime(&now);
         std::stringstream buffer;
@@ -568,19 +568,26 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         std::string send_mac = message_parts[0];
         send_mac.erase(std::remove(send_mac.begin(), send_mac.end(), ':'), send_mac.end());
 
+        std::string message = message_parts[2];
+        size_t pos = message.find(')');
+        if (pos != std::string::npos) {
+          message.erase(0, pos + 1);
+        } else {
+        }
+
         nlohmann::json log_data;
         log_data["type"] = "log";
         log_data["time"] = buffer.str();
         log_data["panel"] = this->_name;
         log_data["mac_address"] = message_parts[0];
         log_data["level"] = message_parts[1];
-        log_data["message"] = message_parts[2];
+        log_data["message"] = message;
         WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log", this->_mac), log_data);
 
         // Save log message in backtrace for when (if) the log interface requests it.
         this->_log_messages_backlog["logs"].insert(this->_log_messages_backlog["logs"].begin(), log_data);
         // Remove older messages from backtrace.
-        if (this->_log_messages_backlog["logs"].size() > MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::MAX_LOG_BUFFER_SIZE)) {
+        if (this->_log_messages_backlog["logs"].size() > MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::MAX_LOG_BUFFER_SIZE)) [[likely]] {
           this->_log_messages_backlog["logs"].erase(this->_log_messages_backlog["logs"].begin() + MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::MAX_LOG_BUFFER_SIZE), this->_log_messages_backlog["logs"].end());
         }
         WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log_backlog", this->_mac), this->_log_messages_backlog);
@@ -809,6 +816,9 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
     return;
   }
 
+  // Remove first char that indicates log level. This is stored separately
+  payload = payload.substr(1);
+
   // Convert payload strings non-printable characters to their hex representation
   std::string converted_payload;
   for (char c : payload) {
@@ -819,9 +829,17 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
     }
   }
 
-  // Remove first char that indicates log level. This is stored separately
-  payload = payload.substr(1);
-  log_data["message"] = converted_payload; // TODO: Clean up message before sending it out
+  // Remove until ) as all that data has been processed and stored separately.
+  size_t pos = converted_payload.find(')');
+  if (pos != std::string::npos) [[likely]] {
+    converted_payload.erase(0, pos + 1);
+  }
+  if (converted_payload.length() > 0 && converted_payload[0] == ' ') [[likely]] {
+    converted_payload.erase(0, 1);
+  }
+
+  log_data["message"] = converted_payload;
+
   WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log", this->_mac), log_data.dump());
 
   // Save log message in backtrace for when (if) the log interface requests it.
