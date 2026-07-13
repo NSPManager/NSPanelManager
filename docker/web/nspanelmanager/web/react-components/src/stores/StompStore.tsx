@@ -20,7 +20,7 @@ const rxStompConfig: RxStompConfig = {
   heartbeatIncoming: 1000,
   heartbeatOutgoing: 1000,
   reconnectDelay: 1000,
-  stompVersions: new Versions(["1.2"]),
+  stompVersions: new Versions([]),
 };
 
 interface ISubscriptionData {

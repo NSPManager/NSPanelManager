@@ -1,6 +1,6 @@
-import { i as __commonJSMin } from "./main-qcg616_z.js";
-import { t as create } from "./react-B85aptD-.js";
-import { n as Notify, r as RemoveNotification } from "./NSPanelToastContainer-DUooxCvd.js";
+import { i as __commonJSMin } from "./main-afCuO7kO.js";
+import { t as create } from "./react-CC_gJ0mf.js";
+import { n as Notify, r as RemoveNotification } from "./NSPanelToastContainer-Dqh2DL4A.js";
 //#region node_modules/tslib/tslib.es6.mjs
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -3700,7 +3700,7 @@ var rxStompConfig = {
 	heartbeatIncoming: 1e3,
 	heartbeatOutgoing: 1e3,
 	reconnectDelay: 1e3,
-	stompVersions: new import_stomp_umd.Versions(["1.2"])
+	stompVersions: new import_stomp_umd.Versions([])
 };
 var useStompStore = create((set, get) => ({
 	status: "none",
