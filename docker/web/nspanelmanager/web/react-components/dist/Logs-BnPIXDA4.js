@@ -1,11 +1,11 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-B6diILJP.js";
-import { t as useSettingsStore } from "./SettingsStore-T9d45ts7.js";
-import { t as useStompStore } from "./StompStore-DPuln7ht.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-qcg616_z.js";
+import { t as useSettingsStore } from "./SettingsStore-Cf60MiEJ.js";
+import { t as useStompStore } from "./StompStore-DbccEW_k.js";
 //#region src/components/NSPanelPage/Logs.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_jsx_runtime = require_jsx_runtime();
 function NSPanelLogs({ nspanel_mac }) {
-	const { status: settingsStatus, settings, fetchData: fetchSettingsData } = useSettingsStore();
+	const { status: settingsStatus, fetchData: fetchSettingsData } = useSettingsStore();
 	const { status: stompStatus } = useStompStore();
 	const [logs, setLogs] = (0, import_react.useState)([]);
 	const [hasSubscribed, setHasSubscribed] = (0, import_react.useState)(false);
@@ -129,7 +129,7 @@ function NSPanelLogs({ nspanel_mac }) {
 								children: log.message
 							})
 						]
-					}, log))
+					}, `${log.time}-${log.level}-${log.message}`))
 				})]
 			})
 		})]

@@ -883,10 +883,6 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
     if (new_panel != nullptr) {
       std::lock_guard<std::mutex> lock_guard(EntityManager::_nspanels_mutex);
       EntityManager::_nspanels.push_back(new_panel);
-      nlohmann::json data = {
-          {"event_type", "register_request"},
-          {"nspanel_id", new_panel->get_id()}};
-      WebsocketServer::update_stomp_topic_value("mqttmanager/events", data);
     }
   }
   EntityManager::_send_websocket_state_update();

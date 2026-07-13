@@ -12,9 +12,9 @@ interface INSpanelLogData {
 }
 
 export default function NSPanelLogs({ nspanel_mac }: { nspanel_mac: string }) {
-  const { status: settingsStatus, settings, fetchData: fetchSettingsData } = useSettingsStore();
+  const { status: settingsStatus, fetchData: fetchSettingsData } = useSettingsStore();
   const { status: stompStatus } = useStompStore();
-  const [logs, setLogs] = useState([]);
+  const [logs, setLogs] = useState<INSpanelLogData[]>([]);
   const [hasSubscribed, setHasSubscribed] = useState(false);
   const [hasDownloadedLogs, setHasDownloadedLogs] = useState(false);
   const maxLogs = useSettingsStore.getState().settings?.max_live_log_messages ?? 250;
@@ -56,10 +56,10 @@ export default function NSPanelLogs({ nspanel_mac }: { nspanel_mac: string }) {
     }
   }, [settingsStatus, fetchSettingsData, stompStatus, nspanel_mac]);
 
-  const download_nspanel_logs_callback = (message) => {
+  const download_nspanel_logs_callback = (message: any) => {
     if (!hasDownloadedLogs) {
       const data = JSON.parse(message.body);
-      const logs = [];
+      const logs: string[] = [];
       data.logs.map((log: INSpanelLogData) => logs.push(`${log.time} ${log.level} ${log.message}`));
       const blob = new Blob([logs.join("\n")], { type: "text/plain" });
       const url = URL.createObjectURL(blob);
@@ -101,7 +101,7 @@ export default function NSPanelLogs({ nspanel_mac }: { nspanel_mac: string }) {
           </thead>
           <tbody className="">
             {logs.map((log) => (
-              <tr key={log} className="hover:bg-base-300">
+              <tr key={`${log.time}-${log.level}-${log.message}`} className="hover:bg-base-300">
                 <td className="px-3 py-1">{log.time}</td>
                 {(() => {
                   switch (log.level) {
