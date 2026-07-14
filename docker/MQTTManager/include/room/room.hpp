@@ -139,9 +139,6 @@ private:
   std::condition_variable _room_update_condition_variable;
   bool _room_status_updated = false;
 
-  // The last time a room status update was triggered from any monitored entitiy
-  std::atomic<std::chrono::time_point<std::chrono::system_clock>> _last_status_update_time;
-
   /*
    * Create a protobuf room state object and send out to _mqtt_state_topic.
    */

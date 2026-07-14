@@ -280,7 +280,6 @@ void Room::page_changed_callback(RoomEntitiesPage *page) {
   if (this->_send_status_updates) {
     {
       std::lock_guard<std::mutex> mutex_guard(this->_status_update_mutex);
-      this->_last_status_update_time = std::chrono::system_clock::now();
       this->_room_status_updated = false;
     }
     this->_room_update_condition_variable.notify_all();
@@ -363,23 +362,24 @@ void Room::command_callback(NSPanelMQTTManagerCommand &command) {
 
 void Room::_update_room_state() {
   SPDLOG_INFO("Started thread to handle room status updates for room {}::{}", this->_id, this->_name);
+  std::unique_lock<std::mutex> lock(this->_status_update_mutex);
   for (;;) {
     // Wait for notification that a room has been updated
-    std::unique_lock<std::mutex> mutex_guard(this->_status_update_mutex);
-    this->_room_update_condition_variable.wait(mutex_guard, [&]() {
+    this->_room_update_condition_variable.wait(lock, [this]() {
       return !this->_room_status_updated;
     });
 
     // Wait until changes has settled as when a user changes light states in "All rooms" mode a burst of changes will occur from all rooms.
     uint32_t backoff_time = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::ROOM_STATUS_BACKOFF_TIME);
-    while (this->_last_status_update_time.load() + std::chrono::milliseconds(backoff_time) > std::chrono::system_clock::now()) {
-      std::this_thread::sleep_for(this->_last_status_update_time.load() + std::chrono::milliseconds(backoff_time) - std::chrono::system_clock::now());
+    while (this->_room_update_condition_variable.wait_for(lock, std::chrono::milliseconds(backoff_time)) == std::cv_status::no_timeout) {
+      // If we woke up via notify, we just loop and wait again.
+      // This is where the "debounce" happens.
     }
-
-    SPDLOG_DEBUG("Updating room status.");
+    SPDLOG_DEBUG("Room status backoff time reaced, sending update for room {}::{}.", this->_id, this->_name);
     this->_room_status_updated = true;
-
     this->_send_room_state_update();
+    lock.unlock();
+    lock.lock();
   }
 }
 

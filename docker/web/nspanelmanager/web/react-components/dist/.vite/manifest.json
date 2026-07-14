@@ -1,32 +1,32 @@
 {
-  "_MultiStep_AddEditEntity-D0sJcblm.js": {
-    "file": "MultiStep_AddEditEntity-D0sJcblm.js",
+  "_MultiStep_AddEditEntity-CSljAlTX.js": {
+    "file": "MultiStep_AddEditEntity-CSljAlTX.js",
     "name": "MultiStep_AddEditEntity",
     "imports": [
       "src/main.tsx"
     ]
   },
   "src/components/EntitiesPage/EntitiesPagesView.tsx": {
-    "file": "EntitiesPagesView-AJkQOPGz.js",
+    "file": "EntitiesPagesView-BRjeAZoK.js",
     "name": "EntitiesPagesView",
     "src": "src/components/EntitiesPage/EntitiesPagesView.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_MultiStep_AddEditEntity-D0sJcblm.js"
+      "_MultiStep_AddEditEntity-CSljAlTX.js"
     ]
   },
   "src/main.tsx": {
-    "file": "main-DRtg4JvM.js",
+    "file": "main-Dd0inYxN.js",
     "name": "main",
     "src": "src/main.tsx",
     "isEntry": true,
     "dynamicImports": [
-      "_MultiStep_AddEditEntity-D0sJcblm.js",
+      "_MultiStep_AddEditEntity-CSljAlTX.js",
       "src/components/EntitiesPage/EntitiesPagesView.tsx"
     ],
     "css": [
-      "main-DGNrK5qb.css"
+      "main-JUTJWg1N.css"
     ]
   }
 }
