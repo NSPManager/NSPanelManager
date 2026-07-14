@@ -97,7 +97,7 @@ void StompTopic::update_value(nlohmann::json &data) {
 }
 
 void StompTopic::set_retained(bool retained) {
-  SPDLOG_DEBUG("Setting topic '{}' to retained? {}", this->_topic_name, retained ? "Yes" : "No");
+  SPDLOG_TRACE("Setting topic '{}' to retained? {}", this->_topic_name, retained ? "Yes" : "No");
   this->_retained = retained;
 }
 
