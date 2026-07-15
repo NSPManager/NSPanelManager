@@ -1,9 +1,9 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-afCuO7kO.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-DrdsUemQ.js";
-import { n as Notify } from "./NSPanelToastContainer-Dqh2DL4A.js";
-import { t as useStompStore } from "./StompStore-p3Yel4rQ.js";
-import { t as useEntityStatesStore } from "./EntityStore-dWz2q6vx.js";
-import { _ as mdiWifiStrength4, a as mdiMemory, c as mdiRestart, d as mdiUpload, g as mdiWifiStrength3, h as mdiWifiStrength2, l as mdiTableArrowUp, m as mdiWifiStrength1Alert, n as mdiCog, o as mdiMenuDownOutline, p as mdiWeb, s as mdiMinusCircle, u as mdiThermometer, v as mdiWifiStrengthAlertOutline, y as require_Icon } from "./mdi-BWyzN5W1.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-GZAbzCI4.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-C6euR-0J.js";
+import { n as Notify } from "./NSPanelToastContainer--s3HWviP.js";
+import { t as useStompStore } from "./StompStore-CDxaNzmd.js";
+import { t as useEntityStatesStore } from "./EntityStore-9eGpH2oX.js";
+import { _ as mdiWifiStrength4, a as mdiMemory, c as mdiRestart, d as mdiUpload, g as mdiWifiStrength3, h as mdiWifiStrength2, l as mdiTableArrowUp, m as mdiWifiStrength1Alert, n as mdiCog, o as mdiMenuDownOutline, p as mdiWeb, s as mdiMinusCircle, u as mdiThermometer, v as mdiWifiStrengthAlertOutline, y as require_Icon } from "./mdi-BbA6p6gZ.js";
 //#region src/components/IndexPage/NSPanelBox.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_Icon = require_Icon();
@@ -149,7 +149,7 @@ var NSPanelWarnings = ({ warnings }) => {
 			})
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
 			tabIndex: -1,
-			className: "dropdown-content list backdrop-blur-lg backdrop-brightness-50 border border-warning/50 w-92 rounded-box shadow-md",
+			className: "dropdown-content list backdrop-blur-md backdrop-brightness-80 border border-warning/50 w-92 rounded-box shadow-md",
 			children: warnings.map((warning, index) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
 				className: "list-row",
 				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
@@ -714,7 +714,7 @@ var NewNSPanelContent = ({ status }) => {
 var NSPanelBox = ({ mac }) => {
 	const nspanel_status = useEntityStatesStore.getState().nspanels[mac];
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "text-base-content rounded-b-box rounded-t-field nspanel-box bg-base-100 shadow-xl overflow-visible h-34",
+		className: "text-base-content rounded-b-box rounded-t-field nspanel-box bg-base-200 hover:bg-base-100 transition-all duration-200 shadow-xl shadow-neutral/3 hover:shadow-neutral/10 overflow-visible h-34",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			className: "overflow-hidden",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NSPanelStatusHeader, {

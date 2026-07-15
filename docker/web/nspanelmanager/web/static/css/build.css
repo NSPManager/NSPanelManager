@@ -30,9 +30,9 @@
     default: false;
     prefersdark: false;
     color-scheme: "dark";
-    --color-base-100: #111827;
-    --color-base-200: #0c111c;
-    --color-base-300: #06090e;
+    --color-base-100: #131c2e;
+    --color-base-200: #101624;
+    --color-base-300: #0a0e17;
     --color-base-content: oklch(96% 0.007 247.896);
     --color-primary: #01baef;
     --color-primary-content: oklch(14% 0.005 285.823);
@@ -40,7 +40,7 @@
     --color-secondary-content: oklch(14% 0.005 285.823);
     --color-accent: oklch(79% 0.209 151.711);
     --color-accent-content: oklch(14% 0.005 285.823);
-    --color-neutral: oklch(27% 0.041 260.031);
+    --color-neutral: #0d1014;
     --color-neutral-content: oklch(98% 0.003 247.858);
     --color-info: #0091ff;
     --color-info-content: oklch(14% 0.005 285.823);

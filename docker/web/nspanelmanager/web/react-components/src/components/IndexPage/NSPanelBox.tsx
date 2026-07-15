@@ -171,7 +171,7 @@ const NSPanelWarnings = ({ warnings }: { warnings: INSPanelWarningData[] }) => {
       <div className="flex items-end justify-end px-1">
         <div className={`status ${badge_color} status-lg`} tabIndex={1} role="button"></div>
       </div>
-      <ul tabIndex={-1} className="dropdown-content list backdrop-blur-lg backdrop-brightness-50 border border-warning/50 w-92 rounded-box shadow-md">
+      <ul tabIndex={-1} className="dropdown-content list backdrop-blur-md backdrop-brightness-80 border border-warning/50 w-92 rounded-box shadow-md">
         {warnings.map((warning, index) => (
           <li key={index} className="list-row">
             <div>
@@ -651,7 +651,7 @@ const NSPanelBox = ({ mac: mac }: { mac: string }) => {
   const nspanel_status = useEntityStatesStore.getState().nspanels[mac];
 
   return (
-    <div className="text-base-content rounded-b-box rounded-t-field nspanel-box bg-base-100 shadow-xl overflow-visible h-34">
+    <div className="text-base-content rounded-b-box rounded-t-field nspanel-box bg-base-200 hover:bg-base-100 transition-all duration-200 shadow-xl shadow-neutral/3 hover:shadow-neutral/10 overflow-visible h-34">
       <div className="overflow-hidden">
         <NSPanelStatusHeader state={nspanel_status?.state ?? ""} update_progress={nspanel_status?.update_progress ?? 0} />
       </div>
