@@ -38,7 +38,6 @@ Room::Room(uint32_t room_id) {
 
   if (!this->_update_room_state_thread.joinable()) {
     SPDLOG_INFO("No thread to handle room status updates for room {}::{} starting...", this->_id, this->_name);
-    this->_last_status_update_time = std::chrono::system_clock::now();
     this->_update_room_state_thread = std::thread(&Room::_update_room_state, this);
     this->_update_room_state_thread.detach();
   }
