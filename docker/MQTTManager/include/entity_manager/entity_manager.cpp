@@ -726,7 +726,7 @@ void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
       for (auto &room : rooms) {
         std::vector<std::shared_ptr<Light>> lights = room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
         for (auto &light : lights) {
-          if (light->get_state() && light->get_controlled_from_main_page()) {
+          if (light->get_state() && light->get_controlled_from_main_page() && (command.first_page_turn_on().affect_lights() == NSPanelMQTTManagerCommand_AffectLightsOptions_ALL || (any_ceiling_light_on && light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::CEILING) || (any_table_light_on && light->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::TABLE))) {
             turn_on_command->set_global(false);
             turn_on_command->set_selected_room(room->get_id());
             room->command_callback(base_command);
