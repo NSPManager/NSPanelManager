@@ -680,6 +680,7 @@ void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
         rooms.push_back(*room);
       } else {
         SPDLOG_ERROR("Default room for NSPanel {}::{} not found.", (*nspanel)->get_id(), (*nspanel)->get_name());
+        return;
       }
     } else {
       std::lock_guard<std::mutex> lock_guard(EntityManager::_rooms_mutex);
@@ -688,44 +689,73 @@ void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
     NSPanelMQTTManagerCommand base_command;
     base_command.CopyFrom(command);
     auto *turn_on_command = base_command.mutable_first_page_turn_on();
+    turn_on_command->set_global(false);
 
     // Check if ANY table or ceiling light is turned on.
-    bool any_ceiling_light_on = false;
-    bool any_table_light_on = false;
+    std::list<std::shared_ptr<Light>> ceiling_lights_on;
+    std::list<std::shared_ptr<Light>> table_lights_on;
     for (auto &room : rooms) {
       for (auto &entity : room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT)) {
         if (entity->get_controlled_from_main_page() && entity->get_state()) {
-          if (entity->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::CEILING) {
-            any_ceiling_light_on = true;
-          } else if (entity->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::TABLE) {
-            any_table_light_on = true;
+          if (entity->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::CEILING && entity->get_state()) {
+            ceiling_lights_on.push_back(entity);
+          } else if (entity->get_light_type() == MQTT_MANAGER_LIGHT_TYPE::TABLE && entity->get_state()) {
+            table_lights_on.push_back(entity);
           }
         }
-        if (any_ceiling_light_on && any_table_light_on) {
-          break;
-        }
-      }
-      if (any_ceiling_light_on && any_table_light_on) {
-        break;
       }
     }
 
-    if (!any_ceiling_light_on && !any_table_light_on) {
+    if (ceiling_lights_on.empty() && table_lights_on.empty()) {
       // Turn on all lights in all the room
       SPDLOG_DEBUG("No lights are turned on, will send command to ALL rooms while processing 'All rooms' command");
       for (auto &room : rooms) {
-        turn_on_command->set_global(false);
         turn_on_command->set_selected_room(room->get_id());
         room->command_callback(base_command);
       }
-    } else {
+    } else if (command.first_page_turn_on().affect_lights() == NSPanelMQTTManagerCommand_AffectLightsOptions_CEILING_LIGHTS) {
+      SPDLOG_DEBUG("Received first page turn on command with brightness of {} to apply to ceiling lights.");
+      if (!ceiling_lights_on.empty()) {
+        SPDLOG_DEBUG("Ceiling lights on, only updating already turned on lights.");
+        for (auto &light : ceiling_lights_on) {
+          turn_on_command->set_selected_room(light->get_room_id());
+          auto room = EntityManager::get_room(light->get_room_id());
+          if (room) {
+            (*room)->command_callback(base_command);
+          }
+        }
+      } else {
+        SPDLOG_DEBUG("No ceiling lights on, will send command to ALL rooms while processing 'All rooms' command.");
+        for (auto &room : rooms) {
+          turn_on_command->set_selected_room(room->get_id());
+          room->command_callback(base_command);
+        }
+      }
+    } else if (command.first_page_turn_on().affect_lights() == NSPanelMQTTManagerCommand_AffectLightsOptions_TABLE_LIGHTS) {
+      SPDLOG_DEBUG("Received first page turn on command with brightness of {} to apply to table lights.");
+      if (!table_lights_on.empty()) {
+        SPDLOG_DEBUG("Table lights on, only updating already turned on lights.");
+        for (auto &light : table_lights_on) {
+          turn_on_command->set_selected_room(light->get_room_id());
+          auto room = EntityManager::get_room(light->get_room_id());
+          if (room) {
+            (*room)->command_callback(base_command);
+          }
+        }
+      } else {
+        SPDLOG_DEBUG("No table lights on, will send command to ALL rooms while processing 'All rooms' command.");
+        for (auto &room : rooms) {
+          turn_on_command->set_selected_room(room->get_id());
+          room->command_callback(base_command);
+        }
+      }
+    } else if (command.first_page_turn_on().affect_lights() == NSPanelMQTTManagerCommand_AffectLightsOptions_ALL) {
       // Lights are turned on in any/some rooms, send command to rooms where lights are turned on to change brightness of those lights
-      SPDLOG_DEBUG("Lights are turned on, will send command to all rooms with lights on while processing 'All rooms' command. Ceiling lights on: {}, table lights on: {}", any_ceiling_light_on ? "Yes" : "No", any_table_light_on ? "Yes" : "No");
+      SPDLOG_DEBUG("Lights are turned on, will send command to all rooms with lights on while processing 'All rooms' command. Ceiling lights on: {}, table lights on: {}", !ceiling_lights_on.empty() ? "Yes" : "No", !table_lights_on.empty() ? "Yes" : "No");
       for (auto &room : rooms) {
         std::vector<std::shared_ptr<Light>> lights = room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
         for (auto &light : lights) {
           if (light->get_state() && light->get_controlled_from_main_page()) {
-            turn_on_command->set_global(false);
             turn_on_command->set_selected_room(room->get_id());
             room->command_callback(base_command);
             break;
