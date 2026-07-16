@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["MultiStep_AddEditEntity-B-xUFKQd.js","react-BVIAW2G4.js","SettingsStore-Bcw507Ue.js","react-select.esm-C6euR-0J.js","NSPanelToastContainer--s3HWviP.js","proxy-D8BN2_cC.js","EntitiesPagesView-CuZuY6IN.js","NSPanelsView-wYHhseAa.js","StompStore-CDxaNzmd.js","EntityStore-9eGpH2oX.js","mdi-BbA6p6gZ.js","InitialSetup-D0aBjTL7.js","Sidebar-D7je9aba.js","Warnings-C2jharLr.js","Logs-Drn49930.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["MultiStep_AddEditEntity-MNCTNSeE.js","react-CZAl-XQU.js","SettingsStore-CcgMQLnz.js","react-select.esm-BX4VKbqE.js","NSPanelToastContainer-pAFprjcA.js","proxy-BcIV1mpH.js","EntitiesPagesView-Dn6sY5jC.js","NSPanelsView-DlzIamoG.js","StompStore-Bk3HTB4a.js","EntityStore-CVjNU32_.js","mdi-DWs0oUnL.js","InitialSetup-DfkaLPPm.js","Sidebar-CWWXiD--.js","Warnings-UGXtkddo.js","Logs-DWgce5pg.js"])))=>i.map(i=>d[i]);
 //#region \0rolldown/runtime.js
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -9967,14 +9967,14 @@ var __vitePreload = function preload(baseModule, deps, importerUrl) {
 //#endregion
 //#region src/componentMap.tsx
 var componentMap = {
-	MultiStep_AddEditEntity: (0, import_react.lazy)(() => __vitePreload(() => import("./MultiStep_AddEditEntity-B-xUFKQd.js").then((n) => n.t), __vite__mapDeps([0,1,2,3,4,5]))),
-	EntitiesPagesView: (0, import_react.lazy)(() => __vitePreload(() => import("./EntitiesPagesView-CuZuY6IN.js"), __vite__mapDeps([6,1,0,2,3,4,5]))),
-	NSPanelsIndexView: (0, import_react.lazy)(() => __vitePreload(() => import("./NSPanelsView-wYHhseAa.js"), __vite__mapDeps([7,3,4,8,1,9,10]))),
-	NSPanelToastContainer: (0, import_react.lazy)(() => __vitePreload(() => import("./NSPanelToastContainer--s3HWviP.js").then((n) => n.t), [])),
-	InitialSetup: (0, import_react.lazy)(() => __vitePreload(() => import("./InitialSetup-D0aBjTL7.js"), __vite__mapDeps([11,2,1,4,5,10]))),
-	NSPanelSideBar: (0, import_react.lazy)(() => __vitePreload(() => import("./Sidebar-D7je9aba.js"), __vite__mapDeps([12,4,8,1,9,10]))),
-	NSPanelWarnings: (0, import_react.lazy)(() => __vitePreload(() => import("./Warnings-C2jharLr.js"), __vite__mapDeps([13,9,1,8,4,10]))),
-	NSPanelLogs: (0, import_react.lazy)(() => __vitePreload(() => import("./Logs-Drn49930.js"), __vite__mapDeps([14,2,1,8,4])))
+	MultiStep_AddEditEntity: (0, import_react.lazy)(() => __vitePreload(() => import("./MultiStep_AddEditEntity-MNCTNSeE.js").then((n) => n.t), __vite__mapDeps([0,1,2,3,4,5]))),
+	EntitiesPagesView: (0, import_react.lazy)(() => __vitePreload(() => import("./EntitiesPagesView-Dn6sY5jC.js"), __vite__mapDeps([6,1,0,2,3,4,5]))),
+	NSPanelsIndexView: (0, import_react.lazy)(() => __vitePreload(() => import("./NSPanelsView-DlzIamoG.js"), __vite__mapDeps([7,3,4,8,1,9,10]))),
+	NSPanelToastContainer: (0, import_react.lazy)(() => __vitePreload(() => import("./NSPanelToastContainer-pAFprjcA.js").then((n) => n.t), [])),
+	InitialSetup: (0, import_react.lazy)(() => __vitePreload(() => import("./InitialSetup-DfkaLPPm.js"), __vite__mapDeps([11,2,1,4,5,10]))),
+	NSPanelSideBar: (0, import_react.lazy)(() => __vitePreload(() => import("./Sidebar-CWWXiD--.js"), __vite__mapDeps([12,4,8,1,9,10]))),
+	NSPanelWarnings: (0, import_react.lazy)(() => __vitePreload(() => import("./Warnings-UGXtkddo.js"), __vite__mapDeps([13,9,1,8,4,10]))),
+	NSPanelLogs: (0, import_react.lazy)(() => __vitePreload(() => import("./Logs-DWgce5pg.js"), __vite__mapDeps([14,2,1,8,4])))
 };
 //#endregion
 //#region node_modules/react/cjs/react-jsx-runtime.production.js

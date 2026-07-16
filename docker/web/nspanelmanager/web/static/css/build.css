@@ -88,6 +88,24 @@
     }
 }
 
+/*.tile-background {
+    -webkit-mask-image: radial-gradient(circle at 60% 5%, black 0%, black 15%, transparent 70%);
+    mask-image: radial-gradient(circle at 60% 5%, black 0%, black 15%, transparent 70%);
+}*/
+
+@keyframes tile-background {
+    0%,
+    12.5%,
+    100% {
+        opacity: 1;
+    }
+
+    25%,
+    82.5% {
+        opacity: 0;
+    }
+}
+
 /* @plugin "daisyui/theme" {
     name: "nspmwip";
     default: false;

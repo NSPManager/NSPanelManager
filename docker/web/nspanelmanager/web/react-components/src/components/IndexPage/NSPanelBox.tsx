@@ -196,274 +196,319 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
   const delete_nspanel_dialog_ref = useRef<HTMLDialogElement>(null);
 
   return (
-    <div className="p-2 relative h-full">
-      <DeleteNSPanelConfirmDialog status={status} ref={delete_nspanel_dialog_ref} delete_nspanel_dialog_ref={delete_nspanel_dialog_ref} />
-      <div className="flex justify-between mx-auto">
-        <a href={`/nspanel/${status.id}`} className="font-medium text-lg">
-          {status.name}
-        </a>
-        <div className="flex items-center justify-end">
-          {(() => {
-            if (status.state === "online") {
-              return null; // No status text to show, panel is working as excpected.
-            } else if (status.state === "offline") {
-              return <span className="flex items-end justify-end text-right italic font-light text-sm">Offline</span>;
-            } else if (status.state === "rebooting") {
-              return <span className="flex items-end justify-end text-right italic font-light text-sm">Rebooting</span>;
-            } else if (status.state === "waiting") {
-              return <span className="flex items-end justify-end text-right italic font-light text-sm">Waiting</span>;
-            } else if (status.state === "updating_fw") {
-              return <span className="flex items-end justify-end text-right italic font-light text-sm">Updating firmware, {status.update_progress}%</span>;
-            } else if (status.state === "updating_fs") {
-              return <span className="flex items-end justify-end text-right italic font-light text-sm">Updating filesystem, {status.update_progress}%</span>;
-            } else if (status.state === "updating_tft") {
-              return <span className="flex items-end justify-end text-right italic font-light text-sm">Updating GUI, {status.update_progress}%</span>;
-            } else {
-              return <span className="flex items-end justify-end text-right italic font-light text-sm text-warning">Unknown status: {status.state}</span>;
-            }
-            return null;
-          })()}
-          {status.state != "offline" && <NSPanelWarnings warnings={status.warnings}></NSPanelWarnings>}
-        </div>
-      </div>
+    <>
+      <div className="relative h-auto">
+        <div className="tile-background w-full h-full group overflow-hidden absolute mb-1 opacity-0 hover:opacity-5">
+          <div className="grid grid-cols-8 w-full h-full">
+            <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-1 group-hover:opacity-50"></div>
+            <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-6s] tile-2 group-hover:opacity-50"></div>
+            <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-4s] tile-3 group-hover:opacity-50"></div>
+            <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-4 group-hover:opacity-50"></div>
+            <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-4s] tile-1 group-hover:opacity-50"></div>
+            <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-2 group-hover:opacity-50"></div>
+            <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-3 group-hover:opacity-50"></div>
+            <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-4s] tile-4 group-hover:opacity-50"></div>
 
-      <div className="flex justify-between items-end">
-        <div>
-          <div className="my-1">
-            {(() => {
-              if (status.model != "sonoff" && status.model != "custom") return null;
-              if (status.state == "offline" || status.state == "unknown" || status.state == "waiting" || status.state == "rebooting") {
-                return (
-                  <span className="icon-text text-sm text-base-content/50">
-                    <Icon path={mdiWifiStrengthAlertOutline} className="w-4 h-4 inline-block me-1"></Icon>-
-                  </span>
-                );
-              } else if (status.rssi <= -80) {
-                return (
-                  <span className="icon-text text-sm">
-                    <Icon path={mdiWifiStrength1Alert} className="w-4 h-4 inline-block me-1"></Icon>
-                    {status.rssi} dBm
-                  </span>
-                );
-              } else if (status.rssi <= -70) {
-                return (
-                  <span className="icon-text text-sm">
-                    <Icon path={mdiWifiStrength2} className="w-4 h-4 inline-block me-1"></Icon>
-                    {status.rssi} dBm
-                  </span>
-                );
-              } else if (status.rssi <= -55) {
-                return (
-                  <span className="icon-text text-sm">
-                    <Icon path={mdiWifiStrength3} className="w-4 h-4 inline-block me-1"></Icon>
-                    {status.rssi} dBm
-                  </span>
-                );
-              } else {
-                return (
-                  <span className="icon-text text-sm">
-                    <Icon path={mdiWifiStrength4} className="w-4 h-4 inline-block me-1"></Icon>
-                    {status.rssi} dBm
-                  </span>
-                );
-              }
-            })()}
+            <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-4s] tile-1 group-hover:opacity-50"></div>
+            <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-2 group-hover:opacity-50"></div>
+            <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-6s] tile-3 group-hover:opacity-50"></div>
+            <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-4s] tile-4 group-hover:opacity-50"></div>
+            <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-1 group-hover:opacity-50"></div>
+            <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-6s] tile-2 group-hover:opacity-50"></div>
+            <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-4s] tile-3 group-hover:opacity-50"></div>
+            <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-4 group-hover:opacity-50"></div>
+
+            <div className="w-full h-full col-span-4 bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-6s] tile-1 group-hover:opacity-50"></div>
+            <div className="w-full h-full col-span-4 bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-2 group-hover:opacity-50"></div>
           </div>
-          <div className="my-1">
-            {(() => {
-              if (status.model != "sonoff" && status.model != "custom") return null;
-              if (status.state == "offline" || status.state == "unknown" || status.state == "waiting" || status.state == "rebooting") {
-                return (
-                  <div className="flex items-center justify-start text-base-content/50">
-                    <div className="icon-text">
-                      <Icon path={mdiThermometer} className="w-4 h-4 inline-block me-1"></Icon>-
-                      <span id="temperature-${nspanel_id}" className="text-sm">
-                        -
+
+          {/*Vertical lines*/}
+          <div className="absolute left-1/8 top-0 w-px h-full bg-white"></div>
+          <div className="absolute left-2/8 top-0 w-px h-full bg-white"></div>
+          <div className="absolute left-3/8 top-0 w-px h-full bg-white"></div>
+          <div className="absolute left-4/8 top-0 w-px h-full bg-white"></div>
+          <div className="absolute left-5/8 top-0 w-px h-full bg-white"></div>
+          <div className="absolute left-6/8 top-0 w-px h-full bg-white"></div>
+          <div className="absolute left-7/8 top-0 w-px h-full bg-white"></div>
+          <div className="absolute left-8/8 top-0 w-px h-full bg-white"></div>
+
+          {/*Horizontal lines*/}
+          <div className="absolute left-0 top-1/3 w-full h-px bg-white"></div>
+          <div className="absolute left-0 top-2/3 w-full h-px bg-white"></div>
+          <div className="absolute left-0 top-3/3 w-full h-px bg-white"></div>
+        </div>
+        <DeleteNSPanelConfirmDialog status={status} ref={delete_nspanel_dialog_ref} delete_nspanel_dialog_ref={delete_nspanel_dialog_ref} />
+        <div className="p-2 h-full">
+          <div className="flex justify-between mx-auto">
+            <a href={`/nspanel/${status.id}`} className="font-medium text-lg">
+              {status.name}
+            </a>
+            <div className="flex items-center justify-end">
+              {(() => {
+                if (status.state === "online") {
+                  return null; // No status text to show, panel is working as excpected.
+                } else if (status.state === "offline") {
+                  return <span className="flex items-end justify-end text-right italic font-light text-sm">Offline</span>;
+                } else if (status.state === "rebooting") {
+                  return <span className="flex items-end justify-end text-right italic font-light text-sm">Rebooting</span>;
+                } else if (status.state === "waiting") {
+                  return <span className="flex items-end justify-end text-right italic font-light text-sm">Waiting</span>;
+                } else if (status.state === "updating_fw") {
+                  return <span className="flex items-end justify-end text-right italic font-light text-sm">Updating firmware, {status.update_progress}%</span>;
+                } else if (status.state === "updating_fs") {
+                  return (
+                    <span className="flex items-end justify-end text-right italic font-light text-sm">Updating filesystem, {status.update_progress}%</span>
+                  );
+                } else if (status.state === "updating_tft") {
+                  return <span className="flex items-end justify-end text-right italic font-light text-sm">Updating GUI, {status.update_progress}%</span>;
+                } else {
+                  return <span className="flex items-end justify-end text-right italic font-light text-sm text-warning">Unknown status: {status.state}</span>;
+                }
+                return null;
+              })()}
+              {status.state != "offline" && <NSPanelWarnings warnings={status.warnings}></NSPanelWarnings>}
+            </div>
+          </div>
+
+          <div className="flex justify-between items-end">
+            <div>
+              <div className="my-1">
+                {(() => {
+                  if (status.model != "sonoff" && status.model != "custom") return null;
+                  if (status.state == "offline" || status.state == "unknown" || status.state == "waiting" || status.state == "rebooting") {
+                    return (
+                      <span className="icon-text text-sm text-base-content/50">
+                        <Icon path={mdiWifiStrengthAlertOutline} className="w-4 h-4 inline-block me-1"></Icon>-
                       </span>
-                    </div>
-                    {status.model == "custom" && (
-                      <>
-                        <span className="mx-1">|</span>
-                        <div className="icon-text text-base-content/50">
-                          <Icon path={mdiWaterPercent} className="w-4 h-4 inline-block me-1"></Icon>-
-                          <span id="humidity-${nspanel_id}" className="text-sm">
+                    );
+                  } else if (status.rssi <= -80) {
+                    return (
+                      <span className="icon-text text-sm">
+                        <Icon path={mdiWifiStrength1Alert} className="w-4 h-4 inline-block me-1"></Icon>
+                        {status.rssi} dBm
+                      </span>
+                    );
+                  } else if (status.rssi <= -70) {
+                    return (
+                      <span className="icon-text text-sm">
+                        <Icon path={mdiWifiStrength2} className="w-4 h-4 inline-block me-1"></Icon>
+                        {status.rssi} dBm
+                      </span>
+                    );
+                  } else if (status.rssi <= -55) {
+                    return (
+                      <span className="icon-text text-sm">
+                        <Icon path={mdiWifiStrength3} className="w-4 h-4 inline-block me-1"></Icon>
+                        {status.rssi} dBm
+                      </span>
+                    );
+                  } else {
+                    return (
+                      <span className="icon-text text-sm">
+                        <Icon path={mdiWifiStrength4} className="w-4 h-4 inline-block me-1"></Icon>
+                        {status.rssi} dBm
+                      </span>
+                    );
+                  }
+                })()}
+              </div>
+              <div className="my-1">
+                {(() => {
+                  if (status.model != "sonoff" && status.model != "custom") return null;
+                  if (status.state == "offline" || status.state == "unknown" || status.state == "waiting" || status.state == "rebooting") {
+                    return (
+                      <div className="flex items-center justify-start text-base-content/50">
+                        <div className="icon-text">
+                          <Icon path={mdiThermometer} className="w-4 h-4 inline-block me-1"></Icon>-
+                          <span id="temperature-${nspanel_id}" className="text-sm">
                             -
                           </span>
                         </div>
-                        <span className="mx-1">|</span>
-                        <div className="icon-text text-base-content/50">
-                          <Icon path={mdiGauge} className="w-4 h-4 inline-block me-1"></Icon>-
-                          <span id="pressure-${nspanel_id}" className="text-sm">
-                            -
-                          </span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                );
-              } else {
-                return (
-                  <div className="flex items-center justify-start">
-                    <div className="icon-text">
-                      <Icon path={mdiThermometer} className="w-4 h-4 inline-block me-1"></Icon>-
-                      <span id="temperature-${nspanel_id}" className="text-sm">
-                        {status.temperature.toFixed(1)}
-                        {status.temperature_unit}
-                      </span>
-                    </div>
-                    {status.model == "custom" && (
-                      <>
-                        <span className="mx-1">|</span>
+                        {status.model == "custom" && (
+                          <>
+                            <span className="mx-1">|</span>
+                            <div className="icon-text text-base-content/50">
+                              <Icon path={mdiWaterPercent} className="w-4 h-4 inline-block me-1"></Icon>-
+                              <span id="humidity-${nspanel_id}" className="text-sm">
+                                -
+                              </span>
+                            </div>
+                            <span className="mx-1">|</span>
+                            <div className="icon-text text-base-content/50">
+                              <Icon path={mdiGauge} className="w-4 h-4 inline-block me-1"></Icon>-
+                              <span id="pressure-${nspanel_id}" className="text-sm">
+                                -
+                              </span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div className="flex items-center justify-start">
                         <div className="icon-text">
-                          <Icon path={mdiWaterPercent} className="w-4 h-4 inline-block me-1"></Icon>
-                          <span id="humidity-${nspanel_id}" className="text-sm">
-                            {(status.humidity && `${status.humidity.toFixed(1)}%`) || "-"}
+                          <Icon path={mdiThermometer} className="w-4 h-4 inline-block me-1"></Icon>-
+                          <span id="temperature-${nspanel_id}" className="text-sm">
+                            {status.temperature.toFixed(1)}
+                            {status.temperature_unit}
                           </span>
                         </div>
-                        <span className="mx-1">|</span>
-                        <div className="icon-text">
-                          <Icon path={mdiGauge} className="w-4 h-4 inline-block me-1"></Icon>
-                          <span id="pressure-${nspanel_id}" className="text-sm">
-                            {(status.pressure && `${(status.pressure / 100).toFixed(1)} hPa`) || "-"}
-                          </span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                );
-              }
-              return null;
-            })()}
+                        {status.model == "custom" && (
+                          <>
+                            <span className="mx-1">|</span>
+                            <div className="icon-text">
+                              <Icon path={mdiWaterPercent} className="w-4 h-4 inline-block me-1"></Icon>
+                              <span id="humidity-${nspanel_id}" className="text-sm">
+                                {(status.humidity && `${status.humidity.toFixed(1)}%`) || "-"}
+                              </span>
+                            </div>
+                            <span className="mx-1">|</span>
+                            <div className="icon-text">
+                              <Icon path={mdiGauge} className="w-4 h-4 inline-block me-1"></Icon>
+                              <span id="pressure-${nspanel_id}" className="text-sm">
+                                {(status.pressure && `${(status.pressure / 100).toFixed(1)} hPa`) || "-"}
+                              </span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+              </div>
+              <div className="my-1">
+                {(() => {
+                  if (status.model != "sonoff" && status.model != "custom") return null;
+                  if (status.state == "offline" || status.state == "unknown" || status.state == "waiting" || status.state == "rebooting") {
+                    return (
+                      <div className="icon-text text-base-content/50">
+                        <Icon path={mdiMemory} className="w-4 h-4 inline-block me-1"></Icon>
+                        <span id="ram-${nspanel_id}" className="text-sm">
+                          -
+                        </span>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <div className="icon-text">
+                        <Icon path={mdiMemory} className="w-4 h-4 inline-block me-1"></Icon>
+                        <span id="ram-${nspanel_id}" className="text-sm">
+                          {status.ram_usage.toFixed(0)}%
+                        </span>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+              </div>
+            </div>
           </div>
-          <div className="my-1">
-            {(() => {
-              if (status.model != "sonoff" && status.model != "custom") return null;
-              if (status.state == "offline" || status.state == "unknown" || status.state == "waiting" || status.state == "rebooting") {
-                return (
-                  <div className="icon-text text-base-content/50">
-                    <Icon path={mdiMemory} className="w-4 h-4 inline-block me-1"></Icon>
-                    <span id="ram-${nspanel_id}" className="text-sm">
-                      -
-                    </span>
-                  </div>
-                );
-              } else {
-                return (
-                  <div className="icon-text">
-                    <Icon path={mdiMemory} className="w-4 h-4 inline-block me-1"></Icon>
-                    <span id="ram-${nspanel_id}" className="text-sm">
-                      {status.ram_usage.toFixed(0)}%
-                    </span>
-                  </div>
-                );
-              }
-              return null;
-            })()}
-          </div>
-        </div>
-      </div>
 
-      <div className="absolute right-2 bottom-2">
-        <button
-          className="font-medium text-sm px-1 py-2 text-center inline-flex items-center cursor-pointer"
-          popoverTarget={`nspanel-actions-${status.id}`}
-          style={{ anchorName: `--anchor-nspanel-actions-${status.id}` }}
-        >
-          <Icon path={mdiCog} className="w-4 h-4"></Icon>
-        </button>
-        <ul
-          className="dropdown menu w-52 rounded-box bg-base-100 shadow-sm"
-          popover="auto"
-          id={`nspanel-actions-${status.id}`}
-          style={{ anchorName: `--anchor-nspanel-actions-${status.id}` }}
-          ref={popoverRef}
-        >
-          {status.model === "sonoff" || status.model === "custom" ? (
-            <>
+          <div className="absolute right-2 bottom-2">
+            <button
+              className="font-medium text-sm px-1 py-2 text-center inline-flex items-center cursor-pointer"
+              popoverTarget={`nspanel-actions-${status.id}`}
+              style={{ anchorName: `--anchor-nspanel-actions-${status.id}` }}
+            >
+              <Icon path={mdiCog} className="w-4 h-4"></Icon>
+            </button>
+            <ul
+              className="dropdown menu w-52 rounded-box bg-base-100 shadow-sm"
+              popover="auto"
+              id={`nspanel-actions-${status.id}`}
+              style={{ anchorName: `--anchor-nspanel-actions-${status.id}` }}
+              ref={popoverRef}
+            >
+              {status.model === "sonoff" || status.model === "custom" ? (
+                <>
+                  <li>
+                    <button
+                      onClick={() => {
+                        useStompStore.getState().send(`nspanel/${status.mac}/command`, "reboot");
+                        Notify({ message: `Sent reboot command to ${status.name}.`, level: "success", duration: 2000 });
+                        popoverRef.current?.hidePopover();
+                      }}
+                      id="reboot-{{ id }}"
+                      hx-swap="none"
+                      className="block px-4 py-2 cursor-pointer nspanel-reboot-button group"
+                    >
+                      <Icon path={mdiRestart} className="w-4 h-4 inline-block me-1 group-hover:text-warning"></Icon>
+                      Reboot
+                    </button>
+                  </li>
+                  <li>
+                    <a
+                      href={status.state === "offline" ? "#" : `http://${status.ip_address}/`}
+                      onClick={() => (status.state != "offline" ? popoverRef.current?.hidePopover() : null)}
+                      id="visit-{{ id }}"
+                      hx-swap="none"
+                      className={`block px-4 py-2 cursor-pointer nspanel-visit-button group ${status.state === "offline" ? "line-through" : ""}`}
+                      target="_blank"
+                      aria-disabled={status.state === "offline"}
+                    >
+                      <Icon path={mdiWeb} className="w-4 h-4 inline-block me-1 group-hover:text-info"></Icon>
+                      Visit
+                    </a>
+                  </li>
+                  <li className="border-t border-neutral-content"></li>
+                  <li>
+                    <a
+                      onClick={() => {
+                        if (status.state !== "offline") {
+                          useStompStore.getState().send(`nspanel/${status.mac}/command`, "firmware_update");
+                          Notify({ message: `Sent firmware update command to ${status.name}.`, level: "success", duration: 2000 });
+                          popoverRef.current?.hidePopover();
+                        }
+                      }}
+                      id="firmware-update-{{ nspanel.data.id }}"
+                      className={`block px-4 py-2 cursor-pointer group ${status.state === "offline" ? "line-through" : ""}`}
+                      aria-disabled={status.state === "offline"}
+                    >
+                      <Icon path={mdiUpload} className="w-4 h-4 inline-block me-1 group-hover:text-success"></Icon>
+                      Update firmware
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      onClick={() => {
+                        if (status.state !== "offline") {
+                          useStompStore.getState().send(`nspanel/${status.mac}/command`, "gui_update");
+                          Notify({ message: `Sent GUI update command to ${status.name}.`, level: "success", duration: 2000 });
+                          popoverRef.current?.hidePopover();
+                        }
+                      }}
+                      id="screen-update-{{ nspanel.data.id }}"
+                      className={`block px-4 py-2 cursor-pointer group ${status.state === "offline" ? "line-through" : ""}`}
+                      aria-disabled={status.state === "offline"}
+                    >
+                      <Icon path={mdiTableArrowUp} className="w-4 h-4 inline-block me-1 group-hover:text-success"></Icon>
+                      Update GUI
+                    </a>
+                  </li>
+                  <li className="border-t border-neutral-content"></li>
+                </>
+              ) : null}
               <li>
                 <button
                   onClick={() => {
-                    useStompStore.getState().send(`nspanel/${status.mac}/command`, "reboot");
-                    Notify({ message: `Sent reboot command to ${status.name}.`, level: "success", duration: 2000 });
+                    delete_nspanel_dialog_ref.current?.showModal();
                     popoverRef.current?.hidePopover();
                   }}
-                  id="reboot-{{ id }}"
+                  id="delete-{{ id }}"
                   hx-swap="none"
-                  className="block px-4 py-2 cursor-pointer nspanel-reboot-button group"
+                  className="block px-4 py-2 cursor-pointer group"
                 >
-                  <Icon path={mdiRestart} className="w-4 h-4 inline-block me-1 group-hover:text-warning"></Icon>
-                  Reboot
+                  <Icon path={mdiMinusCircle} className="w-4 h-4 inline-block me-1 group-hover:text-error"></Icon>
+                  Delete
                 </button>
               </li>
-              <li>
-                <a
-                  href={status.state === "offline" ? "#" : `http://${status.ip_address}/`}
-                  onClick={() => (status.state != "offline" ? popoverRef.current?.hidePopover() : null)}
-                  id="visit-{{ id }}"
-                  hx-swap="none"
-                  className={`block px-4 py-2 cursor-pointer nspanel-visit-button group ${status.state === "offline" ? "line-through" : ""}`}
-                  target="_blank"
-                  aria-disabled={status.state === "offline"}
-                >
-                  <Icon path={mdiWeb} className="w-4 h-4 inline-block me-1 group-hover:text-info"></Icon>
-                  Visit
-                </a>
-              </li>
-              <li className="border-t border-neutral-content"></li>
-              <li>
-                <a
-                  onClick={() => {
-                    if (status.state !== "offline") {
-                      useStompStore.getState().send(`nspanel/${status.mac}/command`, "firmware_update");
-                      Notify({ message: `Sent firmware update command to ${status.name}.`, level: "success", duration: 2000 });
-                      popoverRef.current?.hidePopover();
-                    }
-                  }}
-                  id="firmware-update-{{ nspanel.data.id }}"
-                  className={`block px-4 py-2 cursor-pointer group ${status.state === "offline" ? "line-through" : ""}`}
-                  aria-disabled={status.state === "offline"}
-                >
-                  <Icon path={mdiUpload} className="w-4 h-4 inline-block me-1 group-hover:text-success"></Icon>
-                  Update firmware
-                </a>
-              </li>
-              <li>
-                <a
-                  onClick={() => {
-                    if (status.state !== "offline") {
-                      useStompStore.getState().send(`nspanel/${status.mac}/command`, "gui_update");
-                      Notify({ message: `Sent GUI update command to ${status.name}.`, level: "success", duration: 2000 });
-                      popoverRef.current?.hidePopover();
-                    }
-                  }}
-                  id="screen-update-{{ nspanel.data.id }}"
-                  className={`block px-4 py-2 cursor-pointer group ${status.state === "offline" ? "line-through" : ""}`}
-                  aria-disabled={status.state === "offline"}
-                >
-                  <Icon path={mdiTableArrowUp} className="w-4 h-4 inline-block me-1 group-hover:text-success"></Icon>
-                  Update GUI
-                </a>
-              </li>
-              <li className="border-t border-neutral-content"></li>
-            </>
-          ) : null}
-          <li>
-            <button
-              onClick={() => {
-                delete_nspanel_dialog_ref.current?.showModal();
-                popoverRef.current?.hidePopover();
-              }}
-              id="delete-{{ id }}"
-              hx-swap="none"
-              className="block px-4 py-2 cursor-pointer group"
-            >
-              <Icon path={mdiMinusCircle} className="w-4 h-4 inline-block me-1 group-hover:text-error"></Icon>
-              Delete
-            </button>
-          </li>
-        </ul>
+            </ul>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
