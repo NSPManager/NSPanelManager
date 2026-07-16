@@ -690,6 +690,7 @@ void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
     NSPanelMQTTManagerCommand base_command;
     base_command.CopyFrom(command);
     auto *turn_on_command = base_command.mutable_first_page_turn_on();
+    turn_on_command->set_global(false);
 
     // Check if ANY table or ceiling light is turned on.
     std::list<std::shared_ptr<Light>> ceiling_lights;
@@ -710,7 +711,6 @@ void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
       // Turn on all lights in all the room
       SPDLOG_DEBUG("No lights are turned on, will send command to ALL rooms while processing 'All rooms' command");
       for (auto &room : rooms) {
-        turn_on_command->set_global(false);
         turn_on_command->set_selected_room(room->get_id());
         room->command_callback(base_command);
       }
@@ -757,7 +757,6 @@ void EntityManager::_command_callback(NSPanelMQTTManagerCommand &command) {
         std::vector<std::shared_ptr<Light>> lights = room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
         for (auto &light : lights) {
           if (light->get_state() && light->get_controlled_from_main_page()) {
-            turn_on_command->set_global(false);
             turn_on_command->set_selected_room(room->get_id());
             room->command_callback(base_command);
             break;
