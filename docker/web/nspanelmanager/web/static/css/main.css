@@ -3514,6 +3514,9 @@
   .top-2\/3 {
     top: calc(2/3 * 100%);
   }
+  .top-3 {
+    top: calc(var(--spacing) * 3);
+  }
   .top-3\/3 {
     top: calc(3/3 * 100%);
   }
@@ -3584,6 +3587,9 @@
   .left-0 {
     left: calc(var(--spacing) * 0);
   }
+  .left-1 {
+    left: calc(var(--spacing) * 1);
+  }
   .left-1\/8 {
     left: calc(1/8 * 100%);
   }
@@ -3593,20 +3599,38 @@
   .left-2\/8 {
     left: calc(2/8 * 100%);
   }
+  .left-3 {
+    left: calc(var(--spacing) * 3);
+  }
   .left-3\/8 {
     left: calc(3/8 * 100%);
+  }
+  .left-4 {
+    left: calc(var(--spacing) * 4);
   }
   .left-4\/8 {
     left: calc(4/8 * 100%);
   }
+  .left-5 {
+    left: calc(var(--spacing) * 5);
+  }
   .left-5\/8 {
     left: calc(5/8 * 100%);
+  }
+  .left-6 {
+    left: calc(var(--spacing) * 6);
   }
   .left-6\/8 {
     left: calc(6/8 * 100%);
   }
+  .left-7 {
+    left: calc(var(--spacing) * 7);
+  }
   .left-7\/8 {
     left: calc(7/8 * 100%);
+  }
+  .left-8 {
+    left: calc(var(--spacing) * 8);
   }
   .left-8\/8 {
     left: calc(8/8 * 100%);
@@ -5702,6 +5726,9 @@
   .max-h-0 {
     max-height: calc(var(--spacing) * 0);
   }
+  .max-h-11 {
+    max-height: calc(var(--spacing) * 11);
+  }
   .max-h-11\/12 {
     max-height: calc(11/12 * 100%);
   }
@@ -5922,6 +5949,9 @@
   .max-w-4xl {
     max-width: var(--container-4xl);
   }
+  .max-w-6 {
+    max-width: calc(var(--spacing) * 6);
+  }
   .max-w-6\/12 {
     max-width: calc(6/12 * 100%);
   }
@@ -6050,6 +6080,22 @@
   .translate-full {
     --tw-translate-x: 100%;
     --tw-translate-y: 100%;
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+  }
+  .-translate-x-1 {
+    --tw-translate-x: calc(var(--spacing) * -1);
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+  }
+  .-translate-x-1\/2 {
+    --tw-translate-x: calc(calc(1/2 * 100%) * -1);
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+  }
+  .-translate-y-1 {
+    --tw-translate-y: calc(var(--spacing) * -1);
+    translate: var(--tw-translate-x) var(--tw-translate-y);
+  }
+  .-translate-y-1\/2 {
+    --tw-translate-y: calc(calc(1/2 * 100%) * -1);
     translate: var(--tw-translate-x) var(--tw-translate-y);
   }
   .translate-3d {
@@ -7311,6 +7357,9 @@
   .border-transparent {
     border-color: transparent;
   }
+  .border-warning {
+    border-color: var(--color-warning);
+  }
   .border-warning\/50 {
     border-color: color-mix(in oklab, var(--color-warning) 50%, transparent);
   }
@@ -7574,6 +7623,11 @@
   }
   .from-30\% {
     --tw-gradient-from-position: 30%;
+  }
+  .via-accent {
+    --tw-gradient-via: var(--color-accent);
+    --tw-gradient-via-stops: var(--tw-gradient-position), var(--tw-gradient-from) var(--tw-gradient-from-position), var(--tw-gradient-via) var(--tw-gradient-via-position), var(--tw-gradient-to) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-via-stops);
   }
   .via-accent\/50 {
     --tw-gradient-via: color-mix(in oklab, var(--color-accent) 50%, transparent);
@@ -7891,6 +7945,9 @@
     --size: calc(var(--size-selector, 0.25rem) * 4);
     font-size: 0.625rem;
     padding-inline: calc(0.25rem * 2 - var(--border));
+  }
+  .px-0 {
+    padding-inline: calc(var(--spacing) * 0);
   }
   .px-0\.5 {
     padding-inline: calc(var(--spacing) * 0.5);
@@ -8629,6 +8686,9 @@
   .text-success-content {
     color: var(--color-success-content);
   }
+  .text-transparent {
+    color: transparent;
+  }
   .text-warning {
     color: var(--color-warning);
   }
@@ -8830,6 +8890,9 @@
   .opacity-60 {
     opacity: 60%;
   }
+  .opacity-100 {
+    opacity: 100%;
+  }
   .mix-blend-plus-darker {
     mix-blend-mode: plus-darker;
   }
@@ -8886,6 +8949,9 @@
   }
   .shadow-initial {
     --tw-shadow-color: initial;
+  }
+  .shadow-neutral {
+    --tw-shadow-color: var(--color-neutral);
   }
   .shadow-neutral\/3 {
     --tw-shadow-color: color-mix(in oklab, var(--color-neutral) 3%, transparent);
@@ -10177,6 +10243,13 @@
     &:hover {
       @media (hover: hover) {
         opacity: 5%;
+      }
+    }
+  }
+  .hover\:opacity-10 {
+    &:hover {
+      @media (hover: hover) {
+        opacity: 10%;
       }
     }
   }

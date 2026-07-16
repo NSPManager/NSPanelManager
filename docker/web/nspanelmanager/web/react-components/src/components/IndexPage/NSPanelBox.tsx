@@ -4,6 +4,7 @@ import { useEntityStatesStore, type INSPanelStatusData, type INSPanelWarningData
 import { useRef, useState, useEffect, forwardRef } from "react";
 import { Notify } from "../NSPanelToastContainer.tsx";
 import { useStompStore } from "../../stores/StompStore.tsx";
+import { motion, useMotionValue, useSpring, useMotionTemplate } from "framer-motion";
 import { Icon } from "@mdi/react";
 import {
   mdiAlertCircle,
@@ -193,13 +194,37 @@ const NSPanelWarnings = ({ warnings }: { warnings: INSPanelWarningData[] }) => {
 
 const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
   const popoverRef = useRef<HTMLUListElement>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
   const delete_nspanel_dialog_ref = useRef<HTMLDialogElement>(null);
+
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springX = useSpring(mouseX, { stiffness: 300, damping: 30 });
+  const springY = useSpring(mouseY, { stiffness: 300, damping: 30 });
+
+  const clipPath = useMotionTemplate`radial-gradient(circle at ${springX}px ${springY}px, black 0%, black 15%, transparent 70%)`;
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const boundingRect = boxRef.current?.getBoundingClientRect();
+      if (!boundingRect) return;
+
+      mouseX.set(e.clientX - boundingRect.left);
+      mouseY.set(e.clientY - boundingRect.top);
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, [mouseX, mouseY]);
 
   return (
     <>
-      <div className="relative h-auto">
-        <div className="tile-background w-full h-full group overflow-hidden absolute mb-1 opacity-0 hover:opacity-5">
-          <div className="grid grid-cols-8 w-full h-full">
+      <div className="relative h-auto" ref={boxRef}>
+        <motion.div
+          style={{ WebkitMaskImage: clipPath, maskImage: clipPath }}
+          className="absolute tile-background w-full h-full group overflow-hidden mb-1 opacity-0 hover:opacity-5"
+        >
+          <div className="grid grid-cols-8 w-full h-full inset-0">
             <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-1 group-hover:opacity-50"></div>
             <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-6s] tile-2 group-hover:opacity-50"></div>
             <div className="w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-4s] tile-3 group-hover:opacity-50"></div>
@@ -236,7 +261,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
           <div className="absolute left-0 top-1/3 w-full h-px bg-white"></div>
           <div className="absolute left-0 top-2/3 w-full h-px bg-white"></div>
           <div className="absolute left-0 top-3/3 w-full h-px bg-white"></div>
-        </div>
+        </motion.div>
         <DeleteNSPanelConfirmDialog status={status} ref={delete_nspanel_dialog_ref} delete_nspanel_dialog_ref={delete_nspanel_dialog_ref} />
         <div className="p-2 h-full">
           <div className="flex justify-between mx-auto">
