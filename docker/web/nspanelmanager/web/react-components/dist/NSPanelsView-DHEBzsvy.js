@@ -1,10 +1,10 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-BUiCFwMe.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-BjIZBzMz.js";
-import { n as Notify } from "./NSPanelToastContainer-BrUd3OHj.js";
-import { a as collectMotionValues, c as JSAnimation, d as frame, i as isMotionValue, l as interpolate, m as useConstant, o as motionValue, p as useIsomorphicLayoutEffect, r as MotionConfigContext, t as motion, u as cancelFrame } from "./proxy-DyZxDI_T.js";
-import { t as useStompStore } from "./StompStore-zF6eV8DX.js";
-import { t as useEntityStatesStore } from "./EntityStore-B6XRFEZU.js";
-import { _ as mdiWifiStrength4, a as mdiMemory, c as mdiRestart, d as mdiUpload, g as mdiWifiStrength3, h as mdiWifiStrength2, l as mdiTableArrowUp, m as mdiWifiStrength1Alert, n as mdiCog, o as mdiMenuDownOutline, p as mdiWeb, s as mdiMinusCircle, u as mdiThermometer, v as mdiWifiStrengthAlertOutline, y as require_Icon } from "./mdi-DsYFoSOO.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-Dhmdi5Xt.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-DxXsW9Wi.js";
+import { n as Notify } from "./NSPanelToastContainer-CA5Eqdls.js";
+import { a as collectMotionValues, c as JSAnimation, d as frame, i as isMotionValue, l as interpolate, m as useConstant, o as motionValue, p as useIsomorphicLayoutEffect, r as MotionConfigContext, t as motion, u as cancelFrame } from "./proxy-DyYOxtB3.js";
+import { t as useStompStore } from "./StompStore-DSmuA-f0.js";
+import { t as useEntityStatesStore } from "./EntityStore-CTp1Ux3g.js";
+import { _ as mdiWifiStrength4, a as mdiMemory, c as mdiRestart, d as mdiUpload, g as mdiWifiStrength3, h as mdiWifiStrength2, l as mdiTableArrowUp, m as mdiWifiStrength1Alert, n as mdiCog, o as mdiMenuDownOutline, p as mdiWeb, s as mdiMinusCircle, u as mdiThermometer, v as mdiWifiStrengthAlertOutline, y as require_Icon } from "./mdi-DbmAi7-6.js";
 //#region node_modules/motion-dom/dist/es/utils/transform.mjs
 function transform(...args) {
 	const useImmediate = !Array.isArray(args[0]);
@@ -460,7 +460,7 @@ var AcceptedNSPanelContent = ({ status }) => {
 	})}px ${useSpring(mouseY, {
 		stiffness: 300,
 		damping: 30
-	})}px, black 0%, black 15%, transparent 70%)`;
+	})}px, black 0%, black 15%, transparent 50%)`;
 	(0, import_react.useEffect)(() => {
 		const handleMouseMove = (e) => {
 			const boundingRect = boxRef.current?.getBoundingClientRect();
@@ -507,17 +507,17 @@ var AcceptedNSPanelContent = ({ status }) => {
 							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full col-span-4 bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-2 group-hover:opacity-50" })
 						]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-1/8 top-0 w-px h-full bg-white" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-2/8 top-0 w-px h-full bg-white" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-3/8 top-0 w-px h-full bg-white" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-4/8 top-0 w-px h-full bg-white" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-5/8 top-0 w-px h-full bg-white" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-6/8 top-0 w-px h-full bg-white" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-7/8 top-0 w-px h-full bg-white" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-8/8 top-0 w-px h-full bg-white" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-0 top-1/3 w-full h-px bg-white" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-0 top-2/3 w-full h-px bg-white" }),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-0 top-3/3 w-full h-px bg-white" })
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-1/8 top-0 w-px h-full bg-base-content" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-2/8 top-0 w-px h-full bg-base-content" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-3/8 top-0 w-px h-full bg-base-content" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-4/8 top-0 w-px h-full bg-base-content" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-5/8 top-0 w-px h-full bg-base-content" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-6/8 top-0 w-px h-full bg-base-content" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-7/8 top-0 w-px h-full bg-base-content" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-8/8 top-0 w-px h-full bg-base-content" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-0 top-1/3 w-full h-px bg-base-content" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-0 top-2/3 w-full h-px bg-base-content" }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-0 top-3/3 w-full h-px bg-base-content" })
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(DeleteNSPanelConfirmDialog, {
@@ -834,7 +834,7 @@ var AcceptedNSPanelContent = ({ status }) => {
 										className: "w-4 h-4 inline-block me-1 group-hover:text-info"
 									}), "Visit"]
 								}) }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: "border-t border-neutral-content" }),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: "border-t border-base-content" }),
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
 									onClick: () => {
 										if (status.state !== "offline") {
@@ -875,7 +875,7 @@ var AcceptedNSPanelContent = ({ status }) => {
 										className: "w-4 h-4 inline-block me-1 group-hover:text-success"
 									}), "Update GUI"]
 								}) }),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: "border-t border-neutral-content" })
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { className: "border-t border-base-content" })
 							] }) : null, /* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 								onClick: () => {
 									delete_nspanel_dialog_ref.current?.showModal();

@@ -7483,6 +7483,9 @@
   .bg-base-300 {
     background-color: var(--color-base-300);
   }
+  .bg-base-content {
+    background-color: var(--color-base-content);
+  }
   .bg-black {
     background-color: var(--color-black);
   }

@@ -1,4 +1,4 @@
-import { t as create } from "./react-Byao1cRW.js";
+import { t as create } from "./react-DVCRNpmA.js";
 //#region src/stores/SettingsStore.ts
 function getCookie(name) {
 	let cookieValue = "";

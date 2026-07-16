@@ -202,7 +202,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
   const springX = useSpring(mouseX, { stiffness: 300, damping: 30 });
   const springY = useSpring(mouseY, { stiffness: 300, damping: 30 });
 
-  const clipPath = useMotionTemplate`radial-gradient(circle at ${springX}px ${springY}px, black 0%, black 15%, transparent 70%)`;
+  const clipPath = useMotionTemplate`radial-gradient(circle at ${springX}px ${springY}px, black 0%, black 15%, transparent 50%)`;
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       const boundingRect = boxRef.current?.getBoundingClientRect();
@@ -248,19 +248,19 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
           </div>
 
           {/*Vertical lines*/}
-          <div className="absolute left-1/8 top-0 w-px h-full bg-white"></div>
-          <div className="absolute left-2/8 top-0 w-px h-full bg-white"></div>
-          <div className="absolute left-3/8 top-0 w-px h-full bg-white"></div>
-          <div className="absolute left-4/8 top-0 w-px h-full bg-white"></div>
-          <div className="absolute left-5/8 top-0 w-px h-full bg-white"></div>
-          <div className="absolute left-6/8 top-0 w-px h-full bg-white"></div>
-          <div className="absolute left-7/8 top-0 w-px h-full bg-white"></div>
-          <div className="absolute left-8/8 top-0 w-px h-full bg-white"></div>
+          <div className="absolute left-1/8 top-0 w-px h-full bg-base-content"></div>
+          <div className="absolute left-2/8 top-0 w-px h-full bg-base-content"></div>
+          <div className="absolute left-3/8 top-0 w-px h-full bg-base-content"></div>
+          <div className="absolute left-4/8 top-0 w-px h-full bg-base-content"></div>
+          <div className="absolute left-5/8 top-0 w-px h-full bg-base-content"></div>
+          <div className="absolute left-6/8 top-0 w-px h-full bg-base-content"></div>
+          <div className="absolute left-7/8 top-0 w-px h-full bg-base-content"></div>
+          <div className="absolute left-8/8 top-0 w-px h-full bg-base-content"></div>
 
           {/*Horizontal lines*/}
-          <div className="absolute left-0 top-1/3 w-full h-px bg-white"></div>
-          <div className="absolute left-0 top-2/3 w-full h-px bg-white"></div>
-          <div className="absolute left-0 top-3/3 w-full h-px bg-white"></div>
+          <div className="absolute left-0 top-1/3 w-full h-px bg-base-content"></div>
+          <div className="absolute left-0 top-2/3 w-full h-px bg-base-content"></div>
+          <div className="absolute left-0 top-3/3 w-full h-px bg-base-content"></div>
         </motion.div>
         <DeleteNSPanelConfirmDialog status={status} ref={delete_nspanel_dialog_ref} delete_nspanel_dialog_ref={delete_nspanel_dialog_ref} />
         <div className="p-2 h-full">
@@ -477,7 +477,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                       Visit
                     </a>
                   </li>
-                  <li className="border-t border-neutral-content"></li>
+                  <li className="border-t border-base-content"></li>
                   <li>
                     <a
                       onClick={() => {
@@ -512,7 +512,7 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                       Update GUI
                     </a>
                   </li>
-                  <li className="border-t border-neutral-content"></li>
+                  <li className="border-t border-base-content"></li>
                 </>
               ) : null}
               <li>
