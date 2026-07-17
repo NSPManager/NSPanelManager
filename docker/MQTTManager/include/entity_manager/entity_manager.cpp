@@ -629,7 +629,7 @@ void EntityManager::update_all_rooms_status() {
       all_rooms_status.set_ceiling_lights_dim_level(total_light_level_ceiling / num_lights_ceiling_on);
 
       if (num_kelvin_lights_ceiling > 0) {
-        float average_kelvin = (float)total_kelvin_table / num_kelvin_lights_table;
+        float average_kelvin = (float)total_kelvin_ceiling / num_kelvin_lights_ceiling;
         average_kelvin -= MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN);
         uint8_t kelvin_pct = (average_kelvin / (MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MAX) - MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN))) * 100;
         if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::REVERSE_COLOR_TEMP)) {
