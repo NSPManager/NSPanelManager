@@ -1,10 +1,10 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-Dhmdi5Xt.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-DxXsW9Wi.js";
-import { n as Notify } from "./NSPanelToastContainer-CA5Eqdls.js";
-import { a as collectMotionValues, c as JSAnimation, d as frame, i as isMotionValue, l as interpolate, m as useConstant, o as motionValue, p as useIsomorphicLayoutEffect, r as MotionConfigContext, t as motion, u as cancelFrame } from "./proxy-DyYOxtB3.js";
-import { t as useStompStore } from "./StompStore-DSmuA-f0.js";
-import { t as useEntityStatesStore } from "./EntityStore-CTp1Ux3g.js";
-import { _ as mdiWifiStrength4, a as mdiMemory, c as mdiRestart, d as mdiUpload, g as mdiWifiStrength3, h as mdiWifiStrength2, l as mdiTableArrowUp, m as mdiWifiStrength1Alert, n as mdiCog, o as mdiMenuDownOutline, p as mdiWeb, s as mdiMinusCircle, u as mdiThermometer, v as mdiWifiStrengthAlertOutline, y as require_Icon } from "./mdi-DbmAi7-6.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-ttieu6Zu.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-Dekoy5ud.js";
+import { n as Notify } from "./NSPanelToastContainer-DaUxEofp.js";
+import { a as collectMotionValues, c as JSAnimation, d as frame, i as isMotionValue, l as interpolate, m as useConstant, o as motionValue, p as useIsomorphicLayoutEffect, r as MotionConfigContext, t as motion, u as cancelFrame } from "./proxy-BycBWV9-.js";
+import { t as useStompStore } from "./StompStore-BKyW2wrw.js";
+import { t as useEntityStatesStore } from "./EntityStore-4d4atrdJ.js";
+import { _ as mdiWifiStrength4, a as mdiMemory, c as mdiRestart, d as mdiUpload, g as mdiWifiStrength3, h as mdiWifiStrength2, l as mdiTableArrowUp, m as mdiWifiStrength1Alert, n as mdiCog, o as mdiMenuDownOutline, p as mdiWeb, s as mdiMinusCircle, u as mdiThermometer, v as mdiWifiStrengthAlertOutline, y as require_Icon } from "./mdi-Daxclo8G.js";
 //#region node_modules/motion-dom/dist/es/utils/transform.mjs
 function transform(...args) {
 	const useImmediate = !Array.isArray(args[0]);
@@ -474,7 +474,7 @@ var AcceptedNSPanelContent = ({ status }) => {
 		};
 	}, [mouseX, mouseY]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "relative h-auto",
+		className: "relative h-auto group/box",
 		ref: boxRef,
 		children: [
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
@@ -482,29 +482,29 @@ var AcceptedNSPanelContent = ({ status }) => {
 					WebkitMaskImage: clipPath,
 					maskImage: clipPath
 				},
-				className: "absolute tile-background w-full h-full group overflow-hidden mb-1 opacity-0 hover:opacity-5",
+				className: "absolute tile-background w-full h-full group overflow-hidden mb-1 opacity-0 group-hover/box:opacity-5",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "grid grid-cols-8 w-full h-full inset-0",
 						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-1 group-hover:opacity-50" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-6s] tile-2 group-hover:opacity-50" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-4s] tile-3 group-hover:opacity-50" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-4 group-hover:opacity-50" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-4s] tile-1 group-hover:opacity-50" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-2 group-hover:opacity-50" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-3 group-hover:opacity-50" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-4s] tile-4 group-hover:opacity-50" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-4s] tile-1 group-hover:opacity-50" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-2 group-hover:opacity-50" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-6s] tile-3 group-hover:opacity-50" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-4s] tile-4 group-hover:opacity-50" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-1 group-hover:opacity-50" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-6s] tile-2 group-hover:opacity-50" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-4s] tile-3 group-hover:opacity-50" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-4 group-hover:opacity-50" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full col-span-4 bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-6s] tile-1 group-hover:opacity-50" }),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full col-span-4 bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-2 group-hover:opacity-50" })
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-1 group/box:opacity-50" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-6s] tile-2 group/box:opacity-50" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-4s] tile-3 group/box:opacity-50" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-4 group/box:opacity-50" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-4s] tile-1 group/box:opacity-50" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-2 group/box:opacity-50" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-6s] tile-3 group/box:opacity-50" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-4 group/box:opacity-50" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-4s] tile-1 group/box:opacity-50" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-2 group/box:opacity-50" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-6s] tile-3 group/box:opacity-50" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-4s] tile-4 group/box:opacity-50" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-1 group/box:opacity-50" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-6s] tile-2 group/box:opacity-50" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-3 group/box:opacity-50" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-4s] tile-4 group/box:opacity-50" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full col-span-4 bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-6s] tile-1 group/box:opacity-50" }),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "w-full h-full col-span-4 bg-accent [animation-name:tile-background] [animation-duration:8s] [animation-iteration-count:infinite] opacity-0 [animation-delay:-2s] tile-2 group/box:opacity-50" })
 						]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "absolute left-1/8 top-0 w-px h-full bg-base-content" }),
