@@ -49,6 +49,7 @@ export default function generate_script_tag_html_file(): Plugin {
           const filePath = path.join("dist/.vite/", file);
           await fs.chmod(filePath, 0o777); // Set permissions
         }
+        await fs.chmod("dist/.vite", 0o777); // Set permissions
 
         console.log("Generated templates/scripts.html successfully.");
       } catch (error) {
