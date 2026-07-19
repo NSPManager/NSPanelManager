@@ -33,5 +33,8 @@ source /root/.bash_env
 echo "Installing Node.js via NVM"
 nvm install
 
-cd /usr/src/app/nspanelmanager/web/react-components/
-npm install
+# We are running in dev mode and has therefore copied the react-components folder into the container
+if [ "$IS_DEVEL" == "yes" ]; then
+    cd /usr/src/app/nspanelmanager/web/react-components/
+    npm install
+fi
