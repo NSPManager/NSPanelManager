@@ -199,14 +199,24 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
 
               // Check if both last_will_topic and last_will_message are present
               bool last_will_message_retained = false;
-              StompLastWill last_will = {};
-              if (frame->headers.find("last_will_message_retained") != frame->headers.end() && frame->headers.find("last_will_topic") != frame->headers.end()) {
-                // Last will headers set.
-                std::string last_will_retained = frame->headers["last_will_message_retained"];
-                boost::algorithm::to_lower(last_will_retained);
-                last_will = {frame->headers["last_will_topic"], frame->headers["last_will_message"], last_will_retained.compare("true") == 0};
+              StompLastWill last_will = {
+                  .topic = "",
+                  .message = "",
+                  .retained = false,
+              };
+              if (frame->headers.find("last_will_topic") != frame->headers.end()) {
+                last_will.topic = frame->headers["last_will_topic"];
+              }
 
-                SPDLOG_INFO("Client requested last will message '{}' -> '{}' be sent on disconnect. Retained? {}", last_will.topic, last_will.message, last_will.retained ? "Yes" : "No");
+              if (frame->headers.find("last_will_message") != frame->headers.end()) {
+                last_will.message = frame->headers["last_will_message"];
+              }
+
+              if (frame->headers.find("last_will_retained") != frame->headers.end()) {
+                // Last will headers set.
+                std::string last_will_retained = frame->headers["last_will_retained"];
+                boost::algorithm::to_lower(last_will_retained);
+                last_will.retained = last_will_retained.compare("true") == 0;
               }
 
               std::string heartbeat_header = "0,0";
@@ -232,6 +242,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
                 WebsocketServer::send_stomp_frame(connected_frame, webSocket);
 
                 if (last_will.topic.length() > 0) {
+                  SPDLOG_INFO("Client requested last will message '{}' -> '{}' be sent on disconnect. Retained? {}", last_will.topic, last_will.message, last_will.retained ? "Yes" : "No");
                   std::lock_guard<std::mutex> last_will_map_lock_guard(WebsocketServer::_last_will_map_mutex);
                   WebsocketServer::_last_will_map[&webSocket] = last_will;
                 }
