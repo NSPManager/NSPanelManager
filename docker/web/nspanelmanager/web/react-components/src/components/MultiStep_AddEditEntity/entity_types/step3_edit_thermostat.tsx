@@ -275,7 +275,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
       id: id ?? null,
       controller: controller,
       type: "entity",
-      entity_type: "light",
+      entity_type: "thermostat",
       room_id: room_id,
       entities_page_id: entities_page_id,
       room_view_position: room_view_position,
