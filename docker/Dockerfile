@@ -20,6 +20,9 @@ ARG IS_DEVEL
 WORKDIR /MQTTManager
 SHELL ["/bin/bash", "-c"]
 
+# Update container
+RUN apt-get update && apt-get -y upgrade
+
 RUN echo "Running on $BUILDPLATFORM, building for $TARGETPLATFORM"
 COPY build_scripts/ /build_scripts/
 COPY MQTTManager/ /MQTTManager/
