@@ -850,8 +850,8 @@ def weather_and_time(request):
     if request.method == "POST":
         set_setting_value("location_latitude", request.POST["location_latitude"])
         set_setting_value("location_longitude", request.POST["location_longitude"])
-        set_setting_value("wind_speed_format", request.POST["wind_speed_format"])
-        set_setting_value("precipitation_format", request.POST["precipitation_format"])
+        set_setting_value("weather_wind_speed_format", request.POST["wind_speed_format"])
+        set_setting_value("weather_precipitation_format", request.POST["precipitation_format"])
         set_setting_value("outside_temp_sensor_provider", request.POST["outside_temp_provider"])
         set_setting_value("outside_temp_sensor_entity_id", request.POST["outside_temp_sensor"])
         set_setting_value("weather_update_interval", request.POST["weather_update_interval"])
@@ -870,8 +870,8 @@ def weather_and_time(request):
             "outside_temp_sensor": get_setting_with_default("outside_temp_sensor_entity_id"),
             "location_latitude": get_setting_with_default("location_latitude"),
             "location_longitude": get_setting_with_default("location_longitude"),
-            "wind_speed_format": get_setting_with_default("wind_speed_format"),
-            "precipitation_format": get_setting_with_default("precipitation_format"),
+            "wind_speed_format": get_setting_with_default("weather_wind_speed_format"),
+            "precipitation_format": get_setting_with_default("weather_precipitation_format"),
             "weather_update_interval": get_setting_with_default("weather_update_interval"),
         }
 
