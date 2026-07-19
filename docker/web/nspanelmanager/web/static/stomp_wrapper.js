@@ -105,9 +105,6 @@ const stomp_client = new StompJs.Client({
   connectHeaders: {
     login: "user",
     passcode: "pass",
-    last_will_topic: "mqtt/nspanel/AA:AA:AA:FC:B5:43/status",
-    last_will_message: '{"mac":"AA:AA:AA:92:2F:56","state":"offline"}',
-    last_will_retained: "true",
   },
   reconnectDelay: 2500,
   heartbeatIncoming: 1000,
