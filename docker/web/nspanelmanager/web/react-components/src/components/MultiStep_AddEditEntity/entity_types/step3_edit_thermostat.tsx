@@ -458,6 +458,8 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
   };
 
   console.log("Data: ", getValues());
+  const schemaCheckResult = schema.safeParse(getValues());
+  console.log("Schema check result: ", schemaCheckResult);
 
   return (
     <form onSubmit={handleSubmit(saveEntity)}>
