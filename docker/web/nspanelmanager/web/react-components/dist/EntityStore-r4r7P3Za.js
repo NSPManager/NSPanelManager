@@ -1,5 +1,6 @@
-import { t as create } from "./react-p-ybQBO2.js";
-import { t as useStompStore } from "./StompStore-BKyW2wrw.js";
+import { t as create } from "./react-fWHvS6VU.js";
+import { n as Notify } from "./NSPanelToastContainer-B5jbnFTb.js";
+import { t as useStompStore } from "./StompStore-Bxp3E-AV.js";
 //#region src/stores/EntityStore.ts
 var nspanel_stomp_status_update_callback = (message) => {
 	const json_data = JSON.parse(message.body);
@@ -13,18 +14,27 @@ var useEntityStatesStore = create((set) => ({
 	fetchData: async () => {
 		set({ status: "loading" });
 		if (useStompStore.getState().status == "none") useStompStore.getState().connect();
+		console.debug("Subscribing to entity_states...");
 		useStompStore.getState().subscribe("entity_states", (message) => {
+			console.debug("Got entity states update over STOMP.");
 			set({
 				_nspanels: JSON.parse(message.body).nspanels,
 				status: "loaded"
 			});
 			useEntityStatesStore.getState()._attachNSPanelStatusDataSubscriptions();
 		});
+		console.debug("Loading rooms...");
 		fetch("/rest/rooms").then((response) => response.json()).then((data) => {
+			console.debug("Got rooms data.");
 			for (const room of data.rooms) set({ rooms: {
 				...useEntityStatesStore.getState().rooms,
 				[room.id]: room
 			} });
+		}).catch((error) => {
+			Notify({
+				message: "Failed to fetch rooms. Error: " + error,
+				level: "error"
+			});
 		});
 	},
 	_update_nspanel_status: (mac, status) => {

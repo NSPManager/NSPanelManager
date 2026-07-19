@@ -8,6 +8,7 @@ const InitialSetup = lazy(() => import("./components/InitialSetup/InitialSetup")
 const NSPanelSideBar = lazy(() => import("./components/NSPanelPage/Sidebar"));
 const NSPanelWarnings = lazy(() => import("./components/NSPanelPage/Warnings"));
 const NSPanelLogs = lazy(() => import("./components/NSPanelPage/Logs"));
+const RoomPage = lazy(() => import("./components/RoomPage/RoomPage"));
 
 const componentMap = {
   MultiStep_AddEditEntity,
@@ -18,6 +19,7 @@ const componentMap = {
   NSPanelSideBar,
   NSPanelWarnings,
   NSPanelLogs,
+  RoomPage,
 };
 
 export type ComponentKey = keyof typeof componentMap;

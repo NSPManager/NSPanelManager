@@ -3962,6 +3962,9 @@
       cursor: pointer;
     }
   }
+  .-z-10 {
+    z-index: calc(10 * -1);
+  }
   .z-1 {
     z-index: 1;
   }
@@ -9596,6 +9599,9 @@
   }
   .\[animation-delay\:-6s\] {
     animation-delay: -6s;
+  }
+  .\[animation-delay\:-8s\] {
+    animation-delay: -8s;
   }
   .\[animation-duration\:8s\] {
     animation-duration: 8s;

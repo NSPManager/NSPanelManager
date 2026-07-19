@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { useStompStore } from "./StompStore";
+import { Notify } from "../components/NSPanelToastContainer";
 
 export interface IRoomData {
   id: number;
@@ -85,18 +86,25 @@ export const useEntityStatesStore = create<IEntityStatesStore>((set) => ({
     if (useStompStore.getState().status == "none") {
       useStompStore.getState().connect();
     }
+    console.debug("Subscribing to entity_states...");
     useStompStore.getState().subscribe("entity_states", (message) => {
+      console.debug("Got entity states update over STOMP.");
       const json_data = JSON.parse(message.body);
       set({ _nspanels: json_data.nspanels, status: "loaded" });
       useEntityStatesStore.getState()._attachNSPanelStatusDataSubscriptions();
     });
 
+    console.debug("Loading rooms...");
     fetch("/rest/rooms")
       .then((response) => response.json())
       .then((data) => {
+        console.debug("Got rooms data.");
         for (const room of data.rooms) {
           set({ rooms: { ...useEntityStatesStore.getState().rooms, [room.id]: room } });
         }
+      })
+      .catch((error) => {
+        Notify({ message: "Failed to fetch rooms. Error: " + error, level: "error" });
       });
   },
   _update_nspanel_status: (mac: string, status: INSPanelStatusData) => {
