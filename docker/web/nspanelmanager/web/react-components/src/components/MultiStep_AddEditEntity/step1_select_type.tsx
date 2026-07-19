@@ -77,7 +77,7 @@ const MultiStep_AddEditEntity_Step1 = ({ handleButtonSelectEvent, next_step }: {
             ></span>
           </div>
           <div className="flex justify-center items-center">
-            <span className="text-base-content/50 group-hover:text-base-content">Thermostat/climate</span>
+            <span className="text-base-content/50 group-hover:text-base-content text-center">Thermostat / climate</span>
           </div>
         </div>
       </div>
