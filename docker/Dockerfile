@@ -21,6 +21,7 @@ WORKDIR /MQTTManager
 SHELL ["/bin/bash", "-c"]
 
 RUN echo "Running on $BUILDPLATFORM, building for $TARGETPLATFORM"
+COPY build_scripts/ /build_scripts/
 COPY MQTTManager/ /MQTTManager/
 
 # Only build MQTTManager during Docker build if is is not a devel mode.
