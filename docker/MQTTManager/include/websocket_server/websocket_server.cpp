@@ -163,10 +163,23 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
       std::lock_guard<std::mutex> last_will_map_lock_guard(WebsocketServer::_last_will_map_mutex);
       if (WebsocketServer::_last_will_map.find(&webSocket) != WebsocketServer::_last_will_map.end()) {
         auto last_will = WebsocketServer::_last_will_map[&webSocket];
-        SPDLOG_DEBUG("Websocket had last will. Will send last will message on '{}' -> '{}'. Retained?", last_will.topic, last_will.message, last_will.retained ? "Yes" : "No");
+        SPDLOG_DEBUG("Websocket had last will. Will send last will message on '{}' -> '{}'. Retained? {}", last_will.topic, last_will.message, last_will.retained ? "Yes" : "No");
         WebsocketServer::_last_will_map.erase(&webSocket);
         WebsocketServer::set_stomp_topic_retained(last_will.topic, last_will.retained);
         WebsocketServer::update_stomp_topic_value(last_will.topic, last_will.message);
+
+        // Inform callbacks of last will message
+        StompFrame last_will_frame;
+        last_will_frame.headers["destination"] = last_will.topic;
+        last_will_frame.body = last_will.message;
+        WebsocketServer::_on_global_stomp_send_message_callbacks(last_will_frame);
+
+        std::lock_guard<std::mutex> lock_guard_callbacks(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
+        if (WebsocketServer::_on_stomp_send_message_callbacks.count(last_will_frame.headers["destination"]) > 0) [[likely]] {
+          SPDLOG_DEBUG("Received STOMP SEND command for existing topic, setting topic '{}' to value '{}'", last_will_frame.headers["destination"], last_will_frame.body);
+          WebsocketServer::_on_stomp_send_message_callbacks[last_will_frame.headers["destination"]](last_will_frame);
+          return;
+        }
       }
 
       for (auto &topic : WebsocketServer::_stomp_topics) {

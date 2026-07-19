@@ -366,6 +366,9 @@ void MQTT_Manager::_process_stomp_message(StompFrame frame) {
   std::string payload = frame.body;
 
   if (MQTT_Manager::_mqtt_callbacks.count(topic) > 0) {
+    SPDLOG_TRACE("Forwarding message from STOMP to MQTT callbacks. Topic '{}' -> '{}'", topic, payload);
     MQTT_Manager::_mqtt_callbacks[topic](topic, payload);
+  } else {
+    SPDLOG_DEBUG("No callback registered for topic '{}' in mqtt, ignoring message.", topic);
   }
 }
