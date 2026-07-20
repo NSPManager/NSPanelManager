@@ -158,13 +158,27 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
         std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
         SPDLOG_DEBUG("Websocket closed. Code: {}, Reason: {}", msg->closeInfo.code, msg->closeInfo.reason);
         WebsocketServer::_connected_websockets_stomps.remove(&webSocket);
+
+        for (auto &topic : WebsocketServer::_stomp_topics) {
+          topic->unsubscribe(webSocket, "");
+        }
       }
 
-      std::lock_guard<std::mutex> last_will_map_lock_guard(WebsocketServer::_last_will_map_mutex);
-      if (WebsocketServer::_last_will_map.find(&webSocket) != WebsocketServer::_last_will_map.end()) {
-        auto last_will = WebsocketServer::_last_will_map[&webSocket];
+      StompLastWill last_will = {
+          .topic = "",
+          .message = "",
+          .retained = false,
+      };
+      {
+        std::lock_guard<std::mutex> last_will_map_lock_guard(WebsocketServer::_last_will_map_mutex);
+        if (WebsocketServer::_last_will_map.find(&webSocket) != WebsocketServer::_last_will_map.end()) {
+          last_will = WebsocketServer::_last_will_map[&webSocket];
+          WebsocketServer::_last_will_map.erase(&webSocket);
+        }
+      }
+
+      if (!last_will.topic.empty()) {
         SPDLOG_DEBUG("Websocket had last will. Will send last will message on '{}' -> '{}'. Retained? {}", last_will.topic, last_will.message, last_will.retained ? "Yes" : "No");
-        WebsocketServer::_last_will_map.erase(&webSocket);
         WebsocketServer::set_stomp_topic_retained(last_will.topic, last_will.retained);
         WebsocketServer::update_stomp_topic_value(last_will.topic, last_will.message);
 
@@ -180,10 +194,6 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
           WebsocketServer::_on_stomp_send_message_callbacks[last_will_frame.headers["destination"]](last_will_frame);
           return;
         }
-      }
-
-      for (auto &topic : WebsocketServer::_stomp_topics) {
-        topic->unsubscribe(webSocket, "");
       }
     } else if (msg->type == ix::WebSocketMessageType::Message) {
       if (std::find(WebsocketServer::_connected_websockets_stomps.begin(), WebsocketServer::_connected_websockets_stomps.end(), &webSocket) != WebsocketServer::_connected_websockets_stomps.end()) {
@@ -453,6 +463,10 @@ std::optional<StompFrame> WebsocketServer::decode_stomp_frame(std::string &data)
 }
 
 void WebsocketServer::send_stomp_frame(StompFrame &frame, ix::WebSocket &websocket) {
+  if (websocket.getReadyState() != ix::ReadyState::Open) {
+    return;
+  }
+
   std::string message;
   switch (frame.type) {
   case StompFrame::CONNECT:

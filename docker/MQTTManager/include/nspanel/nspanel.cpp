@@ -588,7 +588,6 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         SPDLOG_ERROR("Received message on log topic {} with wrong format. Message: {}", topic, payload);
       }
     } else if (topic.compare(this->_mqtt_status_topic) == 0 || topic.compare(fmt::format("nspanel/{}/status", this->_name)) == 0) { // TODO: Remove and only use MAC-based topic after 2.0 is stable.
-      SPDLOG_DEBUG("NSPanel {}::{} received new state updated. Message: {}", this->_id, this->_name, payload);
       nlohmann::json data = nlohmann::json::parse(payload);
       // Update internal state.
       std::string state = data["state"];
