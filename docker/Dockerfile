@@ -1,4 +1,4 @@
-FROM node:20-alpine AS ui-builder
+FROM --platform=$BUILDPLATFORM node:20-alpine AS ui-builder
 ARG BUILDTIME
 WORKDIR /ui-app
 
