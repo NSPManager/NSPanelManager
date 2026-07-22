@@ -125,7 +125,7 @@ void NSPanel::reload_config() {
     bool reregister_to_ha_mqtt_discovery = false;
 
     this->_settings = panel_settings;
-    this->_has_registered_to_manager = true; // We managed to get the object in above statement and did not throw, ie. has been registered in manager and has an ID in DB.
+    this->_has_registered_to_manager = panel_settings.accepted; // We managed to get the object in above statement and did not throw, ie. has been registered in manager and has an ID in DB.
     this->_mac = panel_settings.mac_address;
     if (panel_settings.model.compare("sonoff") == 0) {
       this->_model = MQTT_MANAGER_NSPANEL_MODEL::SONOFF;

@@ -339,11 +339,12 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
           SPDLOG_ERROR("Failed to parse STOMP frame");
         }
       } else {
-        SPDLOG_WARN("Received message from websocket but it's not registered among any protocol lists. Will close websocket.");
+        SPDLOG_WARN("Received message from websocket that it's not registered among any protocol lists. Will close websocket.");
         webSocket.close();
       }
     } else {
-      SPDLOG_ERROR("Unknown websocket packet type! Type: {}", static_cast<int>(msg->type));
+      SPDLOG_ERROR("Unknown websocket packet type! Type: {}. Will close connection.", static_cast<int>(msg->type));
+      webSocket.close();
     }
   } catch (std::exception ex) {
     SPDLOG_ERROR("Caught std::exception while processing websocket event. Exception: {}", ex.what());
