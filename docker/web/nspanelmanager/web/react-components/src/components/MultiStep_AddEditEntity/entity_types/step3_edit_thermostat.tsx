@@ -514,7 +514,8 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
               step="0.1"
               min="0.1"
               max="10"
-              {...register("step_size")}
+              value={getValues("step_size")}
+              onChange={(e) => setValue("step_size", parseFloat(e.target.value))}
             />
             <button
               type="button"
