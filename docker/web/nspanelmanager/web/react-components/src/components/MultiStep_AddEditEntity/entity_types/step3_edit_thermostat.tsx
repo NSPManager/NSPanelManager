@@ -514,8 +514,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
               step="0.1"
               min="0.1"
               max="10"
-              value={getValues("step_size")}
-              onChange={(e) => setValue("step_size", parseFloat(e.target.value))}
+              {...register("step_size")}
             />
             <button
               type="button"
@@ -543,7 +542,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
                 options={useAvailableEntitiesStore.getState().home_assistant_options.filter((option) => option.value.startsWith("climate."))}
                 classNames={classNames}
                 onChange={(newValue) => {
-                  setValue("home_assistant_name", newValue ? newValue.value : "");
+                  setValue("home_assistant_name", newValue ? newValue.value : "", { shouldValidate: true, shouldDirty: true });
                 }}
                 unstyled
                 components={select_components}
