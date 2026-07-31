@@ -681,7 +681,7 @@ def put_light_entity(request):
             "is_ceiling_light": str(data["is_ceiling_light"]).lower() == "true",
             "controlled_by_nspanel_main_page": str(data["controlled_by_nspanel_main_page"]).lower() == "true",
         }
-        if "id" in data and data["id"]:
+        if "id" in data:
             new_light = Entity.objects.get(id=int(data["id"]))
         else:
             new_light = Entity()
