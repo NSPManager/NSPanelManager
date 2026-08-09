@@ -1,6 +1,7 @@
 #include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
+#include "room/room.hpp"
 #include <curl/curl.h>
 #include <entity/entity_icons.hpp>
 #include <home_assistant_manager/home_assistant_manager.hpp>
@@ -35,14 +36,48 @@ void HomeAssistantScene::reload_config() {
   }
 }
 
-void HomeAssistantScene::activate() {
+void HomeAssistantScene::activate(std::expected<int32_t, EntityManager::EntityError> triggering_room_id) {
   SPDLOG_INFO("Activating scene {}::{}.", this->_id, this->_name);
-  nlohmann::json service_data;
-  service_data["type"] = "call_service";
-  service_data["domain"] = "scene";
-  service_data["service"] = "turn_on";
-  service_data["target"]["entity_id"] = this->_entity_id;
-  HomeAssistantManager::send_json(service_data);
+
+  if (this->_entity_id.starts_with("scene.")) {
+    nlohmann::json service_data;
+    service_data["type"] = "call_service";
+    service_data["domain"] = "scene";
+    service_data["service"] = "turn_on";
+    service_data["target"]["entity_id"] = this->_entity_id;
+    HomeAssistantManager::send_json(service_data);
+  } else if (this->_entity_id.starts_with("script.")) {
+    nlohmann::json service_data;
+    nlohmann::json context;
+    context["scene_name"] = this->_name;
+    context["scene_id"] = this->_id;
+
+    if (triggering_room_id.has_value()) {
+      auto triggering_room = EntityManager::get_room(*triggering_room_id);
+      if (triggering_room.has_value()) {
+        context["triggering_room_id"] = *triggering_room_id;
+        context["triggering_room_name"] = (*triggering_room)->get_name();
+      }
+    }
+
+    if (!this->_is_global) {
+      auto scene_room = EntityManager::get_room(this->_room_id);
+      if (scene_room.has_value()) {
+        context["scene_room_id"] = this->_room_id;
+        context["scene_room_name"] = (*scene_room)->get_name();
+      }
+    }
+
+    service_data["service_data"]["variables"]["nspanelmanager"] = context;
+    SPDLOG_DEBUG("Sending script with context: {}", context.dump());
+    service_data["type"] = "call_service";
+    service_data["domain"] = "script";
+    service_data["service"] = "turn_on";
+    service_data["target"]["entity_id"] = this->_entity_id;
+    HomeAssistantManager::send_json(service_data);
+  } else {
+    SPDLOG_ERROR("Got request to turn on home assistant scene {}::{} but the entity '{}' is not of known type scene or script.", this->_id, this->_name, this->_entity_id);
+  }
 }
 
 void HomeAssistantScene::save() {
@@ -65,15 +100,6 @@ MQTT_MANAGER_ENTITY_CONTROLLER HomeAssistantScene::get_controller() {
 }
 
 void HomeAssistantScene::post_init() {
-  if (!this->_is_global) {
-    auto room_entity = EntityManager::get_room(this->_room_id);
-    if (room_entity) {
-      this->_room = *room_entity;
-    } else {
-      SPDLOG_ERROR("Did not find any room with room ID: {}. Will not continue loading.", this->_room_id);
-      return;
-    }
-  }
 }
 
 std::string HomeAssistantScene::get_name() {

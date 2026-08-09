@@ -21,5 +21,5 @@ setuptools==72.1.0
 six==1.16.0
 sqlparse==0.5.1
 urllib3==1.26.20
-uWSGI==2.0.26
+uWSGI==2.0.31
 wheel==0.44.0

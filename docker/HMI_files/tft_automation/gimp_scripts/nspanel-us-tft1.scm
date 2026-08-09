@@ -35,11 +35,10 @@
 		(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "SCREENSAVER_PAGE")) 0)
 		(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "DROPDOWN_PAGE")) 0)
 		(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "FIRST_PAGE_SOUND")) 0)
-		;(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "ENTITY_BLINDS")) 0)
-		;(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "ENTITY_THERMOSTAT")) 0)
-		;(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "ENTITY_TV")) 0)
-		;(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "ALARM PAGE")) 0)
-		;(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "SCREENCLEAN_PAGE")) 0)
+		(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "ENTITY_BLINDS")) 0)
+		(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "ENTITY_THERMOSTAT")) 0)
+		(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "ENTITY_TV")) 0)
+		(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "ALARM_PAGE")) 0)
 	
 	(let*
 	((newImage (car (gimp-image-duplicate image))))
@@ -556,7 +555,27 @@
 
 	;MAKE BACKGROUND PAGE INVISIBLE TO PREPARE FOR NEXT ROOM
 	;(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "BACKGROUND")) 0)
+
+;;------------------------------------------------------------------------------------------------------------------------	
+;; THERMOSTAT_PAGE THERMOSTAT_PAGE THERMOSTAT_PAGE THERMOSTAT_PAGE THERMOSTAT_PAGE THERMOSTAT_PAGE THERMOSTAT_PAGE   	
 	
+	;MAKE THERMOSTAT PAGE VISIBLE
+	(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "ENTITY_THERMOSTAT")) 1)
+
+	(let*
+	((newImage (car (gimp-image-duplicate image))))
+		(gimp-image-merge-visible-layers newImage 1)
+		(let*
+		((activeLayer (car (gimp-image-get-active-layer newImage))))
+		(gimp-file-save RUN-NONINTERACTIVE image activeLayer "pictures_tft1/180_thermostat_background.bmp" "pictures_tft1/180_thermostat_background.bmp")
+		)
+	(gimp-image-delete newImage)
+	)
+
+
+	;MAKE BACKGROUND PAGE INVISIBLE TO PREPARE FOR NEXT ROOM
+	(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "ENTITY_THERMOSTAT")) 0)
+;;---------------------------------------------------------------------------------------------------------
 	(gimp-image-delete image)
 	)
 )

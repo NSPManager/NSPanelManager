@@ -14,10 +14,17 @@ upstream mqttmanager {
   server 127.0.0.1:8002;
 }
 
+upstream nextion_img {
+  server 127.0.0.1:8003;    
+}
+
+
 # configuration of the server
 server {
     # the port your site will be served on
     listen      8000;
+    absolute_redirect off;
+    port_in_redirect off;
     # the domain name it will serve for
     server_name nspanelmanager.local;
     charset     utf-8;
@@ -32,6 +39,16 @@ server {
         proxy_set_header Connection $connection_upgrade;
         proxy_set_header Host $host;}
 
+    location /nextion-img {
+        proxy_pass  http://nextion_img;
+    }
+
+    location /webapp {
+        alias /var/www/html/webapp;
+        
+        # Crucial for React Router/Vite: fallback to index.html
+        try_files $uri $uri/ /webapp/index.html;
+    }
 
     location /{
         proxy_pass http://django;

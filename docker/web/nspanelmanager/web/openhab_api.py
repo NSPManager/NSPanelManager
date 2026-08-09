@@ -1,15 +1,15 @@
 import json
-import traceback
-import environ
 import logging
+import traceback
+
+import environ
 import requests
+
 from web.settings_helper import get_setting_with_default
 
-def get_all_openhab_items(filter = {}):
-    return_json = {
-        "items": [],
-        "errors": []
-    }
+
+def get_all_openhab_items(filter={}):
+    return_json = {"items": [], "errors": []}
 
     # OpenHAB
     if get_setting_with_default("openhab_token") != "" and get_setting_with_default("openhab_address") != "":
@@ -34,16 +34,16 @@ def get_all_openhab_items(filter = {}):
                         # Not type filter applied, return all items
                         add_entity = True
 
-
-
                     if add_entity:
-                        return_json["items"].append({
-                            "type": "openhab",
-                            "openhab_type": "item",
-                            "label": item["name"],
-                            "item_id": item["name"],
-                            "item": item,
-                        })
+                        return_json["items"].append(
+                            {
+                                "type": "openhab",
+                                "openhab_type": "item",
+                                "label": item["name"],
+                                "item_id": item["name"],
+                                "item": item,
+                            }
+                        )
             else:
                 return_json["errors"].append("Failed to get OpenHAB items, got return code: " + str(openhab_response.status_code))
                 print("ERROR! Got status code other than 200. Got code: " + str(openhab_response.status_code))
@@ -57,10 +57,7 @@ def get_all_openhab_items(filter = {}):
 
 
 def get_all_openhab_scenes():
-    return_json = {
-        "items": [],
-        "errors": []
-    }
+    return_json = {"items": [], "errors": []}
 
     # OpenHAB
     if get_setting_with_default("openhab_token") != "" and get_setting_with_default("openhab_address") != "":
@@ -75,13 +72,15 @@ def get_all_openhab_scenes():
             openhab_response = requests.get(get_setting_with_default("openhab_address") + "/rest/rules", headers=openhab_request_headers, verify=False)
             if openhab_response.status_code == 200:
                 for item in openhab_response.json():
-                    return_json["items"].append({
-                        "type": "openhab",
-                        "openhab_type": "item",
-                        "label": item["name"],
-                        "item_id": item["uid"],
-                        "item": item,
-                        })
+                    return_json["items"].append(
+                        {
+                            "type": "openhab",
+                            "openhab_type": "item",
+                            "label": item["name"],
+                            "item_id": item["uid"],
+                            "item": item,
+                        }
+                    )
             else:
                 return_json["errors"].append("Failed to get OpenHAB items, got return code: " + str(openhab_response.status_code))
                 print("ERROR! Got status code other than 200. Got code: " + str(openhab_response.status_code))

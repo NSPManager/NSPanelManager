@@ -77,6 +77,11 @@ public:
   static void load_buttons();
 
   /*
+   * Load all thermostats from the DB and remove any existing thermostat that no longer exist.
+   */
+  static void load_thermostats();
+
+  /*
    * Load all switches from the DB and remove any existing switch that no longer exist.
    */
   static void load_switches();
@@ -132,11 +137,14 @@ public:
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
     auto rit = EntityManager::_entities.cbegin();
     while (rit != EntityManager::_entities.cend()) {
-      if ((*rit)->get_type() == type && (*rit)->get_id() == id) {
-        return std::static_pointer_cast<EntityClass>(*rit);
-      } else {
-        ++rit;
+      if ((*rit)->get_id() == id) {
+        if (type == MQTT_MANAGER_ENTITY_TYPE::ANY) {
+          return std::static_pointer_cast<EntityClass>(*rit);
+        } else if ((*rit)->get_type() == type) {
+          return std::static_pointer_cast<EntityClass>(*rit);
+        }
       }
+      ++rit;
     }
     return std::unexpected(EntityError::NOT_FOUND);
   }
@@ -198,6 +206,7 @@ public:
 
   static std::expected<std::shared_ptr<NSPanel>, EntityError> get_nspanel_by_id(uint id);
   static std::expected<std::shared_ptr<NSPanel>, EntityError> get_nspanel_by_mac(std::string mac);
+  static std::expected<int32_t, EntityError> get_room_id_for_panel_id(uint32_t nspanel_id);
 
 private:
   static inline std::vector<std::shared_ptr<MqttManagerEntity>> _entities;

@@ -34,11 +34,6 @@ OpenhabSwitch::OpenhabSwitch(uint32_t switch_id) : SwitchEntity(switch_id) {
   auto switch_config = database_manager::database.get<database_manager::Entity>(this->_id);
   nlohmann::json entity_data = switch_config.get_entity_data_json();
 
-  if (entity_data.contains("openhab_name")) {
-    this->_openhab_name = entity_data["openhab_name"];
-  } else {
-    SPDLOG_ERROR("No OpenHAB name defined for switch {}::{}", this->_id, this->_name);
-  }
   if (entity_data.contains("openhab_item_switch")) {
     this->_openhab_on_off_item = entity_data["openhab_item_switch"];
   } else {
@@ -72,7 +67,7 @@ void OpenhabSwitch::send_state_update_to_controller() {
   payload_data["value"] = this->_requested_state ? "ON" : "OFF";
   service_data["payload"] = payload_data.dump();
 
-  if (MqttManagerConfig::get_settings().optimistic_mode) {
+  if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
     this->_current_state = this->_requested_state;
     this->_entity_changed_callbacks(this);
   }
@@ -91,6 +86,9 @@ void OpenhabSwitch::openhab_event_callback(nlohmann::json data) {
       SPDLOG_ERROR("Received ItemStateChangedEvent with a topic with not enought parts, topic: {}", std::string(data["topic"]));
       return;
     }
+
+    SPDLOG_DEBUG("Switch received callback payload:");
+    SPDLOG_DEBUG(data.dump(2));
 
     std::string topic_item = topic_parts[2];
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
@@ -113,8 +111,7 @@ void OpenhabSwitch::openhab_event_callback(nlohmann::json data) {
     SPDLOG_TRACE("OpenHAB light {}::{} Got initial data from OpenHAB via custom ItemStateFetched event.", this->_id, this->_name);
     if (this->_openhab_on_off_item.compare(data["payload"]["name"]) == 0) {
       if (data["payload"]["state"].is_string()) {
-        nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
-        bool state = std::string(payload["value"]).compare("ON") == 0;
+        bool state = std::string(data["payload"]["state"]).compare("ON") == 0;
         SPDLOG_DEBUG("Switch {}::{} got new state {}, current state: {}.", this->_id, this->_name, state, this->_current_state);
         if (state != this->_current_state) {
           this->_current_state = state;

@@ -8,11 +8,19 @@
 #include <ixwebsocket/IXConnectionState.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXWebSocketServer.h>
+#include <memory>
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <optional>
+#include <shared_mutex>
 #include <string>
 #include <unordered_map>
+
+struct StompLastWill {
+  std::string topic;
+  std::string message;
+  bool retained;
+};
 
 struct StompFrame {
   enum MessageType {
@@ -56,7 +64,7 @@ private:
   std::string _current_value;
   nlohmann::json _current_json_data;
 
-  std::mutex _subscribers_mutex;
+  std::shared_mutex _subscribers_mutex;
   std::list<std::pair<ix::WebSocket *, std::string>> _subscribers;
 };
 
@@ -92,19 +100,32 @@ public:
    */
   static void send_stomp_frame(StompFrame &frame, ix::WebSocket &websocket);
 
+  template <typename CALLBACK_BIND>
+  static void attach_stomp_global_callback(CALLBACK_BIND callback) {
+    std::unique_lock<std::shared_mutex> mutex_guard(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
+    WebsocketServer::_on_global_stomp_send_message_callbacks.disconnect(callback); // First disconnect in case it was already connected to avaid duplicate callbacks
+    WebsocketServer::_on_global_stomp_send_message_callbacks.connect(callback);
+  }
+
   /**
    * Attach a callback to be called when a message is received on a specific topic using STOMP.
    */
   template <typename CALLBACK_BIND>
   static void attach_stomp_callback(std::string topic, CALLBACK_BIND callback) {
-    std::lock_guard<std::mutex> mutex_guard(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
+    std::unique_lock<std::shared_mutex> mutex_guard(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
     WebsocketServer::_on_stomp_send_message_callbacks[topic].disconnect(callback); // First disconnect in case it was already connected to avaid duplicate callbacks
     WebsocketServer::_on_stomp_send_message_callbacks[topic].connect(callback);
   }
 
   template <typename CALLBACK_BIND>
+  static void detach_global_stomp_callback(CALLBACK_BIND callback) {
+    std::unique_lock<std::shared_mutex> mutex_guard(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
+    WebsocketServer::_on_global_stomp_send_message_callbacks.disconnect(callback);
+  }
+
+  template <typename CALLBACK_BIND>
   static void detach_stomp_callback(std::string topic, CALLBACK_BIND callback) {
-    std::lock_guard<std::mutex> mutex_guard(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
+    std::unique_lock<std::shared_mutex> mutex_guard(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
     WebsocketServer::_on_stomp_send_message_callbacks[topic].disconnect(callback);
 
     if (WebsocketServer::_on_stomp_send_message_callbacks[topic].empty()) {
@@ -142,7 +163,7 @@ private:
   };
 
   static inline ix::WebSocketServer *_server;
-  static inline std::mutex _server_mutex;
+  static inline std::shared_mutex _server_mutex;
   static inline std::list<std::function<bool(std::string &message, std::string *response_buf)>> _callbacks;
 
   static inline boost::uuids::random_generator _uuid_generator = boost::uuids::random_generator(); // Used to generate unique UUIDs for STOMP clients
@@ -151,10 +172,15 @@ private:
   static inline std::list<ix::WebSocket *> _connected_websockets_stomps;
 
   // Callback for when a SEND message is received on a STOMP topic
-  static inline std::mutex _on_stomp_send_message_callbacks_mutex;
+  static inline std::shared_mutex _on_stomp_send_message_callbacks_mutex;
   static inline boost::ptr_map<std::string, boost::signals2::signal<void(StompFrame)>> _on_stomp_send_message_callbacks;
+  static inline boost::signals2::signal<void(StompFrame)> _on_global_stomp_send_message_callbacks;
 
-  static inline std::mutex _active_warnings_mutex;
+  // Map of last will messages for each connected WebSocket
+  static inline std::shared_mutex _last_will_map_mutex;
+  static inline std::unordered_map<ix::WebSocket *, StompLastWill> _last_will_map;
+
+  static inline std::shared_mutex _active_warnings_mutex;
   static inline std::list<ActiveWarning> _active_warnings;
 
   static void _websocket_message_callback(std::shared_ptr<ix::ConnectionState> connectionState, ix::WebSocket &webSocket, const ix::WebSocketMessagePtr &msg);

@@ -1,0 +1,132 @@
+import { useDraggable } from "@dnd-kit/react";
+import MultiStep_AddOrEditEntity from "../MultiStep_AddEditEntity/MultiStep_AddEditEntity";
+import type { IDragingItemData, IEntityOrSceneData } from "../../stores/EntitiesPagesStore";
+import { useEntitiesPagesStore } from "../../stores/EntitiesPagesStore";
+import { useRef, useState } from "react";
+// import Step2 from "./step2_select_controller";
+// import Step3 from "./Step3";
+
+const GenericSceneBox = ({ scene, draging_item }: { scene: IEntityOrSceneData; draging_item: IDragingItemData | undefined | null }) => {
+  const { ref } = useDraggable({ id: `scene-${scene.id}`, data: { type: "scene", config: scene } });
+  const { entities_pages, removeScene, fetchData } = useEntitiesPagesStore();
+  const entity_page = entities_pages.find((page) => page.id === scene.entities_page_id);
+  const removeSceneDialogRef = useRef<HTMLDialogElement>(null);
+  const [editDialogOpened, setEditDialogOpened] = useState(false);
+
+  function getCookie(name: string) {
+    let cookieValue = "";
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === name + "=") {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  async function deleteScene(id: number) {
+    console.log("Deleting scene", id);
+    if (entity_page) {
+      fetch(`/rest/scenes/${id}`, {
+        credentials: "same-origin",
+        method: "DELETE",
+        mode: "same-origin",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
+      })
+        .then(async (response) => {
+          if (response.ok) {
+            console.log("Successfully deleted scene", id);
+            removeScene(id);
+          }
+        })
+        .catch((error) => {
+          console.error("Error deleting scene", error);
+        });
+    }
+  }
+
+  if (!entity_page) return null;
+  return (
+    <>
+      <dialog ref={removeSceneDialogRef} className="modal">
+        <div className="modal-box">
+          <h3 className="text-lg font-bold">Delete scene</h3>
+          <p className="py-4">Are you sure you want to delete scene "{scene.friendly_name}"?</p>
+          <div className="flex justify-end join">
+            <button onClick={() => removeSceneDialogRef.current?.close()} className="btn btn-neutral join-item">
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                removeSceneDialogRef.current?.close();
+                deleteScene(scene.id);
+              }}
+              className="btn btn-error join-item"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+      <MultiStep_AddOrEditEntity
+        type="scene"
+        room_id={entity_page.room_id}
+        entities_page_id={scene.entities_page_id}
+        room_view_position={scene.room_view_position}
+        id={scene.id}
+        opened={editDialogOpened}
+        setOpened={setEditDialogOpened}
+        onComplete={() => {
+          fetchData(entity_page.room_id);
+          setEditDialogOpened(false);
+        }}
+      />
+      <div
+        ref={ref}
+        className={`draggable-entity-item bg-neutral/50 rounded-box text-neutral-content flex items-center justify-center indicator w-full h-full ${draging_item ? "hover:outline-1 hover:outline-accent" : ""} cursor-grab`}
+        title="Drag & drop to move this entity"
+      >
+        {/*<!-- Box indicators/buttons -->*/}
+        <button
+          className="indicator-item badge badge-info me-8 w-6 h-6 flex items-center justify-center cursor-pointer"
+          title="Edit scene"
+          onClick={() => setEditDialogOpened(true)}
+        >
+          <span className="mdi mdi-pencil"></span>
+        </button>
+        <button
+          className="indicator-item badge badge-warning hover:badge-error w-6 h-6 flex items-center justify-center cursor-pointer"
+          title="Remove scene from page/room"
+          onClick={() => {
+            removeSceneDialogRef.current?.showModal();
+          }}
+        >
+          <span className="mdi mdi-close"></span>
+        </button>
+
+        {/*<!-- "Status badge" (dot) before name to indicate entity controller -->*/}
+        {(() => {
+          if (scene.controller == "home_assistant") {
+            return <div className="status status-info shadow-none absolute top-2 left-2 cursor-default" title="Controlled by Home Assistant"></div>;
+          } else if (scene.controller == "openhab") {
+            return <div className="status status-warning shadow-none absolute top-2 left-2 cursor-default" title="Controlled by OpenHAB"></div>;
+          } else if (scene.controller == "nspm_scene" || scene.controller == "nspm") {
+            return <div className="status status-accent shadow-none absolute top-2 left-2 cursor-default" title="Controlled by NSPanel Manager"></div>;
+          } else {
+            return <div className="status status-error animate-ping absolute top-2 left-2 cursor-default" title="Unknown controller"></div>;
+          }
+        })()}
+        <span className="text-sm m-2">{scene.friendly_name}</span>
+      </div>
+    </>
+  );
+};
+
+export default GenericSceneBox;

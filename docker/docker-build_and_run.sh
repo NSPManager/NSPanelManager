@@ -21,4 +21,5 @@ if [ ! -e "data/secret.key" ] && [ -e "$(pwd)/web/nspanelmanager/secret.key" ]; 
 	cp "$(pwd)/web/nspanelmanager/secret.key" "data/secret.key"
 fi
 
-docker build -t nspanelmanager . && docker run --name nspanelmanager -v /etc/timezone:/etc/timezone:ro -v "$(pwd)/data/":"/data/" -d -p 8000:8000 -p 8001:8001 nspanelmanager
+#docker build -t nspanelmanager . && docker run --name nspanelmanager -v /etc/timezone:/etc/timezone:ro -v "$(pwd)/data/":"/data/" -d -p 8000:8000 -p 8001:8001 nspanelmanager
+docker build -t nspanelmanager . && docker run --name nspanelmanager -v /etc/localtime:/etc/localtime:ro -v "$(pwd)/data/":"/data/" -d -p 8000:8000 -p 8001:8001 nspanelmanager

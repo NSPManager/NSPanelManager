@@ -177,7 +177,7 @@
           <h3 class="block mb-2 text-sm font-medium">Reverse color temperature slider</h3>
           <ul
             class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
-            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+            <li class="w-full border-t sm:border-t-0 border-neutral">
               <div class="flex items-center ps-3">
                 <input id="keep_color_temp_slider" type="radio" name="reverse_color_temp" value="False" {% if reverse_color_temp != "True" %}checked{% endif %}
                   class="w-4 h-4 radio radio-accent">
@@ -185,7 +185,7 @@
                   class="w-full py-3 ms-2 text-sm font-medium">Keep default</label>
               </div>
             </li>
-            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+            <li class="w-full border-t sm:border-t-0 border-neutral">
               <div class="flex items-center ps-3">
                 <input id="reverse_color_temp_slider" type="radio" name="reverse_color_temp" value="True" {% if reverse_color_temp == "True" %}checked{% endif %}
                   class="w-4 h-4 radio radio-accent">
@@ -200,7 +200,7 @@
           <h3 class="block mb-2 text-sm font-medium">Turn on behavior</h3>
           <ul
             class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
-            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+            <li class="w-full border-t sm:border-t-0 border-neutral">
               <div class="flex items-center ps-3">
                 <input id="turn_on_color_temp" type="radio" name="turn_on_behavior" value="color_temp" {% if turn_on_behavior == "color_temp" %}checked{% endif %}
                   class="w-4 h-4 radio radio-accent">
@@ -208,7 +208,7 @@
                   class="w-full py-3 ms-2 text-sm font-medium">Color temperature</label>
               </div>
             </li>
-            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+            <li class="w-full border-t sm:border-t-0 border-neutral">
               <div class="flex items-center ps-3">
                 <input id="turn_on_restore" type="radio" name="turn_on_behavior" value="restore" {% if turn_on_behavior == "restore" %}checked{% endif %}
                   class="w-4 h-4 radio radio-accent">
@@ -345,7 +345,7 @@
         <div class="flex-auto mb-2">
             <h3 class="block mb-2 text-sm font-medium">Screensaver inside temperature</h3>
             <ul class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
-                <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+                <li class="w-full border-t sm:border-t-0 border-neutral">
                     <div class="flex items-center ps-3">
                     <input id="show_screensaver_inside_temperature" type="radio" name="show_screensaver_inside_temperature" value="True" {% if show_screensaver_inside_temperature == "True" %}checked{% endif %}
                         class="w-4 h-4 radio radio-accent">
@@ -353,7 +353,7 @@
                     </div>
                 </li>
 
-                <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+                <li class="w-full border-t sm:border-t-0 border-neutral">
                     <div class="flex items-center ps-3">
                     <input id="hide_screensaver_inside_temperature" type="radio" name="show_screensaver_inside_temperature" value="False" {% if show_screensaver_inside_temperature == "False" %}checked{% endif %}
                         class="w-4 h-4 radio radio-accent">
@@ -368,7 +368,7 @@
         <div class="flex-auto mb-2" id="screensaver_outside_temperature_setting">
             <h3 class="block mb-2 text-sm font-medium">Screensaver outside temperature</h3>
             <ul class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
-                <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+                <li class="w-full border-t sm:border-t-0 border-neutral">
                     <div class="flex items-center ps-3">
                     <input id="show_screensaver_outside_temperature" type="radio" name="show_screensaver_outside_temperature" value="True" {% if show_screensaver_outside_temperature == "True" %}checked{% endif %}
                         class="w-4 h-4 radio radio-accent">
@@ -376,7 +376,7 @@
                     </div>
                 </li>
 
-                <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+                <li class="w-full border-t sm:border-t-0 border-neutral">
                     <div class="flex items-center ps-3">
                     <input id="hide_screensaver_outside_temperature" type="radio" name="show_screensaver_outside_temperature" value="False" {% if show_screensaver_outside_temperature == "False" %}checked{% endif %}
                         class="w-4 h-4 radio radio-accent">
@@ -393,18 +393,18 @@
           <ul
             class="items-center w-full text-sm font-medium border border-neutral rounded-lg sm:flex">
                 <!-- Optimistic mode -->
-                <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+                <li class="w-full border-t sm:border-t-0 border-neutral">
               <div class="flex items-center ps-3">
-                <input id="entity_update_mode_optimistic" type="radio" name="optimistic_mode" value="optimistic" {% if optimistic_mode == "True" %}checked{% endif %}
+                <input id="entity_update_mode_optimistic" type="radio" name="optimistic_mode" value="optimistic" {% if optimistic_mode|lower == "true" %}checked{% endif %}
                   class="w-4 h-4 radio radio-accent">
                 <label for="entity_update_mode_optimistic" class="w-full py-3 ms-2 text-sm font-medium">Optimistic</label>
               </div>
             </li>
 
             <!-- Wait mode -->
-            <li class="w-full border-b sm:border-b-0 sm:border-r border-neutral">
+            <li class="w-full border-t sm:border-t-0 border-neutral">
               <div class="flex items-center ps-3">
-                <input id="entity_update_mode_wait" type="radio" name="optimistic_mode" value="wait" {% if optimistic_mode == "False" %}checked{% endif %}
+                <input id="entity_update_mode_wait" type="radio" name="optimistic_mode" value="wait" {% if optimistic_mode|lower == "false" %}checked{% endif %}
                   class="w-4 h-4 radio radio-accent">
                 <label for="entity_update_mode_wait"
                   class="w-full py-3 ms-2 text-sm font-medium">Wait</label>
@@ -413,6 +413,18 @@
           </ul>
         </div>
 
+
+        <!-- room status backoff time -->
+        <div class="mb-2">
+            <label for="room_status_backoff_time" class="block mb-1 text-sm font-medium">Room status backoff time (ms)</label>
+            <div class="flex flex-row-reverse">
+                <input class="outline-none rounded-none bg-base-300 border-neutral border border-l-0 rounded-e-field focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
+                type="number" class="input" name="room_status_backoff_time" value="{{ room_status_backoff_time }}" required>
+                <span class="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent">
+                <span class="mdi mdi-clock-outline"></span>
+                </span>
+            </div>
+        </div>
 
         <!-- All room status backoff time -->
         <div class="mb-2">

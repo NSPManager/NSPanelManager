@@ -1,4 +1,25 @@
 @import "tailwindcss";
+@tailwind components;
+@tailwind utilities;
+
+@property --border-angle {
+    syntax: "<angle>";
+    inherits: false;
+    initial-value: 0deg;
+}
+
+@theme {
+    --color-home-assistant: #18bcf2;
+    --color-openhab: #e64a19;
+
+    --animate-rotate-border: border-rotate 3s linear infinite;
+    @keyframes border-rotate {
+        to {
+            --border-angle: 360deg;
+        }
+    }
+}
+
 @plugin "daisyui" {
     themes: all;
 }
@@ -37,6 +58,18 @@
     --border: 1px;
     --depth: 0;
     --noise: 0;
+}
+
+.number-apperance-none {
+    appearance: none;
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    -moz-appearance: textfield;
 }
 
 /* @plugin "daisyui/theme" {

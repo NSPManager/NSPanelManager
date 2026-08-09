@@ -1,0 +1,24 @@
+{% load react_tags %}
+
+<dialog id="modal" class="modal" hx-swap-oob="true">
+    <div class="modal-box overflow-y-visible">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+
+        {% RC "MultiStep_AddEditEntity" room_id=room_id entities_page_id=entities_page_id room_view_position=room_view_position %}
+    </div>
+
+    <!-- Backdrop that closes dialog/modal on click -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+
+    <script>
+        htmx.on("htmx:afterSwap", (e) => {
+          if(e.detail.elt.id == "modal") {
+            modal.showModal();
+          }
+        });
+    </script>
+</dialog>

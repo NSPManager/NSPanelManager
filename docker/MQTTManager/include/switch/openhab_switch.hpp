@@ -24,7 +24,6 @@ public:
 private:
   // Mutex to only allow one thread to access the openhab items at a time
   std::mutex _openhab_items_mutex;
-  std::string _openhab_name;
   std::string _openhab_on_off_item; // Controls the item for on/off functioanlity
 
   uint64_t _last_on_off_change;

@@ -71,10 +71,7 @@ function stomp_subscribe(topic, callback) {
 }
 
 function stomp_unsubscribe(topic, callback) {
-  stomp_subscription_callbacks[topic]["callbacks"].splice(
-    stomp_subscription_callbacks[topic]["callbacks"].indexOf(callback),
-    1,
-  );
+  stomp_subscription_callbacks[topic]["callbacks"].splice(stomp_subscription_callbacks[topic]["callbacks"].indexOf(callback), 1);
 
   if (stomp_subscription_callbacks[topic]["callbacks"].length === 0) {
     stomp_subscription_destinations[topic].unsubscribe();
@@ -84,22 +81,14 @@ function stomp_unsubscribe(topic, callback) {
 }
 
 function stomp_message_callback(message) {
-  stomp_subscription_callbacks[message.headers.destination][
-    "callbacks"
-  ].forEach(function (callback) {
+  stomp_subscription_callbacks[message.headers.destination]["callbacks"].forEach(function (callback) {
     callback(message);
   });
 }
 
 function stomp_reconnect_callback() {
   // No username or password required to connect to STOMP websocket. Set dummy values.
-  stomp_client.connect(
-    "user",
-    "pass",
-    stomp_connected_callback,
-    stomp_disconnected_callback,
-    stomp_error_callback,
-  );
+  stomp_client.connect("user", "pass", stomp_connected_callback, stomp_disconnected_callback, stomp_error_callback);
 }
 
 // Setup base Stomp connection so that all other components can it use
@@ -110,8 +99,7 @@ if (location.protocol === "https:") {
   stomp_websocket_address = "ws://";
 }
 
-stomp_websocket_address +=
-  location.hostname + ":" + location.port + "/websocket/stomp";
+stomp_websocket_address += location.hostname + ":" + location.port + "/websocket/stomp";
 const stomp_client = new StompJs.Client({
   brokerURL: stomp_websocket_address,
   connectHeaders: {

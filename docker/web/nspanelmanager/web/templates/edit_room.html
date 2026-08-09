@@ -2,6 +2,7 @@
 {% load jsonify %}
 {% load set_var %}
 {% load concat %}
+{% load react_tags %}
 
 {% block head %}
 {% load static %}
@@ -100,23 +101,13 @@
 
 <div class="md:flex md:justify-between md:items-start mt-2">
   <div class="p-4 bg-base-100 rounded-md shadow-lg w-full">
-    <div class="md:flex md:flex-wrap md:justify-between items-center mb-2">
-      <span class="block mb-2 text-xl">{{ room.friendly_name }} scenes</span>
-      <button type="button" hx-get="{{ ingress_path }}{% url "htmx_partial_add_entities_page_to_room" room_id=room.id is_scenes_page=True is_global_scenes_page=False %}" hx-swap="none" class="btn btn-info btn-outline">Add scenes page</button>
-    </div>
-
-    {% component "nspanel_room_entities_pages" room_id=room.id is_scenes_pages=True is_global_scenes_page=False %}{% endcomponent %}
+    {% RC "EntitiesPagesView" room_id=room.id type="scene" %}
   </div>
 </div>
 
 <div class="md:flex md:justify-between md:items-start mt-2 mb-4">
   <div class="p-4 bg-base-100 rounded-md shadow-lg w-full">
-    <div class="md:flex md:flex-wrap md:justify-between items-center">
-        <span class="block mb-2 text-xl">{{ room.friendly_name }} entities</span>
-        <button type="button" hx-get='{{ ingress_path }}{% url "htmx_partial_add_entities_page_to_room" room_id=room.id is_scenes_page=False is_global_scenes_page=False %}' hx-swap="none" hx-indicator="#modal_loading" class="btn btn-info btn-outline">Add page</button>
-    </div>
-
-    {% component "nspanel_room_entities_pages" room_id=room.id is_scenes_pages=False is_global_scenes_page=False %}{% endcomponent %}
+    {% RC "EntitiesPagesView" room_id=room.id type="entity" %}
   </div>
 </div>
 {% endblock %}

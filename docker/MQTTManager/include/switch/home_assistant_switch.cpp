@@ -53,12 +53,12 @@ void HomeAssistantSwitch::send_state_update_to_controller() {
     service_data["domain"] = "switch";
     if (this->_requested_state) {
       service_data["service"] = "turn_on";
-      if (MqttManagerConfig::get_settings().optimistic_mode) {
+      if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
         this->_current_state = true;
       }
     } else {
       service_data["service"] = "turn_off";
-      if (MqttManagerConfig::get_settings().optimistic_mode) {
+      if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
         this->_current_state = false;
       }
     }
@@ -67,12 +67,12 @@ void HomeAssistantSwitch::send_state_update_to_controller() {
     service_data["domain"] = "input_boolean";
     if (this->_requested_state) {
       service_data["service"] = "turn_on";
-      if (MqttManagerConfig::get_settings().optimistic_mode) {
+      if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
         this->_current_state = true;
       }
     } else {
       service_data["service"] = "turn_off";
-      if (MqttManagerConfig::get_settings().optimistic_mode) {
+      if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
         this->_current_state = false;
       }
     }
@@ -81,7 +81,7 @@ void HomeAssistantSwitch::send_state_update_to_controller() {
     SPDLOG_ERROR("Could not determin domain for switch entity {}::{}. HA Name: {}", this->_id, this->_name, this->_home_assistant_name);
   }
 
-  if (MqttManagerConfig::get_settings().optimistic_mode) {
+  if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
     this->_entity_changed_callbacks(this);
   }
 }

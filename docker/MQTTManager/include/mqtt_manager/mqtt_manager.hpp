@@ -1,6 +1,7 @@
 #ifndef MQTT_MANAGER_HPP
 #define MQTT_MANAGER_HPP
 
+#include "websocket_server/websocket_server.hpp"
 #include <boost/lockfree/spsc_queue.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/signals2.hpp>
@@ -24,7 +25,6 @@ struct MQTTMessage {
 class MQTT_Manager {
 public:
   static void init(); // Load config and connect to MQTT
-
   static void connect();
 
   /*
@@ -113,6 +113,7 @@ private:
   static inline std::mutex _mqtt_client_mutex;
   static inline std::mutex _mqtt_message_mutex;
   static inline std::list<mqtt::message_ptr> _mqtt_messages_buffer;
+  static inline std::unordered_map<std::string, std::string> _mqtt_retain_buffer; // Used so that when we reconnect to an MQTT server that has restarted we can repopulate the retained messages.
 
   static void _reconnect_mqtt_client();
 
@@ -129,6 +130,14 @@ private:
   static inline std::string _mqtt_username;
   static inline std::string _mqtt_password;
   static inline std::atomic<bool> _stop_consuming;
+
+  /**
+   * Will process a STOMP message received the websocket through WebsocketManager.
+   * This is used to bridge STOMP and MQTT to be able to hook into React web frontend.
+   * @param topic: The STOMP topic the message was received on.
+   * @param message: The STOMP message payload.
+   */
+  static void _process_stomp_message(StompFrame frame);
 };
 
 #endif // !MQTT_MANAGER_HPP

@@ -8,6 +8,7 @@
 #include "web_helper/WebHelper.hpp"
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/bind.hpp>
 #include <boost/bind/placeholders.hpp>
 #include <boost/exception/diagnostic_information.hpp>
@@ -22,6 +23,7 @@
 #include <ctime>
 #include <curl/curl.h>
 #include <curl/easy.h>
+#include <entity/entity.hpp>
 #include <exception>
 #include <fmt/chrono.h>
 #include <fmt/core.h>
@@ -34,6 +36,7 @@
 #include <nlohmann/json_fwd.hpp>
 #include <optional>
 #include <room/room.hpp>
+#include <scenes/scene.hpp>
 #include <spdlog/spdlog.h>
 #include <sqlite3.h>
 #include <sqlite_orm/sqlite_orm.h>
@@ -67,11 +70,27 @@ std::shared_ptr<NSPanel> NSPanel::create_from_discovery_request(nlohmann::json r
     database_manager::NSPanel panel_data;
     panel_data.mac_address = request_data.at("mac_origin").get<std::string>();
     panel_data.friendly_name = request_data.at("friendly_name").get<std::string>();
+    if (request_data.contains("model")) {
+      std::string nspanel_model = request_data.at("model").get<std::string>();
+      if (nspanel_model.compare("sonoff") == 0) {
+        panel_data.model = "sonoff";
+      } else if (nspanel_model.compare("custom") == 0) {
+        panel_data.model = "custom";
+      } else if (nspanel_model.compare("web") == 0) {
+        panel_data.model = "web";
+      } else {
+        SPDLOG_WARN("Failed to parse panel model for NSPanel {}. Got value '{}'. Will assume sonoff.", panel_data.friendly_name, panel_data.model);
+        panel_data.model = "sonoff";
+      }
+    } else {
+      SPDLOG_WARN("No model field set in request request for NSPanel {}. Got value '{}'. Will assume sonoff.", panel_data.friendly_name, panel_data.model);
+      panel_data.model = "sonoff";
+    }
     panel_data.room_id = db_room[0].id;
     panel_data.version = request_data.at("version").get<std::string>();
-    panel_data.button1_detached_mode_light_id = std::nullopt;
+    panel_data.button1_detached_mode_entity_id = std::nullopt;
     panel_data.button1_mode = 0;
-    panel_data.button2_detached_mode_light_id = std::nullopt;
+    panel_data.button2_detached_mode_entity_id = std::nullopt;
     panel_data.button2_mode = 0;
     panel_data.md5_data_file = request_data.at("md5_data_file").get<std::string>();
     panel_data.md5_firmware = request_data.at("md5_firmware").get<std::string>();
@@ -80,7 +99,7 @@ std::shared_ptr<NSPanel> NSPanel::create_from_discovery_request(nlohmann::json r
     panel_data.accepted = false;
     try {
       int new_nspanel_id = database_manager::database.insert(panel_data);
-      if (MqttManagerConfig::get_setting_with_default("default_nspanel_type", "eu").compare("eu") == 0) {
+      if (MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::DEFAULT_NSPANEL_TYPE).compare("eu") == 0) {
         MqttManagerConfig::set_nspanel_setting_value(new_nspanel_id, "is_us_panel", "False");
       } else {
         MqttManagerConfig::set_nspanel_setting_value(new_nspanel_id, "is_us_panel", "True");
@@ -106,8 +125,19 @@ void NSPanel::reload_config() {
     bool reregister_to_ha_mqtt_discovery = false;
 
     this->_settings = panel_settings;
-    this->_has_registered_to_manager = true; // We managed to get the object in above statement and did not throw, ie. has been registered in manager and has an ID in DB.
+    this->_has_registered_to_manager = panel_settings.accepted; // We managed to get the object in above statement and did not throw, ie. has been registered in manager and has an ID in DB.
     this->_mac = panel_settings.mac_address;
+    if (panel_settings.model.compare("sonoff") == 0) {
+      this->_model = MQTT_MANAGER_NSPANEL_MODEL::SONOFF;
+    } else if (panel_settings.model.compare("custom") == 0) {
+      this->_model = MQTT_MANAGER_NSPANEL_MODEL::CUSTOM;
+    } else if (panel_settings.model.compare("web") == 0) {
+      this->_model = MQTT_MANAGER_NSPANEL_MODEL::WEB;
+    } else {
+      SPDLOG_ERROR("Failed to prase panel model for NSPanel {}::{}. Got value '{}'. Will assume sonoff.", panel_settings.id, panel_settings.friendly_name, panel_settings.model);
+      this->_model = MQTT_MANAGER_NSPANEL_MODEL::SONOFF;
+    }
+
     this->_is_us_panel = this->_get_nspanel_setting_with_default("is_us_panel", "False").compare("True") == 0;
     std::string us_panel_orientation = this->_get_nspanel_setting_with_default("us_panel_orientation", "vertical");
     if (us_panel_orientation.compare("vertical") == 0) {
@@ -185,6 +215,8 @@ void NSPanel::reload_config() {
       this->_mqtt_log_topic = fmt::format("nspanel/{}/log", this->_name); // TODO: Remove as this is the old log topic. Use the new based on MAC-address instead.
       this->_mqtt_command_topic = fmt::format("nspanel/{}/command", this->_mac);
       this->_mqtt_sensor_temperature_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_temperature/config", mqtt_register_mac);
+      this->_mqtt_sensor_humidity_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_humidity/config", mqtt_register_mac);
+      this->_mqtt_sensor_pressure_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_pressure/config", mqtt_register_mac);
       this->_mqtt_switch_relay1_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay1/config", mqtt_register_mac);
       this->_mqtt_light_relay1_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay1/config", mqtt_register_mac);
       this->_mqtt_switch_relay2_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay2/config", mqtt_register_mac);
@@ -200,7 +232,8 @@ void NSPanel::reload_config() {
       this->_mqtt_status_topic = fmt::format("nspanel/{}/status", this->_mac);
       this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_mac);
       this->_mqtt_temperature_topic = fmt::format("nspanel/{}/temperature", this->_mac);
-
+      this->_mqtt_humidity_topic = fmt::format("nspanel/{}/humidity", this->_mac);
+      this->_mqtt_pressure_topic = fmt::format("nspanel/{}/pressure", this->_mac);
       this->_mqtt_topic_home_page_status = fmt::format("nspanel/{}/home_page", this->_mac);
       this->_mqtt_topic_home_page_all_rooms_status = fmt::format("nspanel/{}/home_page_all", this->_mac);
       this->_mqtt_topic_room_entities_page_status = fmt::format("nspanel/{}/entities_page", this->_mac);
@@ -231,7 +264,7 @@ void NSPanel::reload_config() {
 
     this->send_config();
   } catch (std::system_error &ex) {
-    SPDLOG_ERROR("Failed to get config for NSPanel {} from database.", this->_id);
+    SPDLOG_ERROR("Failed to get config for NSPanel {} from database. Error: {}", this->_id, ex.what());
   }
   SPDLOG_TRACE("NSPanel {}::{} received config update.", this->_id, this->_name);
 
@@ -244,7 +277,6 @@ void NSPanel::send_config() {
 
   SPDLOG_INFO("Sending config over MQTT for panel {}::{}", this->_id, this->_name);
   NSPanelConfig config;
-  MqttManagerSettingsHolder global_setting = MqttManagerConfig::get_settings();
 
   auto default_room = EntityManager::get_room(this->_settings.room_id);
   if (!default_room) {
@@ -256,31 +288,40 @@ void NSPanel::send_config() {
   config.set_name(this->_name);
   config.set_default_room(this->_settings.room_id);
   config.set_default_page(static_cast<NSPanelConfig_NSPanelDefaultPage>(std::stoi(this->_get_nspanel_setting_with_default("default_page", "0"))));
-  config.set_min_button_push_time(std::stoi(MqttManagerConfig::get_setting_with_default("min_button_push_time", "50")));
-  config.set_button_long_press_time(std::stoi(MqttManagerConfig::get_setting_with_default("button_long_press_time", "5000")));
-  config.set_special_mode_trigger_time(std::stoi(MqttManagerConfig::get_setting_with_default("special_mode_trigger_time", "300")));
-  config.set_special_mode_release_time(std::stoi(MqttManagerConfig::get_setting_with_default("special_mode_release_time", "5000")));
-  config.set_screen_dim_level(std::stoi(this->_get_nspanel_setting_with_default("screen_dim_level", MqttManagerConfig::get_setting_with_default("screen_dim_level", "100"))));
-  config.set_screensaver_dim_level(std::stoi(this->_get_nspanel_setting_with_default("screensaver_dim_level", MqttManagerConfig::get_setting_with_default("screensaver_dim_level", "1"))));
-  config.set_screensaver_activation_timeout(std::stoi(this->_get_nspanel_setting_with_default("screensaver_activation_timeout", MqttManagerConfig::get_setting_with_default("screensaver_activation_timeout", "30000"))));
-  config.set_clock_us_style(!global_setting.clock_24_hour_format);
-  config.set_use_fahrenheit(MqttManagerConfig::get_setting_with_default("use_fahrenheit", "False").compare("True") == 0);
+  config.set_min_button_push_time(MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::MIN_BUTTON_PUSH_TIME));
+  config.set_button_long_press_time(MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::BUTTON_LONG_PRESS_TIME));
+  config.set_special_mode_trigger_time(MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::SPECIAL_MODE_TRIGGER_TIME));
+  config.set_special_mode_release_time(MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::SPECIAL_MODE_RELEASE_TIME));
+  config.set_screen_dim_level(std::stoi(this->_get_nspanel_setting_with_default("screen_dim_level", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::SCREEN_DIM_LEVEL))));
+  config.set_screensaver_dim_level(std::stoi(this->_get_nspanel_setting_with_default("screensaver_dim_level", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::SCREENSAVER_DIM_LEVEL))));
+  config.set_screensaver_activation_timeout(std::stoi(this->_get_nspanel_setting_with_default("screensaver_activation_timeout", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::SCREENSAVER_ACTIVATION_TIMEOUT))));
+  config.set_clock_us_style(MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::CLOCK_US_STYLE));
+  config.set_use_fahrenheit(MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::USE_FAHRENHEIT));
   config.set_is_us_panel(this->_get_nspanel_setting_with_default("is_us_panel", "False").compare("True") == 0);
   config.set_reverse_relays(this->_get_nspanel_setting_with_default("reverse_relays", "False").compare("True") == 0);
   config.set_relay1_default_mode(this->_get_nspanel_setting_with_default("relay1_default_mode", "False").compare("True") == 0);
   config.set_relay2_default_mode(this->_get_nspanel_setting_with_default("relay2_default_mode", "False").compare("True") == 0);
   config.set_temperature_calibration((std::stof(this->_get_nspanel_setting_with_default("temperature_calibration", "0.0")) * 10));
-  config.set_default_light_brightess(std::stoi(MqttManagerConfig::get_setting_with_default("light_turn_on_brightness", "50")));
+  config.set_default_light_brightess(MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::LIGHT_TURN_ON_BRIGHTNESS));
   config.set_locked_to_default_room(this->is_locked_to_default_room());
-  if ((*default_room)->has_temperature_sensor()) {
-    config.set_inside_temperature_sensor_mqtt_topic((*default_room)->get_temperature_sensor_mqtt_topic());
-  }
+  config.set_button1_lower_temperature(0);
+  config.set_button1_upper_temperature(0);
+  config.set_button2_lower_temperature(0);
+  config.set_button2_upper_temperature(0);
 
   ButtonMode b1_mode = static_cast<ButtonMode>(this->_settings.button1_mode);
   if (b1_mode == ButtonMode::DIRECT) {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_DIRECT);
   } else if (b1_mode == ButtonMode::FOLLOW) {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_FOLLOW);
+  } else if (b1_mode == ButtonMode::THERMOSTAT_HEATING) {
+    config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_HEAT);
+    config.set_button1_lower_temperature(std::stoi(this->_get_nspanel_setting_with_default("button1_relay_lower_temperature", "0")));
+    config.set_button1_upper_temperature(std::stoi(this->_get_nspanel_setting_with_default("button1_relay_upper_temperature", "0")));
+  } else if (b1_mode == ButtonMode::THERMOSTAT_COOLING) {
+    config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
+    config.set_button1_lower_temperature(std::stoi(this->_get_nspanel_setting_with_default("button1_relay_lower_temperature", "0")));
+    config.set_button1_upper_temperature(std::stoi(this->_get_nspanel_setting_with_default("button1_relay_upper_temperature", "0")));
   } else {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
@@ -290,37 +331,70 @@ void NSPanel::send_config() {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_DIRECT);
   } else if (b2_mode == ButtonMode::FOLLOW) {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_FOLLOW);
+  } else if (b2_mode == ButtonMode::THERMOSTAT_HEATING) {
+    config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_HEAT);
+    config.set_button2_lower_temperature(std::stoi(this->_get_nspanel_setting_with_default("button2_relay_lower_temperature", "0")));
+    config.set_button2_upper_temperature(std::stoi(this->_get_nspanel_setting_with_default("button2_relay_upper_temperature", "0")));
+  } else if (b2_mode == ButtonMode::THERMOSTAT_COOLING) {
+    config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
+    config.set_button2_lower_temperature(std::stoi(this->_get_nspanel_setting_with_default("button2_relay_lower_temperature", "0")));
+    config.set_button2_upper_temperature(std::stoi(this->_get_nspanel_setting_with_default("button2_relay_upper_temperature", "0")));
   } else {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
 
-  config.set_optimistic_mode(global_setting.optimistic_mode);
-  config.set_raise_light_level_to_100_above(std::stoi(MqttManagerConfig::get_setting_with_default("raise_to_100_light_level", "96")));
+  config.set_optimistic_mode(MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE));
+  config.set_raise_light_level_to_100_above(MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::RAISE_TO_100_LIGHT_LEVEL));
 
-  std::string screensaver_mode = this->_get_nspanel_setting_with_default("screensaver_mode", MqttManagerConfig::get_setting_with_default("screensaver_mode", "with_background"));
+  std::string screensaver_mode = this->_get_nspanel_setting_with_default("screensaver_mode", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::SCREENSAVER_MODE));
   if (screensaver_mode.compare("with_background") == 0) {
     config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITH_BACKGROUND);
+
+    if (config.screensaver_dim_level() == 0) {
+      SPDLOG_WARN("Setting screensaver dim level to 10 as a screensaver has been chosen to be displayed but screensaver brightness is set to 0.");
+      config.set_screensaver_dim_level(10);
+    }
   } else if (screensaver_mode.compare("without_background") == 0) {
     config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITHOUT_BACKGROUND);
+
+    if (config.screensaver_dim_level() == 0) {
+      SPDLOG_WARN("Setting screensaver dim level to 10 as a screensaver has been chosen to be displayed but screensaver brightness is set to 0.");
+      config.set_screensaver_dim_level(10);
+    }
   } else if (screensaver_mode.compare("datetime_with_background") == 0) {
     config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_DATETIME_WITH_BACKGROUND);
+
+    if (config.screensaver_dim_level() == 0) {
+      SPDLOG_WARN("Setting screensaver dim level to 10 as a screensaver has been chosen to be displayed but screensaver brightness is set to 0.");
+      config.set_screensaver_dim_level(10);
+    }
   } else if (screensaver_mode.compare("datetime_without_background") == 0) {
     config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_DATETIME_WITHOUT_BACKGROUND);
+
+    if (config.screensaver_dim_level() == 0) {
+      SPDLOG_WARN("Setting screensaver dim level to 10 as a screensaver has been chosen to be displayed but screensaver brightness is set to 0.");
+      config.set_screensaver_dim_level(10);
+    }
   } else if (screensaver_mode.compare("no_screensaver") == 0) {
     config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_NO_SCREENSAVER);
+
+    if (config.screensaver_dim_level() == 0) {
+      SPDLOG_WARN("Setting screensaver dim level to 10 as a screensaver has been chosen to be displayed but screensaver brightness is set to 0.");
+      config.set_screensaver_dim_level(10);
+    }
   } else {
     SPDLOG_ERROR("Unknown screensaver mode '{}' for NSPanel {}::{}, assuming weather with background.", screensaver_mode, this->_id, this->_name);
     config.set_screensaver_mode(NSPanelConfig_NSPanelScreensaverMode::NSPanelConfig_NSPanelScreensaverMode_WEATHER_WITH_BACKGROUND);
   }
 
-  std::string show_screensaver_inside_temperature = this->_get_nspanel_setting_with_default("show_screensaver_inside_temperature", MqttManagerConfig::get_setting_with_default("show_screensaver_inside_temperature", "True"));
+  std::string show_screensaver_inside_temperature = this->_get_nspanel_setting_with_default("show_screensaver_inside_temperature", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::SHOW_SCREENSAVER_INSIDE_TEMPERATURE));
   if (show_screensaver_inside_temperature.compare("True") == 0) {
     config.set_show_screensaver_inside_temperature(true);
   } else {
     config.set_show_screensaver_inside_temperature(false);
   }
 
-  std::string show_screensaver_outside_temperature = this->_get_nspanel_setting_with_default("show_screensaver_outside_temperature", MqttManagerConfig::get_setting_with_default("show_screensaver_outside_temperature", "True"));
+  std::string show_screensaver_outside_temperature = this->_get_nspanel_setting_with_default("show_screensaver_outside_temperature", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::SHOW_SCREENSAVER_OUTSIDE_TEMPERATURE));
   if (show_screensaver_outside_temperature.compare("True") == 0) {
     config.set_show_screensaver_outside_temperature(true);
   } else {
@@ -335,7 +409,7 @@ void NSPanel::send_config() {
         config.add_relay1_relay_group(binding.relay_group_id);
       }
     }
-  } catch (std::system_error) {
+  } catch (...) {
     // Did not find matching relay group binind, relay is not bound.
   }
 
@@ -347,7 +421,7 @@ void NSPanel::send_config() {
         config.add_relay2_relay_group(binding.relay_group_id);
       }
     }
-  } catch (std::system_error) {
+  } catch (...) {
     // Did not find matching relay group binind, relay is not bound.
   }
 
@@ -431,6 +505,8 @@ void NSPanel::reset_ha_mqtt_topics() {
   MQTT_Manager::clear_retain(this->_mqtt_switch_relay2_topic);
   MQTT_Manager::clear_retain(this->_mqtt_switch_screen_topic);
   MQTT_Manager::clear_retain(this->_mqtt_sensor_temperature_topic);
+  MQTT_Manager::clear_retain(this->_mqtt_sensor_humidity_topic);
+  MQTT_Manager::clear_retain(this->_mqtt_sensor_pressure_topic);
   MQTT_Manager::clear_retain(this->_mqtt_number_screen_brightness_topic);
   MQTT_Manager::clear_retain(this->_mqtt_number_screensaver_brightness_topic);
   MQTT_Manager::clear_retain(this->_mqtt_select_screensaver_topic);
@@ -452,6 +528,10 @@ std::string NSPanel::get_mac() {
 
 MQTT_MANAGER_NSPANEL_STATE NSPanel::get_state() {
   return this->_state;
+}
+
+MQTT_MANAGER_NSPANEL_MODEL NSPanel::get_model() {
+  return this->_model;
 }
 
 void NSPanel::mqtt_callback(std::string topic, std::string payload) {
@@ -479,7 +559,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         std::tm tm = *std::localtime(&now);
         std::stringstream buffer;
-        if (MqttManagerConfig::get_settings().clock_24_hour_format) {
+        if (!MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::CLOCK_US_STYLE)) {
           buffer << std::put_time(&tm, "%H:%M:%S");
         } else {
           buffer << std::put_time(&tm, "%I:%M:%S %p");
@@ -500,8 +580,8 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         // Save log message in backtrace for when (if) the log interface requests it.
         this->_log_messages_backlog["logs"].insert(this->_log_messages_backlog["logs"].begin(), log_data);
         // Remove older messages from backtrace.
-        if (this->_log_messages_backlog["logs"].size() > MqttManagerConfig::get_settings().max_log_buffer_size) {
-          this->_log_messages_backlog["logs"].erase(this->_log_messages_backlog["logs"].begin() + MqttManagerConfig::get_settings().max_log_buffer_size, this->_log_messages_backlog["logs"].end());
+        if (this->_log_messages_backlog["logs"].size() > MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::MAX_LOG_BUFFER_SIZE)) {
+          this->_log_messages_backlog["logs"].erase(this->_log_messages_backlog["logs"].begin() + MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::MAX_LOG_BUFFER_SIZE), this->_log_messages_backlog["logs"].end());
         }
         WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log_backlog", this->_mac), this->_log_messages_backlog);
       } else {
@@ -525,18 +605,6 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
     } else if (topic.compare(this->_mqtt_status_report_topic) == 0 || topic.compare(fmt::format("nspanel/{}/status_report", this->_name)) == 0) { // TODO: Remove and only use MAC-based topic after 2.0 is stable.
       NSPanelStatusReport report;
       if (report.ParseFromString(payload)) {
-        // Successfully received a new type of status report in protobuf format. This means that we have successfully updated to 2.0 firmware. Remove old MQTT topic retains:
-        // TODO: Remove once 2.0 is stable release
-        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/status", this->_name));
-        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/status_report", this->_name));
-        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/log", this->_name));
-        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/r1_state", this->_name));
-        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/r2_state", this->_name));
-        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/screen_state", this->_name));
-        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/temperature_state", this->_name));
-        MQTT_Manager::clear_retain(fmt::format("nspanel/{}/command", this->_name));
-        MQTT_Manager::clear_retain(fmt::format("nspanel/{}", this->_name));
-
         SPDLOG_DEBUG("Got new status report from NSPanel {}::{}", this->_id, this->_name);
         this->_ip_address = report.ip_address();
         this->_rssi = report.rssi();
@@ -545,6 +613,17 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         this->_current_firmware_md5_checksum = report.md5_firmware();
         this->_current_littlefs_md5_checksum = report.md5_littlefs();
         this->_current_tft_md5_checksum = report.md5_tft_gui();
+
+        MQTT_Manager::publish(this->_mqtt_temperature_topic, fmt::format("{:.1f}", this->_temperature));
+        if (report.has_humidity()) {
+          this->_humidity = report.humidity();
+          MQTT_Manager::publish(this->_mqtt_humidity_topic, fmt::format("{:.1f}", this->_humidity));
+        }
+
+        if (report.has_pressure()) {
+          this->_pressure = report.pressure();
+          MQTT_Manager::publish(this->_mqtt_pressure_topic, fmt::format("{:.1f}", this->_pressure / 100));
+        }
 
         switch (report.nspanel_state()) {
         case NSPanelStatusReport_state::NSPanelStatusReport_state_ONLINE:
@@ -599,8 +678,6 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
           this->_nspanel_warnings.push_back(ws_warn);
         }
 
-        // Received new temperature from status report, send out on temperature topic:
-        MQTT_Manager::publish(this->_mqtt_temperature_topic, fmt::format("{:.1f}", this->_temperature));
         this->send_websocket_status_update();
       } else {
         SPDLOG_ERROR("Failed to parse NSPanelStatusReport from string as protobuf. Will try JSON.");
@@ -691,6 +768,11 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
   if (trim_start_pos == std::string::npos) {
     return; // Message contains no valid chars, only spaces
   }
+
+  if (payload.length() <= 0) [[unlikely]] {
+    return; // Message is empty.
+  }
+
   payload = payload.substr(trim_start_pos, trim_end_pos + 1 - 4); // Trim spaces and such but also the first 7 chars that is the color coding for the message
   if (payload[0] == 0x1B) {                                       // Message formated with color. Remove color
     payload = payload.substr(7);
@@ -699,7 +781,7 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
   std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   std::tm tm = *std::localtime(&now);
   std::stringstream buffer;
-  if (MqttManagerConfig::get_settings().clock_24_hour_format) {
+  if (!MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::CLOCK_US_STYLE)) {
     buffer << std::put_time(&tm, "%H:%M:%S");
   } else {
     buffer << std::put_time(&tm, "%I:%M:%S %p");
@@ -724,16 +806,26 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
     return;
   }
 
+  // Convert payload strings non-printable characters to their hex representation
+  std::string converted_payload;
+  for (char c : payload) {
+    if (!std::isprint(c)) {
+      converted_payload += fmt::format("{{0x{:02X}}}", static_cast<unsigned char>(c));
+    } else {
+      converted_payload += c;
+    }
+  }
+
   // Remove first char that indicates log level. This is stored separately
   payload = payload.substr(1);
-  log_data["message"] = payload; // TODO: Clean up message before sending it out
+  log_data["message"] = converted_payload; // TODO: Clean up message before sending it out
   WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log", this->_mac), log_data.dump());
 
   // Save log message in backtrace for when (if) the log interface requests it.
   this->_log_messages_backlog["logs"].insert(this->_log_messages_backlog["logs"].begin(), log_data);
   // Remove older messages from backtrace.
-  if (this->_log_messages_backlog["logs"].size() > MqttManagerConfig::get_settings().max_log_buffer_size) {
-    this->_log_messages_backlog["logs"].erase(this->_log_messages_backlog["logs"].begin() + MqttManagerConfig::get_settings().max_log_buffer_size, this->_log_messages_backlog["logs"].end());
+  if (this->_log_messages_backlog["logs"].size() > MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::MAX_LOG_BUFFER_SIZE)) {
+    this->_log_messages_backlog["logs"].erase(this->_log_messages_backlog["logs"].begin() + MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::MAX_LOG_BUFFER_SIZE), this->_log_messages_backlog["logs"].end());
   }
   WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log_backlog", this->_mac), this->_log_messages_backlog);
 }
@@ -747,6 +839,8 @@ void NSPanel::send_websocket_status_update() {
       {"ip_address", this->_ip_address},
       {"rssi", this->_rssi},
       {"temperature", this->_temperature},
+      {"humidity", this->_humidity},
+      {"pressure", this->_pressure},
       {"ram_usage", this->_heap_used_pct},
       {"update_progress", this->_update_progress},
   };
@@ -759,23 +853,26 @@ void NSPanel::send_websocket_status_update() {
   }
 
   // Check if NSPanel has firmware, littlefs or tft file updates available and set appropriate warning.
-  if (this->_current_firmware_md5_checksum.empty() || this->_current_littlefs_md5_checksum.empty()) {
-    status_data["warnings"].push_back(nlohmann::json{
-        {"level", "warning"},
-        {"text", "Manager has no checksum for installed firmware on panel. If this doesn't go away within 5 minutes, try performing a firmware update from the manager."}});
-  } else if (this->has_firmware_update() || this->has_littlefs_update()) {
-    status_data["warnings"].push_back(nlohmann::json{
-        {"level", "warning"},
-        {"text", "Firmware update available"}});
-  }
-  if (this->_current_tft_md5_checksum.empty()) {
-    status_data["warnings"].push_back(nlohmann::json{
-        {"level", "warning"},
-        {"text", "Manager has no checksum for installed GUI on panel. If this doesn't go away within 5 minutes, try performing a GUI update from the manager."}});
-  } else if (this->has_tft_update()) {
-    status_data["warnings"].push_back(nlohmann::json{
-        {"level", "warning"},
-        {"text", "GUI update available"}});
+  // Only check for models that actually have firmware, littlefs and TFT.
+  if (this->_model != MQTT_MANAGER_NSPANEL_MODEL::WEB) {
+    if (this->_current_firmware_md5_checksum.empty() || this->_current_littlefs_md5_checksum.empty()) {
+      status_data["warnings"].push_back(nlohmann::json{
+          {"level", "warning"},
+          {"text", "Manager has no checksum for installed firmware on panel. If this doesn't go away within 5 minutes, try performing a firmware update from the manager."}});
+    } else if (this->has_firmware_update() || this->has_littlefs_update()) {
+      status_data["warnings"].push_back(nlohmann::json{
+          {"level", "warning"},
+          {"text", "Firmware update available"}});
+    }
+    if (this->_current_tft_md5_checksum.empty()) {
+      status_data["warnings"].push_back(nlohmann::json{
+          {"level", "warning"},
+          {"text", "Manager has no checksum for installed GUI on panel. If this doesn't go away within 5 minutes, try performing a GUI update from the manager."}});
+    } else if (this->has_tft_update()) {
+      status_data["warnings"].push_back(nlohmann::json{
+          {"level", "warning"},
+          {"text", "GUI update available"}});
+    }
   }
 
   switch (this->_state) {
@@ -811,23 +908,49 @@ void NSPanel::send_websocket_status_update() {
 }
 
 bool NSPanel::has_firmware_update() {
-  auto file_checksum = MqttManagerConfig::get_firmware_checksum();
-  if (file_checksum) {
-    return this->_current_firmware_md5_checksum.compare(*file_checksum) != 0;
-  } else {
-    SPDLOG_ERROR("Failed to get checksum for firmware file!");
-    return false;
+  std::string file_checksum = "";
+  if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::SONOFF) {
+    auto result = MqttManagerConfig::get_firmware_sonoff_checksum();
+    if (result) {
+      file_checksum = *result;
+    } else {
+      SPDLOG_ERROR("Failed to get checksum for sonoff firmware!");
+      return false;
+    }
+  } else if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::CUSTOM) {
+    auto result = MqttManagerConfig::get_firmware_custom_checksum();
+    if (result) {
+      file_checksum = *result;
+    } else {
+      SPDLOG_ERROR("Failed to get checksum for custom firmware!");
+      return false;
+    }
   }
+
+  return this->_current_firmware_md5_checksum.compare(file_checksum) != 0;
 }
 
 bool NSPanel::has_littlefs_update() {
-  auto file_checksum = MqttManagerConfig::get_littlefs_checksum();
-  if (file_checksum) {
-    return this->_current_littlefs_md5_checksum.compare(*file_checksum) != 0;
-  } else {
-    SPDLOG_ERROR("Failed to get checksum for littlefs file!");
-    return false;
+  std::string file_checksum = "";
+  if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::SONOFF) {
+    auto result = MqttManagerConfig::get_littlefs_sonoff_checksum();
+    if (result) {
+      file_checksum = *result;
+    } else {
+      SPDLOG_ERROR("Failed to get checksum for sonoff LittleFS!");
+      return false;
+    }
+  } else if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::CUSTOM) {
+    auto result = MqttManagerConfig::get_littlefs_custom_checksum();
+    if (result) {
+      file_checksum = *result;
+    } else {
+      SPDLOG_ERROR("Failed to get checksum for custom LittleFS!");
+      return false;
+    }
   }
+
+  return this->_current_littlefs_md5_checksum.compare(file_checksum) != 0;
 }
 
 bool NSPanel::has_tft_update() {
@@ -1067,38 +1190,145 @@ bool NSPanel::has_registered_to_manager() {
 
 bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload) {
   try {
-    SPDLOG_INFO("Sending registration data to Django for database management.");
-    std::string url = "http://" MANAGER_ADDRESS ":" MANAGER_PORT "/rest/nspanels";
-    std::string response_data;
-    std::string payload_data = register_request_payload.dump();
+    SPDLOG_TRACE("Processing register_request. Data: {}", register_request_payload.dump(4));
 
-    if (register_request_payload.contains("md5_firmware")) {
-      this->_current_firmware_md5_checksum = register_request_payload["md5_firmware"];
-    }
-    if (register_request_payload.contains("md5_data_file")) {
-      this->_current_littlefs_md5_checksum = register_request_payload["md5_data_file"];
-    }
-    if (register_request_payload.contains("md5_tft_file")) {
-      this->_current_tft_md5_checksum = register_request_payload["md5_tft_file"];
+    SPDLOG_INFO("Registering NSPanel {}::{} to manager.", this->_id, this->_name);
+    // Verify a valid MAC address was provided in the register_request
+    if (register_request_payload.contains("mac") && register_request_payload.at("mac").is_string()) {
+      this->_mac = register_request_payload.at("mac");
+    } else if (register_request_payload.contains("mac_origin") && register_request_payload.at("mac_origin").is_string()) {
+      this->_mac = register_request_payload.at("mac_origin");
+    } else if (register_request_payload.contains("mac_address") && register_request_payload.at("mac_address").is_string()) {
+      this->_mac = register_request_payload.at("mac_address");
+    } else {
+      SPDLOG_ERROR("Failed to get MAC from register request. Cannot register to manager!");
+      return false;
     }
 
-    if (WebHelper::perform_post_request(&url, &response_data, nullptr, &payload_data)) {
+    if (!register_request_payload.contains("friendly_name") || !register_request_payload.at("friendly_name").is_string()) {
+      SPDLOG_ERROR("Failed to get friendly name from register request. Cannot register to manager!");
+      return false;
+    }
+
+    if (!register_request_payload.contains("model") || !register_request_payload.at("model").is_string()) {
+      SPDLOG_WARN("Failed to get model from register request. Will assume sonoff!");
+      this->_model = MQTT_MANAGER_NSPANEL_MODEL::SONOFF;
+    } else {
+      std::string nspanel_model = register_request_payload.at("model").get<std::string>();
+      if (nspanel_model.compare("sonoff") == 0) {
+        this->_model = MQTT_MANAGER_NSPANEL_MODEL::SONOFF;
+      } else if (nspanel_model.compare("custom") == 0) {
+        this->_model = MQTT_MANAGER_NSPANEL_MODEL::CUSTOM;
+      } else if (nspanel_model.compare("web") == 0) {
+        this->_model = MQTT_MANAGER_NSPANEL_MODEL::WEB;
+      } else {
+        SPDLOG_WARN("Failed to parse panel model for NSPanel {}. Got value '{}'. Will assume sonoff.", register_request_payload.at("friendly_name").get<std::string>(), nspanel_model);
+        this->_model = MQTT_MANAGER_NSPANEL_MODEL::SONOFF;
+      }
+    }
+
+    std::string version = "UNKNOWN";
+    if (!register_request_payload.contains("version") || !register_request_payload.at("version").is_string()) {
+      version = register_request_payload.at("version").get<std::string>();
+    }
+
+    if (register_request_payload.contains("md5_firmware") && register_request_payload.at("md5_firmware").is_string()) {
+      this->_current_firmware_md5_checksum = register_request_payload.at("md5_firmware").get<std::string>();
+    }
+
+    if (register_request_payload.contains("md5_data_file") && register_request_payload.at("md5_data_file").is_string()) {
+      this->_current_littlefs_md5_checksum = register_request_payload.at("md5_data_file").get<std::string>();
+    } else {
+      this->_current_littlefs_md5_checksum = "UNKNOWN";
+    }
+
+    if (register_request_payload.contains("md5_tft_file") && register_request_payload.at("md5_tft_file").is_string()) {
+      this->_current_tft_md5_checksum = register_request_payload.at("md5_tft_file").get<std::string>();
+    } else {
+      this->_current_tft_md5_checksum = "UNKNOWN";
+    }
+
+    bool denied = true;
+    if (register_request_payload.contains("denied") && register_request_payload.at("denied").is_string()) {
+      std::string denied_str = register_request_payload.at("denied").get<std::string>();
+      boost::algorithm::to_lower(denied_str);
+      if (denied_str.compare("true") == 0) {
+        denied = true;
+      } else {
+        denied = false;
+      }
+    }
+
+    if (!register_request_payload.contains("version") || !register_request_payload.at("version").is_string()) {
+      SPDLOG_ERROR("Failed to get version from register request. Cannot register to manager!");
+      return false;
+    }
+
+    bool panel_exists = database_manager::database.count<database_manager::NSPanel>(sqlite_orm::where(sqlite_orm::c(&database_manager::NSPanel::mac_address) == this->_mac)) > 0;
+    database_manager::NSPanel panel_settings;
+    if (panel_exists) {
+      panel_settings = database_manager::database.get<database_manager::NSPanel>(this->_id);
+    }
+    panel_settings.mac_address = this->_mac;
+    panel_settings.friendly_name = register_request_payload.at("friendly_name").get<std::string>();
+    switch (this->_model) {
+    case MQTT_MANAGER_NSPANEL_MODEL::SONOFF:
+      panel_settings.model = "sonoff";
+      break;
+    case MQTT_MANAGER_NSPANEL_MODEL::CUSTOM:
+      panel_settings.model = "custom";
+      break;
+    case MQTT_MANAGER_NSPANEL_MODEL::WEB:
+      panel_settings.model = "web";
+      break;
+    default:
+      SPDLOG_ERROR("Unknown key for this->_mode. Will assume sonoff model for panel {}::{}", this->_id, this->_name);
+      panel_settings.model = "sonoff";
+      break;
+    }
+    panel_settings.version = register_request_payload.at("version").get<std::string>();
+    panel_settings.md5_data_file = this->_current_littlefs_md5_checksum;
+    panel_settings.md5_firmware = this->_current_firmware_md5_checksum;
+    panel_settings.md5_tft_file = this->_current_tft_md5_checksum;
+
+    if (panel_exists) {
+      database_manager::database.update(panel_settings);
+    } else {
+      // Get ID of first available room to register to
+      auto rooms = EntityManager::get_all_rooms();
+      if (rooms && !(*rooms).empty()) {
+        panel_settings.room_id = (*rooms).front()->get_id();
+      } else {
+        SPDLOG_ERROR("Cannot register NSPanel as no rooms are available.");
+        return false;
+      }
+
+      this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
+
+      panel_settings.denied = false;
+      panel_settings.accepted = false;
+      panel_settings.button1_detached_mode_entity_id = std::nullopt;
+      panel_settings.button1_mode = 0;
+      panel_settings.button2_detached_mode_entity_id = std::nullopt;
+      panel_settings.button2_mode = 0;
+
+      database_manager::database.insert(panel_settings);
+      this->_id = panel_settings.id;
+    }
+
+    if (!panel_settings.denied && panel_settings.accepted) {
       SPDLOG_INFO("Panel registration OK. Updating internal data.");
       this->reload_config();
-      // Everything was successfull, send registration accept to panel:
+
       nlohmann::json response;
       response["command"] = "register_accept";
-      response["address"] = MqttManagerConfig::get_settings().manager_address;
-      response["port"] = MqttManagerConfig::get_settings().manager_port;
+      response["address"] = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS);
+      response["port"] = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::MANAGER_PORT);
       response["config_topic"] = this->_mqtt_config_topic;
       std::string reply_topic = fmt::format("nspanel/{}/command", std::string(register_request_payload.at("friendly_name")));
       MQTT_Manager::publish(reply_topic, response.dump());
-
-      SPDLOG_TRACE("Sending websocket update for NSPanel {}::{} state change.", this->_id, this->_name);
-      nlohmann::json data = nlohmann::json::parse(response_data);
-
-    } else {
-      SPDLOG_INFO("NSPanel {}::{} has yet to be accepted. Will not answer request.", this->_id, this->_name);
+      reply_topic = fmt::format("nspanel/{}/command", this->_mac);
+      MQTT_Manager::publish(reply_topic, response.dump());
     }
   } catch (const std::exception &e) {
     SPDLOG_ERROR("Caught exception when trying to register NSPanel: {}", boost::diagnostic_information(e, true));
@@ -1126,17 +1356,40 @@ void NSPanel::register_to_home_assistant() {
   // Register temperature sensor
   nlohmann::json temperature_sensor_data = nlohmann::json(base_json);
   temperature_sensor_data["device_class"] = "temperature";
-  if (MqttManagerConfig::get_setting_with_default("use_fahrenheit", "False").compare("True") == 0) {
+  if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::USE_FAHRENHEIT)) {
     temperature_sensor_data["unit_of_measurement"] = "°F";
   } else {
     temperature_sensor_data["unit_of_measurement"] = "°C";
   }
   temperature_sensor_data["name"] = "Temperature";
-  temperature_sensor_data["state_topic"] = fmt::format("nspanel/{}/temperature", this->_mac);
+  temperature_sensor_data["state_topic"] = this->_mqtt_temperature_topic;
   temperature_sensor_data["unique_id"] = fmt::format("{}_temperature", this->_name);
   std::string temperature_sensor_data_str = temperature_sensor_data.dump();
   SPDLOG_DEBUG("Registring temp sensor for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
   MQTT_Manager::publish(this->_mqtt_sensor_temperature_topic, temperature_sensor_data_str, true);
+
+  // Register humidity sensor
+  if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::CUSTOM) {
+    nlohmann::json humidity_sensor_data = nlohmann::json(base_json);
+    humidity_sensor_data["device_class"] = "humidity";
+    humidity_sensor_data["unit_of_measurement"] = "%";
+    humidity_sensor_data["name"] = "Humidity";
+    humidity_sensor_data["state_topic"] = this->_mqtt_humidity_topic;
+    humidity_sensor_data["unique_id"] = fmt::format("{}_humidity", this->_name);
+    std::string humidity_sensor_data_str = humidity_sensor_data.dump();
+    SPDLOG_DEBUG("Registring humidity sensor for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
+    MQTT_Manager::publish(this->_mqtt_sensor_humidity_topic, humidity_sensor_data_str, true);
+
+    nlohmann::json pressure_sensor_data = nlohmann::json(base_json);
+    pressure_sensor_data["device_class"] = "pressure";
+    pressure_sensor_data["unit_of_measurement"] = "hPa";
+    pressure_sensor_data["name"] = "Pressure";
+    pressure_sensor_data["state_topic"] = this->_mqtt_pressure_topic;
+    pressure_sensor_data["unique_id"] = fmt::format("{}_pressure", this->_name);
+    std::string pressure_sensor_data_str = pressure_sensor_data.dump();
+    SPDLOG_DEBUG("Registring pressure sensor for NSPanel {}::{} to Home Assistant.", this->_id, this->_name);
+    MQTT_Manager::publish(this->_mqtt_sensor_pressure_topic, pressure_sensor_data_str, true);
+  }
 
   // Register relay1
   if (this->_register_relay1_as_light == NSPanelSettings::RelayRegisterType::NSPanelSettings_RelayRegisterType_SWITCH) {
@@ -1270,21 +1523,27 @@ void NSPanel::set_relay_state(uint8_t relay, bool state) {
 void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
   if (command.has_button_pressed()) {
     if (command.nspanel_id() == this->_id) {
-      // TODO: Handle button press
       SPDLOG_DEBUG("NSPanel {}::{} got button {} press,", this->_id, this->_name, command.button_pressed().button_id());
 
       if (command.button_pressed().button_id() == 1) {
         ButtonMode button_mode = static_cast<ButtonMode>(this->_settings.button1_mode);
         switch (button_mode) {
         case ButtonMode::DETACHED: {
-          if (this->_settings.button1_detached_mode_light_id.has_value()) {
-            auto light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, this->_settings.button1_detached_mode_light_id.value());
-            if (light)
-              (*light)->toggle();
-            else
-              SPDLOG_ERROR("Tried to toggle detached light via panel but no light was was found with configured ID.");
+          if (this->_settings.button1_detached_mode_entity_id.has_value()) {
+            auto entity = EntityManager::get_entity_by_id<MqttManagerEntity>(MQTT_MANAGER_ENTITY_TYPE::ANY, this->_settings.button1_detached_mode_entity_id.value());
+            if (entity) {
+              if ((*entity)->can_toggle()) {
+                auto scene = std::dynamic_pointer_cast<Scene>(*entity);
+                if (scene) {
+                  scene->activate(this->get_default_room_id());
+                } else {
+                  (*entity)->toggle();
+                }
+              }
+            } else
+              SPDLOG_ERROR("Tried to toggle detached entity via panel but no entity was found with configured ID '{}'.", this->_settings.button1_detached_mode_entity_id.value());
           } else {
-            SPDLOG_ERROR("Tried to toggle detached light via panel but no light was configured for button.");
+            SPDLOG_ERROR("Tried to toggle detached entity via panel but no entity was configured for button.");
           }
           break;
         }
@@ -1304,14 +1563,21 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
         ButtonMode button_mode = static_cast<ButtonMode>(this->_settings.button2_mode);
         switch (button_mode) {
         case ButtonMode::DETACHED: {
-          if (this->_settings.button2_detached_mode_light_id.has_value()) {
-            auto light = EntityManager::get_entity_by_id<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT, this->_settings.button2_detached_mode_light_id.value());
-            if (light)
-              (*light)->toggle();
-            else
-              SPDLOG_ERROR("Tried to toggle detached light via panel but no light was was found with configured ID.");
+          if (this->_settings.button2_detached_mode_entity_id.has_value()) {
+            auto entity = EntityManager::get_entity_by_id<MqttManagerEntity>(MQTT_MANAGER_ENTITY_TYPE::ANY, this->_settings.button2_detached_mode_entity_id.value());
+            if (entity) {
+              if ((*entity)->can_toggle()) {
+                auto scene = std::dynamic_pointer_cast<Scene>(*entity);
+                if (scene) {
+                  scene->activate(this->get_default_room_id());
+                } else {
+                  (*entity)->toggle();
+                }
+              }
+            } else
+              SPDLOG_ERROR("Tried to toggle detached entity via panel but no entity was found with configured ID '{}'.", this->_settings.button2_detached_mode_entity_id.value());
           } else {
-            SPDLOG_ERROR("Tried to toggle detached light via panel but no light was configured for button.");
+            SPDLOG_ERROR("Tried to toggle detached entity via panel but no entity was configured for button.");
           }
           break;
         }

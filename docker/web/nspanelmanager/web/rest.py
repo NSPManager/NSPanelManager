@@ -1,16 +1,49 @@
-from re import A
+import hashlib
+import json
+import logging
 import socket
+from pprint import pprint
+from re import A
+
+from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.core.files.storage import FileSystemStorage
 
-import hashlib
-import logging
-import json
+import web.home_assistant_api
+import web.openhab_api
+from web.settings_helper import (
+    get_nspanel_setting_with_default,
+    get_setting_with_default,
+    set_setting_value,
+)
 
-from .models import NSPanel, Room, LightState, Scene, RelayGroup
-from .apps import start_mqtt_manager
-from web.settings_helper import get_setting_with_default, get_nspanel_setting_with_default, set_setting_value
+from .apps import send_mqttmanager_reload_command
+from .models import Entity, LightState, NSPanel, RelayGroup, Room, RoomEntitiesPage, Scene, Settings
+
+########################
+# Get entities section #
+########################
+
+
+def get_home_assistant_entities(request):
+    if request.method != "GET":
+        return JsonResponse({"status": "error"}, status=405)
+
+    filter_params = json.loads(request.GET.get("filter", "{}"))
+    return JsonResponse(web.home_assistant_api.get_all_home_assistant_items(filter_params))
+
+
+def get_openhab_items(request):
+    if request.method != "GET":
+        return JsonResponse({"status": "error"}, status=405)
+
+    filter_params = json.loads(request.GET.get("filter", "{}"))
+    openhab_items = web.openhab_api.get_all_openhab_items(filter_params)
+    openhab_scenes = web.openhab_api.get_all_openhab_scenes()
+    openhab_items["items"].extend(openhab_scenes["items"])
+    openhab_items["errors"].extend(openhab_scenes["errors"])
+    return JsonResponse(openhab_items)
+
 
 ##########################
 ## MQTTManager section ###
@@ -29,21 +62,24 @@ banned_setting_keys = [
     "OPENHAB_TOKEN",
 ]
 
+
 def mqttmanager_get_setting(request, setting_key):
     if setting_key in banned_setting_keys:
-        return JsonResponse({"status": "error"}, status=403) # Return error forbidden
+        return JsonResponse({"status": "error"}, status=403)  # Return error forbidden
 
     try:
         settings = {}
-        if request.method == 'GET':
+        if request.method == "GET":
             settings[setting_key] = get_setting_with_default(setting_key)
         else:
             return JsonResponse({"status": "error"}, status=405)
 
-        return JsonResponse({
-            "status": "ok",
-            "settings": settings,
-        })
+        return JsonResponse(
+            {
+                "status": "ok",
+                "settings": settings,
+            }
+        )
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
@@ -54,19 +90,21 @@ def mqttmanager_get_setting(request, setting_key):
 def mqttmanager_settings_post(request):
     try:
         settings = {}
-        if request.method == 'POST':
+        if request.method == "POST":
             data = json.loads(request.body)
             for setting_key in data["settings"]:
                 if setting_key in banned_setting_keys:
-                    return JsonResponse({"status": "error"}, status=403) # Return error forbidden
+                    return JsonResponse({"status": "error"}, status=403)  # Return error forbidden
                 settings[setting_key] = get_setting_with_default(setting_key)
         else:
             return JsonResponse({"status": "error"}, status=405)
 
-        return JsonResponse({
-            "status": "ok",
-            "settings": settings,
-        })
+        return JsonResponse(
+            {
+                "status": "ok",
+                "settings": settings,
+            }
+        )
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
@@ -77,6 +115,7 @@ def mqttmanager_settings_post(request):
 ## NSPanel section ###
 ######################
 
+
 # Get the MD5 checksum of a file
 # Return none if file not found
 def get_file_md5sum(filename):
@@ -86,221 +125,27 @@ def get_file_md5sum(filename):
     else:
         return None
 
-# Retreive warnings for a NSPanel. Only GET-requests are valid for this resource
-def nspanel_warnings(request):
-    try:
-        if(request.method == "GET"):
-            md5_firmware = get_file_md5sum("firmware.bin")
-            md5_data_file = get_file_md5sum("data_file.bin")
-            md5_tft_file = get_file_md5sum("gui.tft")
-            md5_us_tft_file = get_file_md5sum("gui_us.tft")
-
-            if request.GET.get('id'):
-                nspanel_objects = NSPanel.objects.filter(id=request.GET.get('id'))
-            elif request.GET.get('mac_address'):
-                nspanel_objects = NSPanel.objects.filter(mac_address=request.GET.get('mac_address'))
-            else:
-                nspanel_objects = NSPanel.objects.all()
-
-            panels = []
-            for nspanel in nspanel_objects:
-
-                panel_info = {
-                    "nspanel_id": nspanel.id,
-                    "mac_address": nspanel.mac_address,
-                    "warnings": []
-                }
-                for panel in NSPanel.objects.all():
-                    if panel == nspanel:
-                        continue
-                    elif panel.friendly_name == nspanel.friendly_name:
-                        panel_info["warnings"].append("Two or more panels exists with the same name. This may have unintended consequences")
-                        break
-                if nspanel.md5_firmware != md5_firmware or nspanel.md5_data_file != md5_data_file:
-                    panel_info["warnings"].append("Firmware update available.")
-                if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "False" and nspanel.md5_tft_file != md5_tft_file:
-                    panel_info["warnings"].append("GUI update available.")
-                if get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False") == "True" and nspanel.md5_tft_file != md5_us_tft_file:
-                    panel_info["warnings"].append("GUI update available.")
-                panels.append(panel_info)
-
-            return JsonResponse({
-                "status": "ok",
-                "nspanels": panels
-            }, status=200)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error"}, status=405)
-
-@csrf_exempt
-def nspanels(request):
-    if request.method == "GET":
-        return nspanels_get(request)
-    elif request.method == "POST":
-        return nspanel_post(request)
-    else:
-        return JsonResponse({
-            "status": "error"
-        }, status=405)
-
-def nspanels_get(request):
-    if request.method == "GET":
-        nspanels = list()
-        if request.GET.get('id'):
-            nspanel_objects = NSPanel.objects.filter(id=request.GET.get('id'))
-        elif request.GET.get('mac_address'):
-            nspanel_objects = NSPanel.objects.filter(mac_address=request.GET.get('mac_address'))
-        else:
-            nspanel_objects = NSPanel.objects.all()
-
-        for nspanel in nspanel_objects:
-            nspanels.append({
-                "nspanel_id": nspanel.id,
-                "mac_address": nspanel.mac_address,
-                "name": nspanel.friendly_name,
-                "home": nspanel.room.id,
-                "default_page": get_nspanel_setting_with_default(nspanel.id, "default_page", 0),
-                "raise_to_100_light_level": get_setting_with_default("raise_to_100_light_level"),
-                "color_temp_min": get_setting_with_default("color_temp_min"),
-                "color_temp_max": get_setting_with_default("color_temp_max"),
-                "reverse_color_temp": get_setting_with_default("reverse_color_temp"),
-                "min_button_push_time": get_setting_with_default("min_button_push_time"),
-                "button_long_press_time": get_setting_with_default("button_long_press_time"),
-                "special_mode_trigger_time": get_setting_with_default("special_mode_trigger_time"),
-                "special_mode_release_time": get_setting_with_default("special_mode_release_time"),
-                "screen_dim_level": get_nspanel_setting_with_default(nspanel.id, "screen_dim_level", get_setting_with_default("screen_dim_level")),
-                "screensaver_dim_level": get_nspanel_setting_with_default(nspanel.id, "screensaver_dim_level", get_setting_with_default("screensaver_dim_level")),
-                "screensaver_activation_timeout": get_nspanel_setting_with_default(nspanel.id, "screensaver_activation_timeout", get_setting_with_default("screensaver_activation_timeout")),
-                "screensaver_mode": get_nspanel_setting_with_default(nspanel.id, "screensaver_mode", get_setting_with_default("screensaver_mode")),
-                "clock_us_style": get_setting_with_default("clock_us_style"),
-                "use_fahrenheit": get_setting_with_default("use_fahrenheit"),
-                "is_us_panel": get_nspanel_setting_with_default(nspanel.id, "is_us_panel", "False"),
-                "lock_to_default_room": get_nspanel_setting_with_default(nspanel.id, "lock_to_default_room", "False"),
-                "reverse_relays": get_nspanel_setting_with_default(nspanel.id, "reverse_relays", False),
-                "relay1_default_mode": get_nspanel_setting_with_default(nspanel.id, "relay1_default_mode", "False"),
-                "relay2_default_mode": get_nspanel_setting_with_default(nspanel.id, "relay2_default_mode", "False"),
-                "temperature_calibration": get_nspanel_setting_with_default(nspanel.id, "temperature_calibration", 0),
-                "button1_mode": nspanel.button1_mode,
-                "button2_mode": nspanel.button2_mode,
-                "button1_mqtt_topic": get_nspanel_setting_with_default(nspanel.id, "button1_mqtt_topic", ""),
-                "button2_mqtt_topic": get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_topic", ""),
-                "button1_mqtt_payload": get_nspanel_setting_with_default(nspanel.id, "button1_mqtt_payload", ""),
-                "button2_mqtt_payload": get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_payload", ""),
-                "button1_detached_light": nspanel.button1_detached_mode_light.id if nspanel.button1_detached_mode_light else -1,
-                "button2_detached_light": nspanel.button2_detached_mode_light.id if nspanel.button2_detached_mode_light else -1,
-                "denied": nspanel.denied,
-                "accepted": nspanel.accepted,
-                "rooms": [room.id for room in Room.objects.all().order_by('displayOrder')],
-                "scenes": [scene.id for scene in Scene.objects.all()],
-            })
-        return JsonResponse({
-            "status": "ok",
-            "nspanels": nspanels
-        })
-
-# Handle DELETE request to "nspanel" endpoint.
-@csrf_exempt
-def nspanel_delete(request, panel_id):
-    if request.method == "DELETE":
-        try:
-            logging.info(F"Deleting NSPanel with ID {panel_id}.")
-            nspanel = NSPanel.objects.get(id=panel_id)
-            nspanel.delete()
-            return JsonResponse({
-                "status": "ok",
-                "nspanel_id": panel_id
-            }, status=200)
-        except Exception as ex:
-            logging.exception(ex)
-            return JsonResponse({"status": "error"}, status=500)
-    else:
-        return JsonResponse({"status": "error"}, status=405)
-
-# Handle POST request to "nspanel" endpoint.
-@csrf_exempt
-def nspanel_post(request):
-    try:
-        data = json.loads(request.body)
-
-        if "mac" in data:
-            data["mac_address"] = data["mac"]
-        elif "mac_origin" in data:
-            data["mac_address"] = data["mac_origin"]
-        new_panel = NSPanel.objects.filter(mac_address=data['mac_address']).first()
-
-        # new_panel is none ie. we didn't find a known panel with that MAC. Create a new one.
-        if not new_panel:
-            new_panel = NSPanel()
-            new_panel.friendly_name = data['friendly_name']
-
-        new_panel.mac_address = data['mac_address']
-        new_panel.version = data["version"] if "version" in data else ""
-        new_panel.ip_address = ""  # TODO: Remove ip_address from DB
-
-        fs = FileSystemStorage()
-        if "md5_firmware" in data:
-            if data["md5_firmware"] == "":
-                new_panel.md5_firmware = hashlib.md5(
-                    fs.open("firmware.bin").read()).hexdigest()
-            else:
-                new_panel.md5_firmware = data["md5_firmware"]
-
-        if "md5_data_file" in data:
-            if data["md5_data_file"] == "":
-                new_panel.md5_data_file = hashlib.md5(
-                    fs.open("data_file.bin").read()).hexdigest()
-            else:
-                new_panel.md5_data_file = data["md5_data_file"]
-
-        # TFT file will never be flashed by default with a new panel, always set the MD5 from registration
-        if "md5_tft_file" in data:
-            new_panel.md5_tft_file = data["md5_tft_file"]
-
-        if "denied" in data:
-            if str(data["denied"]).lower() == "true":
-                new_panel.denied = True
-            else:
-                new_panel.denied = False
-
-        # If no room is set, select the first one as default
-        try:
-            if not new_panel.room:
-                new_panel.room = Room.objects.first()
-        except NSPanel.room.RelatedObjectDoesNotExist:
-            new_panel.room = Room.objects.first()
-
-        # Save the update/Create new panel
-        new_panel.save()
-        json_response = {
-            "status": "ok",
-            "nspanel_id": new_panel.id,
-            "denied": new_panel.denied,
-            "accepted": new_panel.accepted,
-        }
-        return JsonResponse(json_response, status=200)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
-
-
 
 ##################################
 ## NSPanel Relay Group section ###
 ##################################
 def relay_groups(request):
     try:
-        if request.method == 'GET':
+        if request.method == "GET":
             relay_groups = []
             for relay_group in RelayGroup.objects.all():
                 rg_info = {
                     "relay_group_id": relay_group.id,
                     "name": relay_group.friendly_name,
-                    "relays": []
+                    "relays": [],
                 }
                 for relay_binding in relay_group.relaygroupbinding_set.all():
                     rg_info["relays"].append(
-                        {"nspanel_id": relay_binding.nspanel.id, "relay_num": relay_binding.relay_num})
+                        {
+                            "nspanel_id": relay_binding.nspanel.id,
+                            "relay_num": relay_binding.relay_num,
+                        }
+                    )
                 relay_groups.append(rg_info)
             return JsonResponse({"status": "ok", "relay_groups": relay_groups}, status=200)
         else:
@@ -309,9 +154,11 @@ def relay_groups(request):
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
 
+
 ####################
 ### Room section ###
 ####################
+
 
 @csrf_exempt
 def rooms(request):
@@ -322,27 +169,233 @@ def rooms(request):
     else:
         return JsonResponse({"status": "error"}, status=405)
 
+
+def settings(request):
+    if request.method == "GET":
+        return settings_get(request)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
+
+
+def settings_get(request):
+    settings = {}
+    for setting in Settings.objects.all():
+        settings[setting.name] = setting.value
+    settings["home_assistant_token_set"] = settings.get("home_assistant_token", "") != ""
+    del settings["home_assistant_token"]
+    settings["openhab_token_set"] = settings.get("openhab_token", "") != ""
+    del settings["openhab_token"]
+    settings["mqtt_password_set"] = settings.get("mqtt_password", "") != ""
+    del settings["mqtt_password"]
+    return JsonResponse({"status": "ok", "settings": settings}, status=200)
+
+
 def rooms_get(request):
     try:
         rooms = list()
-        if request.GET.get('id'):
-            room_objects = Room.objects.filter(id=request.GET.get('id'))
+        if request.GET.get("id"):
+            room_objects = Room.objects.filter(id=request.GET.get("id"))
         else:
             room_objects = Room.objects.all()
         for room in room_objects:
-            rooms.append({
-                "room_id": room.id,
-                "name": room.friendly_name,
-                "lights": [light.id for light in room.light_set.all()],
-                "scenes": [scene.id for scene in room.scene_set.all()],
-            })
-        return JsonResponse({
-            "status": "ok",
-            "rooms": rooms
-        }, status=200)
+            rooms.append(
+                {
+                    "id": room.id,
+                    "name": room.friendly_name,
+                }
+            )
+        return JsonResponse({"status": "ok", "rooms": rooms}, status=200)
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
+
+
+def put_room_entities_order(request, room_id):
+    if request.method == "PUT":
+        try:
+            data = json.loads(request.body)
+            for entity in data["entities"]:
+                db_entity = Entity.objects.get(id=entity["id"])
+                db_entity.room_view_position = entity["room_view_position"]
+                db_entity.entities_page_id = entity["entities_page_id"]
+                db_entity.save()
+            for scene in data["scenes"]:
+                db_scene = Scene.objects.get(id=scene["id"])
+                db_scene.room_view_position = scene["room_view_position"]
+                db_scene.entities_page_id = scene["entities_page_id"]
+                db_scene.save()
+            send_mqttmanager_reload_command()
+            return JsonResponse({"status": "ok"}, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
+
+
+def room_entities_pages(request, room_id):
+    if request.method == "GET":
+        try:
+            room = Room.objects.get(id=room_id)
+            pages = RoomEntitiesPage.objects.filter(room=room).order_by("display_order")
+            response = []
+            for page in pages:
+                response.append(
+                    {
+                        "id": page.id,
+                        "display_order": page.display_order,
+                        "number_of_entities": page.page_type,
+                        "type": "scene" if page.is_scenes_page else "entity",
+                        "room_id": room_id,
+                        "entities": [get_rest_entitiy_representation(entity.id) for entity in page.entity_set.all().order_by("room_view_position")],
+                        "scenes": [get_rest_scene_representation(entity.id) for entity in page.scene_set.all().order_by("room_view_position")],
+                    }
+                )
+            return JsonResponse({"status": "ok", "entities_pages": response}, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
+    elif request.method == "PUT":
+        required_fields = ["is_scenes_page", "type"]
+        data = json.loads(request.body)
+
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        room = Room.objects.get(id=room_id)
+        pages = RoomEntitiesPage.objects.filter(room=room).order_by("display_order")
+        new_display_order = 0  # Default to zero of no pages exists
+        if len(pages) > 0:
+            new_display_order = pages[len(pages) - 1].display_order + 1
+
+        new_page = RoomEntitiesPage()
+        new_page.page_type = data["type"]
+        new_page.display_order = new_display_order
+        new_page.is_scenes_page = data["is_scenes_page"]
+        new_page.room = room
+        new_page.save()
+        send_mqttmanager_reload_command()
+        return JsonResponse({"status": "ok"}, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
+
+
+def room_entities_page(request, page_id):
+    if request.method == "GET":
+        try:
+            page = RoomEntitiesPage.objects.get(id=page_id)
+            response = {
+                "status": "ok",
+                "entities": [],
+                "scenes": [],
+            }
+            for entity in page.entity_set.all().order_by("room_view_position"):
+                response["entities"].append(get_rest_entitiy_representation(entity.id))
+            for entity in page.scene_set.all().order_by("room_view_position"):
+                response["scenes"].append(get_rest_scene_representation(entity.id))
+            return JsonResponse(response, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
+    elif request.method == "PUT":
+        try:
+            data = json.loads(request.body)
+            db_page = RoomEntitiesPage.objects.get(id=page_id)
+            db_page.page_type = data.get("number_of_entities", db_page.page_type)
+            db_page.display_order = data.get("display_order", db_page.display_order)
+            db_page.save()
+            return JsonResponse({"status": "ok"}, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
+    elif request.method == "DELETE":
+        try:
+            db_page = RoomEntitiesPage.objects.get(id=page_id)
+            db_page.delete()
+            send_mqttmanager_reload_command()
+            return JsonResponse({"status": "ok"}, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
+
+
+def room_entities_pages_order(request):
+    if request.method == "PUT":
+        try:
+            json_data = json.loads(request.body)
+            if "order" not in json_data:
+                return JsonResponse({"status": "error", "message": "order field is required"}, status=400)
+            for page_id, display_order in json_data["order"]:
+                db_page = RoomEntitiesPage.objects.get(id=page_id)
+                db_page.display_order = display_order
+                db_page.save()
+            send_mqttmanager_reload_command()
+            return JsonResponse({"status": "ok"}, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
+
+
+########################
+### Global functions ###
+########################
+
+
+def global_entities_pages(request):
+    if request.method == "GET":
+        try:
+            pages = RoomEntitiesPage.objects.filter(room=None).order_by("display_order")
+            response = []
+            for page in pages:
+                response.append(
+                    {
+                        "id": page.id,
+                        "display_order": page.display_order,
+                        "number_of_entities": page.page_type,
+                        "type": "scene" if page.is_scenes_page else "entity",
+                        "room_id": None,
+                        "entities": [get_rest_entitiy_representation(entity.id) for entity in page.entity_set.all().order_by("room_view_position")],
+                        "scenes": [get_rest_scene_representation(entity.id) for entity in page.scene_set.all().order_by("room_view_position")],
+                    }
+                )
+            return JsonResponse({"status": "ok", "entities_pages": response}, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
+    elif request.method == "PUT":
+        required_fields = ["is_scenes_page", "type"]
+        data = json.loads(request.body)
+
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        pages = RoomEntitiesPage.objects.filter(room=None).order_by("display_order")
+        new_display_order = 0  # Default to zero of no pages exists
+        if len(pages) > 0:
+            new_display_order = pages[len(pages) - 1].display_order + 1
+
+        new_page = RoomEntitiesPage()
+        new_page.page_type = data["type"]
+        new_page.display_order = new_display_order
+        new_page.is_scenes_page = data["is_scenes_page"]
+        new_page.room = None
+        new_page.save()
+        send_mqttmanager_reload_command()
+        return JsonResponse({"status": "ok"}, status=200)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
+
+
+######################
+### Room functions ###
+######################
+
 
 @csrf_exempt
 def room_delete(request, room_id):
@@ -350,15 +403,25 @@ def room_delete(request, room_id):
         try:
             room = Room.objects.get(id=room_id)
             room.delete()
-            return JsonResponse({
-                "status": "ok",
-                "room_id": room_id
-            }, status=200)
+            return JsonResponse({"status": "ok", "room_id": room_id}, status=200)
         except Exception as ex:
             logging.exception(ex)
             return JsonResponse({"status": "error"}, status=500)
     else:
         return JsonResponse({"status": "error"}, status=405)
+
+
+def room_entities(request, room_id):
+    if request.method == "GET":
+        try:
+            entities = Entity.objects.filter(room_id=room_id)
+            return JsonResponse({"status": "ok", "entities": [get_rest_entitiy_representation(entity.id) for entity in entities]}, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error"}, status=500)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
+
 
 @csrf_exempt
 def room_create(request):
@@ -368,10 +431,7 @@ def room_create(request):
             new_room = Room()
             new_room.friendly_name = data["name"]
             new_room.save()
-            return JsonResponse({
-                "status": "ok",
-                "room_id": new_room.id
-            }, status=200)
+            return JsonResponse({"status": "ok", "room_id": new_room.id}, status=200)
         except Exception as ex:
             logging.exception(ex)
             return JsonResponse({"status": "error"}, status=500)
@@ -382,6 +442,33 @@ def room_create(request):
 #####################
 ### Scene section ###
 #####################
+def get_rest_scene_representation(scene_id):
+    scene = Scene.objects.get(id=scene_id)
+    scene_info = {
+        "id": scene.id,
+        "friendly_name": scene.friendly_name,
+        "type": "scene",
+        "room_id": scene.room.id if scene.room != None else None,
+        "entities_page_id": scene.entities_page.id if scene.entities_page != None else None,
+        "room_view_position": scene.room_view_position,
+        "controller": scene.scene_type,
+        "scene_type": scene.scene_type,
+        "backend_name": scene.backend_name,  # Name for OpenHAB or Home Assistant entity to activate
+        "light_states": [],
+    }
+    for state in scene.lightstate_set.all():
+        scene_info["light_states"].append(
+            {
+                "light_id": state.light.id,
+                "color_mode": state.color_mode,
+                "light_level": state.light_level,
+                "color_temp": state.color_temperature,
+                "hue": state.hue,
+                "saturation": state.saturation,
+            }
+        )
+    return scene_info
+
 
 def scenes(request):
     if request.method == "GET":
@@ -391,13 +478,14 @@ def scenes(request):
     else:
         return JsonResponse({"status": "error"}, status=405)
 
+
 def scenes_get(request):
     try:
         scenes = []
-        if request.GET.get('light_id'):
-            scenes_objects = Scene.objects.filter(id=request.GET.get('scene_id'))
-        elif request.GET.get('room_id'):
-            scenes_objects = Scene.objects.filter(room_id=request.GET.get('room_id'))
+        if request.GET.get("light_id"):
+            scenes_objects = Scene.objects.filter(id=request.GET.get("scene_id"))
+        elif request.GET.get("room_id"):
+            scenes_objects = Scene.objects.filter(room_id=request.GET.get("room_id"))
         else:
             scenes_objects = Scene.objects.all()
 
@@ -406,34 +494,31 @@ def scenes_get(request):
                 scene_info = {
                     "scene_id": scene.id,
                     "scene_type": scene.scene_type,
-                    "entity_name": scene.backend_name, # Name for OpenHAB or Home Assistant entity to activate
+                    "entity_name": scene.backend_name,  # Name for OpenHAB or Home Assistant entity to activate
                     "scene_name": scene.friendly_name,
                     "room_id": scene.room.id if scene.room != None else None,
-                    "light_states": []
+                    "light_states": [],
                 }
                 for state in scene.lightstate_set.all():
-                    scene_info["light_states"].append({
-                        "light_id": state.light.id,
-                        "light_type": state.light.type,
-                        "color_mode": state.color_mode,
-                        "light_level": state.light_level,
-                        "color_temp": state.color_temperature,
-                        "hue": state.hue,
-                        "saturation": state.saturation
-                    })
+                    scene_info["light_states"].append(
+                        {
+                            "light_id": state.light.id,
+                            "light_type": state.light.type,
+                            "color_mode": state.color_mode,
+                            "light_level": state.light_level,
+                            "color_temp": state.color_temperature,
+                            "hue": state.hue,
+                            "saturation": state.saturation,
+                        }
+                    )
                 scenes.append(scene_info)
-            return JsonResponse({
-                "status": "ok",
-                "scenes": scenes
-            }, status=200)
+            return JsonResponse({"status": "ok", "scenes": scenes}, status=200)
         else:
-            return JsonResponse({
-                "status": "error",
-                "scenes": scenes
-            }, status=404)
+            return JsonResponse({"status": "error", "scenes": scenes}, status=404)
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
+
 
 # TODO: This method currently handles both "create new" and "update old".
 # This functionality should be split into two calls as in best practive with REST API.
@@ -471,7 +556,6 @@ def scenes_post(request):
         return JsonResponse({"status": "error"}, status=500)
 
 
-
 ####################
 ### Misc section ###
 ####################
@@ -479,10 +563,401 @@ def scenes_post(request):
 def get_ip_by_hostname(request):
     try:
         data = json.loads(request.body)
-        ip_address = socket.gethostbyname(data['hostname'])
+        ip_address = socket.gethostbyname(data["hostname"])
         return JsonResponse({"ip": ip_address}, status=200)
     except socket.gaierror:
         return JsonResponse({"error": "Hostname not found"}, status=404)
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"error": "Internal server error"}, status=500)
+
+
+### Generic scene URLs ###
+def get_scene(request, scene_id):
+    try:
+        if request.method == "GET":
+            scene = Scene.objects.get(id=scene_id)
+            return JsonResponse(
+                {
+                    "status": "success",
+                    "result": {"id": scene.id, "room_id": scene.room_id, "friendly_name": scene.friendly_name, "type": "scene", "controller": scene.scene_type, "backend_name": scene.backend_name, "entities_page_id": scene.entities_page_id, "room_view_position": scene.room_view_position},
+                }
+            )
+        elif request.method == "DELETE":
+            scene = Scene.objects.get(id=scene_id)
+            scene.delete()
+            return JsonResponse({"status": "success"})
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"error": "Internal server error"}, status=500)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+
+
+### Generic Entity section ###
+def get_rest_entitiy_representation(entity_id):
+    entity = Entity.objects.get(id=entity_id)
+    return {
+        "id": entity.id,
+        "friendly_name": entity.friendly_name,
+        "type": "entity",
+        "entity_type": entity.entity_type,
+        "room_id": entity.room_id,
+        "entities_page_id": entity.entities_page_id,
+        "room_view_position": entity.room_view_position,
+        "controller": entity.entity_data["controller"],
+        **entity.entity_data,
+    }
+
+
+def get_entity(request, entity_id):
+    try:
+        if request.method == "GET":
+            return JsonResponse(
+                get_rest_entitiy_representation(entity_id),
+            )
+        elif request.method == "DELETE":
+            Entity.objects.get(id=entity_id).delete()
+            send_mqttmanager_reload_command()
+            return JsonResponse(
+                {
+                    "status": "success",
+                }
+            )
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"error": "Internal server error"}, status=500)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+
+
+##################
+# Lights section #
+##################
+
+
+def entities_lights(request):
+    try:
+        if request.method == "PUT":
+            return put_light_entity(request)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+
+
+def put_light_entity(request):
+    try:
+        required_light_fields = [  # Fields required for light entities
+            "room_id",
+            "entities_page_id",
+            "room_view_position",
+            "controller",
+            "type",
+            "friendly_name",
+            "can_color_temperature",
+            "can_dim",
+            "can_rgb",
+            "controlled_by_nspanel_main_page",
+            "home_assistant_name",
+            "is_ceiling_light",
+            "openhab_item_color_temp",
+            "openhab_item_dimmer",
+            "openhab_item_rgb",
+        ]
+        data = json.loads(request.body)["values"]
+        for field in required_light_fields:
+            if field not in data:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        entity_data = {
+            "controller": data["controller"],
+            "home_assistant_name": data.get("home_assistant_name", ""),
+            "openhab_control_mode": "dimmer" if data.get("can_dim", False) else "switch",
+            "openhab_item_dimmer": data.get("openhab_item_dimmer", ""),
+            "openhab_item_color_temp": data.get("openhab_item_color_temp", ""),
+            "openhab_item_rgb": data.get("openhab_item_rgb", ""),
+            "can_dim": str(data["can_dim"]).lower() == "true",
+            "can_color_temperature": str(data["can_color_temperature"]).lower() == "true",
+            "can_rgb": str(data["can_rgb"]).lower() == "true",
+            "is_ceiling_light": str(data["is_ceiling_light"]).lower() == "true",
+            "controlled_by_nspanel_main_page": str(data["controlled_by_nspanel_main_page"]).lower() == "true",
+        }
+        if "id" in data:
+            new_light = Entity.objects.get(id=int(data["id"]))
+        else:
+            new_light = Entity()
+            new_light.entity_type = Entity.EntityType.LIGHT
+
+        new_light.friendly_name = data["friendly_name"]
+        new_light.room = Room.objects.get(id=int(data["room_id"]))
+        new_light.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        new_light.room_view_position = int(data["room_view_position"])
+
+        new_light.entity_data = entity_data
+        new_light.save()
+        send_mqttmanager_reload_command()
+
+        return JsonResponse({"status": "ok"}, status=200)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+####################
+# Switches section #
+####################
+
+
+def entities_switches(request):
+    try:
+        if request.method == "PUT":
+            return put_switch_entity(request)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+
+
+def put_switch_entity(request):
+    try:
+        required_fields = [  # Fields required for light entities
+            "room_id",
+            "entities_page_id",
+            "room_view_position",
+            "controller",
+            "type",
+            "friendly_name",
+            "home_assistant_name",
+            "openhab_item_switch",
+        ]
+        data = json.loads(request.body)
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        entity_data = {
+            "openhab_item_switch": data.get("openhab_item_switch", ""),
+            "home_assistant_name": data.get("home_assistant_name", ""),
+            "controller": data["controller"],
+        }
+        if "id" in data and data["id"]:
+            new_switch = Entity.objects.get(id=int(data["id"]))
+        else:
+            new_switch = Entity()
+            new_switch.entity_type = Entity.EntityType.SWITCH
+
+        new_switch.friendly_name = data["friendly_name"]
+        new_switch.room = Room.objects.get(id=int(data["room_id"]))
+        new_switch.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        new_switch.room_view_position = int(data["room_view_position"])
+
+        new_switch.entity_data = entity_data
+        new_switch.save()
+        send_mqttmanager_reload_command()
+
+        return JsonResponse({"status": "ok"}, status=200)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+###################
+# Buttons section #
+###################
+
+
+def entities_buttons(request):
+    try:
+        if request.method == "PUT":
+            return put_button_entity(request)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+
+
+def put_button_entity(request):
+    try:
+        required_fields = [  # Fields required for button entities
+            "room_id",
+            "entities_page_id",
+            "room_view_position",
+            "controller",
+            "type",
+            "friendly_name",
+            "home_assistant_name",
+            "mqtt_topic",
+            "mqtt_payload",
+        ]
+        data = json.loads(request.body)
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        entity_data = {
+            "mqtt_topic": data.get("mqtt_topic", ""),
+            "mqtt_payload": data.get("mqtt_payload", ""),
+            "home_assistant_name": data.get("home_assistant_name", ""),
+            "controller": data["controller"],
+        }
+        if "id" in data and data["id"]:
+            new_button = Entity.objects.get(id=int(data["id"]))
+        else:
+            new_button = Entity()
+            new_button.entity_type = Entity.EntityType.BUTTON
+
+        new_button.friendly_name = data["friendly_name"]
+        new_button.room = Room.objects.get(id=int(data["room_id"]))
+        new_button.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        new_button.room_view_position = int(data["room_view_position"])
+
+        new_button.entity_data = entity_data
+        new_button.save()
+        send_mqttmanager_reload_command()
+
+        return JsonResponse({"status": "ok"}, status=200)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+###################
+# Thermostat section #
+###################
+
+
+def entities_thermostats(request):
+    try:
+        # if request.method == "PUT":
+        return put_thermostat_entity(request)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+
+
+def put_thermostat_entity(request):
+    try:
+        required_fields = [  # Fields required for thermostat entities
+            "room_id",
+            "entities_page_id",
+            "room_view_position",
+            "controller",
+            "type",
+            "friendly_name",
+            "step_size",
+            "home_assistant_name",
+            "openhab_fan_mode_item",
+            "openhab_hvac_mode_item",
+            "openhab_preset_mode_item",
+            "openhab_swing_mode_item",
+            "openhab_swingh_mode_item",
+            "openhab_temperature_item",
+            "fan_modes",
+            "hvac_modes",
+            "preset_modes",
+            "swing_modes",
+            "swingh_modes",
+        ]
+        required_mode_fields = ["icon", "label", "value"]  # Fields required in each ..._modes items
+
+        data = json.loads(request.body)
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        for mode in ["fan_modes", "hvac_modes", "preset_modes", "swing_modes", "swingh_modes"]:
+            if mode in data:
+                for item in data[mode]:
+                    for field in required_mode_fields:
+                        if field not in item:
+                            return JsonResponse({"status": "error", "message": f"Missing required field in {mode}. Missing field: {field}"}, status=400)
+
+        entity_data = {
+            "controller": data.get("controller", ""),
+            "fan_modes": data.get("fan_modes", []),
+            "hvac_modes": data.get("hvac_modes", []),
+            "preset_modes": data.get("preset_modes", []),
+            "swing_modes": data.get("swing_modes", []),
+            "swingh_modes": data.get("swingh_modes", []),
+            "home_assistant_name": data.get("home_assistant_name", ""),
+            "openhab_fan_mode_item": data.get("openhab_fan_mode_item", ""),
+            "openhab_hvac_mode_item": data.get("openhab_hvac_mode_item", ""),
+            "openhab_preset_mode_item": data.get("openhab_preset_mode_item", ""),
+            "openhab_swing_mode_item": data.get("openhab_swing_mode_item", ""),
+            "openhab_swingh_mode_item": data.get("openhab_swingh_mode_item", ""),
+            "openhab_temperature_item": data.get("openhab_temperature_item", ""),
+            "step_size": float(data.get("step_size", 1)),
+        }
+        if "id" in data and data["id"]:
+            new_thermostat = Entity.objects.get(id=int(data["id"]))
+        else:
+            new_thermostat = Entity()
+            new_thermostat.entity_type = Entity.EntityType.THERMOSTAT
+
+        new_thermostat.friendly_name = data["friendly_name"]
+        new_thermostat.room = Room.objects.get(id=int(data["room_id"]))
+        new_thermostat.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        new_thermostat.room_view_position = int(data["room_view_position"])
+
+        new_thermostat.entity_data = entity_data
+        new_thermostat.save()
+        send_mqttmanager_reload_command()
+
+        return JsonResponse({"status": "ok"}, status=200)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+#################
+# Scene section #
+#################
+
+
+def entities_scenes(request):
+    try:
+        # if request.method == "PUT":
+        return put_scene_entity(request)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+
+
+def put_scene_entity(request):
+    try:
+        required_fields = [  # Fields required for scene entities
+            "room_id",
+            "entities_page_id",
+            "room_view_position",
+            "controller",
+            "type",
+            "friendly_name",
+            "scene_type",
+            "backend_name",
+        ]
+
+        data = json.loads(request.body)
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        if "id" in data and data["id"]:
+            new_scene = Scene.objects.get(id=int(data["id"]))
+        else:
+            new_scene = Scene()
+
+        new_scene.friendly_name = data["friendly_name"]
+        new_scene.room = Room.objects.get(id=int(data["room_id"])) if data["room_id"] else None
+        new_scene.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        new_scene.room_view_position = int(data["room_view_position"])
+
+        new_scene.scene_type = data.get("scene_type", "")
+        new_scene.backend_name = data.get("backend_name", "")
+        new_scene.save()
+        send_mqttmanager_reload_command()
+
+        return JsonResponse({"status": "ok"}, status=200)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)

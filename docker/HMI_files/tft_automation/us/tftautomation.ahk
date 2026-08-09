@@ -16,7 +16,7 @@ outputTftDir4  := "C:\Github\NSPanelManager\docker\HMI_files\tft_automation\us\o
 ; ── STEP 1: Open HMI file (starts editor too) ─
 Run(hmiFile)
 WinWaitActive("Nextion Editor") ; Wait for the window title to show up
-Sleep(2000) ; extra buffer to let it finish loading fully
+Sleep(5000) ; extra buffer to let it finish loading fully
 
 ; ── STEP 2: Delete all images ────────────────
 Click(195, 444)        ; Trash icon
@@ -49,7 +49,7 @@ Sleep(5000)
 ;WinWaitActive("Nextion Editor", "Import successful", 5)  ; title + text filter
 ;Sleep(100)                                               ; give focus to OK
 Send("{Enter}")                                          ; press OK
-Sleep(1000)
+Sleep(2000)
 
 ; ── STEP 4: Build TFT Output ───────────────── 
 ; Activate the editor window just in case
@@ -58,7 +58,9 @@ Sleep(100)
 
 ;Click the File menu — get coordinates using Window Spy
 Click(23, 46)         ; adjust this to your File menu position
-Sleep(200)            ; let the menu open
+Sleep(100)
+Click(23, 46)         ; adjust this to your File menu position
+Sleep(2000)            ; let the menu open
 
 ;Navigate to “TFT Output” using arrow keys
 Send("{Down 1}")      ; move to first item — adjust if needed
@@ -105,12 +107,12 @@ Sleep(100)
 Send("{Enter}")                             ; Import into Nextion
 
 WinWaitClose("ahk_class #32770", , 5)
-Sleep(3000)
+Sleep(5000)
 ; wait for the success pop-up and dismiss it
 ;WinWaitActive("Nextion Editor", "Import successful", 5)  ; title + text filter
 ;Sleep(100)                                               ; give focus to OK
 Send("{Enter}")                                          ; press OK
-Sleep(1000)
+Sleep(2000)
 
 ; ── STEP 4: Build TFT Output ───────────────── 
 ; Activate the editor window just in case
@@ -119,7 +121,9 @@ Sleep(100)
 
 ;Click the File menu — get coordinates using Window Spy
 Click(23, 46)         ; adjust this to your File menu position
-Sleep(200)            ; let the menu open
+Sleep(100)
+Click(23, 46)         ; adjust this to your File menu position
+Sleep(2000)            ; let the menu open
 
 ;Navigate to “TFT Output” using arrow keys
 Send("{Down 1}")      ; move to first item — adjust if needed
@@ -164,12 +168,12 @@ Sleep(100)
 Send("{Enter}")                             ; Import into Nextion
 
 WinWaitClose("ahk_class #32770", , 5)
-Sleep(3000)
+Sleep(5000)
 ; wait for the success pop-up and dismiss it
 ;WinWaitActive("Nextion Editor", "Import successful", 5)  ; title + text filter
 ;Sleep(100)                                               ; give focus to OK
 Send("{Enter}")                                          ; press OK
-Sleep(1000)
+Sleep(2000)
 
 ; ── STEP 4: Build TFT Output ───────────────── 
 ; Activate the editor window just in case
@@ -178,7 +182,9 @@ Sleep(100)
 
 ;Click the File menu — get coordinates using Window Spy
 Click(23, 46)         ; adjust this to your File menu position
-Sleep(200)            ; let the menu open
+Sleep(100)
+Click(23, 46)         ; adjust this to your File menu position
+Sleep(2000)            ; let the menu open
 
 ;Navigate to “TFT Output” using arrow keys
 Send("{Down 1}")      ; move to first item — adjust if needed
@@ -223,12 +229,12 @@ Sleep(100)
 Send("{Enter}")                             ; Import into Nextion
 
 WinWaitClose("ahk_class #32770", , 5)
-Sleep(3000)
+Sleep(5000)
 ; wait for the success pop-up and dismiss it
 ;WinWaitActive("Nextion Editor", "Import successful", 5)  ; title + text filter
 ;Sleep(100)                                               ; give focus to OK
 Send("{Enter}")                                          ; press OK
-Sleep(1000)
+Sleep(2000)
 
 ; ── STEP 4: Build TFT Output ───────────────── 
 ; Activate the editor window just in case
@@ -237,7 +243,9 @@ Sleep(100)
 
 ;Click the File menu — get coordinates using Window Spy
 Click(23, 46)         ; adjust this to your File menu position
-Sleep(200)            ; let the menu open
+Sleep(100)
+Click(23, 46)         ; adjust this to your File menu position
+Sleep(2000)            ; let the menu open
 
 ;Navigate to “TFT Output” using arrow keys
 Send("{Down 1}")      ; move to first item — adjust if needed

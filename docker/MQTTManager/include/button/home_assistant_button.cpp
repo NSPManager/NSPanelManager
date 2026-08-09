@@ -34,7 +34,7 @@ void HomeAssistantButton::send_state_update_to_controller() {
     SPDLOG_ERROR("Home Assistant button {}::{} has no HA item defined!", this->_id, this->_name);
     return;
   }
-  std::string home_assistant_name = this->_entity_data["home_assistant_name"];
+  std::string home_assistant_name = this->_entity_data.value("home_assistant_name", "");
 
   nlohmann::json service_data;
   service_data["type"] = "call_service";
@@ -47,7 +47,7 @@ void HomeAssistantButton::send_state_update_to_controller() {
   }
   HomeAssistantManager::send_json(service_data);
 
-  if (MqttManagerConfig::get_settings().optimistic_mode) {
+  if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
     this->_entity_changed_callbacks(this);
   }
 }
