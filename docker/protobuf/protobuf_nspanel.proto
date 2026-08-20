@@ -135,6 +135,17 @@ message NSPanelRoomEntitiesPage {
     int32 pco2 = 5;
     bool can_save_scene = 6;
     string mqtt_state_topic = 7; // MQTT topic where NSPanelEntityState is sent for control of individual entity. Empty if not controllable individually.
+
+    enum EntityType {
+      ENTITY_TYPE_UNSPECIFIED = 0;
+      ENTITY_TYPE_LIGHT = 1;
+      ENTITY_TYPE_SWITCH = 2;
+      ENTITY_TYPE_BUTTON = 3;
+      ENTITY_TYPE_THERMOSTAT = 4;
+      ENTITY_TYPE_SCENE = 5;
+    }
+    EntityType type = 8;
+    int32 id = 9;
   }
 
   repeated EntitySlot entities = 4;

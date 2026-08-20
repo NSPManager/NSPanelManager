@@ -251,6 +251,43 @@ inline bool NSPanelStatusReport_state_Parse(absl::string_view name, NSPanelStatu
   return ::google::protobuf::internal::ParseNamedEnum<NSPanelStatusReport_state>(
       NSPanelStatusReport_state_descriptor(), name, value);
 }
+enum NSPanelRoomEntitiesPage_EntitySlot_EntityType : int {
+  NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_UNSPECIFIED = 0,
+  NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_LIGHT = 1,
+  NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_SWITCH = 2,
+  NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_BUTTON = 3,
+  NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_THERMOSTAT = 4,
+  NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_SCENE = 5,
+  NSPanelRoomEntitiesPage_EntitySlot_EntityType_NSPanelRoomEntitiesPage_EntitySlot_EntityType_INT_MIN_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::min(),
+  NSPanelRoomEntitiesPage_EntitySlot_EntityType_NSPanelRoomEntitiesPage_EntitySlot_EntityType_INT_MAX_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::max(),
+};
+
+bool NSPanelRoomEntitiesPage_EntitySlot_EntityType_IsValid(int value);
+extern const uint32_t NSPanelRoomEntitiesPage_EntitySlot_EntityType_internal_data_[];
+constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot_EntityType_EntityType_MIN = static_cast<NSPanelRoomEntitiesPage_EntitySlot_EntityType>(0);
+constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot_EntityType_EntityType_MAX = static_cast<NSPanelRoomEntitiesPage_EntitySlot_EntityType>(5);
+constexpr int NSPanelRoomEntitiesPage_EntitySlot_EntityType_EntityType_ARRAYSIZE = 5 + 1;
+const ::google::protobuf::EnumDescriptor*
+NSPanelRoomEntitiesPage_EntitySlot_EntityType_descriptor();
+template <typename T>
+const std::string& NSPanelRoomEntitiesPage_EntitySlot_EntityType_Name(T value) {
+  static_assert(std::is_same<T, NSPanelRoomEntitiesPage_EntitySlot_EntityType>::value ||
+                    std::is_integral<T>::value,
+                "Incorrect type passed to EntityType_Name().");
+  return NSPanelRoomEntitiesPage_EntitySlot_EntityType_Name(static_cast<NSPanelRoomEntitiesPage_EntitySlot_EntityType>(value));
+}
+template <>
+inline const std::string& NSPanelRoomEntitiesPage_EntitySlot_EntityType_Name(NSPanelRoomEntitiesPage_EntitySlot_EntityType value) {
+  return ::google::protobuf::internal::NameOfDenseEnum<NSPanelRoomEntitiesPage_EntitySlot_EntityType_descriptor,
+                                                 0, 5>(
+      static_cast<int>(value));
+}
+inline bool NSPanelRoomEntitiesPage_EntitySlot_EntityType_Parse(absl::string_view name, NSPanelRoomEntitiesPage_EntitySlot_EntityType* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<NSPanelRoomEntitiesPage_EntitySlot_EntityType>(
+      NSPanelRoomEntitiesPage_EntitySlot_EntityType_descriptor(), name, value);
+}
 enum NSPanelMQTTManagerCommand_AffectLightsOptions : int {
   NSPanelMQTTManagerCommand_AffectLightsOptions_ALL = 0,
   NSPanelMQTTManagerCommand_AffectLightsOptions_TABLE_LIGHTS = 1,
@@ -1217,6 +1254,29 @@ class NSPanelRoomEntitiesPage_EntitySlot final : public ::google::protobuf::Mess
  public:
   ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
+  using EntityType = NSPanelRoomEntitiesPage_EntitySlot_EntityType;
+  static constexpr EntityType ENTITY_TYPE_UNSPECIFIED = NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_UNSPECIFIED;
+  static constexpr EntityType ENTITY_TYPE_LIGHT = NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_LIGHT;
+  static constexpr EntityType ENTITY_TYPE_SWITCH = NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_SWITCH;
+  static constexpr EntityType ENTITY_TYPE_BUTTON = NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_BUTTON;
+  static constexpr EntityType ENTITY_TYPE_THERMOSTAT = NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_THERMOSTAT;
+  static constexpr EntityType ENTITY_TYPE_SCENE = NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_SCENE;
+  static inline bool EntityType_IsValid(int value) {
+    return NSPanelRoomEntitiesPage_EntitySlot_EntityType_IsValid(value);
+  }
+  static constexpr EntityType EntityType_MIN = NSPanelRoomEntitiesPage_EntitySlot_EntityType_EntityType_MIN;
+  static constexpr EntityType EntityType_MAX = NSPanelRoomEntitiesPage_EntitySlot_EntityType_EntityType_MAX;
+  static constexpr int EntityType_ARRAYSIZE = NSPanelRoomEntitiesPage_EntitySlot_EntityType_EntityType_ARRAYSIZE;
+  static inline const ::google::protobuf::EnumDescriptor* EntityType_descriptor() {
+    return NSPanelRoomEntitiesPage_EntitySlot_EntityType_descriptor();
+  }
+  template <typename T>
+  static inline const std::string& EntityType_Name(T value) {
+    return NSPanelRoomEntitiesPage_EntitySlot_EntityType_Name(value);
+  }
+  static inline bool EntityType_Parse(absl::string_view name, EntityType* value) {
+    return NSPanelRoomEntitiesPage_EntitySlot_EntityType_Parse(name, value);
+  }
 
   // accessors -------------------------------------------------------
   enum : int {
@@ -1227,6 +1287,8 @@ class NSPanelRoomEntitiesPage_EntitySlot final : public ::google::protobuf::Mess
     kPcoFieldNumber = 4,
     kPco2FieldNumber = 5,
     kCanSaveSceneFieldNumber = 6,
+    kTypeFieldNumber = 8,
+    kIdFieldNumber = 9,
   };
   // string name = 2;
   void clear_name() ;
@@ -1316,13 +1378,33 @@ class NSPanelRoomEntitiesPage_EntitySlot final : public ::google::protobuf::Mess
   void _internal_set_can_save_scene(bool value);
 
   public:
+  // .NSPanelRoomEntitiesPage.EntitySlot.EntityType type = 8;
+  void clear_type() ;
+  ::NSPanelRoomEntitiesPage_EntitySlot_EntityType type() const;
+  void set_type(::NSPanelRoomEntitiesPage_EntitySlot_EntityType value);
+
+  private:
+  ::NSPanelRoomEntitiesPage_EntitySlot_EntityType _internal_type() const;
+  void _internal_set_type(::NSPanelRoomEntitiesPage_EntitySlot_EntityType value);
+
+  public:
+  // int32 id = 9;
+  void clear_id() ;
+  ::int32_t id() const;
+  void set_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_id() const;
+  void _internal_set_id(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:NSPanelRoomEntitiesPage.EntitySlot)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      3, 7, 0,
-      67, 2>
+      4, 9, 0,
+      75, 2>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -1349,6 +1431,8 @@ class NSPanelRoomEntitiesPage_EntitySlot final : public ::google::protobuf::Mess
     ::int32_t pco_;
     ::int32_t pco2_;
     bool can_save_scene_;
+    int type_;
+    ::int32_t id_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -7114,6 +7198,50 @@ inline void NSPanelRoomEntitiesPage_EntitySlot::set_allocated_mqtt_state_topic(s
   // @@protoc_insertion_point(field_set_allocated:NSPanelRoomEntitiesPage.EntitySlot.mqtt_state_topic)
 }
 
+// .NSPanelRoomEntitiesPage.EntitySlot.EntityType type = 8;
+inline void NSPanelRoomEntitiesPage_EntitySlot::clear_type() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.type_ = 0;
+}
+inline ::NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot::type() const {
+  // @@protoc_insertion_point(field_get:NSPanelRoomEntitiesPage.EntitySlot.type)
+  return _internal_type();
+}
+inline void NSPanelRoomEntitiesPage_EntitySlot::set_type(::NSPanelRoomEntitiesPage_EntitySlot_EntityType value) {
+  _internal_set_type(value);
+  // @@protoc_insertion_point(field_set:NSPanelRoomEntitiesPage.EntitySlot.type)
+}
+inline ::NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot::_internal_type() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelRoomEntitiesPage_EntitySlot_EntityType>(_impl_.type_);
+}
+inline void NSPanelRoomEntitiesPage_EntitySlot::_internal_set_type(::NSPanelRoomEntitiesPage_EntitySlot_EntityType value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.type_ = value;
+}
+
+// int32 id = 9;
+inline void NSPanelRoomEntitiesPage_EntitySlot::clear_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.id_ = 0;
+}
+inline ::int32_t NSPanelRoomEntitiesPage_EntitySlot::id() const {
+  // @@protoc_insertion_point(field_get:NSPanelRoomEntitiesPage.EntitySlot.id)
+  return _internal_id();
+}
+inline void NSPanelRoomEntitiesPage_EntitySlot::set_id(::int32_t value) {
+  _internal_set_id(value);
+  // @@protoc_insertion_point(field_set:NSPanelRoomEntitiesPage.EntitySlot.id)
+}
+inline ::int32_t NSPanelRoomEntitiesPage_EntitySlot::_internal_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.id_;
+}
+inline void NSPanelRoomEntitiesPage_EntitySlot::_internal_set_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.id_ = value;
+}
+
 // -------------------------------------------------------------------
 
 // NSPanelRoomEntitiesPage
@@ -9686,6 +9814,12 @@ struct is_proto_enum<::NSPanelStatusReport_state> : std::true_type {};
 template <>
 inline const EnumDescriptor* GetEnumDescriptor<::NSPanelStatusReport_state>() {
   return ::NSPanelStatusReport_state_descriptor();
+}
+template <>
+struct is_proto_enum<::NSPanelRoomEntitiesPage_EntitySlot_EntityType> : std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor<::NSPanelRoomEntitiesPage_EntitySlot_EntityType>() {
+  return ::NSPanelRoomEntitiesPage_EntitySlot_EntityType_descriptor();
 }
 template <>
 struct is_proto_enum<::NSPanelMQTTManagerCommand_AffectLightsOptions> : std::true_type {};

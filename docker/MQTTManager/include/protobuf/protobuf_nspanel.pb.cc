@@ -128,6 +128,8 @@ inline constexpr NSPanelRoomEntitiesPage_EntitySlot::Impl_::Impl_(
         pco_{0},
         pco2_{0},
         can_save_scene_{false},
+        type_{static_cast< ::NSPanelRoomEntitiesPage_EntitySlot_EntityType >(0)},
+        id_{0},
         _cached_size_{0} {}
 
 template <typename>
@@ -532,7 +534,7 @@ struct NSPanelConfigDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelConfigDefaultTypeInternal _NSPanelConfig_default_instance_;
-static const ::_pb::EnumDescriptor* file_level_enum_descriptors_protobuf_5fnspanel_2eproto[6];
+static const ::_pb::EnumDescriptor* file_level_enum_descriptors_protobuf_5fnspanel_2eproto[7];
 static constexpr const ::_pb::ServiceDescriptor**
     file_level_service_descriptors_protobuf_5fnspanel_2eproto = nullptr;
 const ::uint32_t
@@ -641,6 +643,8 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelRoomEntitiesPage_EntitySlot, _impl_.pco2_),
         PROTOBUF_FIELD_OFFSET(::NSPanelRoomEntitiesPage_EntitySlot, _impl_.can_save_scene_),
         PROTOBUF_FIELD_OFFSET(::NSPanelRoomEntitiesPage_EntitySlot, _impl_.mqtt_state_topic_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelRoomEntitiesPage_EntitySlot, _impl_.type_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelRoomEntitiesPage_EntitySlot, _impl_.id_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelRoomEntitiesPage, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -822,19 +826,19 @@ static const ::_pbi::MigrationSchema
         {55, -1, -1, sizeof(::NSPanelWarning)},
         {65, -1, -1, sizeof(::NSPanelStatusReport)},
         {88, -1, -1, sizeof(::NSPanelRoomEntitiesPage_EntitySlot)},
-        {103, -1, -1, sizeof(::NSPanelRoomEntitiesPage)},
-        {115, -1, -1, sizeof(::NSPanelRoomStatus)},
-        {136, -1, -1, sizeof(::NSPanelWeatherUpdate_ForecastItem)},
-        {149, -1, -1, sizeof(::NSPanelWeatherUpdate)},
-        {165, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
-        {180, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
-        {190, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
-        {207, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage)},
-        {217, -1, -1, sizeof(::NSPanelMQTTManagerCommand_SaveSceneCommand)},
-        {227, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ButtonPressed)},
-        {236, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand)},
-        {246, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ThermostatCommand)},
-        {257, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
+        {105, -1, -1, sizeof(::NSPanelRoomEntitiesPage)},
+        {117, -1, -1, sizeof(::NSPanelRoomStatus)},
+        {138, -1, -1, sizeof(::NSPanelWeatherUpdate_ForecastItem)},
+        {151, -1, -1, sizeof(::NSPanelWeatherUpdate)},
+        {167, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOn)},
+        {182, -1, -1, sizeof(::NSPanelMQTTManagerCommand_FirstPageTurnLightOff)},
+        {192, -1, -1, sizeof(::NSPanelMQTTManagerCommand_LightCommand)},
+        {209, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage)},
+        {219, -1, -1, sizeof(::NSPanelMQTTManagerCommand_SaveSceneCommand)},
+        {229, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ButtonPressed)},
+        {238, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand)},
+        {248, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ThermostatCommand)},
+        {259, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelConfig_RoomInfo_default_instance_._instance,
@@ -914,14 +918,20 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "_pressure\030\016 \001(\010\022\020\n\010pressure\030\017 \001(\002\"`\n\005sta"
     "te\022\n\n\006ONLINE\020\000\022\013\n\007OFFLINE\020\001\022\020\n\014UPDATING_"
     "TFT\020\002\022\025\n\021UPDATING_FIRMWARE\020\003\022\025\n\021UPDATING"
-    "_LITTLEFS\020\004\"\230\002\n\027NSPanelRoomEntitiesPage\022"
+    "_LITTLEFS\020\004\"\210\004\n\027NSPanelRoomEntitiesPage\022"
     "\n\n\002id\030\001 \001(\005\022\021\n\tpage_type\030\002 \001(\005\022\023\n\013header"
     "_text\030\003 \001(\t\0225\n\010entities\030\004 \003(\0132#.NSPanelR"
-    "oomEntitiesPage.EntitySlot\032\221\001\n\nEntitySlo"
+    "oomEntitiesPage.EntitySlot\032\201\003\n\nEntitySlo"
     "t\022\032\n\022room_view_position\030\001 \001(\005\022\014\n\004name\030\002 "
     "\001(\t\022\014\n\004icon\030\003 \001(\t\022\013\n\003pco\030\004 \001(\005\022\014\n\004pco2\030\005"
     " \001(\005\022\026\n\016can_save_scene\030\006 \001(\010\022\030\n\020mqtt_sta"
-    "te_topic\030\007 \001(\t\"\226\003\n\021NSPanelRoomStatus\022\n\n\002"
+    "te_topic\030\007 \001(\t\022<\n\004type\030\010 \001(\0162..NSPanelRo"
+    "omEntitiesPage.EntitySlot.EntityType\022\n\n\002"
+    "id\030\t \001(\005\"\243\001\n\nEntityType\022\033\n\027ENTITY_TYPE_U"
+    "NSPECIFIED\020\000\022\025\n\021ENTITY_TYPE_LIGHT\020\001\022\026\n\022E"
+    "NTITY_TYPE_SWITCH\020\002\022\026\n\022ENTITY_TYPE_BUTTO"
+    "N\020\003\022\032\n\026ENTITY_TYPE_THERMOSTAT\020\004\022\025\n\021ENTIT"
+    "Y_TYPE_SCENE\020\005\"\226\003\n\021NSPanelRoomStatus\022\n\n\002"
     "id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\031\n\021average_dim_le"
     "vel\030\003 \001(\005\022 \n\030ceiling_lights_dim_level\030\004 "
     "\001(\005\022\036\n\026table_lights_dim_level\030\005 \001(\005\022!\n\031a"
@@ -993,7 +1003,7 @@ static ::absl::once_flag descriptor_table_protobuf_5fnspanel_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_2eproto = {
     false,
     false,
-    5184,
+    5424,
     descriptor_table_protodef_protobuf_5fnspanel_2eproto,
     "protobuf_nspanel.proto",
     &descriptor_table_protobuf_5fnspanel_2eproto_once,
@@ -1096,9 +1106,33 @@ constexpr int NSPanelStatusReport::state_ARRAYSIZE;
 
 #endif  // (__cplusplus < 201703) &&
         // (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
-const ::google::protobuf::EnumDescriptor* NSPanelMQTTManagerCommand_AffectLightsOptions_descriptor() {
+const ::google::protobuf::EnumDescriptor* NSPanelRoomEntitiesPage_EntitySlot_EntityType_descriptor() {
   ::google::protobuf::internal::AssignDescriptors(&descriptor_table_protobuf_5fnspanel_2eproto);
   return file_level_enum_descriptors_protobuf_5fnspanel_2eproto[4];
+}
+PROTOBUF_CONSTINIT const uint32_t NSPanelRoomEntitiesPage_EntitySlot_EntityType_internal_data_[] = {
+    393216u, 0u, };
+bool NSPanelRoomEntitiesPage_EntitySlot_EntityType_IsValid(int value) {
+  return 0 <= value && value <= 5;
+}
+#if (__cplusplus < 201703) && \
+  (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
+
+constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot::ENTITY_TYPE_UNSPECIFIED;
+constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot::ENTITY_TYPE_LIGHT;
+constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot::ENTITY_TYPE_SWITCH;
+constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot::ENTITY_TYPE_BUTTON;
+constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot::ENTITY_TYPE_THERMOSTAT;
+constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot::ENTITY_TYPE_SCENE;
+constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot::EntityType_MIN;
+constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot::EntityType_MAX;
+constexpr int NSPanelRoomEntitiesPage_EntitySlot::EntityType_ARRAYSIZE;
+
+#endif  // (__cplusplus < 201703) &&
+        // (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
+const ::google::protobuf::EnumDescriptor* NSPanelMQTTManagerCommand_AffectLightsOptions_descriptor() {
+  ::google::protobuf::internal::AssignDescriptors(&descriptor_table_protobuf_5fnspanel_2eproto);
+  return file_level_enum_descriptors_protobuf_5fnspanel_2eproto[5];
 }
 PROTOBUF_CONSTINIT const uint32_t NSPanelMQTTManagerCommand_AffectLightsOptions_internal_data_[] = {
     196608u, 0u, };
@@ -1119,7 +1153,7 @@ constexpr int NSPanelMQTTManagerCommand::AffectLightsOptions_ARRAYSIZE;
         // (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
 const ::google::protobuf::EnumDescriptor* NSPanelWarningLevel_descriptor() {
   ::google::protobuf::internal::AssignDescriptors(&descriptor_table_protobuf_5fnspanel_2eproto);
-  return file_level_enum_descriptors_protobuf_5fnspanel_2eproto[5];
+  return file_level_enum_descriptors_protobuf_5fnspanel_2eproto[6];
 }
 PROTOBUF_CONSTINIT const uint32_t NSPanelWarningLevel_internal_data_[] = {
     393216u, 0u, };
@@ -3245,9 +3279,9 @@ NSPanelRoomEntitiesPage_EntitySlot::NSPanelRoomEntitiesPage_EntitySlot(
                offsetof(Impl_, room_view_position_),
            reinterpret_cast<const char *>(&from._impl_) +
                offsetof(Impl_, room_view_position_),
-           offsetof(Impl_, can_save_scene_) -
+           offsetof(Impl_, id_) -
                offsetof(Impl_, room_view_position_) +
-               sizeof(Impl_::can_save_scene_));
+               sizeof(Impl_::id_));
 
   // @@protoc_insertion_point(copy_constructor:NSPanelRoomEntitiesPage.EntitySlot)
 }
@@ -3264,9 +3298,9 @@ inline void NSPanelRoomEntitiesPage_EntitySlot::SharedCtor(::_pb::Arena* arena) 
   ::memset(reinterpret_cast<char *>(&_impl_) +
                offsetof(Impl_, room_view_position_),
            0,
-           offsetof(Impl_, can_save_scene_) -
+           offsetof(Impl_, id_) -
                offsetof(Impl_, room_view_position_) +
-               sizeof(Impl_::can_save_scene_));
+               sizeof(Impl_::id_));
 }
 NSPanelRoomEntitiesPage_EntitySlot::~NSPanelRoomEntitiesPage_EntitySlot() {
   // @@protoc_insertion_point(destructor:NSPanelRoomEntitiesPage.EntitySlot)
@@ -3302,15 +3336,15 @@ NSPanelRoomEntitiesPage_EntitySlot::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 7, 0, 67, 2> NSPanelRoomEntitiesPage_EntitySlot::_table_ = {
+const ::_pbi::TcParseTable<4, 9, 0, 75, 2> NSPanelRoomEntitiesPage_EntitySlot::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    7, 56,  // max_field_number, fast_idx_mask
+    9, 120,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967168,  // skipmap
+    4294966784,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    7,  // num_field_entries
+    9,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     &_NSPanelRoomEntitiesPage_EntitySlot_default_instance_._instance,
@@ -3342,6 +3376,18 @@ const ::_pbi::TcParseTable<3, 7, 0, 67, 2> NSPanelRoomEntitiesPage_EntitySlot::_
     // string mqtt_state_topic = 7;
     {::_pbi::TcParser::FastUS1,
      {58, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelRoomEntitiesPage_EntitySlot, _impl_.mqtt_state_topic_)}},
+    // .NSPanelRoomEntitiesPage.EntitySlot.EntityType type = 8;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelRoomEntitiesPage_EntitySlot, _impl_.type_), 63>(),
+     {64, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelRoomEntitiesPage_EntitySlot, _impl_.type_)}},
+    // int32 id = 9;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelRoomEntitiesPage_EntitySlot, _impl_.id_), 63>(),
+     {72, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelRoomEntitiesPage_EntitySlot, _impl_.id_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
@@ -3366,10 +3412,16 @@ const ::_pbi::TcParseTable<3, 7, 0, 67, 2> NSPanelRoomEntitiesPage_EntitySlot::_
     // string mqtt_state_topic = 7;
     {PROTOBUF_FIELD_OFFSET(NSPanelRoomEntitiesPage_EntitySlot, _impl_.mqtt_state_topic_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // .NSPanelRoomEntitiesPage.EntitySlot.EntityType type = 8;
+    {PROTOBUF_FIELD_OFFSET(NSPanelRoomEntitiesPage_EntitySlot, _impl_.type_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
+    // int32 id = 9;
+    {PROTOBUF_FIELD_OFFSET(NSPanelRoomEntitiesPage_EntitySlot, _impl_.id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
   }},
   // no aux_entries
   {{
-    "\42\0\4\4\0\0\0\20"
+    "\42\0\4\4\0\0\0\20\0\0\0\0\0\0\0\0"
     "NSPanelRoomEntitiesPage.EntitySlot"
     "name"
     "icon"
@@ -3388,8 +3440,8 @@ PROTOBUF_NOINLINE void NSPanelRoomEntitiesPage_EntitySlot::Clear() {
   _impl_.icon_.ClearToEmpty();
   _impl_.mqtt_state_topic_.ClearToEmpty();
   ::memset(&_impl_.room_view_position_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.can_save_scene_) -
-      reinterpret_cast<char*>(&_impl_.room_view_position_)) + sizeof(_impl_.can_save_scene_));
+      reinterpret_cast<char*>(&_impl_.id_) -
+      reinterpret_cast<char*>(&_impl_.room_view_position_)) + sizeof(_impl_.id_));
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -3452,6 +3504,20 @@ PROTOBUF_NOINLINE void NSPanelRoomEntitiesPage_EntitySlot::Clear() {
     target = stream->WriteStringMaybeAliased(7, _s, target);
   }
 
+  // .NSPanelRoomEntitiesPage.EntitySlot.EntityType type = 8;
+  if (this->_internal_type() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+        8, this->_internal_type(), target);
+  }
+
+  // int32 id = 9;
+  if (this->_internal_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<9>(
+            stream, this->_internal_id(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -3511,6 +3577,18 @@ PROTOBUF_NOINLINE void NSPanelRoomEntitiesPage_EntitySlot::Clear() {
     total_size += 2;
   }
 
+  // .NSPanelRoomEntitiesPage.EntitySlot.EntityType type = 8;
+  if (this->_internal_type() != 0) {
+    total_size += 1 +
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_type());
+  }
+
+  // int32 id = 9;
+  if (this->_internal_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_id());
+  }
+
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
@@ -3544,6 +3622,12 @@ void NSPanelRoomEntitiesPage_EntitySlot::MergeImpl(::google::protobuf::MessageLi
   if (from._internal_can_save_scene() != 0) {
     _this->_impl_.can_save_scene_ = from._impl_.can_save_scene_;
   }
+  if (from._internal_type() != 0) {
+    _this->_impl_.type_ = from._impl_.type_;
+  }
+  if (from._internal_id() != 0) {
+    _this->_impl_.id_ = from._impl_.id_;
+  }
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -3564,8 +3648,8 @@ void NSPanelRoomEntitiesPage_EntitySlot::InternalSwap(NSPanelRoomEntitiesPage_En
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.icon_, &other->_impl_.icon_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.mqtt_state_topic_, &other->_impl_.mqtt_state_topic_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(NSPanelRoomEntitiesPage_EntitySlot, _impl_.can_save_scene_)
-      + sizeof(NSPanelRoomEntitiesPage_EntitySlot::_impl_.can_save_scene_)
+      PROTOBUF_FIELD_OFFSET(NSPanelRoomEntitiesPage_EntitySlot, _impl_.id_)
+      + sizeof(NSPanelRoomEntitiesPage_EntitySlot::_impl_.id_)
       - PROTOBUF_FIELD_OFFSET(NSPanelRoomEntitiesPage_EntitySlot, _impl_.room_view_position_)>(
           reinterpret_cast<char*>(&_impl_.room_view_position_),
           reinterpret_cast<char*>(&other->_impl_.room_view_position_));
