@@ -125,7 +125,7 @@ void NSPanel::reload_config() {
     bool reregister_to_ha_mqtt_discovery = false;
 
     this->_settings = panel_settings;
-    this->_has_registered_to_manager = true; // We managed to get the object in above statement and did not throw, ie. has been registered in manager and has an ID in DB.
+    this->_has_registered_to_manager = panel_settings.accepted; // We managed to get the object in above statement and did not throw, ie. has been registered in manager and has an ID in DB.
     this->_mac = panel_settings.mac_address;
     if (panel_settings.model.compare("sonoff") == 0) {
       this->_model = MQTT_MANAGER_NSPANEL_MODEL::SONOFF;
@@ -1313,7 +1313,21 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
     }
     panel_settings.mac_address = this->_mac;
     panel_settings.friendly_name = register_request_payload.at("friendly_name").get<std::string>();
-    panel_settings.model = register_request_payload.at("model").get<std::string>();
+    switch (this->_model) {
+    case MQTT_MANAGER_NSPANEL_MODEL::SONOFF:
+      panel_settings.model = "sonoff";
+      break;
+    case MQTT_MANAGER_NSPANEL_MODEL::CUSTOM:
+      panel_settings.model = "custom";
+      break;
+    case MQTT_MANAGER_NSPANEL_MODEL::WEB:
+      panel_settings.model = "web";
+      break;
+    default:
+      SPDLOG_ERROR("Unknown key for this->_mode. Will assume sonoff model for panel {}::{}", this->_id, this->_name);
+      panel_settings.model = "sonoff";
+      break;
+    }
     panel_settings.version = register_request_payload.at("version").get<std::string>();
     panel_settings.md5_data_file = this->_current_littlefs_md5_checksum;
     panel_settings.md5_firmware = this->_current_firmware_md5_checksum;

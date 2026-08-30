@@ -1,6 +1,6 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-CQ7r299A.js";
-import { t as useSettingsStore } from "./SettingsStore-DLzb0Fv-.js";
-import { t as useStompStore } from "./StompStore-Bxp3E-AV.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-BWgDajaM.js";
+import { t as useSettingsStore } from "./SettingsStore-D3WfdsO1.js";
+import { t as useStompStore } from "./StompStore-CvFAM8Xu.js";
 //#region src/components/NSPanelPage/Logs.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_jsx_runtime = require_jsx_runtime();
@@ -13,7 +13,10 @@ function NSPanelLogs({ nspanel_mac }) {
 	const maxLogs = useSettingsStore.getState().settings?.max_live_log_messages ?? 250;
 	const nspanel_backlog_callback = (message) => {
 		useStompStore.getState().unsubscribe(`nspanel/${nspanel_mac}/log_backlog`, nspanel_backlog_callback);
-		if (logs.length === 0) setLogs(JSON.parse(message.body).logs);
+		if (logs.length === 0) {
+			const data = JSON.parse(message.body);
+			setLogs(data.logs);
+		}
 		if (logs.length > maxLogs) setLogs(logs.slice(0, maxLogs));
 	};
 	(0, import_react.useEffect)(() => {

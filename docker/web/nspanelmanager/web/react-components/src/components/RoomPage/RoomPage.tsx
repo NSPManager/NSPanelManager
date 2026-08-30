@@ -5,7 +5,7 @@ import EntitiesPagesView from "../EntitiesPage/EntitiesPagesView";
 import { Icon } from "@mdi/react";
 import { mdiTextShort } from "@mdi/js";
 
-export default function RoomPage({ room_id }: { room_id: string }) {
+export default function RoomPage({ room_id }: { room_id: number }) {
   const { status: stompStatus } = useStompStore();
   const { status: entityStatus, rooms } = useEntityStatesStore();
 

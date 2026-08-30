@@ -1,4 +1,4 @@
-FROM node:20-alpine AS ui-builder
+FROM --platform=$BUILDPLATFORM node:20-alpine AS ui-builder
 ARG BUILDTIME
 WORKDIR /ui-app
 
@@ -20,7 +20,11 @@ ARG IS_DEVEL
 WORKDIR /MQTTManager
 SHELL ["/bin/bash", "-c"]
 
+# Update container
+RUN apt-get update && apt-get -y upgrade
+
 RUN echo "Running on $BUILDPLATFORM, building for $TARGETPLATFORM"
+COPY build_scripts/ /build_scripts/
 COPY MQTTManager/ /MQTTManager/
 
 # Only build MQTTManager during Docker build if is is not a devel mode.

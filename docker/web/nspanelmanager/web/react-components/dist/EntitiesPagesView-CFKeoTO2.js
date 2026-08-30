@@ -1,24 +1,27 @@
-import { c as __toESM, n as require_react_dom, r as require_react, t as require_jsx_runtime } from "./main-CQ7r299A.js";
-import { t as create } from "./react-fWHvS6VU.js";
-import { n as MultiStep_AddOrEditEntity, r as useEntitiesPagesStore } from "./MultiStep_AddEditEntity-C5FsBH1V.js";
+import { c as __toESM, n as require_react_dom, r as require_react, t as require_jsx_runtime } from "./main-BWgDajaM.js";
+import { t as create } from "./react-BrBB-CGW.js";
+import { n as MultiStep_AddOrEditEntity, r as useEntitiesPagesStore } from "./MultiStep_AddEditEntity-kzipJWWS.js";
 //#region node_modules/@preact/signals-core/dist/signals-core.module.js
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var i = Symbol.for("preact-signals");
 function t() {
-	if (!(s > 1)) {
+	if (!(v > 1)) {
 		var i, t = !1;
 		(function() {
 			var i = c;
 			c = void 0;
 			while (void 0 !== i) {
-				if (i.S.v === i.v) i.S.i = i.i;
+				var t = i.S;
+				if (t.v === i.v) {
+					for (var n = t.t; void 0 !== n; n = n.x) if (n.i === i.i) n.i = t.i;
+				}
 				i = i.o;
 			}
 		})();
 		while (void 0 !== h) {
 			var n = h;
 			h = void 0;
-			v++;
+			s++;
 			while (void 0 !== n) {
 				var r = n.u;
 				n.u = void 0;
@@ -34,60 +37,69 @@ function t() {
 				n = r;
 			}
 		}
-		v = 0;
-		s--;
+		s = 0;
+		v--;
 		if (t) throw i;
-	} else s--;
+	} else v--;
 }
 function n(i) {
-	if (s > 0) return i();
+	if (v > 0) return i();
 	e = ++u;
-	s++;
+	v++;
 	try {
 		return i();
 	} finally {
 		t();
 	}
 }
-var r = void 0;
-function o(i) {
-	var t = r;
+var r;
+var o = void 0;
+function f(i) {
+	var t = o, n = r;
+	o = void 0;
 	r = void 0;
 	try {
 		return i();
 	} finally {
-		r = t;
+		o = t;
+		r = n;
 	}
 }
-var f, h = void 0, s = 0, v = 0, u = 0, e = 0, c = void 0, d = 0;
+var h = void 0;
+var v = 0;
+var s = 0;
+var u = 0;
+var e = 0;
+var c = void 0;
+var d = 0;
 function a(i) {
-	if (void 0 !== r) {
+	if (void 0 !== o) {
 		var t = i.n;
-		if (void 0 === t || t.t !== r) {
+		if (void 0 === t || t.t !== o) {
 			t = {
 				i: 0,
 				S: i,
-				p: r.s,
+				p: o.s,
 				n: void 0,
-				t: r,
+				t: o,
 				e: void 0,
 				x: void 0,
 				r: t
 			};
-			if (void 0 !== r.s) r.s.n = t;
-			r.s = t;
+			if (void 0 !== o.s) o.s.n = t;
+			o.s = t;
 			i.n = t;
-			if (32 & r.f) i.S(t);
+			if (32 & o.f) i.S(t);
 			return t;
 		} else if (-1 === t.i) {
 			t.i = 0;
 			if (void 0 !== t.n) {
 				t.n.p = t.p;
 				if (void 0 !== t.p) t.p.n = t.n;
-				t.p = r.s;
+				t.p = o.s;
 				t.n = void 0;
-				r.s.n = t;
-				r.s = t;
+				o.s.n = t;
+				o.s = t;
 			}
 			return t;
 		}
@@ -113,7 +125,7 @@ l.prototype.S = function(i) {
 		i.x = n;
 		this.t = i;
 		if (void 0 !== n) n.e = i;
-		else o(function() {
+		else f(function() {
 			var i;
 			null == (i = t.W) || i.call(t);
 		});
@@ -133,7 +145,7 @@ l.prototype.U = function(i) {
 		}
 		if (i === this.t) {
 			this.t = r;
-			if (void 0 === r) o(function() {
+			if (void 0 === r) f(function() {
 				var i;
 				null == (i = t.Z) || i.call(t);
 			});
@@ -143,13 +155,10 @@ l.prototype.U = function(i) {
 l.prototype.subscribe = function(i) {
 	var t = this;
 	return j(function() {
-		var n = t.value, o = r;
-		r = void 0;
-		try {
-			i(n);
-		} finally {
-			r = o;
-		}
+		var n = t.value;
+		f(function() {
+			return i(n);
+		});
 	}, { name: "sub" });
 };
 l.prototype.valueOf = function() {
@@ -162,13 +171,10 @@ l.prototype.toJSON = function() {
 	return this.value;
 };
 l.prototype.peek = function() {
-	var i = r;
-	r = void 0;
-	try {
-		return this.value;
-	} finally {
-		r = i;
-	}
+	var i = this;
+	return f(function() {
+		return i.value;
+	});
 };
 Object.defineProperty(l.prototype, "value", {
 	get: function() {
@@ -178,9 +184,9 @@ Object.defineProperty(l.prototype, "value", {
 	},
 	set: function(i) {
 		if (i !== this.v) {
-			if (v > 100) throw new Error("Cycle detected");
+			if (s > 100) throw new Error("Cycle detected");
 			(function(i) {
-				if (0 !== s && 0 === v) {
+				if (0 !== v && 0 === s) {
 					if (i.l !== e) {
 						i.l = e;
 						c = {
@@ -195,7 +201,7 @@ Object.defineProperty(l.prototype, "value", {
 			this.v = i;
 			this.i++;
 			d++;
-			s++;
+			v++;
 			try {
 				for (var n = this.t; void 0 !== n; n = n.x) n.t.N();
 			} finally {
@@ -239,14 +245,11 @@ function b(i) {
 	i.s = n;
 }
 function p(i, t) {
-	l.call(this, void 0);
+	l.call(this, void 0, t);
 	this.x = i;
 	this.s = void 0;
 	this.g = d - 1;
 	this.f = 4;
-	this.W = null == t ? void 0 : t.watched;
-	this.Z = null == t ? void 0 : t.unwatched;
-	this.name = null == t ? void 0 : t.name;
 }
 p.prototype = new l();
 p.prototype.h = function() {
@@ -261,10 +264,10 @@ p.prototype.h = function() {
 		this.f &= -2;
 		return !0;
 	}
-	var i = r;
+	var i = o;
 	try {
 		_(this);
-		r = this;
+		o = this;
 		var t = this.x();
 		if (16 & this.f || this.v !== t || 0 === this.i) {
 			this.v = t;
@@ -276,7 +279,7 @@ p.prototype.h = function() {
 		this.f |= 16;
 		this.i++;
 	}
-	r = i;
+	o = i;
 	b(this);
 	this.f &= -2;
 	return !0;
@@ -318,9 +321,9 @@ function S(i) {
 	var n = i.m;
 	i.m = void 0;
 	if ("function" == typeof n) {
-		s++;
-		var o = r;
-		r = void 0;
+		v++;
+		var r = o;
+		o = void 0;
 		try {
 			n();
 		} catch (t) {
@@ -329,7 +332,7 @@ function S(i) {
 			m(i);
 			throw t;
 		} finally {
-			r = o;
+			o = r;
 			t();
 		}
 	}
@@ -341,9 +344,9 @@ function m(i) {
 	S(i);
 }
 function x(i) {
-	if (r !== this) throw new Error("Out-of-order effect");
+	if (o !== this) throw new Error("Out-of-order effect");
 	b(this);
-	r = i;
+	o = i;
 	this.f &= -2;
 	if (8 & this.f) m(this);
 	t();
@@ -355,7 +358,7 @@ function E(i, t) {
 	this.u = void 0;
 	this.f = 32;
 	this.name = null == t ? void 0 : t.name;
-	if (f) f.push(this);
+	if (r) r.push(this);
 }
 E.prototype.c = function() {
 	var i = this.S();
@@ -374,9 +377,9 @@ E.prototype.S = function() {
 	this.f &= -9;
 	S(this);
 	_(this);
-	s++;
-	var i = r;
-	r = this;
+	v++;
+	var i = o;
+	o = this;
 	return x.bind(this, i);
 };
 E.prototype.N = function() {
@@ -577,7 +580,26 @@ function effects(...entries) {
 	const effects2 = entries.map((fn) => j(fn));
 	return () => effects2.forEach((cleanup) => cleanup());
 }
-var _previous_dec, _initial_dec, _current_dec$1, _current_dec2, _previous_dec2, _initial_dec2 = [reactive], _init$5, _initial, _a$3, initial_get, initial_set, _ValueHistory_instances, _previous, _b$1, previous_get, previous_set, _current, _c$2, current_get, current_set;
+var _previous_dec;
+var _initial_dec;
+var _current_dec$1;
+var _current_dec2;
+var _previous_dec2;
+var _initial_dec2 = [reactive];
+var _init$5;
+var _initial;
+var _a$3;
+var initial_get;
+var initial_set;
+var _ValueHistory_instances;
+var _previous;
+var _b$1;
+var previous_get;
+var previous_set;
+var _current;
+var _c$2;
+var current_get;
+var current_set;
 _previous_dec2 = [reactive], _current_dec2 = [reactive], _current_dec$1 = [enumerable()], _initial_dec = [enumerable()], _previous_dec = [enumerable()];
 var ValueHistory = class {
 	constructor(defaultValue, equals = Object.is) {
@@ -602,7 +624,7 @@ var ValueHistory = class {
 	}
 	/** Set the current value */
 	set current(value) {
-		const current = o(() => __privateGet$6(this, _ValueHistory_instances, current_get));
+		const current = f(() => __privateGet$6(this, _ValueHistory_instances, current_get));
 		if (value && current && this.equals(current, value)) return;
 		n(() => {
 			if (!__privateGet$6(this, _ValueHistory_instances, initial_get)) __privateSet$6(this, _ValueHistory_instances, value, initial_set);
@@ -632,7 +654,7 @@ __decorateElement$5(_init$5, 2, "initial", _initial_dec, ValueHistory);
 __decorateElement$5(_init$5, 2, "previous", _previous_dec, ValueHistory);
 __decoratorMetadata$5(_init$5, ValueHistory);
 function snapshot(value) {
-	return o(() => {
+	return f(() => {
 		const output = {};
 		for (const key in value) output[key] = value[key];
 		return output;
@@ -926,7 +948,11 @@ function rectangleRectangleIntersection(a, b) {
 	if (left < right && top < bottom) return width * height;
 	return 0;
 }
-var _direction_dec$1, _delta_dec$1, _a$2, _timestamp$1, _init$4;
+var _direction_dec$1;
+var _delta_dec$1;
+var _a$2;
+var _timestamp$1;
+var _init$4;
 var Position$1 = class extends (_a$2 = ValueHistory, _delta_dec$1 = [derived], _direction_dec$1 = [derived], _a$2) {
 	constructor(initialValue) {
 		const point = Point$1.from(initialValue);
@@ -1128,7 +1154,10 @@ function descriptor(plugin) {
 	};
 	return plugin;
 }
-var _disabled_dec = [reactive], _init$3, _disabled, _cleanupFunctions$1;
+var _disabled_dec = [reactive];
+var _init$3;
+var _disabled;
+var _cleanupFunctions$1;
 var Plugin = class {
 	/**
 	* Creates a new plugin instance.
@@ -1168,7 +1197,7 @@ var Plugin = class {
 	* This method does not trigger effects when accessed.
 	*/
 	isDisabled() {
-		return o(() => {
+		return f(() => {
 			return this.disabled;
 		});
 	}
@@ -1336,7 +1365,8 @@ function sortCollisions(a, b) {
 	return b.priority - a.priority;
 }
 var DEFAULT_VALUE = [];
-var _previousCoordinates, _collisions;
+var _previousCoordinates;
+var _collisions;
 var CollisionObserver = class extends Plugin {
 	/**
 	* Creates a new CollisionObserver instance.
@@ -1351,7 +1381,7 @@ var CollisionObserver = class extends Plugin {
 		__privateSet$4(this, _collisions, y(DEFAULT_VALUE));
 		this.destroy = effects(() => {
 			const collisions = this.computeCollisions();
-			const coordinates = o(() => this.manager.dragOperation.position.current);
+			const coordinates = f(() => this.manager.dragOperation.position.current);
 			if (collisions !== DEFAULT_VALUE) {
 				const previousCoordinates = __privateGet$4(this, _previousCoordinates);
 				__privateSet$4(this, _previousCoordinates, coordinates);
@@ -1369,7 +1399,7 @@ var CollisionObserver = class extends Plugin {
 	* @param immediate - If true, updates collisions immediately. If false, resets previous coordinates.
 	*/
 	forceUpdate(immediate = true) {
-		o(() => {
+		f(() => {
 			if (immediate) __privateGet$4(this, _collisions).value = this.computeCollisions();
 			else __privateSet$4(this, _previousCoordinates, void 0);
 		});
@@ -1394,7 +1424,7 @@ var CollisionObserver = class extends Plugin {
 			if (!detectCollision) continue;
 			potentialTargets.push(entry);
 			entry.shape;
-			const collision = o(() => detectCollision({
+			const collision = f(() => detectCollision({
 				droppable: entry,
 				dragOperation
 			}));
@@ -1416,7 +1446,16 @@ var CollisionObserver = class extends Plugin {
 };
 _previousCoordinates = /* @__PURE__ */ new WeakMap();
 _collisions = /* @__PURE__ */ new WeakMap();
-var _disabled_dec2, _data_dec, _manager_dec = [reactive], _Entity_static, flushIdChanges_fn, _init2$1, _manager, _idSignal, _data, _disabled2;
+var _disabled_dec2;
+var _data_dec;
+var _manager_dec = [reactive];
+var _Entity_static;
+var flushIdChanges_fn;
+var _init2$1;
+var _manager;
+var _idSignal;
+var _data;
+var _disabled2;
 _data_dec = [reactive], _disabled_dec2 = [reactive];
 var _Entity = class _Entity {
 	/**
@@ -1605,7 +1644,17 @@ var EntityRegistry = class {
 		this.map.value = /* @__PURE__ */ new Map();
 	}
 };
-var _isDragSource_dec, _isDragging_dec, _isDropping_dec, _status_dec, _modifiers_dec, _type_dec, _c$1, _init3$1, _type, _modifiers, _status;
+var _isDragSource_dec;
+var _isDragging_dec;
+var _isDropping_dec;
+var _status_dec;
+var _modifiers_dec;
+var _type_dec;
+var _c$1;
+var _init3$1;
+var _type;
+var _modifiers;
+var _status;
 var Draggable$1 = class extends (_c$1 = Entity, _type_dec = [reactive], _modifiers_dec = [reactive], _status_dec = [reactive], _isDropping_dec = [derived], _isDragging_dec = [derived], _isDragSource_dec = [derived], _c$1) {
 	constructor(_a, manager) {
 		var _b = _a, { modifiers, type, sensors, plugins, effects: effects6 } = _b, input = __objRest$3(_b, [
@@ -1668,7 +1717,19 @@ __decorateElement$3(_init3$1, 2, "isDropping", _isDropping_dec, Draggable$1);
 __decorateElement$3(_init3$1, 2, "isDragging", _isDragging_dec, Draggable$1);
 __decorateElement$3(_init3$1, 2, "isDragSource", _isDragSource_dec, Draggable$1);
 __decoratorMetadata$3(_init3$1, Draggable$1);
-var _isDropTarget_dec, _shape_dec, _collisionPriority_dec, _collisionDetector_dec, _type_dec2, _accept_dec, _c2$1, _init4$1, _accept, _type2, _collisionDetector, _collisionPriority, _shape;
+var _isDropTarget_dec;
+var _shape_dec;
+var _collisionPriority_dec;
+var _collisionDetector_dec;
+var _type_dec2;
+var _accept_dec;
+var _c2$1;
+var _init4$1;
+var _accept;
+var _type2;
+var _collisionDetector;
+var _collisionPriority;
+var _shape;
 var Droppable$1 = class extends (_c2$1 = Entity, _accept_dec = [reactive], _type_dec2 = [reactive], _collisionDetector_dec = [reactive], _collisionPriority_dec = [reactive], _shape_dec = [reactive], _isDropTarget_dec = [derived], _c2$1) {
 	constructor(_a, manager) {
 		var _b = _a, { accept, collisionDetector, collisionPriority, type } = _b, input = __objRest$3(_b, [
@@ -1820,7 +1881,7 @@ var CollisionNotifier = class extends CorePlugin {
 			if (isEqual(collisions, previousCollisions)) return;
 			else previousCollisions = collisions;
 			const [firstCollision] = collisions;
-			o(() => {
+			f(() => {
 				var _a;
 				if ((firstCollision == null ? void 0 : firstCollision.id) !== ((_a = manager.dragOperation.target) == null ? void 0 : _a.id)) {
 					collisionObserver.disable();
@@ -1846,7 +1907,15 @@ var CollisionType = /* @__PURE__ */ ((CollisionType2) => {
 	CollisionType2[CollisionType2["PointerIntersection"] = 2] = "PointerIntersection";
 	return CollisionType2;
 })(CollisionType || {});
-var _dropped_dec, _dragging_dec, _initialized_dec, _initializing_dec, _idle_dec, _current_dec, _value_dec = [reactive], _init5$1, _value;
+var _dropped_dec;
+var _dragging_dec;
+var _initialized_dec;
+var _initializing_dec;
+var _idle_dec;
+var _current_dec;
+var _value_dec = [reactive];
+var _init5$1;
+var _value;
 _current_dec = [derived], _idle_dec = [derived], _initializing_dec = [derived], _initialized_dec = [derived], _dragging_dec = [derived], _dropped_dec = [derived];
 var Status = class {
 	constructor() {
@@ -1916,7 +1985,7 @@ var DragActions = class {
 	* @returns A promise that resolves to true if the drop was prevented
 	*/
 	setDropTarget(identifier) {
-		return o(() => {
+		return f(() => {
 			const { dragOperation } = this.manager;
 			const id = identifier != null ? identifier : null;
 			if (dragOperation.targetIdentifier === id) return Promise.resolve(false);
@@ -1937,7 +2006,7 @@ var DragActions = class {
 	* @throws {Error} If there is no drag source or another operation is active
 	*/
 	start(args) {
-		return o(() => {
+		return f(() => {
 			const { dragOperation } = this.manager;
 			if (args.source != null) this.setDragSource(args.source);
 			if (!dragOperation.source) throw new Error("Cannot start a drag operation without a drag source");
@@ -1987,7 +2056,7 @@ var DragActions = class {
 	* @param args.propagate - Whether to dispatch dragmove events
 	*/
 	move(args) {
-		return o(() => {
+		return f(() => {
 			var _a, _b;
 			const { dragOperation } = this.manager;
 			const { status, controller } = dragOperation;
@@ -2023,7 +2092,7 @@ var DragActions = class {
 	* - Handles cleanup of the operation state
 	*/
 	stop(args = {}) {
-		return o(() => {
+		return f(() => {
 			var _a, _b;
 			const { dragOperation } = this.manager;
 			const { controller } = dragOperation;
@@ -2044,7 +2113,7 @@ var DragActions = class {
 			const end = () => {
 				this.manager.renderer.rendering.then(() => {
 					dragOperation.status.set("dropped");
-					const dropping = o(() => {
+					const dropping = f(() => {
 						var _a2;
 						return ((_a2 = dragOperation.source) == null ? void 0 : _a2.status) === "dropping";
 					});
@@ -2208,7 +2277,25 @@ var DragDropRegistry = class {
 		this.modifiers.destroy();
 	}
 };
-var _transform_dec, _target_dec, _source_dec, _modifiers_dec2, _targetIdentifier_dec, _sourceIdentifier_dec, _activatorEvent_dec, _canceled_dec, _shape_dec2 = [derived], _manager2, _previousSource, _shape2, _init6$1, _canceled, _activatorEvent, _sourceIdentifier, _targetIdentifier, _modifiers2, _transform;
+var _transform_dec;
+var _target_dec;
+var _source_dec;
+var _modifiers_dec2;
+var _targetIdentifier_dec;
+var _sourceIdentifier_dec;
+var _activatorEvent_dec;
+var _canceled_dec;
+var _shape_dec2 = [derived];
+var _manager2;
+var _previousSource;
+var _shape2;
+var _init6$1;
+var _canceled;
+var _activatorEvent;
+var _sourceIdentifier;
+var _targetIdentifier;
+var _modifiers2;
+var _transform;
 _canceled_dec = [reactive], _activatorEvent_dec = [reactive], _sourceIdentifier_dec = [reactive], _targetIdentifier_dec = [reactive], _modifiers_dec2 = [reactive], _source_dec = [derived], _target_dec = [derived], _transform_dec = [derived];
 var DragOperation = class {
 	/**
@@ -2286,7 +2373,7 @@ var DragOperation = class {
 	* @returns An immutable snapshot of the current operation state
 	*/
 	snapshot() {
-		return o(() => ({
+		return f(() => ({
 			source: this.source,
 			target: this.target,
 			activatorEvent: this.activatorEvent,
@@ -2389,7 +2476,7 @@ var DragDropManager$1 = class {
 		const { destroy } = this;
 		const cleanup = effects(() => {
 			var _a2, _b, _c3;
-			const currentModifiers = o(() => this.dragOperation.modifiers);
+			const currentModifiers = f(() => this.dragOperation.modifiers);
 			const managerModifiers = this.modifiers;
 			for (const modifier of currentModifiers) if (!managerModifiers.includes(modifier)) modifier.destroy();
 			this.dragOperation.modifiers = (_c3 = (_b = (_a2 = this.dragOperation.source) == null ? void 0 : _a2.modifiers) == null ? void 0 : _b.map((modifier) => {
@@ -2789,7 +2876,17 @@ var ResizeNotifier = class extends Observer {
 _initialized = /* @__PURE__ */ new WeakMap();
 var threshold = Array.from({ length: 100 }, (_, index) => index / 100);
 var THROTTLE_INTERVAL = 75;
-var _visible, _previousBoundingClientRect, _resizeObserver, _positionObserver, _visibilityObserver, _debug, _disconnected, _observePosition, _PositionObserver_instances, notify_fn, updateDebug_fn;
+var _visible;
+var _previousBoundingClientRect;
+var _resizeObserver;
+var _positionObserver;
+var _visibilityObserver;
+var _debug;
+var _disconnected;
+var _observePosition;
+var _PositionObserver_instances;
+var notify_fn;
+var updateDebug_fn;
 var PositionObserver = class {
 	constructor(element, callback, options = {
 		debug: false,
@@ -2966,7 +3063,10 @@ function addScrollListener(element, callback) {
 		}
 	};
 }
-var _elementObserver, _disconnected2, _frames, _handleScroll;
+var _elementObserver;
+var _disconnected2;
+var _frames;
+var _handleScroll;
 var FrameObserver = class {
 	constructor(element, callback, options) {
 		this.callback = callback;
@@ -3330,15 +3430,19 @@ function scrollIntoViewIfNeeded(el, { block = "nearest", inline = "nearest" } = 
 		}
 		if (block !== "none") {
 			const overTop = adjustedTop < ancestor.scrollTop;
-			if (overTop !== adjustedTop + el.offsetHeight > ancestor.scrollTop + ancestor.clientHeight) if (block === "center") ancestor.scrollTop = adjustedTop - ancestor.clientHeight / 2 + el.offsetHeight / 2;
-			else if (overTop) ancestor.scrollTop = adjustedTop;
-			else ancestor.scrollTop = adjustedTop + el.offsetHeight - ancestor.clientHeight;
+			if (overTop !== adjustedTop + el.offsetHeight > ancestor.scrollTop + ancestor.clientHeight) {
+				if (block === "center") ancestor.scrollTop = adjustedTop - ancestor.clientHeight / 2 + el.offsetHeight / 2;
+				else if (overTop) ancestor.scrollTop = adjustedTop;
+				else ancestor.scrollTop = adjustedTop + el.offsetHeight - ancestor.clientHeight;
+			}
 		}
 		if (inline !== "none") {
 			const overLeft = adjustedLeft < ancestor.scrollLeft;
-			if (overLeft !== adjustedLeft + el.offsetWidth > ancestor.scrollLeft + ancestor.clientWidth) if (inline === "center") ancestor.scrollLeft = adjustedLeft - ancestor.clientWidth / 2 + el.offsetWidth / 2;
-			else if (overLeft) ancestor.scrollLeft = adjustedLeft;
-			else ancestor.scrollLeft = adjustedLeft + el.offsetWidth - ancestor.clientWidth;
+			if (overLeft !== adjustedLeft + el.offsetWidth > ancestor.scrollLeft + ancestor.clientWidth) {
+				if (inline === "center") ancestor.scrollLeft = adjustedLeft - ancestor.clientWidth / 2 + el.offsetWidth / 2;
+				else if (overLeft) ancestor.scrollLeft = adjustedLeft;
+				else ancestor.scrollLeft = adjustedLeft + el.offsetWidth - ancestor.clientWidth;
+			}
 		}
 		processedAncestors.push(ancestor);
 	}
@@ -3923,7 +4027,19 @@ function debounce(fn, wait) {
 	return debounced;
 }
 var styleRegistry = /* @__PURE__ */ new Map();
-var _roots_dec, _targetRoot_dec, _sourceRoot_dec, _additionalRoots_dec, _a$1, _registeredRules, _init$2, _additionalRoots, _StyleInjector_instances, syncStyles_fn, inject_fn, injectStyleElement_fn, injectAdoptedSheet_fn;
+var _roots_dec;
+var _targetRoot_dec;
+var _sourceRoot_dec;
+var _additionalRoots_dec;
+var _a$1;
+var _registeredRules;
+var _init$2;
+var _additionalRoots;
+var _StyleInjector_instances;
+var syncStyles_fn;
+var inject_fn;
+var injectStyleElement_fn;
+var injectAdoptedSheet_fn;
 var _StyleInjector = class _StyleInjector extends (_a$1 = CorePlugin, _additionalRoots_dec = [reactive], _sourceRoot_dec = [derived], _targetRoot_dec = [derived], _roots_dec = [derived], _a$1) {
 	constructor(manager, options) {
 		super(manager, options);
@@ -3951,13 +4067,13 @@ var _StyleInjector = class _StyleInjector extends (_a$1 = CorePlugin, _additiona
 	* Returns a cleanup function that removes the root.
 	*/
 	addRoot(root) {
-		o(() => {
+		f(() => {
 			const roots = new Set(this.additionalRoots);
 			roots.add(root);
 			this.additionalRoots = roots;
 		});
 		return () => {
-			o(() => {
+			f(() => {
 				const roots = new Set(this.additionalRoots);
 				roots.delete(root);
 				this.additionalRoots = roots;
@@ -4168,7 +4284,7 @@ var CSS_RULES = `
   }
 `.replace(/\n+/g, " ").replace(/\s+/g, " ").trim();
 function createPlaceholder(source, type = "hidden") {
-	return o(() => {
+	return f(() => {
 		const { element, manager } = source;
 		if (!element || !manager) return;
 		const containedDroppables = findContainedDroppables(element, manager.registry.droppables);
@@ -4393,7 +4509,13 @@ function runDropAnimation(ctx) {
 		requestAnimationFrame(ctx.restoreFocus);
 	});
 }
-var _overlay_dec, _a2, _init2, _overlay, _Feedback_instances, trackOverlayRoot_fn, render_fn;
+var _overlay_dec;
+var _a2;
+var _init2;
+var _overlay;
+var _Feedback_instances;
+var trackOverlayRoot_fn;
+var render_fn;
 var _Feedback = class _Feedback extends (_a2 = Plugin, _overlay_dec = [reactive], _a2) {
 	constructor(manager, options) {
 		super(manager, options);
@@ -4471,7 +4593,7 @@ render_fn = function() {
 	const widthOffset = contentBox ? parseInt(paddingInlineStart) + parseInt(paddingInlineEnd) + parseInt(borderInlineStartWidth) + parseInt(borderInlineEndWidth) : 0;
 	const heightOffset = contentBox ? parseInt(paddingBlockStart) + parseInt(paddingBlockEnd) + parseInt(borderBlockStartWidth) + parseInt(borderBlockEndWidth) : 0;
 	const placeholder = feedback !== "move" && !this.overlay ? createPlaceholder(source, clone ? "clone" : "hidden") : null;
-	const isKeyboardOperation = o(() => isKeyboardEvent(manager.dragOperation.activatorEvent));
+	const isKeyboardOperation = f(() => isKeyboardEvent(manager.dragOperation.activatorEvent));
 	if (!initial.translate) {
 		if (this.overlay && parsedTransform) initial.translate = {
 			x: parsedTransform.x,
@@ -4483,7 +4605,7 @@ render_fn = function() {
 		}
 	}
 	if (!initial.transformOrigin) {
-		const current = o(() => position.current);
+		const current = f(() => position.current);
 		const visualLeft = left + ((_d2 = parsedTransform == null ? void 0 : parsedTransform.x) != null ? _d2 : 0);
 		const visualTop = top + ((_e = parsedTransform == null ? void 0 : parsedTransform.y) != null ? _e : 0);
 		initial.transformOrigin = {
@@ -4528,7 +4650,7 @@ render_fn = function() {
 		top: top + delta.y
 	};
 	feedbackElement.setAttribute(ATTRIBUTE, "true");
-	const transform = o(() => dragOperation.transform);
+	const transform = f(() => dragOperation.transform);
 	const initialTranslate = (_f = initial.translate) != null ? _f : {
 		x: 0,
 		y: 0
@@ -4582,14 +4704,14 @@ render_fn = function() {
 		}
 	});
 	const initialShape = new DOMRectangle(feedbackElement);
-	o(() => dragOperation.shape = initialShape);
+	f(() => dragOperation.shape = initialShape);
 	const feedbackWindow = getWindow(feedbackElement);
 	const handleWindowResize = (event) => {
 		this.manager.actions.stop({ event });
 	};
 	const reducedMotion = prefersReducedMotion(feedbackWindow);
 	if (isKeyboardOperation) feedbackWindow.addEventListener("resize", handleWindowResize);
-	if (o(() => source.status) === "idle") requestAnimationFrame(() => source.status = "dragging");
+	if (f(() => source.status) === "idle") requestAnimationFrame(() => source.status = "dragging");
 	if (placeholder) {
 		resizeObserver.observe(placeholder);
 		elementMutationObserver = createElementMutationObserver(element, placeholder, clone);
@@ -4641,8 +4763,8 @@ render_fn = function() {
 				y: transform2.y / frameTransform.scaleY + initialTranslate2.y
 			};
 			const previousTranslate = state.current.translate;
-			const modifiers = o(() => dragOperation.modifiers);
-			const currentShape = o(() => {
+			const modifiers = f(() => dragOperation.modifiers);
+			const currentShape = f(() => {
 				var _a7;
 				return (_a7 = dragOperation.shape) == null ? void 0 : _a7.current;
 			});
@@ -4704,7 +4826,13 @@ _Feedback.configure = configurator(_Feedback);
 var Feedback = _Feedback;
 var LOCKED = true;
 var UNLOCKED = false;
-var _dec, _a3, _dec2, _b = (_dec2 = [reactive], ScrollDirection.Forward), _init3, __b, __a;
+var _dec;
+var _a3;
+var _dec2;
+var _b = (_dec2 = [reactive], ScrollDirection.Forward);
+var _init3;
+var __b;
+var __a;
 _a3 = (_dec = [reactive], ScrollDirection.Reverse);
 var ScrollLock = class {
 	constructor() {
@@ -4772,7 +4900,12 @@ var ScrollIntentTracker = class extends Plugin {
 function getDirection$1(a, b) {
 	return Math.sign(a - b);
 }
-var _autoScrolling_dec, _a4, _init4, _autoScrolling, _meta, _scroll;
+var _autoScrolling_dec;
+var _a4;
+var _init4;
+var _autoScrolling;
+var _meta;
+var _scroll;
 var Scroller = class extends (_a4 = CorePlugin, _autoScrolling_dec = [reactive], _a4) {
 	constructor(manager) {
 		super(manager);
@@ -5139,12 +5272,10 @@ var _KeyboardSensor = class _KeyboardSensor extends Sensor {
 					y: 0
 				};
 				break;
-			case "right":
-				by = {
-					x: offset.x * factor,
-					y: 0
-				};
-				break;
+			case "right": by = {
+				x: offset.x * factor,
+				y: 0
+			};
 		}
 		if (by.x || by.y) {
 			event.preventDefault();
@@ -5204,9 +5335,7 @@ var DistanceConstraint = class extends ActivationConstraint {
 				}
 				if (exceedsDistance(delta, this.options.value)) this.activate(event);
 				break;
-			case "pointerup":
-				this.abort();
-				break;
+			case "pointerup": this.abort();
 		}
 	}
 	abort() {
@@ -5214,7 +5343,8 @@ var DistanceConstraint = class extends ActivationConstraint {
 	}
 };
 _coordinates = /* @__PURE__ */ new WeakMap();
-var _timeout2, _coordinates2;
+var _timeout2;
+var _coordinates2;
 var DelayConstraint = class extends ActivationConstraint {
 	constructor() {
 		super(...arguments);
@@ -5235,9 +5365,7 @@ var DelayConstraint = class extends ActivationConstraint {
 					y: y - __privateGet$2(this, _coordinates2).y
 				}, this.options.tolerance)) this.abort();
 				break;
-			case "pointerup":
-				this.abort();
-				break;
+			case "pointerup": this.abort();
 		}
 	}
 	abort() {
@@ -5318,8 +5446,10 @@ var _PointerSensor = class _PointerSensor extends Sensor {
 				if (isPointerEvent(event)) this.handlePointerDown(event, source, options);
 			};
 			let targets = [(_a5 = source.handle) != null ? _a5 : source.element];
-			if (options == null ? void 0 : options.activatorElements) if (Array.isArray(options.activatorElements)) targets = options.activatorElements;
-			else targets = options.activatorElements(source);
+			if (options == null ? void 0 : options.activatorElements) {
+				if (Array.isArray(options.activatorElements)) targets = options.activatorElements;
+				else targets = options.activatorElements(source);
+			}
 			for (const target of targets) {
 				if (!target) continue;
 				patchWindow(target.ownerDocument.defaultView);
@@ -5521,7 +5651,12 @@ var DragDropManager = class extends DragDropManager$1 {
 		}));
 	}
 };
-var _element_dec, _handle_dec, _c, _init5, _handle, _element$1;
+var _element_dec;
+var _handle_dec;
+var _c;
+var _init5;
+var _handle;
+var _element$1;
 var Draggable = class extends (_c = Draggable$1, _handle_dec = [reactive], _element_dec = [reactive], _c) {
 	constructor(_a5, manager) {
 		var _b2 = _a5, { element, effects: effects2 = () => [], handle } = _b2, input = __objRest$2(_b2, [
@@ -5554,7 +5689,16 @@ _element$1 = /* @__PURE__ */ new WeakMap();
 __decorateElement$2(_init5, 4, "handle", _handle_dec, Draggable, _handle);
 __decorateElement$2(_init5, 4, "element", _element_dec, Draggable, _element$1);
 __decoratorMetadata$2(_init5, Draggable);
-var _proxy_dec, _element_dec2, _c2, _init6, _element2, _d, element_get, element_set, _Droppable_instances, _proxy;
+var _proxy_dec;
+var _element_dec2;
+var _c2;
+var _init6;
+var _element2;
+var _d;
+var element_get;
+var element_set;
+var _Droppable_instances;
+var _proxy;
 var Droppable = class extends (_c2 = Droppable$1, _element_dec2 = [reactive], _proxy_dec = [reactive], _c2) {
 	constructor(_a5, manager) {
 		var _b2 = _a5, { element, effects: effects2 = () => [] } = _b2, input = __objRest$2(_b2, ["element", "effects"]);
@@ -5567,7 +5711,7 @@ var Droppable = class extends (_c2 = Droppable$1, _element_dec2 = [reactive], _p
 			}
 			if (!manager2) return;
 			const updatedShape = new DOMRectangle(element2);
-			const shape = o(() => this.shape);
+			const shape = f(() => this.shape);
 			if (updatedShape && (shape == null ? void 0 : shape.equals(updatedShape))) return shape;
 			this.shape = updatedShape;
 			return updatedShape;
@@ -5658,7 +5802,7 @@ function useDeepSignal(target, synchronous) {
 			let sync = false;
 			for (const entry of tracked.current) {
 				const [key] = entry;
-				const value = o(() => entry[1]);
+				const value = f(() => entry[1]);
 				const latestValue = target[key];
 				if (value !== latestValue) {
 					stale = true;
@@ -5666,8 +5810,10 @@ function useDeepSignal(target, synchronous) {
 					sync = (_a = synchronous == null ? void 0 : synchronous(key, value, latestValue)) != null ? _a : false;
 				}
 			}
-			if (stale) if (sync) queueMicrotask(() => (0, import_react_dom.flushSync)(forceUpdate));
-			else forceUpdate();
+			if (stale) {
+				if (sync) queueMicrotask(() => (0, import_react_dom.flushSync)(forceUpdate));
+				else forceUpdate();
+			}
 		});
 	}, [target]);
 	return (0, import_react.useMemo)(() => target ? new Proxy(target, { get(target2, key) {
@@ -5737,7 +5883,8 @@ var __objRest$1 = (source, exclude) => {
 	}
 	return target;
 };
-var DragDropContext = (0, import_react.createContext)(new DragDropManager());
+var defaultManager = new DragDropManager();
+var DragDropContext = (0, import_react.createContext)(defaultManager);
 var Renderer = (0, import_react.memo)((0, import_react.forwardRef)(({ children }, ref) => {
 	const [transitionCount, setTransitionCount] = (0, import_react.useState)(0);
 	const rendering = (0, import_react.useRef)(null);
@@ -6958,7 +7105,14 @@ var defaultSortableTransition = {
 	idle: false
 };
 var store = new WeakStore();
-var _group_dec, _index_dec = [reactive], _init, _index, _previousGroup, _previousIndex, _group, _element;
+var _group_dec;
+var _index_dec = [reactive];
+var _init;
+var _index;
+var _previousGroup;
+var _previousIndex;
+var _group;
+var _element;
 _group_dec = [reactive];
 var Sortable2 = class {
 	constructor(_a, manager) {
@@ -7006,7 +7160,7 @@ var Sortable2 = class {
 					var _a2, _b2, _c;
 					const status = (_a2 = this.manager) == null ? void 0 : _a2.dragOperation.status;
 					if ((status == null ? void 0 : status.initializing) && this.id === ((_c = (_b2 = this.manager) == null ? void 0 : _b2.dragOperation.source) == null ? void 0 : _c.id)) store.clear(this.manager);
-					if (status == null ? void 0 : status.dragging) store.set(this.manager, this.id, o(() => ({
+					if (status == null ? void 0 : status.dragging) store.set(this.manager, this.id, f(() => ({
 						initialIndex: this.index,
 						initialGroup: this.group
 					})));
@@ -7050,7 +7204,7 @@ var Sortable2 = class {
 		return (_b = (_a = store.get(this.manager, this.id)) == null ? void 0 : _a.initialGroup) != null ? _b : this.group;
 	}
 	animate() {
-		o(() => {
+		f(() => {
 			const { manager, transition } = this;
 			const { shape } = this.droppable;
 			if (!manager) return;
@@ -7494,27 +7648,28 @@ var EntitiesPage = ({ id, draging_item, deleteEntitiesPage }) => {
 							break;
 						}
 					} else console.error("Unknown entities page type: ", pageData.type);
-					if (item != null) if (item.type === "scene") items.push(/* @__PURE__ */ (0, import_jsx_runtime.jsx)(EntitiesDropTarget, {
-						entities_page_id: pageData.id,
-						room_view_position: i,
-						type: pageData.type,
-						draging_item,
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GenericSceneBox, {
-							scene: item,
-							draging_item
-						}, item.id)
-					}, i));
-					else items.push(/* @__PURE__ */ (0, import_jsx_runtime.jsx)(EntitiesDropTarget, {
-						entities_page_id: pageData.id,
-						room_view_position: i,
-						type: pageData.type,
-						draging_item,
-						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GenericEntityBox, {
-							entity: item,
-							draging_item
-						}, item.id)
-					}, i));
-					else items.push(/* @__PURE__ */ (0, import_jsx_runtime.jsx)(EntitiesDropTarget, {
+					if (item != null) {
+						if (item.type === "scene") items.push(/* @__PURE__ */ (0, import_jsx_runtime.jsx)(EntitiesDropTarget, {
+							entities_page_id: pageData.id,
+							room_view_position: i,
+							type: pageData.type,
+							draging_item,
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GenericSceneBox, {
+								scene: item,
+								draging_item
+							}, item.id)
+						}, i));
+						else items.push(/* @__PURE__ */ (0, import_jsx_runtime.jsx)(EntitiesDropTarget, {
+							entities_page_id: pageData.id,
+							room_view_position: i,
+							type: pageData.type,
+							draging_item,
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(GenericEntityBox, {
+								entity: item,
+								draging_item
+							}, item.id)
+						}, i));
+					} else items.push(/* @__PURE__ */ (0, import_jsx_runtime.jsx)(EntitiesDropTarget, {
 						entities_page_id: pageData.id,
 						room_view_position: i,
 						type: pageData.type,

@@ -2,8 +2,8 @@
 
 IS_DEVEL="$1"
 if [ -z "${IS_DEVEL}" ]; then
-    echo "Did not provide IS_DEVEL. Exit with error code."
-    exit 1
+    echo "Did not provide IS_DEVEL. Will default to 'no'."
+    IS_DEVEL="no"
 fi
 
 # Install tools needed for building MQTTManager
@@ -21,17 +21,23 @@ else
 fi
 
 
-echo "Install Node Version Manager (NVM)"
-touch /root/.bash_env
-echo '. "/root/.bash_env"' >> /etc/bash.bashrc
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | PROFILE="/root/.bash_env" bash
-echo node > .nvmrc
 
-# Hot-load NVM
-source /root/.bash_env
+# We are running in dev mode and has therefore copied the react-components folder into the container
+if [ "$IS_DEVEL" == "yes" ]; then
+    echo "Install Node Version Manager (NVM)"
+    touch /root/.bash_env
+    echo '. "/root/.bash_env"' >> /etc/bash.bashrc
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.4/install.sh | PROFILE="/root/.bash_env" bash
+    echo node > .nvmrc
 
-echo "Installing Node.js via NVM"
-nvm install
+    # Hot-load NVM
+    source /root/.bash_env
 
-cd /usr/src/app/nspanelmanager/web/react-components/
-npm install
+    echo "Installing Node.js via NVM"
+    nvm install
+
+    cd /usr/src/app/nspanelmanager/web/react-components/
+    npm install
+
+    npm install typescript
+fi

@@ -21,6 +21,7 @@
 #include <ixwebsocket/IXWebSocketServer.h>
 #include <memory>
 #include <mutex>
+#include <shared_mutex>
 #include <spdlog/spdlog.h>
 #include <string>
 #include <sys/socket.h>
@@ -35,7 +36,7 @@ std::string StompTopic::get_name() const {
 }
 
 void StompTopic::subscribe(ix::WebSocket &webSocket, std::string subscription_id) {
-  std::lock_guard<std::mutex> _lock_guard(this->_subscribers_mutex);
+  std::unique_lock<std::shared_mutex> _lock_guard(this->_subscribers_mutex);
   _subscribers.push_back(std::make_pair(&webSocket, subscription_id));
 
   if (this->_retained) {
@@ -58,7 +59,7 @@ void StompTopic::subscribe(ix::WebSocket &webSocket, std::string subscription_id
 }
 
 void StompTopic::unsubscribe(ix::WebSocket &webSocket, std::string subscription_id) {
-  std::lock_guard<std::mutex> _lock_guard(this->_subscribers_mutex);
+  std::unique_lock<std::shared_mutex> _lock_guard(this->_subscribers_mutex);
   _subscribers.erase(std::remove_if(_subscribers.begin(), _subscribers.end(), [&webSocket, &subscription_id](const auto &pair) {
                        return pair.first == &webSocket && (pair.second == subscription_id || subscription_id.empty()); // An empty ID is used to unsubscribe all subscriptions for the given WebSocket.
                      }),
@@ -78,7 +79,7 @@ void StompTopic::update_value(std::string value) {
     frame.headers["destination"] = this->_topic_name;
     frame.body = value;
 
-    std::lock_guard<std::mutex> _lock_guard(this->_subscribers_mutex);
+    std::shared_lock<std::shared_mutex> _lock_guard(this->_subscribers_mutex);
     for (auto &subscriber : _subscribers) {
       frame.headers["subscription"] = subscriber.second;
       WebsocketServer::send_stomp_frame(frame, *subscriber.first);
@@ -102,7 +103,7 @@ void StompTopic::set_retained(bool retained) {
 }
 
 int StompTopic::get_subscriber_count() {
-  std::lock_guard<std::mutex> _lock_guard(this->_subscribers_mutex);
+  std::shared_lock<std::shared_mutex> _lock_guard(this->_subscribers_mutex);
   return this->_subscribers.size();
 }
 
@@ -149,7 +150,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
       SPDLOG_DEBUG("Websocket connected. URL: {}.", msg->openInfo.uri);
 
       if (boost::algorithm::ends_with(msg->openInfo.uri, "/stomp")) {
-        std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
+        std::unique_lock<std::shared_mutex> lock_guard(WebsocketServer::_server_mutex);
         WebsocketServer::_connected_websockets_stomps.push_back(&webSocket);
       } else {
         SPDLOG_ERROR("Connected websocket does not end with /stomp. Unknown protocol. Will close socket.");
@@ -157,22 +158,45 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
       }
     } else if (msg->type == ix::WebSocketMessageType::Close) {
       {
-        std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
+        std::unique_lock<std::shared_mutex> lock_guard(WebsocketServer::_server_mutex);
         SPDLOG_DEBUG("Websocket closed. Code: {}, Reason: {}", msg->closeInfo.code, msg->closeInfo.reason);
         WebsocketServer::_connected_websockets_stomps.remove(&webSocket);
+
+        for (auto &topic : WebsocketServer::_stomp_topics) {
+          topic->unsubscribe(webSocket, "");
+        }
       }
 
-      std::lock_guard<std::mutex> last_will_map_lock_guard(WebsocketServer::_last_will_map_mutex);
-      if (WebsocketServer::_last_will_map.find(&webSocket) != WebsocketServer::_last_will_map.end()) {
-        auto last_will = WebsocketServer::_last_will_map[&webSocket];
-        SPDLOG_DEBUG("Websocket had last will. Will send last will message on '{}' -> '{}'. Retained?", last_will.topic, last_will.message, last_will.retained ? "Yes" : "No");
-        WebsocketServer::_last_will_map.erase(&webSocket);
+      StompLastWill last_will = {
+          .topic = "",
+          .message = "",
+          .retained = false,
+      };
+      {
+        std::shared_lock<std::shared_mutex> last_will_map_lock_guard(WebsocketServer::_last_will_map_mutex);
+        if (WebsocketServer::_last_will_map.find(&webSocket) != WebsocketServer::_last_will_map.end()) {
+          last_will = WebsocketServer::_last_will_map[&webSocket];
+          WebsocketServer::_last_will_map.erase(&webSocket);
+        }
+      }
+
+      if (!last_will.topic.empty()) {
+        SPDLOG_DEBUG("Websocket had last will. Will send last will message on '{}' -> '{}'. Retained? {}", last_will.topic, last_will.message, last_will.retained ? "Yes" : "No");
         WebsocketServer::set_stomp_topic_retained(last_will.topic, last_will.retained);
         WebsocketServer::update_stomp_topic_value(last_will.topic, last_will.message);
-      }
 
-      for (auto &topic : WebsocketServer::_stomp_topics) {
-        topic->unsubscribe(webSocket, "");
+        // Inform callbacks of last will message
+        StompFrame last_will_frame;
+        last_will_frame.headers["destination"] = last_will.topic;
+        last_will_frame.body = last_will.message;
+        WebsocketServer::_on_global_stomp_send_message_callbacks(last_will_frame);
+
+        std::shared_lock<std::shared_mutex> lock_guard_callbacks(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
+        if (WebsocketServer::_on_stomp_send_message_callbacks.count(last_will_frame.headers["destination"]) > 0) [[likely]] {
+          SPDLOG_DEBUG("Received STOMP SEND command for existing topic, setting topic '{}' to value '{}'", last_will_frame.headers["destination"], last_will_frame.body);
+          WebsocketServer::_on_stomp_send_message_callbacks[last_will_frame.headers["destination"]](last_will_frame);
+          return;
+        }
       }
     } else if (msg->type == ix::WebSocketMessageType::Message) {
       if (std::find(WebsocketServer::_connected_websockets_stomps.begin(), WebsocketServer::_connected_websockets_stomps.end(), &webSocket) != WebsocketServer::_connected_websockets_stomps.end()) {
@@ -201,14 +225,24 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
 
               // Check if both last_will_topic and last_will_message are present
               bool last_will_message_retained = false;
-              StompLastWill last_will = {};
-              if (frame->headers.find("last_will_message_retained") != frame->headers.end() && frame->headers.find("last_will_topic") != frame->headers.end()) {
-                // Last will headers set.
-                std::string last_will_retained = frame->headers["last_will_message_retained"];
-                boost::algorithm::to_lower(last_will_retained);
-                last_will = {frame->headers["last_will_topic"], frame->headers["last_will_message"], last_will_retained.compare("true") == 0};
+              StompLastWill last_will = {
+                  .topic = "",
+                  .message = "",
+                  .retained = false,
+              };
+              if (frame->headers.find("last_will_topic") != frame->headers.end()) {
+                last_will.topic = frame->headers["last_will_topic"];
+              }
 
-                SPDLOG_INFO("Client requested last will message '{}' -> '{}' be sent on disconnect. Retained? {}", last_will.topic, last_will.message, last_will.retained ? "Yes" : "No");
+              if (frame->headers.find("last_will_message") != frame->headers.end()) {
+                last_will.message = frame->headers["last_will_message"];
+              }
+
+              if (frame->headers.find("last_will_retained") != frame->headers.end()) {
+                // Last will headers set.
+                std::string last_will_retained = frame->headers["last_will_retained"];
+                boost::algorithm::to_lower(last_will_retained);
+                last_will.retained = last_will_retained.compare("true") == 0;
               }
 
               std::string heartbeat_header = "0,0";
@@ -234,7 +268,8 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
                 WebsocketServer::send_stomp_frame(connected_frame, webSocket);
 
                 if (last_will.topic.length() > 0) {
-                  std::lock_guard<std::mutex> last_will_map_lock_guard(WebsocketServer::_last_will_map_mutex);
+                  SPDLOG_INFO("Client requested last will message '{}' -> '{}' be sent on disconnect. Retained? {}", last_will.topic, last_will.message, last_will.retained ? "Yes" : "No");
+                  std::unique_lock<std::shared_mutex> last_will_map_lock_guard(WebsocketServer::_last_will_map_mutex);
                   WebsocketServer::_last_will_map[&webSocket] = last_will;
                 }
               } else {
@@ -258,9 +293,9 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
             }
 
             SPDLOG_DEBUG("STOMP subscribing to topic {} (id: {})", frame->headers["destination"], frame->headers["id"]);
+            std::shared_lock<std::shared_mutex> lock_guard(WebsocketServer::_server_mutex);
             for (auto &topic : WebsocketServer::_stomp_topics) {
               if (topic->get_name() == frame->headers["destination"]) {
-                std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
                 topic->subscribe(webSocket, frame->headers["id"]);
                 return; // We found the topics and subscribed to it, nothing else to do.
               }
@@ -274,7 +309,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
             SPDLOG_DEBUG("STOMP subscription ID {} unsubscribing.", frame->headers["id"]);
             for (auto &topic : WebsocketServer::_stomp_topics) {
               if (topic->get_name() == frame->headers["destination"]) {
-                std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
+                std::shared_lock<std::shared_mutex> lock_guard(WebsocketServer::_server_mutex);
                 topic->unsubscribe(webSocket, frame->headers["id"]);
                 return; // We found the topics and unsubscribed from it, nothing else to do.
               }
@@ -291,7 +326,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
             SPDLOG_TRACE("Received STOMP SEND command for topic '{}', value '{}'", frame->headers["destination"], frame->body);
 
             WebsocketServer::_on_global_stomp_send_message_callbacks(*frame);
-            std::lock_guard<std::mutex> lock_guard_callbacks(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
+            std::shared_lock<std::shared_mutex> lock_guard_callbacks(WebsocketServer::_on_stomp_send_message_callbacks_mutex);
             if (WebsocketServer::_on_stomp_send_message_callbacks.count(frame->headers["destination"]) > 0) [[likely]] {
               SPDLOG_DEBUG("Received STOMP SEND command for existing topic, setting topic '{}' to value '{}'", frame->headers["destination"], frame->body);
               WebsocketServer::_on_stomp_send_message_callbacks[frame->headers["destination"]](frame.value());
@@ -308,11 +343,12 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
           SPDLOG_ERROR("Failed to parse STOMP frame");
         }
       } else {
-        SPDLOG_WARN("Received message from websocket but it's not registered among any protocol lists. Will close websocket.");
+        SPDLOG_WARN("Received message from websocket that it's not registered among any protocol lists. Will close websocket.");
         webSocket.close();
       }
     } else {
-      SPDLOG_ERROR("Unknown websocket packet type! Type: {}", static_cast<int>(msg->type));
+      SPDLOG_ERROR("Unknown websocket packet type! Type: {}. Will close connection.", static_cast<int>(msg->type));
+      webSocket.close();
     }
   } catch (std::exception ex) {
     SPDLOG_ERROR("Caught std::exception while processing websocket event. Exception: {}", ex.what());
@@ -324,7 +360,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
 void WebsocketServer::update_stomp_topic_value(std::string topic_name, std::string value) {
   SPDLOG_TRACE("Updating STOMP topic '{}' to value '{}'", topic_name, value);
 
-  std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
+  std::shared_lock<std::shared_mutex> lock_guard(WebsocketServer::_server_mutex);
   for (auto &topic : WebsocketServer::_stomp_topics) {
     if (topic->get_name().compare(topic_name) == 0) {
       topic->update_value(value);
@@ -334,7 +370,7 @@ void WebsocketServer::update_stomp_topic_value(std::string topic_name, std::stri
 }
 
 void WebsocketServer::update_stomp_topic_value(std::string topic_name, nlohmann::json &value) {
-  std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
+  std::shared_lock<std::shared_mutex> lock_guard(WebsocketServer::_server_mutex);
   for (auto &topic : WebsocketServer::_stomp_topics) {
     if (topic->get_name().compare(topic_name) == 0) {
       topic->update_value(value);
@@ -344,16 +380,19 @@ void WebsocketServer::update_stomp_topic_value(std::string topic_name, nlohmann:
 }
 
 void WebsocketServer::set_stomp_topic_retained(std::string topic_name, bool retained) {
-  std::lock_guard<std::mutex> lock_guard(WebsocketServer::_server_mutex);
-  SPDLOG_TRACE("Setting STOMP topic '{}' retained? {}", topic_name, retained ? "Yes" : "No");
-  for (auto &topic : WebsocketServer::_stomp_topics) {
-    if (topic->get_name().compare(topic_name) == 0) {
-      topic->set_retained(retained);
-      return;
+  {
+    std::shared_lock<std::shared_mutex> lock_guard(WebsocketServer::_server_mutex);
+    SPDLOG_TRACE("Setting STOMP topic '{}' retained? {}", topic_name, retained ? "Yes" : "No");
+    for (auto &topic : WebsocketServer::_stomp_topics) {
+      if (topic->get_name().compare(topic_name) == 0) {
+        topic->set_retained(retained);
+        return;
+      }
     }
   }
 
   // We didn't find topic, create it and set retained flag
+  std::unique_lock<std::shared_mutex> lock_guard(WebsocketServer::_server_mutex);
   WebsocketServer::_stomp_topics.push_back(std::make_shared<StompTopic>(topic_name, ""));
   WebsocketServer::_stomp_topics.back()->set_retained(retained);
 }
@@ -432,6 +471,10 @@ std::optional<StompFrame> WebsocketServer::decode_stomp_frame(std::string &data)
 }
 
 void WebsocketServer::send_stomp_frame(StompFrame &frame, ix::WebSocket &websocket) {
+  if (websocket.getReadyState() != ix::ReadyState::Open) {
+    return;
+  }
+
   std::string message;
   switch (frame.type) {
   case StompFrame::CONNECT:
@@ -504,7 +547,7 @@ void WebsocketServer::register_warning(ActiveWarningLevel level, std::string war
   bool send_update = false;
   {
     bool found = false;
-    std::lock_guard<std::mutex> lock_guard(WebsocketServer::_active_warnings_mutex);
+    std::unique_lock<std::shared_mutex> lock_guard(WebsocketServer::_active_warnings_mutex);
     for (auto &warning : WebsocketServer::_active_warnings) {
       if (warning.warning_text.compare(warning_text) == 0) {
         if (warning.level != level) {
@@ -532,7 +575,7 @@ void WebsocketServer::register_warning(ActiveWarningLevel level, std::string war
 void WebsocketServer::remove_warning(std::string warning_text) {
   bool send_update = false;
   {
-    std::lock_guard<std::mutex> lock_guard(WebsocketServer::_active_warnings_mutex);
+    std::lock_guard<std::shared_mutex> lock_guard(WebsocketServer::_active_warnings_mutex);
     auto it = WebsocketServer::_active_warnings.begin();
     while (it != WebsocketServer::_active_warnings.end()) {
       if (it->warning_text.compare(warning_text) == 0) {
@@ -557,7 +600,7 @@ void WebsocketServer::_stomp_dismiss_warning_callback(StompFrame frame) {
 }
 
 void WebsocketServer::_send_active_warnings() {
-  std::lock_guard<std::mutex> lock_guard(WebsocketServer::_active_warnings_mutex);
+  std::shared_lock<std::shared_mutex> lock_guard(WebsocketServer::_active_warnings_mutex);
   SPDLOG_DEBUG("Broadcasting active warnings to all connected weboscket clients.");
   nlohmann::json base;
   base["warnings"] = nlohmann::json::array();

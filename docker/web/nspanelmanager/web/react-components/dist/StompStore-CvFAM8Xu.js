@@ -1,6 +1,6 @@
-import { i as __commonJSMin } from "./main-CQ7r299A.js";
-import { t as create } from "./react-fWHvS6VU.js";
-import { n as Notify, r as RemoveNotification } from "./NSPanelToastContainer-B5jbnFTb.js";
+import { i as __commonJSMin } from "./main-BWgDajaM.js";
+import { t as create } from "./react-BrBB-CGW.js";
+import { n as Notify, r as RemoveNotification } from "./NSPanelToastContainer-Abzvd6TK.js";
 //#region node_modules/tslib/tslib.es6.mjs
 /******************************************************************************
 Copyright (c) Microsoft Corporation.
@@ -350,13 +350,15 @@ var Subscription = function() {
 	};
 	Subscription.prototype.add = function(teardown) {
 		var _a;
-		if (teardown && teardown !== this) if (this.closed) execFinalizer(teardown);
-		else {
-			if (teardown instanceof Subscription) {
-				if (teardown.closed || teardown._hasParent(this)) return;
-				teardown._addParent(this);
+		if (teardown && teardown !== this) {
+			if (this.closed) execFinalizer(teardown);
+			else {
+				if (teardown instanceof Subscription) {
+					if (teardown.closed || teardown._hasParent(this)) return;
+					teardown._addParent(this);
+				}
+				(this._finalizers = (_a = this._finalizers) !== null && _a !== void 0 ? _a : []).push(teardown);
 			}
-			(this._finalizers = (_a = this._finalizers) !== null && _a !== void 0 ? _a : []).push(teardown);
 		}
 	};
 	Subscription.prototype._hasParent = function(parent) {
@@ -724,6 +726,71 @@ function isSubscriber(value) {
 	return value && value instanceof Subscriber || isObserver(value) && isSubscription(value);
 }
 //#endregion
+//#region node_modules/rxjs/dist/esm5/internal/util/lift.js
+function hasLift(source) {
+	return isFunction(source === null || source === void 0 ? void 0 : source.lift);
+}
+function operate(init) {
+	return function(source) {
+		if (hasLift(source)) return source.lift(function(liftedSource) {
+			try {
+				return init(liftedSource, this);
+			} catch (err) {
+				this.error(err);
+			}
+		});
+		throw new TypeError("Unable to lift unknown Observable type");
+	};
+}
+//#endregion
+//#region node_modules/rxjs/dist/esm5/internal/operators/OperatorSubscriber.js
+function createOperatorSubscriber(destination, onNext, onComplete, onError, onFinalize) {
+	return new OperatorSubscriber(destination, onNext, onComplete, onError, onFinalize);
+}
+var OperatorSubscriber = function(_super) {
+	__extends(OperatorSubscriber, _super);
+	function OperatorSubscriber(destination, onNext, onComplete, onError, onFinalize, shouldUnsubscribe) {
+		var _this = _super.call(this, destination) || this;
+		_this.onFinalize = onFinalize;
+		_this.shouldUnsubscribe = shouldUnsubscribe;
+		_this._next = onNext ? function(value) {
+			try {
+				onNext(value);
+			} catch (err) {
+				destination.error(err);
+			}
+		} : _super.prototype._next;
+		_this._error = onError ? function(err) {
+			try {
+				onError(err);
+			} catch (err) {
+				destination.error(err);
+			} finally {
+				this.unsubscribe();
+			}
+		} : _super.prototype._error;
+		_this._complete = onComplete ? function() {
+			try {
+				onComplete();
+			} catch (err) {
+				destination.error(err);
+			} finally {
+				this.unsubscribe();
+			}
+		} : _super.prototype._complete;
+		return _this;
+	}
+	OperatorSubscriber.prototype.unsubscribe = function() {
+		var _a;
+		if (!this.shouldUnsubscribe || this.shouldUnsubscribe()) {
+			var closed_1 = this.closed;
+			_super.prototype.unsubscribe.call(this);
+			!closed_1 && ((_a = this.onFinalize) === null || _a === void 0 || _a.call(this));
+		}
+	};
+	return OperatorSubscriber;
+}(Subscriber);
+//#endregion
 //#region node_modules/rxjs/dist/esm5/internal/util/ObjectUnsubscribedError.js
 var ObjectUnsubscribedError = createErrorClass(function(_super) {
 	return function ObjectUnsubscribedErrorImpl() {
@@ -904,108 +971,10 @@ var BehaviorSubject = function(_super) {
 	return BehaviorSubject;
 }(Subject);
 //#endregion
-//#region node_modules/rxjs/dist/esm5/internal/util/EmptyError.js
-var EmptyError = createErrorClass(function(_super) {
-	return function EmptyErrorImpl() {
-		_super(this);
-		this.name = "EmptyError";
-		this.message = "no elements in sequence";
-	};
+//#region node_modules/rxjs/dist/esm5/internal/observable/empty.js
+var EMPTY = new Observable(function(subscriber) {
+	return subscriber.complete();
 });
-//#endregion
-//#region node_modules/rxjs/dist/esm5/internal/firstValueFrom.js
-function firstValueFrom(source, config) {
-	var hasConfig = typeof config === "object";
-	return new Promise(function(resolve, reject) {
-		var subscriber = new SafeSubscriber({
-			next: function(value) {
-				resolve(value);
-				subscriber.unsubscribe();
-			},
-			error: reject,
-			complete: function() {
-				if (hasConfig) resolve(config.defaultValue);
-				else reject(new EmptyError());
-			}
-		});
-		source.subscribe(subscriber);
-	});
-}
-//#endregion
-//#region node_modules/rxjs/dist/esm5/internal/util/lift.js
-function hasLift(source) {
-	return isFunction(source === null || source === void 0 ? void 0 : source.lift);
-}
-function operate(init) {
-	return function(source) {
-		if (hasLift(source)) return source.lift(function(liftedSource) {
-			try {
-				return init(liftedSource, this);
-			} catch (err) {
-				this.error(err);
-			}
-		});
-		throw new TypeError("Unable to lift unknown Observable type");
-	};
-}
-//#endregion
-//#region node_modules/rxjs/dist/esm5/internal/operators/OperatorSubscriber.js
-function createOperatorSubscriber(destination, onNext, onComplete, onError, onFinalize) {
-	return new OperatorSubscriber(destination, onNext, onComplete, onError, onFinalize);
-}
-var OperatorSubscriber = function(_super) {
-	__extends(OperatorSubscriber, _super);
-	function OperatorSubscriber(destination, onNext, onComplete, onError, onFinalize, shouldUnsubscribe) {
-		var _this = _super.call(this, destination) || this;
-		_this.onFinalize = onFinalize;
-		_this.shouldUnsubscribe = shouldUnsubscribe;
-		_this._next = onNext ? function(value) {
-			try {
-				onNext(value);
-			} catch (err) {
-				destination.error(err);
-			}
-		} : _super.prototype._next;
-		_this._error = onError ? function(err) {
-			try {
-				onError(err);
-			} catch (err) {
-				destination.error(err);
-			} finally {
-				this.unsubscribe();
-			}
-		} : _super.prototype._error;
-		_this._complete = onComplete ? function() {
-			try {
-				onComplete();
-			} catch (err) {
-				destination.error(err);
-			} finally {
-				this.unsubscribe();
-			}
-		} : _super.prototype._complete;
-		return _this;
-	}
-	OperatorSubscriber.prototype.unsubscribe = function() {
-		var _a;
-		if (!this.shouldUnsubscribe || this.shouldUnsubscribe()) {
-			var closed_1 = this.closed;
-			_super.prototype.unsubscribe.call(this);
-			!closed_1 && ((_a = this.onFinalize) === null || _a === void 0 || _a.call(this));
-		}
-	};
-	return OperatorSubscriber;
-}(Subscriber);
-//#endregion
-//#region node_modules/rxjs/dist/esm5/internal/operators/filter.js
-function filter(predicate, thisArg) {
-	return operate(function(source, subscriber) {
-		var index = 0;
-		source.subscribe(createOperatorSubscriber(subscriber, function(value) {
-			return predicate.call(thisArg, value, index++) && subscriber.next(value);
-		}));
-	});
-}
 //#endregion
 //#region node_modules/rxjs/dist/esm5/internal/util/isArrayLike.js
 var isArrayLike = (function(x) {
@@ -1208,6 +1177,59 @@ function process(asyncIterable, subscriber) {
 	});
 }
 //#endregion
+//#region node_modules/rxjs/dist/esm5/internal/util/EmptyError.js
+var EmptyError = createErrorClass(function(_super) {
+	return function EmptyErrorImpl() {
+		_super(this);
+		this.name = "EmptyError";
+		this.message = "no elements in sequence";
+	};
+});
+//#endregion
+//#region node_modules/rxjs/dist/esm5/internal/firstValueFrom.js
+function firstValueFrom(source, config) {
+	var hasConfig = typeof config === "object";
+	return new Promise(function(resolve, reject) {
+		var subscriber = new SafeSubscriber({
+			next: function(value) {
+				resolve(value);
+				subscriber.unsubscribe();
+			},
+			error: reject,
+			complete: function() {
+				if (hasConfig) resolve(config.defaultValue);
+				else reject(new EmptyError());
+			}
+		});
+		source.subscribe(subscriber);
+	});
+}
+//#endregion
+//#region node_modules/rxjs/dist/esm5/internal/operators/filter.js
+function filter(predicate, thisArg) {
+	return operate(function(source, subscriber) {
+		var index = 0;
+		source.subscribe(createOperatorSubscriber(subscriber, function(value) {
+			return predicate.call(thisArg, value, index++) && subscriber.next(value);
+		}));
+	});
+}
+//#endregion
+//#region node_modules/rxjs/dist/esm5/internal/operators/take.js
+function take(count) {
+	return count <= 0 ? function() {
+		return EMPTY;
+	} : operate(function(source, subscriber) {
+		var seen = 0;
+		source.subscribe(createOperatorSubscriber(subscriber, function(value) {
+			if (++seen <= count) {
+				subscriber.next(value);
+				if (count <= seen) subscriber.complete();
+			}
+		}));
+	});
+}
+//#endregion
 //#region node_modules/rxjs/dist/esm5/internal/operators/share.js
 function share(options) {
 	if (options === void 0) options = {};
@@ -1282,26 +1304,6 @@ function handleReset(reset, on) {
 	return innerFrom(on.apply(void 0, __spreadArray([], __read(args)))).subscribe(onSubscriber);
 }
 //#endregion
-//#region node_modules/rxjs/dist/esm5/internal/observable/empty.js
-var EMPTY = new Observable(function(subscriber) {
-	return subscriber.complete();
-});
-//#endregion
-//#region node_modules/rxjs/dist/esm5/internal/operators/take.js
-function take(count) {
-	return count <= 0 ? function() {
-		return EMPTY;
-	} : operate(function(source, subscriber) {
-		var seen = 0;
-		source.subscribe(createOperatorSubscriber(subscriber, function(value) {
-			if (++seen <= count) {
-				subscriber.next(value);
-				if (count <= seen) subscriber.complete();
-			}
-		}));
-	});
-}
-//#endregion
 //#region node_modules/@stomp/rx-stomp/esm6/rx-stomp-state.js
 var import_stomp_umd = (/* @__PURE__ */ __commonJSMin(((exports, module) => {
 	(function(global, factory) {
@@ -1321,7 +1323,8 @@ var import_stomp_umd = (/* @__PURE__ */ __commonJSMin(((exports, module) => {
 				const id = Math.random().toString().substring(2, 8);
 				const origOnClose = this.onclose;
 				this.onclose = (closeEvent) => {
-					debug(`Discarded socket (#${id})  closed after ${(/* @__PURE__ */ new Date()).getTime() - ts.getTime()}ms, with code/reason: ${closeEvent.code}/${closeEvent.reason}`);
+					const delay = (/* @__PURE__ */ new Date()).getTime() - ts.getTime();
+					debug(`Discarded socket (#${id})  closed after ${delay}ms, with code/reason: ${closeEvent.code}/${closeEvent.reason}`);
 				};
 				this.close();
 				origOnClose?.call(webSocket, {
@@ -2296,7 +2299,7 @@ var import_stomp_umd = (/* @__PURE__ */ __commonJSMin(((exports, module) => {
 				* client.maxReconnectDelay = 10000; // Maximum wait time is 10 seconds
 				* ```
 				*/
-				this.maxReconnectDelay = 900 * 1e3;
+				this.maxReconnectDelay = 9e5;
 				/**
 				* Mode for determining the time interval between reconnection attempts.
 				*
@@ -2388,7 +2391,7 @@ var import_stomp_umd = (/* @__PURE__ */ __commonJSMin(((exports, module) => {
 				*
 				* Default is 8 KB (`8 * 1024` bytes). This value has no effect if [splitLargeFrames]{@link Client#splitLargeFrames} is `false`.
 				*/
-				this.maxWebSocketChunkSize = 8 * 1024;
+				this.maxWebSocketChunkSize = 8192;
 				/**
 				* Forces all WebSocket frames to use binary transport, irrespective of payload type.
 				*
@@ -2999,7 +3002,7 @@ var import_stomp_umd = (/* @__PURE__ */ __commonJSMin(((exports, module) => {
 				/**
 				* It is no op now. No longer needed. Large packets work out of the box.
 				*/
-				this.maxWebSocketFrameSize = 16 * 1024;
+				this.maxWebSocketFrameSize = 16384;
 				this._heartbeatInfo = new HeartbeatInfo(this);
 				this.reconnect_delay = 0;
 				this.webSocketFactory = webSocketFactory;

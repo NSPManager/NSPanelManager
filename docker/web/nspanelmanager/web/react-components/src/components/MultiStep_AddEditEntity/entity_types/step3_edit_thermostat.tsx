@@ -276,7 +276,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
       id: id ?? null,
       controller: controller,
       type: "entity",
-      entity_type: "light",
+      entity_type: "thermostat",
       room_id: room_id,
       entities_page_id: entities_page_id,
       room_view_position: room_view_position,
@@ -295,6 +295,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
       swingh_modes: [],
     },
   });
+  const { entities } = useEntitiesPagesStore.getState();
 
   const {
     fields: fanModeFields,
@@ -358,13 +359,14 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
 
   useEffect(() => {
     if (id != null) {
-      const entityData = useEntitiesPagesStore.getState().entities.find((entity) => entity.id == id);
+      const entityData = entities.find((entity) => entity.id == id);
+      console.log("Found entity data:", entityData);
       reset(entityData);
       if (entityData?.step_size) {
         setValue("step_size", parseFloat(String(entityData.step_size)));
       }
     }
-  }, [id, useEntitiesPagesStore.getState().entities]);
+  }, [id, entities, reset, setValue]);
 
   function saveEntity(data: ThermostatFormData) {
     // PUT request using fetch with error handling
@@ -538,7 +540,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
                 options={useAvailableEntitiesStore.getState().home_assistant_options.filter((option) => option.value.startsWith("climate."))}
                 classNames={classNames}
                 onChange={(newValue) => {
-                  setValue("home_assistant_name", newValue ? newValue.value : "");
+                  setValue("home_assistant_name", newValue ? newValue.value : "", { shouldValidate: true, shouldDirty: true });
                 }}
                 unstyled
                 components={select_components}

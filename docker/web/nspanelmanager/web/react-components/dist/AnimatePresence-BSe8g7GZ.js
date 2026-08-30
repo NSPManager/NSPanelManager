@@ -1,5 +1,5 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-CQ7r299A.js";
-import { f as PresenceContext, h as LayoutGroupContext, m as useConstant, n as usePresence, p as useIsomorphicLayoutEffect, r as MotionConfigContext, s as isHTMLElement } from "./proxy-D4neoJHM.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-BWgDajaM.js";
+import { f as PresenceContext, h as LayoutGroupContext, i as isHTMLElement, m as useConstant, n as usePresence, p as useIsomorphicLayoutEffect, r as MotionConfigContext } from "./proxy-BZ7OE7_K.js";
 //#region node_modules/framer-motion/dist/es/utils/use-composed-ref.mjs
 var import_jsx_runtime = require_jsx_runtime();
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
@@ -88,7 +88,7 @@ function PopChild({ children, isPresent, anchorX, anchorY, root, pop }) {
 		direction: "ltr"
 	});
 	const { nonce } = (0, import_react.useContext)(MotionConfigContext);
-	const composedRef = useComposedRefs(ref, children.props?.ref ?? children?.ref);
+	const composedRef = useComposedRefs(ref, pop !== false ? children.props?.ref ?? children?.ref : void 0);
 	/**
 	* We create and inject a style block so we can apply this explicit
 	* sizing in a non-destructive manner by just deleting the style block.
@@ -136,6 +136,12 @@ function PopChild({ children, isPresent, anchorX, anchorY, root, pop }) {
 var PresenceChild = ({ children, initial, isPresent, onExitComplete, custom, presenceAffectsLayout, mode, anchorX, anchorY, root }) => {
 	const presenceChildren = useConstant(newChildrenMap);
 	const id = (0, import_react.useId)();
+	const isPresentRef = (0, import_react.useRef)(isPresent);
+	const onExitCompleteRef = (0, import_react.useRef)(onExitComplete);
+	useIsomorphicLayoutEffect(() => {
+		isPresentRef.current = isPresent;
+		onExitCompleteRef.current = onExitComplete;
+	});
 	let isReusedContext = true;
 	let context = (0, import_react.useMemo)(() => {
 		isReusedContext = false;
@@ -151,7 +157,10 @@ var PresenceChild = ({ children, initial, isPresent, onExitComplete, custom, pre
 			},
 			register: (childId) => {
 				presenceChildren.set(childId, false);
-				return () => presenceChildren.delete(childId);
+				return () => {
+					presenceChildren.delete(childId);
+					!isPresentRef.current && !presenceChildren.size && onExitCompleteRef.current?.();
+				};
 			}
 		};
 	}, [

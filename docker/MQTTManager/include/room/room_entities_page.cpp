@@ -175,8 +175,10 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
       entity_slot->set_icon(light->get_icon());
       entity_slot->set_pco(light->get_icon_color());
       entity_slot->set_pco2(light->get_icon_active_color());
-      entity_slot->set_can_save_scene(false); // Entity is not a scene.
+      entity_slot->set_type(NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_LIGHT);
+      entity_slot->set_id(light->get_id());
       entity_slot->set_mqtt_state_topic(light->get_mqtt_state_topic());
+      entity_slot->set_can_save_scene(false); // Entity is not a scene.
     } else if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::SWITCH_ENTITY) {
       std::shared_ptr<SwitchEntity> switch_entity = std::static_pointer_cast<SwitchEntity>(entity);
       NSPanelRoomEntitiesPage_EntitySlot *entity_slot = proto_state.add_entities();
@@ -186,6 +188,8 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
       entity_slot->set_pco(switch_entity->get_icon_color());
       entity_slot->set_pco2(switch_entity->get_icon_active_color());
       entity_slot->set_mqtt_state_topic(switch_entity->get_mqtt_state_topic());
+      entity_slot->set_type(NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_SWITCH);
+      entity_slot->set_id(switch_entity->get_id());
     } else if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::BUTTON) {
       std::shared_ptr<ButtonEntity> button_entity = std::static_pointer_cast<ButtonEntity>(entity);
       NSPanelRoomEntitiesPage_EntitySlot *entity_slot = proto_state.add_entities();
@@ -195,6 +199,8 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
       entity_slot->set_pco(button_entity->get_icon_color());
       entity_slot->set_pco2(button_entity->get_icon_active_color());
       entity_slot->set_mqtt_state_topic(button_entity->get_mqtt_state_topic());
+      entity_slot->set_type(NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_BUTTON);
+      entity_slot->set_id(button_entity->get_id());
     } else if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::SCENE) {
       std::shared_ptr<Scene> scene = std::static_pointer_cast<Scene>(entity);
       NSPanelRoomEntitiesPage_EntitySlot *entity_slot = proto_state.add_entities();
@@ -204,6 +210,8 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
       entity_slot->set_pco(scene->get_icon_color());
       entity_slot->set_pco2(scene->get_icon_active_color());
       entity_slot->set_mqtt_state_topic(scene->get_mqtt_state_topic());
+      entity_slot->set_type(NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_SCENE);
+      entity_slot->set_id(scene->get_id());
       if (scene->get_controller() == MQTT_MANAGER_ENTITY_CONTROLLER::NSPM) {
         entity_slot->set_can_save_scene(true);
       } else {
@@ -219,6 +227,10 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
       entity_slot->set_pco2(thermostat->get_icon_active_color());
       entity_slot->set_can_save_scene(false); // Entity is not a scene.
       entity_slot->set_mqtt_state_topic(thermostat->get_mqtt_state_topic());
+      entity_slot->set_type(NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_THERMOSTAT);
+      entity_slot->set_id(thermostat->get_id());
+
+      SPDLOG_DEBUG("Thermostat icon: {} (0x{:X})", entity_slot->icon(), entity_slot->icon()[0]);
     } else {
       SPDLOG_ERROR("Unknown entity type {} while processing EntityWrapper while building NSPanelRoomEntitiesPage protobuf object.", (int)entity->get_type());
     }

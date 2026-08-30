@@ -84,11 +84,13 @@ export const useEntitiesPagesStore = create<IEntitiesPages>((set) => ({
     })
       .then((response) => response.json())
       .then((data) => {
-        set((state) => ({ ...state, status: "loaded", room_id, entities_pages: data.entities_pages, entities: [], scenes: [] }));
+        set((state) => ({ ...state, room_id, entities_pages: data.entities_pages, entities: [], scenes: [] }));
 
         for (const page of data.entities_pages) {
           set((state) => ({ ...state, entities: [...state.entities, ...page.entities], scenes: [...state.scenes, ...page.scenes] }));
         }
+
+        set({ status: "loaded" });
       });
   },
   removeEntitiesPage: (id: number) => {

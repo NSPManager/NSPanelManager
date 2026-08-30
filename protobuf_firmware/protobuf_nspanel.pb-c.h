@@ -75,6 +75,15 @@ typedef enum _NSPanelStatusReport__State {
   NSPANEL_STATUS_REPORT__STATE__REBOOTING = 5
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_STATUS_REPORT__STATE)
 } NSPanelStatusReport__State;
+typedef enum _NSPanelRoomEntitiesPage__EntitySlot__EntityType {
+  NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_UNSPECIFIED = 0,
+  NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_LIGHT = 1,
+  NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_SWITCH = 2,
+  NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_BUTTON = 3,
+  NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_THERMOSTAT = 4,
+  NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_SCENE = 5
+    PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE)
+} NSPanelRoomEntitiesPage__EntitySlot__EntityType;
 typedef enum _NSPanelMQTTManagerCommand__AffectLightsOptions {
   NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__ALL = 0,
   NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__TABLE_LIGHTS = 1,
@@ -226,10 +235,12 @@ struct  NSPanelRoomEntitiesPage__EntitySlot
    * MQTT topic where NSPanelEntityState is sent for control of individual entity. Empty if not controllable individually.
    */
   char *mqtt_state_topic;
+  NSPanelRoomEntitiesPage__EntitySlot__EntityType type;
+  int32_t id;
 };
 #define NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_room_entities_page__entity_slot__descriptor) \
-    , 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0, (char *)protobuf_c_empty_string }
+    , 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0, (char *)protobuf_c_empty_string, NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_UNSPECIFIED, 0 }
 
 
 /*
@@ -699,6 +710,7 @@ extern const ProtobufCMessageDescriptor nspanel_status_report__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_status_report__state__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_room_entities_page__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_room_entities_page__entity_slot__descriptor;
+extern const ProtobufCEnumDescriptor    nspanel_room_entities_page__entity_slot__entity_type__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_room_status__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_weather_update__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_weather_update__forecast_item__descriptor;

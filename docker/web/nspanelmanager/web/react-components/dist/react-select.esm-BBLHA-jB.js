@@ -1,4 +1,4 @@
-import { c as __toESM, i as __commonJSMin, n as require_react_dom, r as require_react } from "./main-CQ7r299A.js";
+import { c as __toESM, i as __commonJSMin, n as require_react_dom, r as require_react } from "./main-BWgDajaM.js";
 //#region node_modules/@babel/runtime/helpers/esm/typeof.js
 function _typeof(o) {
 	"@babel/helpers - typeof";
@@ -312,10 +312,11 @@ var StyleSheet = /*#__PURE__*/ function() {
 		var _this = this;
 		this._insertTag = function(tag) {
 			var before;
-			if (_this.tags.length === 0) if (_this.insertionPoint) before = _this.insertionPoint.nextSibling;
-			else if (_this.prepend) before = _this.container.firstChild;
-			else before = _this.before;
-			else before = _this.tags[_this.tags.length - 1].nextSibling;
+			if (_this.tags.length === 0) {
+				if (_this.insertionPoint) before = _this.insertionPoint.nextSibling;
+				else if (_this.prepend) before = _this.container.firstChild;
+				else before = _this.before;
+			} else before = _this.tags[_this.tags.length - 1].nextSibling;
 			_this.container.insertBefore(tag, before);
 			_this.tags.push(tag);
 		};
@@ -634,9 +635,7 @@ function delimiter(type) {
 		case 40:
 			if (type === 41) delimiter(type);
 			break;
-		case 92:
-			next();
-			break;
+		case 92: next();
 	}
 	return position;
 }
@@ -1115,7 +1114,25 @@ var createCache = function createCache(options) {
 * LICENSE file in the root directory of this source tree.
 */
 var require_react_is_production_min = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var b = "function" === typeof Symbol && Symbol.for, c = b ? Symbol.for("react.element") : 60103, d = b ? Symbol.for("react.portal") : 60106, e = b ? Symbol.for("react.fragment") : 60107, f = b ? Symbol.for("react.strict_mode") : 60108, g = b ? Symbol.for("react.profiler") : 60114, h = b ? Symbol.for("react.provider") : 60109, k = b ? Symbol.for("react.context") : 60110, l = b ? Symbol.for("react.async_mode") : 60111, m = b ? Symbol.for("react.concurrent_mode") : 60111, n = b ? Symbol.for("react.forward_ref") : 60112, p = b ? Symbol.for("react.suspense") : 60113, q = b ? Symbol.for("react.suspense_list") : 60120, r = b ? Symbol.for("react.memo") : 60115, t = b ? Symbol.for("react.lazy") : 60116, v = b ? Symbol.for("react.block") : 60121, w = b ? Symbol.for("react.fundamental") : 60117, x = b ? Symbol.for("react.responder") : 60118, y = b ? Symbol.for("react.scope") : 60119;
+	var b = "function" === typeof Symbol && Symbol.for;
+	var c = b ? Symbol.for("react.element") : 60103;
+	var d = b ? Symbol.for("react.portal") : 60106;
+	var e = b ? Symbol.for("react.fragment") : 60107;
+	var f = b ? Symbol.for("react.strict_mode") : 60108;
+	var g = b ? Symbol.for("react.profiler") : 60114;
+	var h = b ? Symbol.for("react.provider") : 60109;
+	var k = b ? Symbol.for("react.context") : 60110;
+	var l = b ? Symbol.for("react.async_mode") : 60111;
+	var m = b ? Symbol.for("react.concurrent_mode") : 60111;
+	var n = b ? Symbol.for("react.forward_ref") : 60112;
+	var p = b ? Symbol.for("react.suspense") : 60113;
+	var q = b ? Symbol.for("react.suspense_list") : 60120;
+	var r = b ? Symbol.for("react.memo") : 60115;
+	var t = b ? Symbol.for("react.lazy") : 60116;
+	var v = b ? Symbol.for("react.block") : 60121;
+	var w = b ? Symbol.for("react.fundamental") : 60117;
+	var x = b ? Symbol.for("react.responder") : 60118;
+	var y = b ? Symbol.for("react.scope") : 60119;
 	function z(a) {
 		if ("object" === typeof a && null !== a) {
 			var u = a.$$typeof;
@@ -1443,14 +1460,12 @@ function handleInterpolation(mergedProps, registered, interpolation) {
 				return serializedStyles.styles + ";";
 			}
 			return createStringFromObject(mergedProps, registered, interpolation);
-		case "function":
-			if (mergedProps !== void 0) {
-				var previousCursor = cursor;
-				var result = interpolation(mergedProps);
-				cursor = previousCursor;
-				return handleInterpolation(mergedProps, registered, result);
-			}
-			break;
+		case "function": if (mergedProps !== void 0) {
+			var previousCursor = cursor;
+			var result = interpolation(mergedProps);
+			cursor = previousCursor;
+			return handleInterpolation(mergedProps, registered, result);
+		}
 	}
 	var asString = interpolation;
 	if (registered == null) return asString;
@@ -1677,7 +1692,7 @@ function getParentNode(node) {
 }
 function getNearestOverflowAncestor(node) {
 	const parentNode = getParentNode(node);
-	if (isLastTraversableNode(parentNode)) return node.ownerDocument ? node.ownerDocument.body : node.body;
+	if (isLastTraversableNode(parentNode)) return (node.ownerDocument || node).body;
 	if (isHTMLElement(parentNode) && isOverflowElement(parentNode)) return parentNode;
 	return getNearestOverflowAncestor(parentNode);
 }
@@ -1744,8 +1759,7 @@ function getVisualOffsets(element) {
 }
 function shouldAddVisualOffsets(element, isFixed, floatingOffsetParent) {
 	if (isFixed === void 0) isFixed = false;
-	if (!floatingOffsetParent || isFixed && floatingOffsetParent !== getWindow(element)) return false;
-	return isFixed;
+	return !!floatingOffsetParent && isFixed && floatingOffsetParent === getWindow(element);
 }
 function getBoundingClientRect(element, includeScale, isFixedStrategy, offsetParent) {
 	if (includeScale === void 0) includeScale = false;
@@ -1753,20 +1767,22 @@ function getBoundingClientRect(element, includeScale, isFixedStrategy, offsetPar
 	const clientRect = element.getBoundingClientRect();
 	const domElement = unwrapElement(element);
 	let scale = createCoords(1);
-	if (includeScale) if (offsetParent) {
-		if (isElement(offsetParent)) scale = getScale(offsetParent);
-	} else scale = getScale(element);
+	if (includeScale) {
+		if (offsetParent) {
+			if (isElement(offsetParent)) scale = getScale(offsetParent);
+		} else scale = getScale(element);
+	}
 	const visualOffsets = shouldAddVisualOffsets(domElement, isFixedStrategy, offsetParent) ? getVisualOffsets(domElement) : createCoords(0);
 	let x = (clientRect.left + visualOffsets.x) / scale.x;
 	let y = (clientRect.top + visualOffsets.y) / scale.y;
 	let width = clientRect.width / scale.x;
 	let height = clientRect.height / scale.y;
-	if (domElement) {
+	if (domElement && offsetParent) {
 		const win = getWindow(domElement);
-		const offsetWin = offsetParent && isElement(offsetParent) ? getWindow(offsetParent) : offsetParent;
+		const offsetWin = isElement(offsetParent) ? getWindow(offsetParent) : offsetParent;
 		let currentWin = win;
 		let currentIFrame = getFrameElement(currentWin);
-		while (currentIFrame && offsetParent && offsetWin !== currentWin) {
+		while (currentIFrame && offsetWin !== currentWin) {
 			const iframeScale = getScale(currentIFrame);
 			const iframeRect = currentIFrame.getBoundingClientRect();
 			const css = getComputedStyle$1(currentIFrame);
@@ -1792,7 +1808,7 @@ function getBoundingClientRect(element, includeScale, isFixedStrategy, offsetPar
 function rectsAreEqual(a, b) {
 	return a.x === b.x && a.y === b.y && a.width === b.width && a.height === b.height;
 }
-function observeMove(element, onMove) {
+function observeMove(element, onMove, ancestorResize) {
 	let io = null;
 	let timeoutId;
 	const root = getDocumentElement(element);
@@ -1821,6 +1837,7 @@ function observeMove(element, onMove) {
 		let isFirstUpdate = true;
 		function handleObserve(entries) {
 			const ratio = entries[0].intersectionRatio;
+			if (!rectsAreEqual(elementRectForRootMargin, element.getBoundingClientRect())) return refresh();
 			if (ratio !== threshold) {
 				if (!isFirstUpdate) return refresh();
 				if (!ratio) timeoutId = setTimeout(() => {
@@ -1828,7 +1845,6 @@ function observeMove(element, onMove) {
 				}, 1e3);
 				else refresh(false, ratio);
 			}
-			if (ratio === 1 && !rectsAreEqual(elementRectForRootMargin, element.getBoundingClientRect())) refresh();
 			isFirstUpdate = false;
 		}
 		try {
@@ -1841,8 +1857,14 @@ function observeMove(element, onMove) {
 		}
 		io.observe(element);
 	}
+	const win = getWindow(element);
+	const handleResize = () => refresh(ancestorResize);
+	win.addEventListener("resize", handleResize);
 	refresh(true);
-	return cleanup;
+	return () => {
+		win.removeEventListener("resize", handleResize);
+		cleanup();
+	};
 }
 /**
 * Automatically updates the position of the floating element when necessary.
@@ -1858,10 +1880,10 @@ function autoUpdate(reference, floating, update, options) {
 	const referenceEl = unwrapElement(reference);
 	const ancestors = ancestorScroll || ancestorResize ? [...referenceEl ? getOverflowAncestors(referenceEl) : [], ...floating ? getOverflowAncestors(floating) : []] : [];
 	ancestors.forEach((ancestor) => {
-		ancestorScroll && ancestor.addEventListener("scroll", update, { passive: true });
+		ancestorScroll && ancestor.addEventListener("scroll", update);
 		ancestorResize && ancestor.addEventListener("resize", update);
 	});
-	const cleanupIo = referenceEl && layoutShift ? observeMove(referenceEl, update) : null;
+	const cleanupIo = referenceEl && layoutShift ? observeMove(referenceEl, update, ancestorResize) : null;
 	let reobserveFrame = -1;
 	let resizeObserver = null;
 	if (elementResize) {
@@ -2106,7 +2128,8 @@ var removeProps = function removeProps(propsObj) {
 		return newProps;
 	}, {});
 };
-var _excluded$3 = ["children", "innerProps"], _excluded2$1 = ["children", "innerProps"];
+var _excluded$3 = ["children", "innerProps"];
+var _excluded2$1 = ["children", "innerProps"];
 function getMenuPlacement(_ref) {
 	var preferredMaxHeight = _ref.maxHeight, menuEl = _ref.menuEl, minHeight = _ref.minHeight, preferredPlacement = _ref.placement, shouldScroll = _ref.shouldScroll, isFixedPosition = _ref.isFixedPosition, controlHeight = _ref.controlHeight;
 	var scrollParent = getScrollParent(menuEl);
@@ -2290,8 +2313,8 @@ var noticeCSS = function noticeCSS(_ref5, unstyled) {
 var noOptionsMessageCSS = noticeCSS;
 var loadingMessageCSS = noticeCSS;
 var NoOptionsMessage = function NoOptionsMessage(_ref6) {
-	var _ref6$children = _ref6.children, children = _ref6$children === void 0 ? "No options" : _ref6$children, innerProps = _ref6.innerProps;
-	return jsx("div", _extends({}, getStyleProps(_objectSpread2(_objectSpread2({}, _objectWithoutProperties(_ref6, _excluded$3)), {}, {
+	var _ref6$children = _ref6.children, children = _ref6$children === void 0 ? "No options" : _ref6$children, innerProps = _ref6.innerProps, restProps = _objectWithoutProperties(_ref6, _excluded$3);
+	return jsx("div", _extends({}, getStyleProps(_objectSpread2(_objectSpread2({}, restProps), {}, {
 		children,
 		innerProps
 	}), "noOptionsMessage", {
@@ -2300,8 +2323,8 @@ var NoOptionsMessage = function NoOptionsMessage(_ref6) {
 	}), innerProps), children);
 };
 var LoadingMessage = function LoadingMessage(_ref7) {
-	var _ref7$children = _ref7.children, children = _ref7$children === void 0 ? "Loading..." : _ref7$children, innerProps = _ref7.innerProps;
-	return jsx("div", _extends({}, getStyleProps(_objectSpread2(_objectSpread2({}, _objectWithoutProperties(_ref7, _excluded2$1)), {}, {
+	var _ref7$children = _ref7.children, children = _ref7$children === void 0 ? "Loading..." : _ref7$children, innerProps = _ref7.innerProps, restProps = _objectWithoutProperties(_ref7, _excluded2$1);
+	return jsx("div", _extends({}, getStyleProps(_objectSpread2(_objectSpread2({}, restProps), {}, {
 		children,
 		innerProps
 	}), "loadingMessage", {
@@ -2419,7 +2442,8 @@ var IndicatorsContainer = function IndicatorsContainer(props) {
 	return jsx("div", _extends({}, getStyleProps(props, "indicatorsContainer", { indicators: true }), innerProps), children);
 };
 var _templateObject;
-var _excluded$2 = ["size"], _excluded2 = [
+var _excluded$2 = ["size"];
+var _excluded2 = [
 	"innerProps",
 	"isRtl",
 	"size"
@@ -2521,8 +2545,8 @@ var LoadingDot = function LoadingDot(_ref6) {
 	}, "", "") });
 };
 var LoadingIndicator = function LoadingIndicator(_ref7) {
-	var innerProps = _ref7.innerProps, isRtl = _ref7.isRtl, _ref7$size = _ref7.size, size = _ref7$size === void 0 ? 4 : _ref7$size;
-	return jsx("div", _extends({}, getStyleProps(_objectSpread2(_objectSpread2({}, _objectWithoutProperties(_ref7, _excluded2)), {}, {
+	var innerProps = _ref7.innerProps, isRtl = _ref7.isRtl, _ref7$size = _ref7.size, size = _ref7$size === void 0 ? 4 : _ref7$size, restProps = _objectWithoutProperties(_ref7, _excluded2);
+	return jsx("div", _extends({}, getStyleProps(_objectSpread2(_objectSpread2({}, restProps), {}, {
 		innerProps,
 		isRtl,
 		size
@@ -3996,9 +4020,10 @@ var Select = /*#__PURE__*/ function(_Component) {
 				_this.setValue(multiValueAsValue(selectValue.filter(function(i) {
 					return _this.getOptionValue(i) !== candidate;
 				})), "deselect-option", newValue);
-			} else if (!isDisabled) if (isMulti) _this.setValue(multiValueAsValue([].concat(_toConsumableArray(selectValue), [newValue])), "select-option", newValue);
-			else _this.setValue(singleValueAsValue(newValue), "select-option");
-			else {
+			} else if (!isDisabled) {
+				if (isMulti) _this.setValue(multiValueAsValue([].concat(_toConsumableArray(selectValue), [newValue])), "select-option", newValue);
+				else _this.setValue(singleValueAsValue(newValue), "select-option");
+			} else {
 				_this.ariaOnChange(singleValueAsValue(newValue), {
 					action: "select-option",
 					option: newValue,
@@ -4442,9 +4467,7 @@ var Select = /*#__PURE__*/ function(_Component) {
 						else if (focusedIndex === -1) nextFocus = lastIndex;
 						else nextFocus = focusedIndex - 1;
 						break;
-					case "next":
-						if (focusedIndex > -1 && focusedIndex < lastIndex) nextFocus = focusedIndex + 1;
-						break;
+					case "next": if (focusedIndex > -1 && focusedIndex < lastIndex) nextFocus = focusedIndex + 1;
 				}
 				this.setState({
 					inputIsHidden: nextFocus !== -1,
@@ -4903,31 +4926,32 @@ var Select = /*#__PURE__*/ function(_Component) {
 					onFocus: this.onValueInputFocus
 				});
 				if (!name || isDisabled) return;
-				if (isMulti) if (delimiter) {
-					var value = selectValue.map(function(opt) {
-						return _this5.getOptionValue(opt);
-					}).join(delimiter);
-					return /*#__PURE__*/ import_react.createElement("input", {
-						name,
-						type: "hidden",
-						value
-					});
-				} else {
-					var input = selectValue.length > 0 ? selectValue.map(function(opt, i) {
+				if (isMulti) {
+					if (delimiter) {
+						var value = selectValue.map(function(opt) {
+							return _this5.getOptionValue(opt);
+						}).join(delimiter);
 						return /*#__PURE__*/ import_react.createElement("input", {
-							key: "i-".concat(i),
 							name,
 							type: "hidden",
-							value: _this5.getOptionValue(opt)
+							value
 						});
-					}) : /*#__PURE__*/ import_react.createElement("input", {
-						name,
-						type: "hidden",
-						value: ""
-					});
-					return /*#__PURE__*/ import_react.createElement("div", null, input);
-				}
-				else {
+					} else {
+						var input = selectValue.length > 0 ? selectValue.map(function(opt, i) {
+							return /*#__PURE__*/ import_react.createElement("input", {
+								key: "i-".concat(i),
+								name,
+								type: "hidden",
+								value: _this5.getOptionValue(opt)
+							});
+						}) : /*#__PURE__*/ import_react.createElement("input", {
+							name,
+							type: "hidden",
+							value: ""
+						});
+						return /*#__PURE__*/ import_react.createElement("div", null, input);
+					}
+				} else {
 					var _value = selectValue[0] ? this.getOptionValue(selectValue[0]) : "";
 					return /*#__PURE__*/ import_react.createElement("input", {
 						name,
