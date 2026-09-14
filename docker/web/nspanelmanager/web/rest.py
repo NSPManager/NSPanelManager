@@ -909,6 +909,65 @@ def put_thermostat_entity(request):
         return JsonResponse({"status": "error"}, status=500)
 
 
+########################
+# Media player section #
+########################
+
+
+def entities_media_players(request):
+    try:
+        # if request.method == "PUT":
+        return put_media_player_entity(request)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+
+
+def put_media_player_entity(request):
+    try:
+        required_fields = [  # Fields required for media player entities
+            "room_id",
+            "entities_page_id",
+            "room_view_position",
+            "controller",
+            "friendly_name",
+            "home_assistant_name",
+        ]
+
+        data = json.loads(request.body)
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        if data["controller"] != "home_assistant":
+            return JsonResponse({"status": "error", "message": f"Unsupported controller for media player: {data['controller']}"}, status=400)
+
+        entity_data = {
+            "controller": data["controller"],
+            "home_assistant_name": data["home_assistant_name"],
+        }
+        if "id" in data and data["id"]:
+            new_media_player = Entity.objects.get(id=int(data["id"]))
+        else:
+            new_media_player = Entity()
+            new_media_player.entity_type = Entity.EntityType.MEDIA_PLAYER
+
+        new_media_player.friendly_name = data["friendly_name"]
+        new_media_player.room = Room.objects.get(id=int(data["room_id"]))
+        new_media_player.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        new_media_player.room_view_position = int(data["room_view_position"])
+
+        new_media_player.entity_data = entity_data
+        new_media_player.save()
+        send_mqttmanager_reload_command()
+
+        return JsonResponse({"status": "ok"}, status=200)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
 #################
 # Scene section #
 #################
