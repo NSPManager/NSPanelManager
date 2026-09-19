@@ -59,6 +59,9 @@ inline constexpr NSPanelEntityState_MediaPlayer::Impl_::Impl_(
         media_artist_(
             &::google::protobuf::internal::fixed_address_empty_string,
             ::_pbi::ConstantInitialized()),
+        album_art_url_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
         media_player_id_{0},
         state_{static_cast< ::NSPanelEntityState_MediaPlayer_PlaybackState >(0)},
         volume_{0},
@@ -275,6 +278,7 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_MediaPlayer, _impl_.can_previous_track_),
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_MediaPlayer, _impl_.can_set_volume_),
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_MediaPlayer, _impl_.can_mute_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_MediaPlayer, _impl_.album_art_url_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -296,7 +300,7 @@ static const ::_pbi::MigrationSchema
         {28, -1, -1, sizeof(::NSPanelEntityState_Thermostat_ThermostatOption)},
         {40, -1, -1, sizeof(::NSPanelEntityState_Thermostat)},
         {55, -1, -1, sizeof(::NSPanelEntityState_MediaPlayer)},
-        {78, -1, -1, sizeof(::NSPanelEntityState)},
+        {79, -1, -1, sizeof(::NSPanelEntityState)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelEntityState_Light_default_instance_._instance,
@@ -308,7 +312,7 @@ static const ::_pb::Message* const file_default_instances[] = {
 };
 const char descriptor_table_protodef_protobuf_5fnspanel_5fentity_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\035protobuf_nspanel_entity.proto\"\343\n\n\022NSPa"
+    "\n\035protobuf_nspanel_entity.proto\"\372\n\n\022NSPa"
     "nelEntityState\022*\n\005light\030\001 \001(\0132\031.NSPanelE"
     "ntityState.LightH\000\0224\n\nthermostat\030\002 \001(\0132\036"
     ".NSPanelEntityState.ThermostatH\000\0227\n\014medi"
@@ -331,7 +335,7 @@ const char descriptor_table_protodef_protobuf_5fnspanel_5fentity_2eproto[] ABSL_
     "\030\004 \003(\0132E.NSPanelEntityState.Thermostat.T"
     "hermostatOption.ThermostatOptionValue\0324\n"
     "\025ThermostatOptionValue\022\r\n\005value\030\001 \001(\t\022\014\n"
-    "\004icon\030\002 \001(\t\032\325\003\n\013MediaPlayer\022\027\n\017media_pla"
+    "\004icon\030\002 \001(\t\032\354\003\n\013MediaPlayer\022\027\n\017media_pla"
     "yer_id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022<\n\005state\030\003 \001("
     "\0162-.NSPanelEntityState.MediaPlayer.Playb"
     "ackState\022\023\n\013media_title\030\004 \001(\t\022\024\n\014media_a"
@@ -340,16 +344,17 @@ const char descriptor_table_protodef_protobuf_5fnspanel_5fentity_2eproto[] ABSL_
     "ce_volume\030\t \001(\005\022\020\n\010can_play\030\n \001(\010\022\021\n\tcan"
     "_pause\030\013 \001(\010\022\026\n\016can_next_track\030\014 \001(\010\022\032\n\022"
     "can_previous_track\030\r \001(\010\022\026\n\016can_set_volu"
-    "me\030\016 \001(\010\022\020\n\010can_mute\030\017 \001(\010\"_\n\rPlaybackSt"
-    "ate\022\013\n\007UNKNOWN\020\000\022\007\n\003OFF\020\001\022\006\n\002ON\020\002\022\010\n\004IDL"
-    "E\020\003\022\013\n\007PLAYING\020\004\022\n\n\006PAUSED\020\005\022\r\n\tBUFFERIN"
-    "G\020\006B\010\n\006entityb\006proto3"
+    "me\030\016 \001(\010\022\020\n\010can_mute\030\017 \001(\010\022\025\n\ralbum_art_"
+    "url\030\020 \001(\t\"_\n\rPlaybackState\022\013\n\007UNKNOWN\020\000\022"
+    "\007\n\003OFF\020\001\022\006\n\002ON\020\002\022\010\n\004IDLE\020\003\022\013\n\007PLAYING\020\004\022"
+    "\n\n\006PAUSED\020\005\022\r\n\tBUFFERING\020\006B\010\n\006entityb\006pr"
+    "oto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_5fentity_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_5fentity_2eproto = {
     false,
     false,
-    1421,
+    1444,
     descriptor_table_protodef_protobuf_5fnspanel_5fentity_2eproto,
     "protobuf_nspanel_entity.proto",
     &descriptor_table_protobuf_5fnspanel_5fentity_2eproto_once,
@@ -1736,6 +1741,7 @@ inline PROTOBUF_NDEBUG_INLINE NSPanelEntityState_MediaPlayer::Impl_::Impl_(
       : name_(arena, from.name_),
         media_title_(arena, from.media_title_),
         media_artist_(arena, from.media_artist_),
+        album_art_url_(arena, from.album_art_url_),
         _cached_size_{0} {}
 
 NSPanelEntityState_MediaPlayer::NSPanelEntityState_MediaPlayer(
@@ -1763,6 +1769,7 @@ inline PROTOBUF_NDEBUG_INLINE NSPanelEntityState_MediaPlayer::Impl_::Impl_(
       : name_(arena),
         media_title_(arena),
         media_artist_(arena),
+        album_art_url_(arena),
         _cached_size_{0} {}
 
 inline void NSPanelEntityState_MediaPlayer::SharedCtor(::_pb::Arena* arena) {
@@ -1784,6 +1791,7 @@ inline void NSPanelEntityState_MediaPlayer::SharedDtor() {
   _impl_.name_.Destroy();
   _impl_.media_title_.Destroy();
   _impl_.media_artist_.Destroy();
+  _impl_.album_art_url_.Destroy();
   _impl_.~Impl_();
 }
 
@@ -1808,15 +1816,15 @@ NSPanelEntityState_MediaPlayer::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<4, 15, 0, 74, 2> NSPanelEntityState_MediaPlayer::_table_ = {
+const ::_pbi::TcParseTable<4, 16, 0, 95, 2> NSPanelEntityState_MediaPlayer::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    15, 120,  // max_field_number, fast_idx_mask
+    16, 120,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294934528,  // skipmap
+    4294901760,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    15,  // num_field_entries
+    16,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     &_NSPanelEntityState_MediaPlayer_default_instance_._instance,
@@ -1826,7 +1834,9 @@ const ::_pbi::TcParseTable<4, 15, 0, 74, 2> NSPanelEntityState_MediaPlayer::_tab
     ::_pbi::TcParser::GetTable<::NSPanelEntityState_MediaPlayer>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    {::_pbi::TcParser::MiniParse, {}},
+    // string album_art_url = 16;
+    {::_pbi::TcParser::FastUS2,
+     {386, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_MediaPlayer, _impl_.album_art_url_)}},
     // int32 media_player_id = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelEntityState_MediaPlayer, _impl_.media_player_id_), 63>(),
      {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_MediaPlayer, _impl_.media_player_id_)}},
@@ -1920,14 +1930,18 @@ const ::_pbi::TcParseTable<4, 15, 0, 74, 2> NSPanelEntityState_MediaPlayer::_tab
     // bool can_mute = 15;
     {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_MediaPlayer, _impl_.can_mute_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // string album_art_url = 16;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_MediaPlayer, _impl_.album_art_url_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
   // no aux_entries
   {{
-    "\36\0\4\0\13\14\0\0\0\0\0\0\0\0\0\0"
+    "\36\0\4\0\13\14\0\0\0\0\0\0\0\0\0\0\15\0\0\0\0\0\0\0"
     "NSPanelEntityState.MediaPlayer"
     "name"
     "media_title"
     "media_artist"
+    "album_art_url"
   }},
 };
 
@@ -1941,6 +1955,7 @@ PROTOBUF_NOINLINE void NSPanelEntityState_MediaPlayer::Clear() {
   _impl_.name_.ClearToEmpty();
   _impl_.media_title_.ClearToEmpty();
   _impl_.media_artist_.ClearToEmpty();
+  _impl_.album_art_url_.ClearToEmpty();
   ::memset(&_impl_.media_player_id_, 0, static_cast<::size_t>(
       reinterpret_cast<char*>(&_impl_.can_mute_) -
       reinterpret_cast<char*>(&_impl_.media_player_id_)) + sizeof(_impl_.can_mute_));
@@ -2062,6 +2077,14 @@ PROTOBUF_NOINLINE void NSPanelEntityState_MediaPlayer::Clear() {
         15, this->_internal_can_mute(), target);
   }
 
+  // string album_art_url = 16;
+  if (!this->_internal_album_art_url().empty()) {
+    const std::string& _s = this->_internal_album_art_url();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelEntityState.MediaPlayer.album_art_url");
+    target = stream->WriteStringMaybeAliased(16, _s, target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -2096,6 +2119,12 @@ PROTOBUF_NOINLINE void NSPanelEntityState_MediaPlayer::Clear() {
   if (!this->_internal_media_artist().empty()) {
     total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
                                     this->_internal_media_artist());
+  }
+
+  // string album_art_url = 16;
+  if (!this->_internal_album_art_url().empty()) {
+    total_size += 2 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_album_art_url());
   }
 
   // int32 media_player_id = 1;
@@ -2183,6 +2212,9 @@ void NSPanelEntityState_MediaPlayer::MergeImpl(::google::protobuf::MessageLite& 
   if (!from._internal_media_artist().empty()) {
     _this->_internal_set_media_artist(from._internal_media_artist());
   }
+  if (!from._internal_album_art_url().empty()) {
+    _this->_internal_set_album_art_url(from._internal_album_art_url());
+  }
   if (from._internal_media_player_id() != 0) {
     _this->_impl_.media_player_id_ = from._impl_.media_player_id_;
   }
@@ -2238,6 +2270,7 @@ void NSPanelEntityState_MediaPlayer::InternalSwap(NSPanelEntityState_MediaPlayer
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.media_title_, &other->_impl_.media_title_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.media_artist_, &other->_impl_.media_artist_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.album_art_url_, &other->_impl_.album_art_url_, arena);
   ::google::protobuf::internal::memswap<
       PROTOBUF_FIELD_OFFSET(NSPanelEntityState_MediaPlayer, _impl_.can_mute_)
       + sizeof(NSPanelEntityState_MediaPlayer::_impl_.can_mute_)

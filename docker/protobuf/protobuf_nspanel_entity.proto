@@ -76,6 +76,11 @@ message NSPanelEntityState {
     bool can_previous_track = 13;
     bool can_set_volume = 14;
     bool can_mute = 15;
+
+    // URL to fetch the current album art from, normally served by the manager.
+    // Empty when there is no art. The URL changes whenever the art changes, so
+    // the panel can compare it with the last URL to tell when to fetch again.
+    string album_art_url = 16;
   }
 
   oneof entity {

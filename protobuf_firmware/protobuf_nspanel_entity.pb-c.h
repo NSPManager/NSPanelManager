@@ -132,10 +132,16 @@ struct  NSPanelEntityState__MediaPlayer
   protobuf_c_boolean can_previous_track;
   protobuf_c_boolean can_set_volume;
   protobuf_c_boolean can_mute;
+  /*
+   * URL to fetch the current album art from, normally served by the manager.
+   * Empty when there is no art. The URL changes whenever the art changes, so
+   * the panel can compare it with the last URL to tell when to fetch again.
+   */
+  char *album_art_url;
 };
 #define NSPANEL_ENTITY_STATE__MEDIA_PLAYER__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_entity_state__media_player__descriptor) \
-    , 0, (char *)protobuf_c_empty_string, NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__UNKNOWN, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }
+    , 0, (char *)protobuf_c_empty_string, NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__UNKNOWN, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string }
 
 
 typedef enum {

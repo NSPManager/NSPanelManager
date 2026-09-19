@@ -496,6 +496,7 @@ class NSPanelEntityState_MediaPlayer final : public ::google::protobuf::Message
     kNameFieldNumber = 2,
     kMediaTitleFieldNumber = 4,
     kMediaArtistFieldNumber = 5,
+    kAlbumArtUrlFieldNumber = 16,
     kMediaPlayerIdFieldNumber = 1,
     kStateFieldNumber = 3,
     kVolumeFieldNumber = 6,
@@ -555,6 +556,22 @@ class NSPanelEntityState_MediaPlayer final : public ::google::protobuf::Message
   inline PROTOBUF_ALWAYS_INLINE void _internal_set_media_artist(
       const std::string& value);
   std::string* _internal_mutable_media_artist();
+
+  public:
+  // string album_art_url = 16;
+  void clear_album_art_url() ;
+  const std::string& album_art_url() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_album_art_url(Arg_&& arg, Args_... args);
+  std::string* mutable_album_art_url();
+  PROTOBUF_NODISCARD std::string* release_album_art_url();
+  void set_allocated_album_art_url(std::string* value);
+
+  private:
+  const std::string& _internal_album_art_url() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_album_art_url(
+      const std::string& value);
+  std::string* _internal_mutable_album_art_url();
 
   public:
   // int32 media_player_id = 1;
@@ -682,8 +699,8 @@ class NSPanelEntityState_MediaPlayer final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      4, 15, 0,
-      74, 2>
+      4, 16, 0,
+      95, 2>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -706,6 +723,7 @@ class NSPanelEntityState_MediaPlayer final : public ::google::protobuf::Message
     ::google::protobuf::internal::ArenaStringPtr name_;
     ::google::protobuf::internal::ArenaStringPtr media_title_;
     ::google::protobuf::internal::ArenaStringPtr media_artist_;
+    ::google::protobuf::internal::ArenaStringPtr album_art_url_;
     ::int32_t media_player_id_;
     int state_;
     ::int32_t volume_;
@@ -2962,6 +2980,56 @@ inline bool NSPanelEntityState_MediaPlayer::_internal_can_mute() const {
 inline void NSPanelEntityState_MediaPlayer::_internal_set_can_mute(bool value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.can_mute_ = value;
+}
+
+// string album_art_url = 16;
+inline void NSPanelEntityState_MediaPlayer::clear_album_art_url() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.album_art_url_.ClearToEmpty();
+}
+inline const std::string& NSPanelEntityState_MediaPlayer::album_art_url() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.album_art_url)
+  return _internal_album_art_url();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelEntityState_MediaPlayer::set_album_art_url(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.album_art_url_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.album_art_url)
+}
+inline std::string* NSPanelEntityState_MediaPlayer::mutable_album_art_url() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_album_art_url();
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.MediaPlayer.album_art_url)
+  return _s;
+}
+inline const std::string& NSPanelEntityState_MediaPlayer::_internal_album_art_url() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.album_art_url_.Get();
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_album_art_url(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.album_art_url_.Set(value, GetArena());
+}
+inline std::string* NSPanelEntityState_MediaPlayer::_internal_mutable_album_art_url() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.album_art_url_.Mutable( GetArena());
+}
+inline std::string* NSPanelEntityState_MediaPlayer::release_album_art_url() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelEntityState.MediaPlayer.album_art_url)
+  return _impl_.album_art_url_.Release();
+}
+inline void NSPanelEntityState_MediaPlayer::set_allocated_album_art_url(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.album_art_url_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.album_art_url_.IsDefault()) {
+          _impl_.album_art_url_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelEntityState.MediaPlayer.album_art_url)
 }
 
 // -------------------------------------------------------------------

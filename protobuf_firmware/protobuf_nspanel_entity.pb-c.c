@@ -547,7 +547,7 @@ const ProtobufCEnumDescriptor nspanel_entity_state__media_player__playback_state
   nspanel_entity_state__media_player__playback_state__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_entity_state__media_player__field_descriptors[15] =
+static const ProtobufCFieldDescriptor nspanel_entity_state__media_player__field_descriptors[16] =
 {
   {
     "media_player_id",
@@ -729,8 +729,21 @@ static const ProtobufCFieldDescriptor nspanel_entity_state__media_player__field_
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "album_art_url",
+    16,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__MediaPlayer, album_art_url),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_entity_state__media_player__field_indices_by_name[] = {
+  15,   /* field[15] = album_art_url */
   14,   /* field[14] = can_mute */
   11,   /* field[11] = can_next_track */
   10,   /* field[10] = can_pause */
@@ -750,7 +763,7 @@ static const unsigned nspanel_entity_state__media_player__field_indices_by_name[
 static const ProtobufCIntRange nspanel_entity_state__media_player__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 15 }
+  { 0, 16 }
 };
 const ProtobufCMessageDescriptor nspanel_entity_state__media_player__descriptor =
 {
@@ -760,7 +773,7 @@ const ProtobufCMessageDescriptor nspanel_entity_state__media_player__descriptor 
   "NSPanelEntityState__MediaPlayer",
   "",
   sizeof(NSPanelEntityState__MediaPlayer),
-  15,
+  16,
   nspanel_entity_state__media_player__field_descriptors,
   nspanel_entity_state__media_player__field_indices_by_name,
   1,  nspanel_entity_state__media_player__number_ranges,
