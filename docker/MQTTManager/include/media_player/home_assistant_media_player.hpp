@@ -23,6 +23,13 @@ public:
   void set_source_volume(uint8_t volume);
   void set_muted(bool muted);
 
+protected:
+  /**
+   * Download album art from Home Assistant. The source is the "entity_picture" attribute from Home Assistant,
+   * either a path on Home Assistant (normally its media player image proxy) or an external URL.
+   */
+  bool _download_album_art(const std::string &source, std::string &image_data);
+
 private:
   /**
    * Load Home Assistant specific settings from entity_data in the DB.

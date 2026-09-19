@@ -5,14 +5,18 @@
 #include "media_player/media_player.hpp"
 #include "protobuf_nspanel_entity.pb.h"
 #include <algorithm>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/bind.hpp>
 #include <cmath>
 #include <cstdint>
 #include <home_assistant_manager/home_assistant_manager.hpp>
+#include <list>
+#include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <web_helper/WebHelper.hpp>
 
 HomeAssistantMediaPlayer::HomeAssistantMediaPlayer(uint32_t media_player_id) : MediaPlayerEntity(media_player_id) {
   // Process Home Assistant specific details. General media player data is loaded in the "MediaPlayerEntity" constructor.
@@ -125,6 +129,7 @@ void HomeAssistantMediaPlayer::home_assistant_event_callback(nlohmann::json data
     if (new_state_data.is_null()) {
       // Entity was removed from Home Assistant.
       this->_state = NSPanelEntityState_MediaPlayer_PlaybackState_UNKNOWN;
+      this->_set_album_art_source("");
     } else {
       std::string new_state = new_state_data.contains("state") && new_state_data["state"].is_string() ? new_state_data["state"].get<std::string>() : "";
       if (new_state.compare("playing") == 0) {
@@ -149,6 +154,7 @@ void HomeAssistantMediaPlayer::home_assistant_event_callback(nlohmann::json data
 
       this->_media_title = attributes.contains("media_title") && attributes["media_title"].is_string() ? attributes["media_title"].get<std::string>() : "";
       this->_media_artist = attributes.contains("media_artist") && attributes["media_artist"].is_string() ? attributes["media_artist"].get<std::string>() : "";
+      this->_set_album_art_source(attributes.contains("entity_picture") && attributes["entity_picture"].is_string() ? attributes["entity_picture"].get<std::string>() : "");
 
       // Home Assistant does not report volume while a media player is off, keep the last known values in that case.
       if (attributes.contains("volume_level") && attributes["volume_level"].is_number()) {
@@ -222,6 +228,39 @@ void HomeAssistantMediaPlayer::set_source_volume(uint8_t volume) {
   if (strategy) {
     strategy->set_source_volume(volume);
   }
+}
+
+bool HomeAssistantMediaPlayer::_download_album_art(const std::string &source, std::string &image_data) {
+  std::string url;
+  std::string authorization_header;
+  std::list<const char *> headers;
+
+  if (boost::algorithm::starts_with(source, "http://") || boost::algorithm::starts_with(source, "https://")) {
+    // The integration serves the image from somewhere else. Do not send the Home Assistant token to it.
+    url = source;
+  } else {
+    // A path on Home Assistant, normally /api/media_player_proxy/<entity>?token=...&cache=...
+    url = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::HOME_ASSISTANT_ADDRESS);
+    if (url.empty()) {
+      SPDLOG_ERROR("No Home Assistant address configured. Cannot download album art for media player {}::{}.", this->_id, this->_name);
+      return false;
+    }
+    while (!url.empty() && url.back() == '/') {
+      url.pop_back();
+    }
+    if (MqttManagerConfig::is_home_assistant_addon()) {
+      url.append("/core"); // The Home Assistant API is reached through the supervisor proxy when running as an add-on.
+    }
+    url.append(source);
+
+    // The token in the proxy path is enough on its own, but the supervisor proxy requires an authorization header.
+    authorization_header = fmt::format("Authorization: Bearer {}", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::HOME_ASSISTANT_TOKEN));
+    headers.push_back(authorization_header.c_str());
+  }
+
+  SPDLOG_DEBUG("Downloading album art for media player {}::{}.", this->_id, this->_name);
+  // WebHelper treats an empty header list as an error, so only pass the list when there is something in it.
+  return WebHelper::perform_get_request(&url, &image_data, headers.empty() ? nullptr : &headers);
 }
 
 void HomeAssistantMediaPlayer::set_muted(bool muted) {

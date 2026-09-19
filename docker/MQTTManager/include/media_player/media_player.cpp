@@ -75,6 +75,7 @@ void MediaPlayerEntity::send_state_update_to_nspanel() {
   media_player_state->set_can_previous_track(this->_can_previous_track);
   media_player_state->set_can_set_volume(this->_can_set_volume);
   media_player_state->set_can_mute(this->_can_mute);
+  media_player_state->set_album_art_url(this->_get_album_art_url());
 
   google::protobuf::util::MessageDifferencer differencer;
   if (!differencer.Compare(this->_last_media_player_state, state)) {
@@ -123,6 +124,58 @@ void MediaPlayerEntity::command_callback(NSPanelMQTTManagerCommand &command) {
   if (media_player_command.has_muted()) {
     this->set_muted(media_player_command.muted());
   }
+}
+
+void MediaPlayerEntity::_set_album_art_source(const std::string &source) {
+  std::lock_guard<std::mutex> lock_guard(this->_album_art_source_mutex);
+  if (this->_album_art_source.compare(source) != 0) {
+    SPDLOG_DEBUG("Album art for media player {}::{} changed.", this->_id, this->_name);
+    this->_album_art_source = source;
+  }
+}
+
+std::string MediaPlayerEntity::_get_album_art_url() {
+  std::string source;
+  {
+    std::lock_guard<std::mutex> lock_guard(this->_album_art_source_mutex);
+    source = this->_album_art_source;
+  }
+  if (source.empty()) {
+    return "";
+  }
+
+  // The panel downloads from the Nextion image server via the same address and port it uses for everything else on the manager.
+  // The hash of the source makes the URL change whenever the album art does.
+  std::string manager_address = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS);
+  uint32_t manager_port = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::MANAGER_PORT);
+  return fmt::format("http://{}:{}/nextion-img/media_player/{}/album_art?v={:016x}", manager_address, manager_port, this->_id, std::hash<std::string>{}(source));
+}
+
+std::optional<std::string> MediaPlayerEntity::get_album_art() {
+  std::string source;
+  {
+    std::lock_guard<std::mutex> lock_guard(this->_album_art_source_mutex);
+    source = this->_album_art_source;
+  }
+  if (source.empty()) {
+    return std::nullopt;
+  }
+
+  std::lock_guard<std::mutex> lock_guard(this->_album_art_download_mutex);
+  if (this->_album_art_cache_source.compare(source) == 0) {
+    return this->_album_art_cache;
+  }
+
+  std::string image_data;
+  if (!this->_download_album_art(source, image_data)) {
+    SPDLOG_ERROR("Failed to download album art for media player {}::{}.", this->_id, this->_name);
+    return std::nullopt;
+  }
+
+  SPDLOG_DEBUG("Downloaded {} bytes of album art for media player {}::{}.", image_data.size(), this->_id, this->_name);
+  this->_album_art_cache_source = source;
+  this->_album_art_cache = image_data;
+  return image_data;
 }
 
 MediaPlayerEntity::~MediaPlayerEntity() {

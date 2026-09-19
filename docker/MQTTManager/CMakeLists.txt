@@ -29,6 +29,7 @@ find_package(ixwebsocket REQUIRED)
 find_package(tz REQUIRED)
 find_package(protobuf REQUIRED)
 find_package(SqliteOrm REQUIRED)
+find_package(stb REQUIRED)
 find_package(GTest REQUIRED)
 find_package(Boost REQUIRED COMPONENTS signals2 stacktrace_backtrace)
 
@@ -105,7 +106,7 @@ target_link_libraries(MQTTManager_Thermostat MQTTManager_HomeAssistantManager MQ
 add_library(MQTTManager_MediaPlayer STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/media_player.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/media_player.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_media_player.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_media_player.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_source_volume.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_source_volume.cpp)
 set_target_properties(MQTTManager_MediaPlayer PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/media_player.hpp)
 target_include_directories(MQTTManager_MediaPlayer PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_MediaPlayer MQTTManager_HomeAssistantManager spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager gtest::gtest)
+target_link_libraries(MQTTManager_MediaPlayer MQTTManager_HomeAssistantManager MQTTManager_WebHelper spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager gtest::gtest)
 
 add_library(MQTTManager_Switch STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/switch.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/switch.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/home_assistant_switch.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/home_assistant_switch.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/openhab_switch.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/openhab_switch.hpp)
 set_target_properties(MQTTManager_Switch PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/switch.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/home_assistant_switch.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/openhab_switch.hpp)
@@ -141,9 +142,14 @@ target_include_directories(MQTTManager_Config PUBLIC MQTTManager_WebHelper ${CMA
 target_link_libraries(MQTTManager_Config spdlog::spdlog MQTTManager_WebHelper nlohmann_json::nlohmann_json Boost::boost Protobuf_MQTTManager MQTTManager_DatabaseManager MQTTManager_WebsocketServer gtest::gtest)
 
 
+add_library(MQTTManager_NextionImageServer STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/nextion_image_server/nextion_image_server.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/nextion_image_server/nextion_image_server.hpp)
+target_include_directories(MQTTManager_NextionImageServer PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
+target_link_libraries(MQTTManager_NextionImageServer ixwebsocket::ixwebsocket spdlog::spdlog stb::stb MQTTManager_EntityManager MQTTManager_MediaPlayer gtest::gtest)
+
+
 add_executable(${PROJECT_NAME} src/main.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(${PROJECT_NAME} MQTT_Manager MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_CommandManager gtest::gtest)
+target_link_libraries(${PROJECT_NAME} MQTT_Manager MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager MQTTManager_NextionImageServer MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_CommandManager gtest::gtest)
 
 if (TEST_MODE==1)
     enable_testing()
