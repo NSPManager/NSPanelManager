@@ -916,8 +916,8 @@ def put_thermostat_entity(request):
 
 def entities_media_players(request):
     try:
-        # if request.method == "PUT":
-        return put_media_player_entity(request)
+        if request.method == "PUT":
+            return put_media_player_entity(request)
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
@@ -943,21 +943,51 @@ def put_media_player_entity(request):
         if data["controller"] != "home_assistant":
             return JsonResponse({"status": "error", "message": f"Unsupported controller for media player: {data['controller']}"}, status=400)
 
-        entity_data = {
-            "controller": data["controller"],
-            "home_assistant_name": data["home_assistant_name"],
-        }
-        if "id" in data and data["id"]:
-            new_media_player = Entity.objects.get(id=int(data["id"]))
+        try:
+            room_id = int(data["room_id"])
+            entities_page_id = int(data["entities_page_id"])
+            room_view_position = int(data["room_view_position"])
+            media_player_id = int(data["id"]) if data.get("id") else None
+        except (TypeError, ValueError):
+            return JsonResponse({"status": "error", "message": "room_id, entities_page_id, room_view_position and id must be integers."}, status=400)
+
+        if media_player_id is not None:
+            # Only update existing media players, never another type of entity that happens to have this ID.
+            new_media_player = Entity.objects.filter(id=media_player_id).first()
+            if new_media_player is None:
+                return JsonResponse({"status": "error", "message": f"No entity with id {media_player_id}."}, status=404)
+            if new_media_player.entity_type != Entity.EntityType.MEDIA_PLAYER:
+                return JsonResponse({"status": "error", "message": f"Entity {media_player_id} is a {new_media_player.entity_type}, not a media player."}, status=409)
         else:
             new_media_player = Entity()
             new_media_player.entity_type = Entity.EntityType.MEDIA_PLAYER
 
-        new_media_player.friendly_name = data["friendly_name"]
-        new_media_player.room = Room.objects.get(id=int(data["room_id"]))
-        new_media_player.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
-        new_media_player.room_view_position = int(data["room_view_position"])
+        room = Room.objects.filter(id=room_id).first()
+        if room is None:
+            return JsonResponse({"status": "error", "message": f"No room with id {room_id}."}, status=404)
 
+        # The media player is shown in a slot on one of the room's entities pages.
+        entities_page = RoomEntitiesPage.objects.filter(id=entities_page_id).first()
+        if entities_page is None:
+            return JsonResponse({"status": "error", "message": f"No entities page with id {entities_page_id}."}, status=404)
+        if entities_page.room_id != room.id or entities_page.is_scenes_page:
+            return JsonResponse({"status": "error", "message": f"Entities page {entities_page_id} is not an entities page in room {room_id}."}, status=400)
+        if room_view_position < 0 or room_view_position >= entities_page.page_type:
+            return JsonResponse({"status": "error", "message": f"room_view_position must be between 0 and {entities_page.page_type - 1} for entities page {entities_page_id}."}, status=400)
+
+        # The slot must be free. Updating a media player in place keeps its own slot.
+        slot_taken = Entity.objects.filter(entities_page=entities_page, room_view_position=room_view_position).exclude(id=new_media_player.id).exists() or Scene.objects.filter(entities_page=entities_page, room_view_position=room_view_position).exists()
+        if slot_taken:
+            return JsonResponse({"status": "error", "message": f"Slot {room_view_position} on entities page {entities_page_id} is already in use."}, status=409)
+
+        entity_data = {
+            "controller": data["controller"],
+            "home_assistant_name": data["home_assistant_name"],
+        }
+        new_media_player.friendly_name = data["friendly_name"]
+        new_media_player.room = room
+        new_media_player.entities_page = entities_page
+        new_media_player.room_view_position = room_view_position
         new_media_player.entity_data = entity_data
         new_media_player.save()
         send_mqttmanager_reload_command()
