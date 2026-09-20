@@ -1,6 +1,6 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-BWgDajaM.js";
-import { t as useSettingsStore } from "./SettingsStore-D3WfdsO1.js";
-import { t as useStompStore } from "./StompStore-CvFAM8Xu.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-C6rLzdiH.js";
+import { t as useSettingsStore } from "./SettingsStore-DEE6z-od.js";
+import { t as useStompStore } from "./StompStore-CO5yTj2W.js";
 //#region src/components/NSPanelPage/Logs.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_jsx_runtime = require_jsx_runtime();
@@ -10,14 +10,18 @@ function NSPanelLogs({ nspanel_mac }) {
 	const [logs, setLogs] = (0, import_react.useState)([]);
 	const [hasSubscribed, setHasSubscribed] = (0, import_react.useState)(false);
 	const [hasDownloadedLogs, setHasDownloadedLogs] = (0, import_react.useState)(false);
-	const maxLogs = useSettingsStore.getState().settings?.max_live_log_messages ?? 250;
+	const logIdRef = (0, import_react.useRef)(0);
+	const maxLogs = useSettingsStore((s) => s.settings?.max_live_log_messages ?? 50);
 	const nspanel_backlog_callback = (message) => {
 		useStompStore.getState().unsubscribe(`nspanel/${nspanel_mac}/log_backlog`, nspanel_backlog_callback);
 		if (logs.length === 0) {
 			const data = JSON.parse(message.body);
-			setLogs(data.logs);
+			setLogs(() => {
+				for (const log of data.logs) log.id = logIdRef.current++;
+				const maxLogs = useSettingsStore.getState().settings?.max_live_log_messages ?? 50;
+				return data.logs.length > maxLogs ? data.logs.slice(0, maxLogs) : data.logs;
+			});
 		}
-		if (logs.length > maxLogs) setLogs(logs.slice(0, maxLogs));
 	};
 	(0, import_react.useEffect)(() => {
 		if (settingsStatus === "none") fetchSettingsData();
@@ -29,8 +33,12 @@ function NSPanelLogs({ nspanel_mac }) {
 			useStompStore.getState().subscribe(`nspanel/${nspanel_mac}/log_backlog`, nspanel_backlog_callback);
 			useStompStore.getState().subscribe(`nspanel/${nspanel_mac}/log`, (message) => {
 				const log = JSON.parse(message.body);
-				setLogs((prevLogs) => [log, ...prevLogs]);
-				if (logs.length > maxLogs) setLogs(logs.slice(0, maxLogs));
+				log.id = logIdRef.current++;
+				setLogs((prevLogs) => {
+					const next = [log, ...prevLogs];
+					const maxLogs = useSettingsStore.getState().settings?.max_live_log_messages ?? 50;
+					return next.length > maxLogs ? next.slice(0, maxLogs) : next;
+				});
 			});
 			setHasSubscribed(true);
 		}
@@ -38,8 +46,12 @@ function NSPanelLogs({ nspanel_mac }) {
 		settingsStatus,
 		fetchSettingsData,
 		stompStatus,
-		nspanel_mac
+		nspanel_mac,
+		logs
 	]);
+	(0, import_react.useEffect)(() => {
+		setLogs((prevLogs) => prevLogs.slice(0, maxLogs));
+	}, [maxLogs]);
 	const download_nspanel_logs_callback = (message) => {
 		if (!hasDownloadedLogs) {
 			const data = JSON.parse(message.body);
@@ -132,7 +144,7 @@ function NSPanelLogs({ nspanel_mac }) {
 								children: log.message
 							})
 						]
-					}, `${log.time}-${log.level}-${log.message}`))
+					}, `${log.id}`))
 				})]
 			})
 		})]

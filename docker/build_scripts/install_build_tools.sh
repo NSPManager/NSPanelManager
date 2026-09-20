@@ -33,6 +33,9 @@ if [ "$IS_DEVEL" == "yes" ]; then
     # Hot-load NVM
     source /root/.bash_env
 
+    # Install NODE and Python
+
+
     echo "Installing Node.js via NVM"
     nvm install
 

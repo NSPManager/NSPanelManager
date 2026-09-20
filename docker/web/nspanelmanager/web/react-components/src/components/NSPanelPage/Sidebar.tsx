@@ -55,8 +55,11 @@ const NSPanelStatus = ({ status }: { status: INSPanelStatusData }) => {
         <span className="text-base">
           State: <span className="text-primary">Updating firmware</span>
         </span>
-        <div className="absolute left-0 bottom-0 w-full">
-          <div className="min-h-1 bg-primary mx-2 transition-all ease-linear duration-1000 rounded-full" style={{ width: `${status.update_progress}%` }}></div>
+        <div className="absolute left-0 bottom-0 w-full px-2">
+          <div
+            className="min-h-1 w-full bg-primary transition-all ease-linear duration-1000 rounded-full"
+            style={{ width: `${status.update_progress}%` }}
+          ></div>
         </div>
       </div>
     );
@@ -163,7 +166,7 @@ const NSPanelTemperatureStatus = ({ status }: { status: INSPanelStatusData }) =>
     return (
       <div className="list-row flex items-center justify-start gap-1 text-base py-3 px-2">
         <Icon path={mdiThermometer} className="ms-2 w-4 h-4 inline-block"></Icon>
-        Temp: {status.temperature.toFixed(1)}
+        Temp: {status.temperature ? status.temperature.toFixed(1) : "?"}
         {status.temperature_unit}
       </div>
     );

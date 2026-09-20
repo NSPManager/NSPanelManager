@@ -409,9 +409,9 @@ const AcceptedNSPanelContent = ({ status }: { status: INSPanelStatusData }) => {
                     return (
                       <div className="flex items-center justify-start">
                         <div className="icon-text">
-                          <Icon path={mdiThermometer} className="w-4 h-4 inline-block me-1"></Icon>-
+                          <Icon path={mdiThermometer} className="w-4 h-4 inline-block me-1"></Icon>
                           <span id="temperature-${nspanel_id}" className="text-sm">
-                            {status.temperature.toFixed(1)}
+                            {status.temperature ? status.temperature.toFixed(1) : "?"}
                             {status.temperature_unit}
                           </span>
                         </div>

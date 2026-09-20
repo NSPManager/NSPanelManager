@@ -1,8 +1,8 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-BWgDajaM.js";
-import { n as Notify } from "./NSPanelToastContainer-Abzvd6TK.js";
-import { t as useStompStore } from "./StompStore-CvFAM8Xu.js";
-import { t as useEntityStatesStore } from "./EntityStore-Ng4ecFrP.js";
-import { _ as mdiWifiStrength3, a as mdiMemory, b as require_Icon, c as mdiRestart, d as mdiThermometer, f as mdiUpload, g as mdiWifiStrength2, h as mdiWifiStrength1Alert, i as mdiInformationOutline, l as mdiTableArrowUp, m as mdiWeb, p as mdiWaterPercent, s as mdiMinusCircle, v as mdiWifiStrength4, y as mdiWifiStrengthAlertOutline } from "./mdi-CkcpT4WR.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-C6rLzdiH.js";
+import { n as Notify } from "./NSPanelToastContainer-C1l0BoFj.js";
+import { t as useStompStore } from "./StompStore-CO5yTj2W.js";
+import { t as useEntityStatesStore } from "./EntityStore-DkPSX9oD.js";
+import { _ as mdiWifiStrength3, a as mdiMemory, b as require_Icon, c as mdiRestart, d as mdiThermometer, f as mdiUpload, g as mdiWifiStrength2, h as mdiWifiStrength1Alert, i as mdiInformationOutline, l as mdiTableArrowUp, m as mdiWeb, p as mdiWaterPercent, s as mdiMinusCircle, v as mdiWifiStrength4, y as mdiWifiStrengthAlertOutline } from "./mdi-BFaD4ORU.js";
 //#region src/components/NSPanelPage/Sidebar.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_Icon = require_Icon();
@@ -62,9 +62,9 @@ var NSPanelStatus = ({ status }) => {
 				})]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "absolute left-0 bottom-0 w-full",
+				className: "absolute left-0 bottom-0 w-full px-2",
 				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "min-h-1 bg-primary mx-2 transition-all ease-linear duration-1000 rounded-full",
+					className: "min-h-1 w-full bg-primary transition-all ease-linear duration-1000 rounded-full",
 					style: { width: `${status.update_progress}%` }
 				})
 			})
@@ -224,7 +224,7 @@ var NSPanelTemperatureStatus = ({ status }) => {
 				className: "ms-2 w-4 h-4 inline-block"
 			}),
 			"Temp: ",
-			status.temperature.toFixed(1),
+			status.temperature ? status.temperature.toFixed(1) : "?",
 			status.temperature_unit
 		]
 	});

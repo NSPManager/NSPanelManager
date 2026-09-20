@@ -1,10 +1,10 @@
-import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-BWgDajaM.js";
-import { t as create } from "./react-BrBB-CGW.js";
-import { t as useSettingsStore } from "./SettingsStore-D3WfdsO1.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-BBLHA-jB.js";
-import { n as Notify } from "./NSPanelToastContainer-Abzvd6TK.js";
-import { t as motion } from "./proxy-BZ7OE7_K.js";
-import { t as AnimatePresence } from "./AnimatePresence-BSe8g7GZ.js";
+import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-C6rLzdiH.js";
+import { t as create } from "./react-Dx4svSE2.js";
+import { t as useSettingsStore } from "./SettingsStore-DEE6z-od.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-B71mxhCj.js";
+import { n as Notify } from "./NSPanelToastContainer-C1l0BoFj.js";
+import { t as motion } from "./proxy-RB9Gckuq.js";
+import { t as AnimatePresence } from "./AnimatePresence-WFQ6otv5.js";
 //#region src/stores/EntitiesPagesStore.ts
 function getCookie$1(name) {
 	let cookieValue = "";
@@ -442,6 +442,109 @@ var generateWatchOutput = (names, _names, formValues, isGlobal, defaultValue) =>
 	isGlobal && (_names.watchAll = true);
 	return formValues;
 };
+/**
+* Custom hook to subscribe to field changes and isolate re-rendering at the component level.
+*
+* @remarks
+*
+* [API](https://react-hook-form.com/docs/usewatch) • [Demo](https://codesandbox.io/s/react-hook-form-v7-ts-usewatch-h9i5e)
+*
+* @example
+* ```tsx
+* const { control } = useForm();
+* const values = useWatch({
+*   name: "fieldName",
+*   control,
+* })
+* ```
+*/
+function useWatch(props) {
+	const formControl = useFormControlContext();
+	const { control = formControl, name, defaultValue, disabled, exact, compute } = props || {};
+	const _defaultValue = import_react.useRef(defaultValue);
+	const _compute = import_react.useRef(compute);
+	const _computeFormValues = import_react.useRef(void 0);
+	const _prevControl = import_react.useRef(control);
+	const _prevName = import_react.useRef(name);
+	_compute.current = compute;
+	const getInitialOutput = () => {
+		const defaultValue = control._getWatch(name, _defaultValue.current);
+		return _compute.current ? _compute.current(defaultValue) : defaultValue;
+	};
+	const [value, updateValue] = import_react.useState(getInitialOutput);
+	const getCurrentOutput = import_react.useCallback((values) => {
+		const formValues = generateWatchOutput(name, control._names, values || control._formValues, false, _defaultValue.current);
+		return _compute.current ? _compute.current(formValues) : formValues;
+	}, [
+		control._formValues,
+		control._names,
+		name
+	]);
+	const refreshValue = import_react.useCallback((values) => {
+		if (!disabled) {
+			const formValues = generateWatchOutput(name, control._names, values || control._formValues, false, _defaultValue.current);
+			if (_compute.current) {
+				const computedFormValues = _compute.current(formValues);
+				if (!deepEqual(computedFormValues, _computeFormValues.current)) {
+					updateValue(computedFormValues);
+					_computeFormValues.current = computedFormValues;
+				}
+			} else updateValue(formValues);
+		}
+	}, [
+		control._formValues,
+		control._names,
+		disabled,
+		name
+	]);
+	const { resyncIfNeeded, snapshot } = useResyncOnReconnect(getInitialOutput);
+	const _refreshValue = import_react.useRef(refreshValue);
+	_refreshValue.current = refreshValue;
+	const _getCurrentOutput = import_react.useRef(getCurrentOutput);
+	_getCurrentOutput.current = getCurrentOutput;
+	useIsomorphicLayoutEffect(() => {
+		if (_prevControl.current !== control || !deepEqual(_prevName.current, name)) {
+			_prevControl.current = control;
+			_prevName.current = name;
+			_refreshValue.current();
+		} else resyncIfNeeded(!disabled, () => _getCurrentOutput.current(), (currentValue) => {
+			updateValue(currentValue);
+			_computeFormValues.current = currentValue;
+		});
+		const unsubscribe = control._subscribe({
+			name,
+			formState: { values: true },
+			exact,
+			callback: (formState) => {
+				_refreshValue.current(formState.values);
+			}
+		});
+		return () => {
+			unsubscribe();
+			snapshot(!disabled, () => _getCurrentOutput.current());
+		};
+	}, [
+		control,
+		exact,
+		name,
+		disabled,
+		resyncIfNeeded,
+		snapshot
+	]);
+	import_react.useEffect(() => control._removeUnmounted());
+	const controlChanged = _prevControl.current !== control;
+	const prevName = _prevName.current;
+	return import_react.useMemo(() => {
+		if (disabled) return false;
+		const nameChanged = !controlChanged && !deepEqual(prevName, name);
+		return controlChanged || nameChanged;
+	}, [
+		disabled,
+		controlChanged,
+		name,
+		prevName
+	]) ? getCurrentOutput() : value;
+}
 var generateId = () => typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
 	const r = Math.random() * 16 | 0;
 	return (c === "x" ? r : r & 3 | 8).toString(16);
@@ -7555,6 +7658,7 @@ function getOptionsFromItems(items) {
 		let mdi_icon = "mdi-help";
 		if (item.item_id.startsWith("light")) mdi_icon = "mdi-lightbulb";
 		else if (item.item_id.startsWith("input_boolean")) mdi_icon = "mdi-toggle-switch-variant";
+		else if (item.item_id.startsWith("sensor.")) mdi_icon = "mdi-access-point";
 		else if (item.item_id.startsWith("switch")) mdi_icon = "mdi-toggle-switch-variant";
 		else if (item.item_id.startsWith("button") || item.item_id.startsWith("input_button")) mdi_icon = "mdi-gesture-tap-button";
 		else if (item.item_id.startsWith("climate")) mdi_icon = "mdi-thermostat";
@@ -7563,7 +7667,8 @@ function getOptionsFromItems(items) {
 		options.push({
 			value: item.item_id,
 			label: item.label,
-			icon: mdi_icon
+			icon: mdi_icon,
+			type: item.type
 		});
 	}
 	return options;
@@ -8485,6 +8590,7 @@ var schema$1 = object({
 	friendly_name: string().min(1),
 	step_size: float32(),
 	controller: string(),
+	use_current_temperature: string(),
 	home_assistant_name: string().optional(),
 	openhab_fan_mode_item: string().optional(),
 	openhab_hvac_mode_item: string().optional(),
@@ -8492,6 +8598,7 @@ var schema$1 = object({
 	openhab_swing_mode_item: string().optional(),
 	openhab_swingh_mode_item: string().optional(),
 	openhab_temperature_item: string().optional(),
+	openhab_current_temperature_item: string().optional(),
 	fan_modes: array(object({
 		icon: string(),
 		label: string().min(1),
@@ -8682,7 +8789,7 @@ var IconSelector = ({ value, onChange }) => {
 	});
 };
 var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_page_id, room_view_position, id, onComplete }) => {
-	const { control, handleSubmit, register, reset, getValues, setValue, formState: { isValid } } = useForm({
+	const { control, handleSubmit, register, reset, getValues, setValue, formState: { isValid }, watch } = useForm({
 		resolver: u(schema$1),
 		defaultValues: {
 			id: id ?? null,
@@ -8692,6 +8799,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 			room_id,
 			entities_page_id,
 			room_view_position,
+			use_current_temperature: "True",
 			home_assistant_name: "",
 			openhab_fan_mode_item: "",
 			openhab_hvac_mode_item: "",
@@ -8699,6 +8807,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 			openhab_swing_mode_item: "",
 			openhab_swingh_mode_item: "",
 			openhab_temperature_item: "",
+			openhab_current_temperature_item: "",
 			step_size: .5,
 			fan_modes: [],
 			hvac_modes: [],
@@ -8708,6 +8817,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 		}
 	});
 	const { entities } = useEntitiesPagesStore.getState();
+	watch("use_current_temperature");
 	const { fields: fanModeFields, append: appendFanModeField, remove: removeFanModeField } = useFieldArray({
 		control,
 		name: "fan_modes"
@@ -8965,40 +9075,116 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 							})
 						})]
 					}),
-					controller == "openhab" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					controller == "openhab" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "mt-4 border border-primary rounded-box p-4 pt-2",
-						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-							className: "text-lg mb-4",
-							children: "Temperature"
-						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-							className: "",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-								className: "block mb-2 text-sm font-medium",
-								children: "OpenHAB target temperature item"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StateManagedSelect$1, {
-								options: useAvailableEntitiesStore.getState().openhab_options,
-								classNames,
-								onChange: (newValue) => setValue("openhab_temperature_item", newValue ? newValue.value : ""),
-								value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_temperature_item")),
-								unstyled: true,
-								components: select_components$1,
-								styles: {
-									input: (base) => ({
-										...base,
-										"input:focus": { boxShadow: "none" }
-									}),
-									multiValueLabel: (base) => ({
-										...base,
-										whiteSpace: "normal",
-										overflow: "visible"
-									}),
-									control: (base) => ({
-										...base,
-										transition: "none"
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-lg mb-4",
+								children: "Temperature"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+									className: "block mb-2 text-sm font-medium",
+									children: "OpenHAB target temperature item"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StateManagedSelect$1, {
+									options: useAvailableEntitiesStore.getState().openhab_options,
+									classNames,
+									onChange: (newValue) => setValue("openhab_temperature_item", newValue ? newValue.value : ""),
+									value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_temperature_item")),
+									unstyled: true,
+									components: select_components$1,
+									styles: {
+										input: (base) => ({
+											...base,
+											"input:focus": { boxShadow: "none" }
+										}),
+										multiValueLabel: (base) => ({
+											...base,
+											whiteSpace: "normal",
+											overflow: "visible"
+										}),
+										control: (base) => ({
+											...base,
+											transition: "none"
+										})
+									}
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "mt-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+									className: "block mb-2 text-sm font-medium",
+									children: "OpenHAB current temperature item"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StateManagedSelect$1, {
+									options: useAvailableEntitiesStore.getState().openhab_options,
+									classNames,
+									onChange: (newValue) => setValue("openhab_current_temperature_item", newValue ? newValue.value : ""),
+									value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_current_temperature_item")),
+									unstyled: true,
+									components: select_components$1,
+									styles: {
+										input: (base) => ({
+											...base,
+											"input:focus": { boxShadow: "none" }
+										}),
+										multiValueLabel: (base) => ({
+											...base,
+											whiteSpace: "normal",
+											overflow: "visible"
+										}),
+										control: (base) => ({
+											...base,
+											transition: "none"
+										})
+									}
+								})]
+							})
+						]
+					}) }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "mr-1",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "w-full text-sm font-medium border border-neutral rounded-lg bg-base-300",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center ps-3 w-full",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "radio",
+									name: "use_current_temperature",
+									value: "False",
+									...register("use_current_temperature"),
+									checked: getValues("use_current_temperature") == "False",
+									className: "w-4 h-4 radio radio-accent"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+									htmlFor: "relay1_off",
+									className: "w-full py-3 ms-2 text-sm font-medium",
+									children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "block mb-2 text-sm font-medium",
+										children: "Use current temperature from room or internal thermistor"
 									})
-								}
+								})]
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center ps-3 w-full",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "radio",
+									name: "use_current_temperature",
+									value: "True",
+									...register("use_current_temperature"),
+									checked: getValues("use_current_temperature") == "True",
+									className: "w-4 h-4 radio radio-accent"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+									htmlFor: "relay1_on",
+									className: "w-full py-3 ms-2 text-sm font-medium",
+									children: [controller == "home_assistant" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "block mb-2 text-sm font-medium",
+										children: "Use current temperature from thermostat entity if available"
+									}), controller == "openhab" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "block mb-2 text-sm font-medium",
+										children: "Use current temperature from OpenHAB item"
+									})]
+								})]
 							})]
-						})]
+						})
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "mt-4 border border-primary rounded-box p-4 pt-2",
@@ -9956,4 +10142,4 @@ var MultiStep_AddOrEditEntity = ({ room_id, entities_page_id, room_view_position
 	});
 };
 //#endregion
-export { MultiStep_AddOrEditEntity as n, useEntitiesPagesStore as r, MultiStep_AddEditEntity_exports as t };
+export { useWatch as a, useForm as i, MultiStep_AddOrEditEntity as n, useEntitiesPagesStore as o, useAvailableEntitiesStore as r, MultiStep_AddEditEntity_exports as t };

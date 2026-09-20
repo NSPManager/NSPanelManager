@@ -5,6 +5,9 @@ import { Notify } from "../components/NSPanelToastContainer";
 export interface IRoomData {
   id: number;
   friendly_name: string;
+  display_order: number;
+  room_temp_provider: string;
+  room_temp_sensor: string;
 }
 
 interface INSPanelInfoData {

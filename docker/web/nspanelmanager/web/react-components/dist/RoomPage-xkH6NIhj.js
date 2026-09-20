@@ -1,8 +1,11 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-BWgDajaM.js";
-import EntitiesPagesView from "./EntitiesPagesView-CFKeoTO2.js";
-import { t as useStompStore } from "./StompStore-CvFAM8Xu.js";
-import { t as useEntityStatesStore } from "./EntityStore-Ng4ecFrP.js";
-import { b as require_Icon, u as mdiTextShort } from "./mdi-CkcpT4WR.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-C6rLzdiH.js";
+import { a as useWatch, i as useForm, r as useAvailableEntitiesStore } from "./MultiStep_AddEditEntity-CzmAzsp_.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-B71mxhCj.js";
+import { n as Notify } from "./NSPanelToastContainer-C1l0BoFj.js";
+import EntitiesPagesView from "./EntitiesPagesView--5Zbbhhv.js";
+import { t as useStompStore } from "./StompStore-CO5yTj2W.js";
+import { t as useEntityStatesStore } from "./EntityStore-DkPSX9oD.js";
+import { b as require_Icon, u as mdiTextShort } from "./mdi-BFaD4ORU.js";
 //#region src/components/RoomPage/RoomPage.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_Icon = require_Icon();
@@ -10,12 +13,93 @@ var import_jsx_runtime = require_jsx_runtime();
 function RoomPage({ room_id }) {
 	const { status: stompStatus } = useStompStore();
 	const { status: entityStatus, rooms } = useEntityStatesStore();
+	const home_assistant_options = useAvailableEntitiesStore((s) => s.home_assistant_options);
+	const openhab_options = useAvailableEntitiesStore((s) => s.openhab_options);
+	const all_options = [...home_assistant_options.filter((option) => option.value.startsWith("sensor.")), ...openhab_options];
+	const room = rooms[room_id];
+	const [hasLoadedValues, setHasLoadedValues] = (0, import_react.useState)(false);
+	const { control, register, getValues, setValue, reset, handleSubmit } = useForm({ defaultValues: {
+		id: room?.id,
+		friendly_name: room?.friendly_name,
+		room_temp_provider: room?.room_temp_provider,
+		room_temp_sensor: room?.room_temp_sensor
+	} });
+	useWatch({
+		control,
+		name: "room_temp_sensor"
+	});
+	const current_friendly_name = useWatch({
+		control,
+		name: "friendly_name"
+	});
+	function getCookie(name) {
+		let cookieValue = "";
+		if (document.cookie && document.cookie !== "") {
+			const cookies = document.cookie.split(";");
+			for (let i = 0; i < cookies.length; i++) {
+				const cookie = cookies[i].trim();
+				if (cookie.substring(0, name.length + 1) === name + "=") {
+					cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+					break;
+				}
+			}
+		}
+		return cookieValue;
+	}
+	const onSubmit = (data) => {
+		fetch("/rest/rooms", {
+			credentials: "same-origin",
+			method: "PUT",
+			mode: "same-origin",
+			headers: {
+				"Content-Type": "application/json",
+				"X-CSRFToken": getCookie("csrftoken")
+			},
+			body: JSON.stringify(data)
+		}).then(async (response) => {
+			const data = await response.json();
+			if (!response.ok) {
+				const error = data && data.message || response.status;
+				return Promise.reject(error);
+			}
+			Notify({
+				message: `Saved room setting successfully.`,
+				level: "success",
+				duration: 5e3
+			});
+		}).catch((error) => {
+			Notify({
+				message: `Error saving entity. Error: ${error}`,
+				level: "error",
+				duration: 1e4
+			});
+		});
+	};
 	(0, import_react.useEffect)(() => {
 		if (stompStatus == "none") useStompStore.getState().connect();
 	}, [stompStatus]);
 	(0, import_react.useEffect)(() => {
 		if (entityStatus == "none") useEntityStatesStore.getState().fetchData();
 	}, [entityStatus]);
+	(0, import_react.useEffect)(() => {
+		if (useAvailableEntitiesStore.getState().status == "none") useAvailableEntitiesStore.getState().fetchEntities();
+	}, []);
+	(0, import_react.useEffect)(() => {
+		if (room && !hasLoadedValues) {
+			reset({
+				id: room.id,
+				friendly_name: room.friendly_name,
+				room_temp_provider: room.room_temp_provider,
+				room_temp_sensor: room.room_temp_sensor
+			});
+			setHasLoadedValues(true);
+		}
+	}, [
+		room,
+		reset,
+		hasLoadedValues,
+		setHasLoadedValues
+	]);
 	if (entityStatus != "loaded") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "flex w-full items-center justify-center text-2xl",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "loading loading-spinner loading-sm mr-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
@@ -38,11 +122,23 @@ function RoomPage({ room_id }) {
 			]
 		})
 	});
-	const room = rooms[room_id];
+	const classNames = {
+		control: (state) => `${state.isFocused ? "border" : "border-0"} border-accent p-2.5 text-sm rounded-box bg-base-300 text-base-content rounded-md`,
+		menu: () => "bg-base-300 p-2.5 rounded-box text-base-content",
+		option: (state) => `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`
+	};
+	const CustomOption = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
+		if (isDisabled) return null;
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			...innerProps,
+			className: `p-1 ${isSelected ? "bg-primary/20 rounded-sm" : ""} ${isFocused ? "bg-primary/20 rounded-sm" : ""}`,
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mdi ${data.icon} me-2` }), children]
+		});
+	};
+	const select_components = { Option: CustomOption };
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
 		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-			method: "POST",
-			action: "{{ ingress_path }}{% url 'update_room_form' room_id=room.id %}",
+			onSubmit: handleSubmit(onSubmit),
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex items-center justify-between",
 				id: "nspanel_settings_container",
@@ -51,7 +147,7 @@ function RoomPage({ room_id }) {
 					id: "nspanel_name",
 					children: [
 						"Settings for room '",
-						room.friendly_name,
+						current_friendly_name,
 						"'"
 					]
 				}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
@@ -81,7 +177,7 @@ function RoomPage({ room_id }) {
 									className: "outline-none rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name",
 									type: "text",
 									name: "friendly_name",
-									value: room.friendly_name
+									...register("friendly_name")
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 									className: "inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent",
 									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_Icon.Icon, {
@@ -101,33 +197,38 @@ function RoomPage({ room_id }) {
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "my-2 w-full md:ms-1",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-								htmlFor: "room_temp_sensor",
-								className: "block mb-1 text-sm font-medium",
+								className: "block mb-2 text-sm font-medium",
 								children: "Room temperature sensor"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "flex flex-row-reverse",
-								children: [
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-										type: "button",
-										className: "btn btn-info rounded-l-none",
-										"hx-get": "{{ ingress_path }}{% url 'htmx_partial_select_room_temperature_sensor_provider' room_id=room.id %}",
-										"hx-swap": "none",
-										children: "Select"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StateManagedSelect$1, {
+								options: all_options,
+								classNames,
+								onChange: (newValue) => {
+									if (newValue) {
+										setValue("room_temp_provider", newValue.type, { shouldDirty: true });
+										setValue("room_temp_sensor", newValue.value, { shouldDirty: true });
+									} else {
+										setValue("room_temp_provider", "", { shouldDirty: true });
+										setValue("room_temp_sensor", "", { shouldDirty: true });
+									}
+								},
+								unstyled: true,
+								components: select_components,
+								value: all_options.find((option) => option.value === getValues("room_temp_sensor")),
+								styles: {
+									input: (base) => ({
+										...base,
+										"input:focus": { boxShadow: "none" }
 									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-										className: "outline-none bg-base-300 border-neutral border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name",
-										type: "text",
-										id: "room_temp_sensor",
-										name: "room_temp_sensor",
-										value: "{{ room.room_temp_sensor }}",
-										placeholder: "None selected",
-										readOnly: true
+									multiValueLabel: (base) => ({
+										...base,
+										whiteSpace: "normal",
+										overflow: "visible"
 									}),
-									/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-										className: "inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-field peer-focus/name:border-accent",
-										children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mdi mdi-thermometer" })
+									control: (base) => ({
+										...base,
+										transition: "none"
 									})
-								]
+								}
 							})]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "my-4" }),

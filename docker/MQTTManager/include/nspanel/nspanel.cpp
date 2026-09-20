@@ -16,6 +16,7 @@
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/write.hpp>
+#include <boost/regex.hpp>
 #include <chrono>
 #include <command_manager/command_manager.hpp>
 #include <cstddef>
@@ -44,7 +45,6 @@
 #include <string>
 #include <sys/stat.h>
 #include <system_error>
-#include <vector>
 #include <websocket_server/websocket_server.hpp>
 
 NSPanel::NSPanel(uint32_t id) {
@@ -769,6 +769,10 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
 }
 
 void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
+  if (payload.length() <= 0) [[unlikely]] {
+    return; // Message is empty.
+  }
+
   size_t trim_start_pos = payload.find_first_not_of(" \n\r\t");
   if (trim_start_pos == std::string::npos) {
     return; // Message contains no valid chars, only spaces
@@ -780,13 +784,21 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
   }
 
   if (payload.length() <= 0) [[unlikely]] {
-    return; // Message is empty.
+    return; // Message is empty
   }
 
-  payload = payload.substr(trim_start_pos, trim_end_pos + 1 - 4); // Trim spaces and such but also the first 7 chars that is the color coding for the message
-  if (payload[0] == 0x1B) {                                       // Message formated with color. Remove color
-    payload = payload.substr(7);
-  }
+  // Remove color and other ANSI formating options
+  boost::regex ansi_escape(
+      R"(\x1b(?:\[[0-9;]*[A-Za-z]|\][^\x07]*(?:\x07|\x1b\\)|[@-Z\\-_]))",
+      boost::regex::perl);
+  payload = boost::regex_replace(payload, ansi_escape, "");
+
+  // Trim spaces, tabs and other such chars from beginning and end of message
+  boost::regex start_pattern(R"(^[\t\r\n\f\v ]+)");
+  payload = boost::regex_replace(payload, start_pattern, "");
+
+  boost::regex end_pattern(R"([\t\r\n\f\v ]+$)");
+  payload = boost::regex_replace(payload, end_pattern, "");
 
   std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   std::tm tm = *std::localtime(&now);

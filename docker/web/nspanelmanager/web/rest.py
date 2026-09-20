@@ -199,6 +199,8 @@ def relay_groups(request):
 def rooms(request):
     if request.method == "GET":
         return rooms_get(request)
+    elif request.method == "PUT":
+        return room_put(request)
     elif request.method == "POST":
         return room_create(request)
     else:
@@ -260,6 +262,9 @@ def rooms_get(request):
                 {
                     "id": room.id,
                     "friendly_name": room.friendly_name,
+                    "display_order": room.displayOrder,
+                    "room_temp_provider": room.room_temp_provider,
+                    "room_temp_sensor": room.room_temp_sensor,
                 }
             )
         return JsonResponse({"status": "ok", "rooms": rooms}, status=200)
@@ -535,6 +540,31 @@ def room_entities(request, room_id):
         except Exception as ex:
             logging.exception(ex)
             return JsonResponse({"status": "error"}, status=500)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
+
+
+def room_put(request):
+    if request.method == "PUT":
+        try:
+            data = json.loads(request.body)
+            room_id = data["id"]
+            room = Room.objects.get(id=room_id)
+
+            if "friendly_name" in data:
+                room.friendly_name = data["friendly_name"]
+            if "displayOrder" in data:
+                room.displayOrder = data["display_order"]
+            if "room_temp_provider" in data:
+                room.room_temp_provider = data["room_temp_provider"]
+            if "room_temp_sensor" in data:
+                room.room_temp_sensor = data["room_temp_sensor"]
+            room.save()
+            send_mqttmanager_reload_command()
+            return JsonResponse({"status": "ok", "room_id": room.id}, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error", "message": str(ex)}, status=500)
     else:
         return JsonResponse({"status": "error"}, status=405)
 
@@ -961,6 +991,7 @@ def put_thermostat_entity(request):
             "type",
             "friendly_name",
             "step_size",
+            "use_current_temperature",
             "home_assistant_name",
             "openhab_fan_mode_item",
             "openhab_hvac_mode_item",
@@ -995,6 +1026,7 @@ def put_thermostat_entity(request):
             "preset_modes": data.get("preset_modes", []),
             "swing_modes": data.get("swing_modes", []),
             "swingh_modes": data.get("swingh_modes", []),
+            "use_current_temperature": data.get("use_current_temperature", "True") == "True",
             "home_assistant_name": data.get("home_assistant_name", ""),
             "openhab_fan_mode_item": data.get("openhab_fan_mode_item", ""),
             "openhab_hvac_mode_item": data.get("openhab_hvac_mode_item", ""),
@@ -1002,6 +1034,7 @@ def put_thermostat_entity(request):
             "openhab_swing_mode_item": data.get("openhab_swing_mode_item", ""),
             "openhab_swingh_mode_item": data.get("openhab_swingh_mode_item", ""),
             "openhab_temperature_item": data.get("openhab_temperature_item", ""),
+            "openhab_current_temperature_item": data.get("openhab_current_temperature_item", ""),
             "step_size": float(data.get("step_size", 1)),
         }
         if "id" in data and data["id"]:

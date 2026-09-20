@@ -1,10 +1,10 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-BWgDajaM.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-BBLHA-jB.js";
-import { n as Notify } from "./NSPanelToastContainer-Abzvd6TK.js";
-import { a as isMotionValue, c as JSAnimation, d as frame, l as interpolate, m as useConstant, o as collectMotionValues, p as useIsomorphicLayoutEffect, r as MotionConfigContext, s as motionValue, t as motion, u as cancelFrame } from "./proxy-BZ7OE7_K.js";
-import { t as useStompStore } from "./StompStore-CvFAM8Xu.js";
-import { t as useEntityStatesStore } from "./EntityStore-Ng4ecFrP.js";
-import { _ as mdiWifiStrength3, a as mdiMemory, b as require_Icon, c as mdiRestart, d as mdiThermometer, f as mdiUpload, g as mdiWifiStrength2, h as mdiWifiStrength1Alert, l as mdiTableArrowUp, m as mdiWeb, n as mdiCog, o as mdiMenuDownOutline, s as mdiMinusCircle, v as mdiWifiStrength4, y as mdiWifiStrengthAlertOutline } from "./mdi-CkcpT4WR.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-C6rLzdiH.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-B71mxhCj.js";
+import { n as Notify } from "./NSPanelToastContainer-C1l0BoFj.js";
+import { a as isMotionValue, c as JSAnimation, d as frame, l as interpolate, m as useConstant, o as collectMotionValues, p as useIsomorphicLayoutEffect, r as MotionConfigContext, s as motionValue, t as motion, u as cancelFrame } from "./proxy-RB9Gckuq.js";
+import { t as useStompStore } from "./StompStore-CO5yTj2W.js";
+import { t as useEntityStatesStore } from "./EntityStore-DkPSX9oD.js";
+import { _ as mdiWifiStrength3, a as mdiMemory, b as require_Icon, c as mdiRestart, d as mdiThermometer, f as mdiUpload, g as mdiWifiStrength2, h as mdiWifiStrength1Alert, l as mdiTableArrowUp, m as mdiWeb, n as mdiCog, o as mdiMenuDownOutline, s as mdiMinusCircle, v as mdiWifiStrength4, y as mdiWifiStrengthAlertOutline } from "./mdi-BFaD4ORU.js";
 //#region node_modules/motion-dom/dist/es/utils/transform.mjs
 function transform(...args) {
 	const useImmediate = !Array.isArray(args[0]);
@@ -707,18 +707,14 @@ var AcceptedNSPanelContent = ({ status }) => {
 										className: "flex items-center justify-start",
 										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 											className: "icon-text",
-											children: [
-												/* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_Icon.Icon, {
-													path: mdiThermometer,
-													className: "w-4 h-4 inline-block me-1"
-												}),
-												"-",
-												/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-													id: "temperature-${nspanel_id}",
-													className: "text-sm",
-													children: [status.temperature.toFixed(1), status.temperature_unit]
-												})
-											]
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_Icon.Icon, {
+												path: mdiThermometer,
+												className: "w-4 h-4 inline-block me-1"
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+												id: "temperature-${nspanel_id}",
+												className: "text-sm",
+												children: [status.temperature ? status.temperature.toFixed(1) : "?", status.temperature_unit]
+											})]
 										}), status.model == "custom" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
 											/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 												className: "mx-1",

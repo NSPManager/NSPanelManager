@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useStompStore } from "../../stores/StompStore";
 import { useSettingsStore } from "../../stores/SettingsStore";
 
 interface INSpanelLogData {
+  id: number;
   time: string;
   level: "ERROR" | "WARNING" | "INFO" | "DEBUG" | "TRACE";
   mac_address: string;
@@ -17,17 +18,20 @@ export default function NSPanelLogs({ nspanel_mac }: { nspanel_mac: string }) {
   const [logs, setLogs] = useState<INSpanelLogData[]>([]);
   const [hasSubscribed, setHasSubscribed] = useState(false);
   const [hasDownloadedLogs, setHasDownloadedLogs] = useState(false);
-  const maxLogs = useSettingsStore.getState().settings?.max_live_log_messages ?? 250;
+  const logIdRef = useRef(0);
+  const maxLogs = useSettingsStore((s) => s.settings?.max_live_log_messages ?? 50);
 
   const nspanel_backlog_callback = (message: any) => {
     useStompStore.getState().unsubscribe(`nspanel/${nspanel_mac}/log_backlog`, nspanel_backlog_callback);
     if (logs.length === 0) {
       const data = JSON.parse(message.body);
-      setLogs(data.logs);
-    }
-
-    if (logs.length > maxLogs) {
-      setLogs(logs.slice(0, maxLogs));
+      setLogs(() => {
+        for (const log of data.logs) {
+          log.id = logIdRef.current++;
+        }
+        const maxLogs = useSettingsStore.getState().settings?.max_live_log_messages ?? 50;
+        return data.logs.length > maxLogs ? data.logs.slice(0, maxLogs) : data.logs;
+      });
     }
   };
 
@@ -45,16 +49,24 @@ export default function NSPanelLogs({ nspanel_mac }: { nspanel_mac: string }) {
 
       useStompStore.getState().subscribe(`nspanel/${nspanel_mac}/log`, (message: any) => {
         const log = JSON.parse(message.body) as INSpanelLogData;
-        setLogs((prevLogs) => [log, ...prevLogs]);
-
-        if (logs.length > maxLogs) {
-          setLogs(logs.slice(0, maxLogs));
-        }
+        log.id = logIdRef.current++;
+        setLogs((prevLogs) => {
+          const next = [log, ...prevLogs];
+          // console.log("Will setLogs to number of elements: ", next.length > maxLogs ? maxLogs : next.length);
+          // console.log("Max logs: ", maxLogs, " next length: ", next.length);
+          // console.log("New logs length: ", (next.length > maxLogs ? next.slice(0, maxLogs) : next).length);
+          const maxLogs = useSettingsStore.getState().settings?.max_live_log_messages ?? 50;
+          return next.length > maxLogs ? next.slice(0, maxLogs) : next;
+        });
       });
 
       setHasSubscribed(true);
     }
-  }, [settingsStatus, fetchSettingsData, stompStatus, nspanel_mac]);
+  }, [settingsStatus, fetchSettingsData, stompStatus, nspanel_mac, logs]);
+
+  useEffect(() => {
+    setLogs((prevLogs) => prevLogs.slice(0, maxLogs));
+  }, [maxLogs]);
 
   const download_nspanel_logs_callback = (message: any) => {
     if (!hasDownloadedLogs) {
@@ -101,7 +113,7 @@ export default function NSPanelLogs({ nspanel_mac }: { nspanel_mac: string }) {
           </thead>
           <tbody className="">
             {logs.map((log) => (
-              <tr key={`${log.time}-${log.level}-${log.message}`} className="hover:bg-base-300">
+              <tr key={`${log.id}`} className="hover:bg-base-300">
                 <td className="px-3 py-1">{log.time}</td>
                 {(() => {
                   switch (log.level) {
