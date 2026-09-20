@@ -1322,9 +1322,11 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
     database_manager::NSPanel panel_settings;
     if (panel_exists) {
       panel_settings = database_manager::database.get<database_manager::NSPanel>(this->_id);
+    } else {
+      // Panel does not yet exist, take name from register request
+      panel_settings.friendly_name = register_request_payload.at("friendly_name").get<std::string>();
     }
     panel_settings.mac_address = this->_mac;
-    panel_settings.friendly_name = register_request_payload.at("friendly_name").get<std::string>();
     switch (this->_model) {
     case MQTT_MANAGER_NSPANEL_MODEL::SONOFF:
       panel_settings.model = "sonoff";
