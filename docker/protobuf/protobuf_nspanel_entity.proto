@@ -45,8 +45,47 @@ message NSPanelEntityState {
     repeated ThermostatOption options = 7;
   }
 
+  message MediaPlayer {
+    enum PlaybackState {
+      UNKNOWN = 0;
+      OFF = 1;
+      ON = 2;
+      IDLE = 3;
+      PLAYING = 4;
+      PAUSED = 5;
+      BUFFERING = 6;
+    }
+
+    int32 media_player_id = 1;
+    string name = 2;
+    PlaybackState state = 3;
+    string media_title = 4;
+    string media_artist = 5;
+
+    int32 volume = 6; // Volume in 0-100%
+    bool is_muted = 7;
+
+    // Some setups (for example multi-room audio matrices) have a separate volume
+    // for the source feeding this player. Only valid if has_source_volume is set.
+    bool has_source_volume = 8;
+    int32 source_volume = 9; // Volume in 0-100%
+
+    bool can_play = 10;
+    bool can_pause = 11;
+    bool can_next_track = 12;
+    bool can_previous_track = 13;
+    bool can_set_volume = 14;
+    bool can_mute = 15;
+
+    // URL to fetch the current album art from, normally served by the manager.
+    // Empty when there is no art. The URL changes whenever the art changes, so
+    // the panel can compare it with the last URL to tell when to fetch again.
+    string album_art_url = 16;
+  }
+
   oneof entity {
     Light light = 1;
     Thermostat thermostat = 2;
+    MediaPlayer media_player = 3;
   }
 }
