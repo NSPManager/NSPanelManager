@@ -6,6 +6,7 @@
 #include <memory>
 #include <mutex>
 #include <nlohmann/json.hpp>
+#include <optional>
 #include <string>
 
 class HomeAssistantMediaPlayer : public MediaPlayerEntity {
@@ -33,13 +34,15 @@ protected:
 private:
   /**
    * Load Home Assistant specific settings from entity_data in the DB.
+   * @return The entity_data of the media player, or nothing if it could not be loaded.
    */
-  void _load_home_assistant_config();
+  std::optional<nlohmann::json> _load_home_assistant_config();
 
   /**
-   * Create the source volume strategy selected in the global settings.
+   * Create the source volume strategy selected for this media player.
+   * @param entity_data: The media player's entity_data from the DB.
    */
-  void _create_source_volume_strategy();
+  void _create_source_volume_strategy(const nlohmann::json &entity_data);
 
   /**
    * Get the current source volume strategy.

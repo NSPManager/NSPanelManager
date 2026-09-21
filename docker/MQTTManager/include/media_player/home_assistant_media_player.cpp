@@ -25,9 +25,11 @@ HomeAssistantMediaPlayer::HomeAssistantMediaPlayer(uint32_t media_player_id) : M
     return;
   }
 
-  this->_create_source_volume_strategy();
-  this->_load_home_assistant_config();
-  if (this->_home_assistant_name.empty()) {
+  auto entity_data = this->_load_home_assistant_config();
+  // The source volume strategy is configured per media player, so it is created from the same entity_data.
+  // A failed load leaves the media player unusable, drop any source volume strategy with it.
+  this->_create_source_volume_strategy(entity_data.value_or(nlohmann::json::object()));
+  if (!entity_data.has_value()) {
     return;
   }
 
@@ -49,10 +51,10 @@ void HomeAssistantMediaPlayer::reload_config() {
   MediaPlayerEntity::reload_config();
   HomeAssistantManager::detach_event_observer(this->_home_assistant_name, boost::bind(&HomeAssistantMediaPlayer::home_assistant_event_callback, this, _1));
 
-  // Global settings might have changed, start over with the currently selected source volume strategy.
-  this->_create_source_volume_strategy();
-  this->_load_home_assistant_config();
-  if (this->_home_assistant_name.empty()) {
+  // The entity config might have changed, start over with the currently selected source volume strategy.
+  auto entity_data = this->_load_home_assistant_config();
+  this->_create_source_volume_strategy(entity_data.value_or(nlohmann::json::object()));
+  if (!entity_data.has_value()) {
     return;
   }
 
@@ -60,7 +62,7 @@ void HomeAssistantMediaPlayer::reload_config() {
   HomeAssistantManager::attach_event_observer(this->_home_assistant_name, boost::bind(&HomeAssistantMediaPlayer::home_assistant_event_callback, this, _1));
 }
 
-void HomeAssistantMediaPlayer::_load_home_assistant_config() {
+std::optional<nlohmann::json> HomeAssistantMediaPlayer::_load_home_assistant_config() {
   nlohmann::json entity_data;
   try {
     auto media_player = database_manager::database.get<database_manager::Entity>(this->_id);
@@ -68,7 +70,7 @@ void HomeAssistantMediaPlayer::_load_home_assistant_config() {
   } catch (const std::exception &e) {
     SPDLOG_ERROR("Failed to load media player {}: {}", this->_id, e.what());
     this->_home_assistant_name.clear();
-    return;
+    return std::nullopt;
   }
 
   if (entity_data.contains("home_assistant_name") && entity_data["home_assistant_name"].is_string()) {
@@ -76,11 +78,14 @@ void HomeAssistantMediaPlayer::_load_home_assistant_config() {
   } else {
     SPDLOG_ERROR("No home assistant name defined for media player {}::{}", this->_id, this->_name);
     this->_home_assistant_name.clear();
+    return std::nullopt;
   }
+
+  return entity_data;
 }
 
-void HomeAssistantMediaPlayer::_create_source_volume_strategy() {
-  auto strategy = std::shared_ptr<HomeAssistantSourceVolumeStrategy>(HomeAssistantSourceVolumeStrategy::create([this]() {
+void HomeAssistantMediaPlayer::_create_source_volume_strategy(const nlohmann::json &entity_data) {
+  auto strategy = std::shared_ptr<HomeAssistantSourceVolumeStrategy>(HomeAssistantSourceVolumeStrategy::create(this->_id, entity_data, [this]() {
     this->_update_source_volume_and_send_state();
   }));
 

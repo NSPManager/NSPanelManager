@@ -12,7 +12,7 @@
 /**
  * Some setups (for example multi-room audio matrices) have a separate volume for the source
  * feeding a media player. How that source and its volume are exposed in Home Assistant differs
- * between setups, a strategy selected in the global settings decides how to handle it.
+ * between integrations, a strategy selected per media player decides how to handle it.
  */
 class HomeAssistantSourceVolumeStrategy {
 public:
@@ -35,10 +35,12 @@ public:
   virtual void set_source_volume(uint8_t volume) = 0;
 
   /**
-   * Create the strategy selected in the global settings.
+   * Create the strategy selected for the media player.
+   * @param media_player_id: ID of the media player, used for logging.
+   * @param entity_data: The media player's entity_data from the DB.
    * @param on_change: Called when the source volume changes without the media player itself changing.
    */
-  static std::unique_ptr<HomeAssistantSourceVolumeStrategy> create(std::function<void()> on_change);
+  static std::unique_ptr<HomeAssistantSourceVolumeStrategy> create(uint32_t media_player_id, const nlohmann::json &entity_data, std::function<void()> on_change);
 
 protected:
   /**

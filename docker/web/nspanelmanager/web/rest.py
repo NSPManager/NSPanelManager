@@ -914,6 +914,11 @@ def put_thermostat_entity(request):
 ########################
 
 
+# How the volume of the source feeding a media player is found in Home Assistant.
+# See HomeAssistantSourceVolumeStrategy in the MQTTManager for what each one expects.
+MEDIA_PLAYER_SOURCE_VOLUME_STRATEGIES = ["none", "player_attributes", "source_entity"]
+
+
 def entities_media_players(request):
     try:
         if request.method == "PUT":
@@ -942,6 +947,24 @@ def put_media_player_entity(request):
 
         if data["controller"] != "home_assistant":
             return JsonResponse({"status": "error", "message": f"Unsupported controller for media player: {data['controller']}"}, status=400)
+
+        # Source volume is optional, a media player without it only has its own volume.
+        source_volume_strategy = data.get("source_volume_strategy", "none")
+        source_entity_attribute = data.get("source_entity_attribute", "")
+        source_volume_attribute = data.get("source_volume_attribute", "")
+        if not all(isinstance(value, str) for value in [source_volume_strategy, source_entity_attribute, source_volume_attribute]):
+            return JsonResponse({"status": "error", "message": "source_volume_strategy, source_entity_attribute and source_volume_attribute must be strings."}, status=400)
+        source_entity_attribute = source_entity_attribute.strip()
+        source_volume_attribute = source_volume_attribute.strip()
+
+        # Each strategy needs different attributes on the media player in Home Assistant. Reject a combination
+        # here rather than leaving the manager to log an error and silently fall back to no source volume.
+        if source_volume_strategy not in MEDIA_PLAYER_SOURCE_VOLUME_STRATEGIES:
+            return JsonResponse({"status": "error", "message": f"Unknown source volume strategy: {source_volume_strategy}. Expected one of {', '.join(MEDIA_PLAYER_SOURCE_VOLUME_STRATEGIES)}."}, status=400)
+        if source_volume_strategy != "none" and not source_entity_attribute:
+            return JsonResponse({"status": "error", "message": f"Source volume strategy '{source_volume_strategy}' requires source_entity_attribute."}, status=400)
+        if source_volume_strategy == "player_attributes" and not source_volume_attribute:
+            return JsonResponse({"status": "error", "message": "Source volume strategy 'player_attributes' requires source_volume_attribute."}, status=400)
 
         try:
             room_id = int(data["room_id"])
@@ -983,6 +1006,9 @@ def put_media_player_entity(request):
         entity_data = {
             "controller": data["controller"],
             "home_assistant_name": data["home_assistant_name"],
+            "source_volume_strategy": source_volume_strategy,
+            "source_entity_attribute": source_entity_attribute,
+            "source_volume_attribute": source_volume_attribute,
         }
         new_media_player.friendly_name = data["friendly_name"]
         new_media_player.room = room

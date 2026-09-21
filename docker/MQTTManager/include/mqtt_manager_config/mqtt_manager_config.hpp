@@ -73,9 +73,6 @@ enum MQTT_MANAGER_SETTING {
   OPTIMISTIC_MODE,
   LIGHT_TURN_ON_BRIGHTNESS,
   DEFAULT_NSPANEL_TYPE,
-  MEDIA_PLAYER_SOURCE_VOLUME_STRATEGY,
-  MEDIA_PLAYER_SOURCE_ENTITY_ATTRIBUTE,
-  MEDIA_PLAYER_SOURCE_VOLUME_ATTRIBUTE,
   LAST, // Keep last as to be able to reference the last element in the list.
 };
 
@@ -232,9 +229,6 @@ private:
       {MQTT_MANAGER_SETTING::OPTIMISTIC_MODE, {"optimistic_mode", "True"}},
       {MQTT_MANAGER_SETTING::LIGHT_TURN_ON_BRIGHTNESS, {"light_turn_on_brightness", "50"}},
       {MQTT_MANAGER_SETTING::DEFAULT_NSPANEL_TYPE, {"default_nspanel_type", "eu"}},
-      {MQTT_MANAGER_SETTING::MEDIA_PLAYER_SOURCE_VOLUME_STRATEGY, {"media_player_source_volume_strategy", "none"}},
-      {MQTT_MANAGER_SETTING::MEDIA_PLAYER_SOURCE_ENTITY_ATTRIBUTE, {"media_player_source_entity_attribute", ""}},
-      {MQTT_MANAGER_SETTING::MEDIA_PLAYER_SOURCE_VOLUME_ATTRIBUTE, {"media_player_source_volume_attribute", ""}},
 #if defined(TEST_MODE) && TEST_MODE == 1
       {MQTT_MANAGER_SETTING::LAST, {"last", "last_value"}},
 #endif

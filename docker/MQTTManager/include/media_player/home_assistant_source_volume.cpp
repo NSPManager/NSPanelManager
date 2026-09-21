@@ -1,5 +1,4 @@
 #include "media_player/home_assistant_source_volume.hpp"
-#include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include <algorithm>
 #include <boost/bind.hpp>
 #include <cmath>
@@ -9,25 +8,37 @@
 #include <spdlog/spdlog.h>
 #include <string>
 
-std::unique_ptr<HomeAssistantSourceVolumeStrategy> HomeAssistantSourceVolumeStrategy::create(std::function<void()> on_change) {
-  std::string strategy = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MEDIA_PLAYER_SOURCE_VOLUME_STRATEGY);
-  std::string source_entity_attribute = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MEDIA_PLAYER_SOURCE_ENTITY_ATTRIBUTE);
-  std::string source_volume_attribute = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MEDIA_PLAYER_SOURCE_VOLUME_ATTRIBUTE);
+/**
+ * Read a string value from entity_data, or an empty string if it is missing or not a string.
+ */
+static std::string _string_from_entity_data(const nlohmann::json &entity_data, const std::string &key) {
+  if (entity_data.contains(key) && entity_data[key].is_string()) {
+    return entity_data[key];
+  }
+  return "";
+}
 
+std::unique_ptr<HomeAssistantSourceVolumeStrategy> HomeAssistantSourceVolumeStrategy::create(uint32_t media_player_id, const nlohmann::json &entity_data, std::function<void()> on_change) {
+  std::string strategy = _string_from_entity_data(entity_data, "source_volume_strategy");
+  std::string source_entity_attribute = _string_from_entity_data(entity_data, "source_entity_attribute");
+  std::string source_volume_attribute = _string_from_entity_data(entity_data, "source_volume_attribute");
+
+  // The web interface rejects invalid combinations, so anything below is either a media player saved
+  // before source volume existed or a hand edited entity_data.
   if (strategy.compare("player_attributes") == 0) {
     if (source_entity_attribute.empty() || source_volume_attribute.empty()) {
-      SPDLOG_ERROR("Media player source volume strategy 'player_attributes' requires both a source entity attribute and a source volume attribute. Source volume will not be available.");
+      SPDLOG_ERROR("Media player {}: source volume strategy 'player_attributes' requires both a source entity attribute and a source volume attribute. Source volume will not be available.", media_player_id);
     } else {
       return std::make_unique<PlayerAttributesSourceVolumeStrategy>(source_entity_attribute, source_volume_attribute);
     }
   } else if (strategy.compare("source_entity") == 0) {
     if (source_entity_attribute.empty()) {
-      SPDLOG_ERROR("Media player source volume strategy 'source_entity' requires a source entity attribute. Source volume will not be available.");
+      SPDLOG_ERROR("Media player {}: source volume strategy 'source_entity' requires a source entity attribute. Source volume will not be available.", media_player_id);
     } else {
       return std::make_unique<SourceEntitySourceVolumeStrategy>(source_entity_attribute, on_change);
     }
-  } else if (strategy.compare("none") != 0) {
-    SPDLOG_ERROR("Unknown media player source volume strategy '{}'. Source volume will not be available.", strategy);
+  } else if (!strategy.empty() && strategy.compare("none") != 0) {
+    SPDLOG_ERROR("Media player {}: unknown source volume strategy '{}'. Source volume will not be available.", media_player_id, strategy);
   }
   return std::make_unique<NoSourceVolumeStrategy>();
 }
