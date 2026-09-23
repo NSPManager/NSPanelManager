@@ -4,8 +4,11 @@
 #include <cstdint>
 #include <ixwebsocket/IXHttpServer.h>
 #include <map>
+#include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
+#include <tuple>
 
 /**
  * HTTP server that serves images to the NSPanels, converted into a format the panel can draw.
@@ -37,10 +40,32 @@ private:
     std::string data;
   };
 
+  struct ConvertedImageKey {
+    uint32_t media_player_id;
+    uint16_t width;
+    uint16_t height;
+    ImageFormat format;
+
+    bool operator<(const ConvertedImageKey &other) const {
+      return std::tie(media_player_id, width, height, format) < std::tie(other.media_player_id, other.width, other.height, other.format);
+    }
+  };
+
+  struct CachedConvertedImage {
+    // The album art the image was converted from, the entry is outdated once the media player returns different album art.
+    std::shared_ptr<const std::string> source;
+    std::shared_ptr<const ConvertedImage> image;
+  };
+
   /**
-   * Handle an HTTP request to the server.
+   * Handle an HTTP request to the server, responding with an error instead of letting an exception escape.
    */
   static ix::HttpResponsePtr _handle_request(ix::HttpRequestPtr request, std::shared_ptr<ix::ConnectionState> connection_state);
+
+  /**
+   * Route an HTTP request to the handler for its path.
+   */
+  static ix::HttpResponsePtr _route_request(ix::HttpRequestPtr request, std::shared_ptr<ix::ConnectionState> connection_state);
 
   /**
    * Handle a request for media player album art.
@@ -65,8 +90,14 @@ private:
 
   static inline ix::HttpServer *_server;
 
-  // Largest image size that can be requested. The NSPanel display is 480x320 in either orientation.
-  static constexpr uint16_t max_image_dimension = 480;
+  // Converted images, so that panels requesting the same album art do not each decode and scale it again.
+  static inline std::mutex _converted_images_mutex;
+  static inline std::map<ConvertedImageKey, CachedConvertedImage> _converted_images;
+  static constexpr size_t max_converted_images = 32;
+
+  // Largest image size that can be requested. The NSPanel display is 480x320, but format=png can also serve
+  // larger displays such as a phone showing the web interface.
+  static constexpr uint16_t max_image_dimension = 1024;
   static constexpr uint16_t default_image_dimension = 100;
 };
 

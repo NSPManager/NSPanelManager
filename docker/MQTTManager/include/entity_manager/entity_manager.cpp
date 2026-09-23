@@ -340,9 +340,11 @@ void EntityManager::load_media_players() {
         if (entity_data.contains("controller")) {
           std::string controller = entity_data["controller"];
           if (controller.compare("home_assistant") == 0) {
-            std::shared_ptr<MediaPlayerEntity> media_player_entity = std::shared_ptr<MediaPlayerEntity>(new HomeAssistantMediaPlayer(media_player_settings.id));
+            std::shared_ptr<MediaPlayerEntity> media_player_entity = std::make_shared<HomeAssistantMediaPlayer>(media_player_settings.id);
             SPDLOG_INFO("Media player {}::{} was found in database but not in config. Creating media player.", media_player_entity->get_id(), media_player_entity->get_name());
             EntityManager::_entities.push_back(media_player_entity);
+          } else if (controller.compare("openhab") == 0) {
+            SPDLOG_ERROR("Media player {}::{} is controlled by OpenHAB, which is not implemented for media players. Will ignore entity.", media_player_settings.id, media_player_settings.friendly_name);
           } else {
             SPDLOG_ERROR("Unknown media player type '{}'. Will ignore entity.", controller);
           }

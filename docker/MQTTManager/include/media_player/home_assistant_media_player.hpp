@@ -39,7 +39,7 @@ private:
   std::optional<nlohmann::json> _load_home_assistant_config();
 
   /**
-   * Create the source volume strategy selected for this media player.
+   * Create the source volume strategy selected for this media player, unless its settings are unchanged.
    * @param entity_data: The media player's entity_data from the DB.
    */
   void _create_source_volume_strategy(const nlohmann::json &entity_data);
@@ -61,8 +61,11 @@ private:
 
   std::string _home_assistant_name;
 
+  // Guards the source volume strategy, the settings it was created from and the last player attributes it was given.
   std::mutex _source_volume_strategy_mutex;
   std::shared_ptr<HomeAssistantSourceVolumeStrategy> _source_volume_strategy;
+  nlohmann::json _source_volume_settings;
+  nlohmann::json _last_player_attributes = nlohmann::json::object();
 
   // Media player feature flags from Home Assistant (MediaPlayerEntityFeature).
   static constexpr uint32_t feature_pause = 1;

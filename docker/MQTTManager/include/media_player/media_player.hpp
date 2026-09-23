@@ -4,6 +4,7 @@
 #include "protobuf_nspanel.pb.h"
 #include <cstdint>
 #include <entity/entity.hpp>
+#include <memory>
 #include <mutex>
 #include <optional>
 #include <protobuf_nspanel_entity.pb.h>
@@ -78,10 +79,11 @@ public:
 
   /**
    * Get the current album art as the original image data (for example a JPEG) from the controller.
-   * The image is downloaded on first request and cached until the album art changes.
-   * @return The image data or std::nullopt if there is no album art or it could not be downloaded.
+   * The image is downloaded on first request and cached until the album art changes. The same pointer is
+   * returned for as long as the album art stays the same, so it can be used to tell when the art has changed.
+   * @return The image data or nullptr if there is no album art or it could not be downloaded.
    */
-  std::optional<std::string> get_album_art();
+  std::shared_ptr<const std::string> get_album_art();
 
   uint16_t get_id();
   MQTT_MANAGER_ENTITY_TYPE get_type();
@@ -150,7 +152,7 @@ private:
   // at the same time share one download instead of each fetching it.
   std::mutex _album_art_download_mutex;
   std::string _album_art_cache_source;
-  std::string _album_art_cache;
+  std::shared_ptr<const std::string> _album_art_cache;
 };
 
 #endif // !MQTT_MANAGER_MEDIA_PLAYER_HPP

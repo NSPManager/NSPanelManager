@@ -40,6 +40,18 @@ void NextionImageServer::start() {
 }
 
 ix::HttpResponsePtr NextionImageServer::_handle_request(ix::HttpRequestPtr request, std::shared_ptr<ix::ConnectionState> connection_state) {
+  // Requests come from anything on the network, never let a bad one take down the manager.
+  try {
+    return NextionImageServer::_route_request(request, connection_state);
+  } catch (const std::exception &e) {
+    SPDLOG_ERROR("Nextion image server failed to handle {} {}: {}", request->method, request->uri, e.what());
+  } catch (...) {
+    SPDLOG_ERROR("Nextion image server failed to handle {} {}: unknown exception", request->method, request->uri);
+  }
+  return NextionImageServer::_text_response(500, "Internal Server Error", "Internal server error.");
+}
+
+ix::HttpResponsePtr NextionImageServer::_route_request(ix::HttpRequestPtr request, std::shared_ptr<ix::ConnectionState> connection_state) {
   SPDLOG_DEBUG("Nextion image server request from {}: {} {}", connection_state->getRemoteIp(), request->method, request->uri);
   if (request->method.compare("GET") != 0) {
     return NextionImageServer::_text_response(405, "Method Not Allowed", "Only GET is supported.");
@@ -102,15 +114,32 @@ ix::HttpResponsePtr NextionImageServer::_handle_album_art_request(uint32_t media
     return NextionImageServer::_text_response(404, "Not Found", "Unknown media player.");
   }
 
-  std::optional<std::string> album_art = (*media_player)->get_album_art();
+  std::shared_ptr<const std::string> album_art = (*media_player)->get_album_art();
   if (!album_art) {
     // Either the media player has no album art right now or it could not be downloaded, the log tells which.
     return NextionImageServer::_text_response(404, "Not Found", "No album art available.");
   }
 
-  std::optional<ConvertedImage> image = NextionImageServer::_convert_image(*album_art, size[0], size[1], format);
-  if (!image) {
-    return NextionImageServer::_text_response(502, "Bad Gateway", "Failed to convert album art.");
+  std::shared_ptr<const ConvertedImage> image;
+  {
+    // Held while converting so that panels requesting the same image at the same time share one conversion.
+    std::lock_guard<std::mutex> lock_guard(NextionImageServer::_converted_images_mutex);
+    ConvertedImageKey key = {.media_player_id = media_player_id, .width = size[0], .height = size[1], .format = format};
+    auto cached = NextionImageServer::_converted_images.find(key);
+    if (cached != NextionImageServer::_converted_images.end() && cached->second.source == album_art) {
+      image = cached->second.image;
+    } else {
+      std::optional<ConvertedImage> converted = NextionImageServer::_convert_image(*album_art, size[0], size[1], format);
+      if (!converted) {
+        return NextionImageServer::_text_response(502, "Bad Gateway", "Failed to convert album art.");
+      }
+      image = std::make_shared<const ConvertedImage>(std::move(*converted));
+      // Entries for album art that has since changed are only replaced when the same size is requested again, start over rather than grow without bound.
+      if (cached == NextionImageServer::_converted_images.end() && NextionImageServer::_converted_images.size() >= NextionImageServer::max_converted_images) {
+        NextionImageServer::_converted_images.clear();
+      }
+      NextionImageServer::_converted_images[key] = {.source = album_art, .image = image};
+    }
   }
 
   ix::WebSocketHttpHeaders headers;

@@ -49,17 +49,30 @@ HomeAssistantMediaPlayer::~HomeAssistantMediaPlayer() {
 
 void HomeAssistantMediaPlayer::reload_config() {
   MediaPlayerEntity::reload_config();
-  HomeAssistantManager::detach_event_observer(this->_home_assistant_name, boost::bind(&HomeAssistantMediaPlayer::home_assistant_event_callback, this, _1));
 
-  // The entity config might have changed, start over with the currently selected source volume strategy.
+  // Only reattach to Home Assistant and rebuild the source volume strategy when their settings have changed,
+  // so that state updates are not missed while the config is reloaded.
+  std::string previous_home_assistant_name = this->_home_assistant_name;
   auto entity_data = this->_load_home_assistant_config();
-  this->_create_source_volume_strategy(entity_data.value_or(nlohmann::json::object()));
-  if (!entity_data.has_value()) {
-    return;
+  bool home_assistant_name_changed = this->_home_assistant_name.compare(previous_home_assistant_name) != 0;
+
+  if (home_assistant_name_changed) {
+    if (!previous_home_assistant_name.empty()) {
+      HomeAssistantManager::detach_event_observer(previous_home_assistant_name, boost::bind(&HomeAssistantMediaPlayer::home_assistant_event_callback, this, _1));
+    }
+    // The saved attributes belong to the previous Home Assistant entity.
+    std::lock_guard<std::mutex> lock_guard(this->_source_volume_strategy_mutex);
+    this->_last_player_attributes = nlohmann::json::object();
   }
 
-  // Reattach event observer in case entity has changed. This will also request the current state from Home Assistant.
-  HomeAssistantManager::attach_event_observer(this->_home_assistant_name, boost::bind(&HomeAssistantMediaPlayer::home_assistant_event_callback, this, _1));
+  this->_create_source_volume_strategy(entity_data.value_or(nlohmann::json::object()));
+  // The name or source volume might have changed, unchanged states are not sent again.
+  this->_update_source_volume_and_send_state();
+
+  if (home_assistant_name_changed && !this->_home_assistant_name.empty()) {
+    // This will also request the current state from Home Assistant.
+    HomeAssistantManager::attach_event_observer(this->_home_assistant_name, boost::bind(&HomeAssistantMediaPlayer::home_assistant_event_callback, this, _1));
+  }
 }
 
 std::optional<nlohmann::json> HomeAssistantMediaPlayer::_load_home_assistant_config() {
@@ -85,12 +98,33 @@ std::optional<nlohmann::json> HomeAssistantMediaPlayer::_load_home_assistant_con
 }
 
 void HomeAssistantMediaPlayer::_create_source_volume_strategy(const nlohmann::json &entity_data) {
+  nlohmann::json source_volume_settings = nlohmann::json::object();
+  for (const char *key : {"source_volume_strategy", "source_entity_attribute", "source_volume_attribute"}) {
+    if (entity_data.contains(key)) {
+      source_volume_settings[key] = entity_data[key];
+    }
+  }
+
+  {
+    std::lock_guard<std::mutex> lock_guard(this->_source_volume_strategy_mutex);
+    if (this->_source_volume_strategy && this->_source_volume_settings == source_volume_settings) {
+      return;
+    }
+  }
+
   auto strategy = std::shared_ptr<HomeAssistantSourceVolumeStrategy>(HomeAssistantSourceVolumeStrategy::create(this->_id, entity_data, [this]() {
     this->_update_source_volume_and_send_state();
   }));
 
-  std::lock_guard<std::mutex> lock_guard(this->_source_volume_strategy_mutex);
-  this->_source_volume_strategy = strategy;
+  nlohmann::json player_attributes;
+  {
+    std::lock_guard<std::mutex> lock_guard(this->_source_volume_strategy_mutex);
+    this->_source_volume_strategy = strategy;
+    this->_source_volume_settings = source_volume_settings;
+    player_attributes = this->_last_player_attributes;
+  }
+  // Start the new strategy from the latest known player state instead of waiting for the next update from Home Assistant.
+  strategy->update_from_player_attributes(player_attributes);
 }
 
 std::shared_ptr<HomeAssistantSourceVolumeStrategy> HomeAssistantMediaPlayer::_get_source_volume_strategy() {
@@ -181,7 +215,12 @@ void HomeAssistantMediaPlayer::home_assistant_event_callback(nlohmann::json data
       this->_can_mute = supported_features & HomeAssistantMediaPlayer::feature_volume_mute;
     }
 
-    auto strategy = this->_get_source_volume_strategy();
+    std::shared_ptr<HomeAssistantSourceVolumeStrategy> strategy;
+    {
+      std::lock_guard<std::mutex> lock_guard(this->_source_volume_strategy_mutex);
+      this->_last_player_attributes = attributes;
+      strategy = this->_source_volume_strategy;
+    }
     if (strategy) {
       strategy->update_from_player_attributes(attributes);
     }

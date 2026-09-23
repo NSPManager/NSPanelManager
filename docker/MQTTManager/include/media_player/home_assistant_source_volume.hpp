@@ -45,6 +45,7 @@ public:
 protected:
   /**
    * Convert a Home Assistant volume level (0.0-1.0) to 0-100%.
+   * Home Assistant always reports volume_level as 0.0-1.0, whatever the device uses. 0-100 is only used towards the NSPanel.
    */
   static std::optional<uint8_t> _volume_from_json(const nlohmann::json &volume_level);
 

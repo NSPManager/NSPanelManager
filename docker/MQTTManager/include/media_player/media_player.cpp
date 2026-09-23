@@ -47,6 +47,9 @@ void MediaPlayerEntity::reload_config() {
     std::string controller = entity_data["controller"];
     if (controller.compare("home_assistant") == 0) {
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
+    } else if (controller.compare("openhab") == 0) {
+      SPDLOG_ERROR("OpenHAB media players are not implemented, media player {}::{} will not be available.", this->_id, this->_name);
+      this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB;
     } else {
       SPDLOG_ERROR("Got unknown controller ({}) for media player {}::{}. Will default to HOME_ASSISTANT.", controller, this->_id, this->_name);
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
@@ -109,7 +112,11 @@ void MediaPlayerEntity::command_callback(NSPanelMQTTManagerCommand &command) {
   case NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_PREVIOUS_TRACK:
     this->previous_track();
     break;
+  case NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_NONE:
+    // The command only changes volume or mute.
+    break;
   default:
+    SPDLOG_WARN("Received unknown playback action {} for media player {}::{}.", static_cast<int>(media_player_command.playback_action()), this->_id, this->_name);
     break;
   }
 
@@ -147,18 +154,18 @@ std::string MediaPlayerEntity::_get_album_art_url() {
   // The panel downloads from the Nextion image server via the same address and port it uses for everything else on the manager.
   // The hash of the source makes the URL change whenever the album art does.
   std::string manager_address = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS);
-  uint32_t manager_port = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::MANAGER_PORT);
+  uint16_t manager_port = static_cast<uint16_t>(MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::MANAGER_PORT));
   return fmt::format("http://{}:{}/nextion-img/media_player/{}/album_art?v={:016x}", manager_address, manager_port, this->_id, std::hash<std::string>{}(source));
 }
 
-std::optional<std::string> MediaPlayerEntity::get_album_art() {
+std::shared_ptr<const std::string> MediaPlayerEntity::get_album_art() {
   std::string source;
   {
     std::lock_guard<std::mutex> lock_guard(this->_album_art_source_mutex);
     source = this->_album_art_source;
   }
   if (source.empty()) {
-    return std::nullopt;
+    return nullptr;
   }
 
   std::lock_guard<std::mutex> lock_guard(this->_album_art_download_mutex);
@@ -169,13 +176,13 @@ std::optional<std::string> MediaPlayerEntity::get_album_art() {
   std::string image_data;
   if (!this->_download_album_art(source, image_data)) {
     SPDLOG_ERROR("Failed to download album art for media player {}::{}.", this->_id, this->_name);
-    return std::nullopt;
+    return nullptr;
   }
 
   SPDLOG_DEBUG("Downloaded {} bytes of album art for media player {}::{}.", image_data.size(), this->_id, this->_name);
   this->_album_art_cache_source = source;
-  this->_album_art_cache = image_data;
-  return image_data;
+  this->_album_art_cache = std::make_shared<const std::string>(std::move(image_data));
+  return this->_album_art_cache;
 }
 
 MediaPlayerEntity::~MediaPlayerEntity() {
