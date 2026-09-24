@@ -81,6 +81,9 @@ message NSPanelEntityState {
     // Empty when there is no art. The URL changes whenever the art changes, so
     // the panel can compare it with the last URL to tell when to fetch again.
     string album_art_url = 16;
+
+    // How much one volume up/down press changes the volume and source volume, in 1-100%.
+    int32 volume_step = 17;
   }
 
   oneof entity {

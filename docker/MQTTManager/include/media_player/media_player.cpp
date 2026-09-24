@@ -58,6 +58,20 @@ void MediaPlayerEntity::reload_config() {
     SPDLOG_ERROR("No controller defined for media player {}::{}. Will default to HOME_ASSISTANT.", this->_id, this->_name);
     this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
   }
+
+  this->_volume_step = 5; // Default when not set or invalid.
+  if (entity_data.contains("volume_step")) {
+    try {
+      int volume_step = entity_data.at("volume_step").is_string() ? std::stoi(entity_data.at("volume_step").get<std::string>()) : entity_data.at("volume_step").get<int>();
+      if (volume_step >= 1 && volume_step <= 100) {
+        this->_volume_step = volume_step;
+      } else {
+        SPDLOG_ERROR("Volume step {} for media player {}::{} is not between 1 and 100. Will default to {}.", volume_step, this->_id, this->_name, this->_volume_step);
+      }
+    } catch (std::exception &ex) {
+      SPDLOG_ERROR("Caught exception while trying to set volume step for media player {}::{}. Will default to {}. Error: {}", this->_id, this->_name, this->_volume_step, ex.what());
+    }
+  }
 }
 
 void MediaPlayerEntity::send_state_update_to_nspanel() {
@@ -79,6 +93,7 @@ void MediaPlayerEntity::send_state_update_to_nspanel() {
   media_player_state->set_can_set_volume(this->_can_set_volume);
   media_player_state->set_can_mute(this->_can_mute);
   media_player_state->set_album_art_url(this->_get_album_art_url());
+  media_player_state->set_volume_step(this->_volume_step);
 
   google::protobuf::util::MessageDifferencer differencer;
   if (!differencer.Compare(this->_last_media_player_state, state)) {

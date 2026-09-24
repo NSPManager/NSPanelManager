@@ -918,6 +918,9 @@ def put_thermostat_entity(request):
 # See HomeAssistantSourceVolumeStrategy in the MQTTManager for what each one expects.
 MEDIA_PLAYER_SOURCE_VOLUME_STRATEGIES = ["none", "player_attributes", "source_entity"]
 
+# Volume in % that one volume up/down press on the panel changes, unless set per media player.
+MEDIA_PLAYER_DEFAULT_VOLUME_STEP = 5
+
 
 def entities_media_players(request):
     try:
@@ -966,6 +969,11 @@ def put_media_player_entity(request):
         if source_volume_strategy == "player_attributes" and not source_volume_attribute:
             return JsonResponse({"status": "error", "message": "Source volume strategy 'player_attributes' requires source_volume_attribute."}, status=400)
 
+        # How much one volume up/down press on the panel changes the volume. Optional, see below for the default.
+        volume_step = data.get("volume_step")
+        if volume_step is not None and (isinstance(volume_step, bool) or not isinstance(volume_step, int) or volume_step < 1 or volume_step > 100):
+            return JsonResponse({"status": "error", "message": "volume_step must be an integer between 1 and 100."}, status=400)
+
         try:
             room_id = int(data["room_id"])
             entities_page_id = int(data["entities_page_id"])
@@ -1003,12 +1011,17 @@ def put_media_player_entity(request):
         if slot_taken:
             return JsonResponse({"status": "error", "message": f"Slot {room_view_position} on entities page {entities_page_id} is already in use."}, status=409)
 
+        # Without a volume step in the request, an existing media player keeps its step and a new one gets 5%.
+        if volume_step is None:
+            volume_step = new_media_player.entity_data.get("volume_step", MEDIA_PLAYER_DEFAULT_VOLUME_STEP)
+
         entity_data = {
             "controller": data["controller"],
             "home_assistant_name": data["home_assistant_name"],
             "source_volume_strategy": source_volume_strategy,
             "source_entity_attribute": source_entity_attribute,
             "source_volume_attribute": source_volume_attribute,
+            "volume_step": volume_step,
         }
         new_media_player.friendly_name = data["friendly_name"]
         new_media_player.room = room

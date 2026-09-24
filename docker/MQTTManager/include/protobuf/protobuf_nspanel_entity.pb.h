@@ -509,6 +509,7 @@ class NSPanelEntityState_MediaPlayer final : public ::google::protobuf::Message
     kCanPreviousTrackFieldNumber = 13,
     kCanSetVolumeFieldNumber = 14,
     kCanMuteFieldNumber = 15,
+    kVolumeStepFieldNumber = 17,
   };
   // string name = 2;
   void clear_name() ;
@@ -694,12 +695,22 @@ class NSPanelEntityState_MediaPlayer final : public ::google::protobuf::Message
   void _internal_set_can_mute(bool value);
 
   public:
+  // int32 volume_step = 17;
+  void clear_volume_step() ;
+  ::int32_t volume_step() const;
+  void set_volume_step(::int32_t value);
+
+  private:
+  ::int32_t _internal_volume_step() const;
+  void _internal_set_volume_step(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:NSPanelEntityState.MediaPlayer)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      4, 16, 0,
+      5, 17, 0,
       95, 2>
       _table_;
 
@@ -736,6 +747,7 @@ class NSPanelEntityState_MediaPlayer final : public ::google::protobuf::Message
     bool can_previous_track_;
     bool can_set_volume_;
     bool can_mute_;
+    ::int32_t volume_step_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -3030,6 +3042,28 @@ inline void NSPanelEntityState_MediaPlayer::set_allocated_album_art_url(std::str
         }
   #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:NSPanelEntityState.MediaPlayer.album_art_url)
+}
+
+// int32 volume_step = 17;
+inline void NSPanelEntityState_MediaPlayer::clear_volume_step() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.volume_step_ = 0;
+}
+inline ::int32_t NSPanelEntityState_MediaPlayer::volume_step() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.volume_step)
+  return _internal_volume_step();
+}
+inline void NSPanelEntityState_MediaPlayer::set_volume_step(::int32_t value) {
+  _internal_set_volume_step(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.volume_step)
+}
+inline ::int32_t NSPanelEntityState_MediaPlayer::_internal_volume_step() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.volume_step_;
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_volume_step(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.volume_step_ = value;
 }
 
 // -------------------------------------------------------------------

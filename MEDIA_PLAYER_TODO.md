@@ -28,6 +28,8 @@ Needed:
   returns each entity's full Home Assistant state object under `item`, so the wizard already holds the
   selected player's live attributes — offer `Object.keys(item.attributes)` instead of asking the user
   to guess an attribute name they cannot see.
+- A "Volume step" number input for the optional `volume_step` (whole %, 1-100, default 5), with
+  +/- buttons like the thermostat's step size. It applies to both the volume and the source volume.
 
 ## Deleted entities leave a retained state topic behind (pre-existing)
 
@@ -61,10 +63,14 @@ Clearing an existing ghost by hand is a retained publish of an empty payload to 
 
 ## Volume step (review follow-up)
 
-Asked for in the #385 review: some amplifiers should step volume by 0.5 or 5 rather than 1. Per media
-player, stored in `entity_data` like the thermostat's `step_size`. The panel needs to know the step, so it
-needs a `volume_step` field in `NSPanelEntityState.MediaPlayer` (protobuf change, then firmware), plus
-validation in `PUT /rest/entities/media_players` and a field in the web UI.
+Per media player `volume_step` (whole %, 1-100, default 5) is stored in `entity_data`, accepted by
+`PUT /rest/entities/media_players` and sent to the panel as `NSPanelEntityState.MediaPlayer.volume_step`.
+The same step applies to the volume and the source volume. Still missing:
+
+- Firmware: volume up/down buttons that send `clamp(volume ± volume_step, 0, 100)` as an absolute
+  volume. Step from the last volume the panel sent rather than the last state received, so quick
+  presses are not lost while Home Assistant catches up.
+- The field in the web UI (see above).
 
 ## Other
 

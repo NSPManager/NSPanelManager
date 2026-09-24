@@ -120,6 +120,7 @@ protected:
   MQTT_MANAGER_ENTITY_CONTROLLER _controller;
   uint32_t _entity_page_id;
   uint8_t _entity_page_slot;
+  uint8_t _volume_step; // Volume in 1-100% that one volume up/down press on the NSPanel changes
 
   NSPanelEntityState_MediaPlayer_PlaybackState _state = NSPanelEntityState_MediaPlayer_PlaybackState_UNKNOWN;
   std::string _media_title;
