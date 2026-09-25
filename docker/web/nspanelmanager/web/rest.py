@@ -909,6 +909,134 @@ def put_thermostat_entity(request):
         return JsonResponse({"status": "error"}, status=500)
 
 
+########################
+# Media player section #
+########################
+
+
+# How the volume of the source feeding a media player is found in Home Assistant.
+# See HomeAssistantSourceVolumeStrategy in the MQTTManager for what each one expects.
+MEDIA_PLAYER_SOURCE_VOLUME_STRATEGIES = ["none", "player_attributes", "source_entity"]
+
+# Volume in % that one volume up/down press on the panel changes, unless set per media player.
+MEDIA_PLAYER_DEFAULT_VOLUME_STEP = 5
+
+
+def entities_media_players(request):
+    try:
+        if request.method == "PUT":
+            return put_media_player_entity(request)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+
+
+def put_media_player_entity(request):
+    try:
+        required_fields = [  # Fields required for media player entities
+            "room_id",
+            "entities_page_id",
+            "room_view_position",
+            "controller",
+            "friendly_name",
+            "home_assistant_name",
+        ]
+
+        data = json.loads(request.body)
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        if data["controller"] != "home_assistant":
+            return JsonResponse({"status": "error", "message": f"Unsupported controller for media player: {data['controller']}"}, status=400)
+
+        # Source volume is optional, a media player without it only has its own volume.
+        source_volume_strategy = data.get("source_volume_strategy", "none")
+        source_entity_attribute = data.get("source_entity_attribute", "")
+        source_volume_attribute = data.get("source_volume_attribute", "")
+        if not all(isinstance(value, str) for value in [source_volume_strategy, source_entity_attribute, source_volume_attribute]):
+            return JsonResponse({"status": "error", "message": "source_volume_strategy, source_entity_attribute and source_volume_attribute must be strings."}, status=400)
+        source_entity_attribute = source_entity_attribute.strip()
+        source_volume_attribute = source_volume_attribute.strip()
+
+        # Each strategy needs different attributes on the media player in Home Assistant. Reject a combination
+        # here rather than leaving the manager to log an error and silently fall back to no source volume.
+        if source_volume_strategy not in MEDIA_PLAYER_SOURCE_VOLUME_STRATEGIES:
+            return JsonResponse({"status": "error", "message": f"Unknown source volume strategy: {source_volume_strategy}. Expected one of {', '.join(MEDIA_PLAYER_SOURCE_VOLUME_STRATEGIES)}."}, status=400)
+        if source_volume_strategy != "none" and not source_entity_attribute:
+            return JsonResponse({"status": "error", "message": f"Source volume strategy '{source_volume_strategy}' requires source_entity_attribute."}, status=400)
+        if source_volume_strategy == "player_attributes" and not source_volume_attribute:
+            return JsonResponse({"status": "error", "message": "Source volume strategy 'player_attributes' requires source_volume_attribute."}, status=400)
+
+        # How much one volume up/down press on the panel changes the volume. Optional, see below for the default.
+        volume_step = data.get("volume_step")
+        if volume_step is not None and (isinstance(volume_step, bool) or not isinstance(volume_step, int) or volume_step < 1 or volume_step > 100):
+            return JsonResponse({"status": "error", "message": "volume_step must be an integer between 1 and 100."}, status=400)
+
+        try:
+            room_id = int(data["room_id"])
+            entities_page_id = int(data["entities_page_id"])
+            room_view_position = int(data["room_view_position"])
+            media_player_id = int(data["id"]) if data.get("id") else None
+        except (TypeError, ValueError):
+            return JsonResponse({"status": "error", "message": "room_id, entities_page_id, room_view_position and id must be integers."}, status=400)
+
+        if media_player_id is not None:
+            # Only update existing media players, never another type of entity that happens to have this ID.
+            new_media_player = Entity.objects.filter(id=media_player_id).first()
+            if new_media_player is None:
+                return JsonResponse({"status": "error", "message": f"No entity with id {media_player_id}."}, status=404)
+            if new_media_player.entity_type != Entity.EntityType.MEDIA_PLAYER:
+                return JsonResponse({"status": "error", "message": f"Entity {media_player_id} is a {new_media_player.entity_type}, not a media player."}, status=409)
+        else:
+            new_media_player = Entity()
+            new_media_player.entity_type = Entity.EntityType.MEDIA_PLAYER
+
+        room = Room.objects.filter(id=room_id).first()
+        if room is None:
+            return JsonResponse({"status": "error", "message": f"No room with id {room_id}."}, status=404)
+
+        # The media player is shown in a slot on one of the room's entities pages.
+        entities_page = RoomEntitiesPage.objects.filter(id=entities_page_id).first()
+        if entities_page is None:
+            return JsonResponse({"status": "error", "message": f"No entities page with id {entities_page_id}."}, status=404)
+        if entities_page.room_id != room.id or entities_page.is_scenes_page:
+            return JsonResponse({"status": "error", "message": f"Entities page {entities_page_id} is not an entities page in room {room_id}."}, status=400)
+        if room_view_position < 0 or room_view_position >= entities_page.page_type:
+            return JsonResponse({"status": "error", "message": f"room_view_position must be between 0 and {entities_page.page_type - 1} for entities page {entities_page_id}."}, status=400)
+
+        # The slot must be free. Updating a media player in place keeps its own slot.
+        slot_taken = Entity.objects.filter(entities_page=entities_page, room_view_position=room_view_position).exclude(id=new_media_player.id).exists() or Scene.objects.filter(entities_page=entities_page, room_view_position=room_view_position).exists()
+        if slot_taken:
+            return JsonResponse({"status": "error", "message": f"Slot {room_view_position} on entities page {entities_page_id} is already in use."}, status=409)
+
+        # Without a volume step in the request, an existing media player keeps its step and a new one gets 5%.
+        if volume_step is None:
+            volume_step = new_media_player.entity_data.get("volume_step", MEDIA_PLAYER_DEFAULT_VOLUME_STEP)
+
+        entity_data = {
+            "controller": data["controller"],
+            "home_assistant_name": data["home_assistant_name"],
+            "source_volume_strategy": source_volume_strategy,
+            "source_entity_attribute": source_entity_attribute,
+            "source_volume_attribute": source_volume_attribute,
+            "volume_step": volume_step,
+        }
+        new_media_player.friendly_name = data["friendly_name"]
+        new_media_player.room = room
+        new_media_player.entities_page = entities_page
+        new_media_player.room_view_position = room_view_position
+        new_media_player.entity_data = entity_data
+        new_media_player.save()
+        send_mqttmanager_reload_command()
+
+        return JsonResponse({"status": "ok"}, status=200)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
 #################
 # Scene section #
 #################
