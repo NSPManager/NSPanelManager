@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load react_tags %}
+
+{% block head %}
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{{ ingress_path }}{% static 'index.css' %}?refresh={% now 'U' %}">
+{% if manager_address == "" %}<script src="{{ ingress_path }}{% static 'initial_setup.js' %}?refresh={% now 'U' %}"></script>{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<!--Show initial setup if no manager address is set-->
+{% if manager_address == "" %}
+    {% RC 'InitialSetup' opened=True isHomeAssistantAddon=is_home_assistant_addon %}
+{% endif %}
+
+{% RC 'NSPanelsIndexView' %}
+{% endblock %}

@@ -5,6 +5,7 @@ import socket
 from pprint import pprint
 from re import A
 
+import requests
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -33,6 +34,25 @@ def get_home_assistant_entities(request):
     return JsonResponse(web.home_assistant_api.get_all_home_assistant_items(filter_params))
 
 
+def test_home_assistant(request):
+    if request.method != "GET":
+        return JsonResponse({"status": "error"}, status=405)
+
+    address = request.GET.get("address")
+    token = request.GET.get("token")
+    if not address or not token:
+        return JsonResponse({"status": "error", "message": "address and token are required"}, status=400)
+
+    try:
+        response = requests.get(f"{address}/api/states", headers={"Authorization": f"Bearer {token}"})
+        if response.ok:
+            return JsonResponse({"status": "success"})
+        else:
+            return JsonResponse({"status": "error", "message": response.text}, status=response.status_code)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+
 def get_openhab_items(request):
     if request.method != "GET":
         return JsonResponse({"status": "error"}, status=405)
@@ -43,6 +63,25 @@ def get_openhab_items(request):
     openhab_items["items"].extend(openhab_scenes["items"])
     openhab_items["errors"].extend(openhab_scenes["errors"])
     return JsonResponse(openhab_items)
+
+
+def test_openhab(request):
+    if request.method != "GET":
+        return JsonResponse({"status": "error"}, status=405)
+
+    address = request.GET.get("address")
+    token = request.GET.get("token")
+    if not address or not token:
+        return JsonResponse({"status": "error", "message": "address and token are required"}, status=400)
+
+    try:
+        response = requests.get(f"{address}/rest/items", headers={"Authorization": f"Bearer {token}"})
+        if response.ok:
+            return JsonResponse({"status": "success"})
+        else:
+            return JsonResponse({"status": "error", "message": response.text}, status=response.status_code)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 
 ##########################
@@ -87,28 +126,24 @@ def mqttmanager_get_setting(request, setting_key):
 
 
 @csrf_exempt
-def mqttmanager_settings_post(request):
-    try:
-        settings = {}
-        if request.method == "POST":
-            data = json.loads(request.body)
-            for setting_key in data["settings"]:
-                if setting_key in banned_setting_keys:
-                    return JsonResponse({"status": "error"}, status=403)  # Return error forbidden
-                settings[setting_key] = get_setting_with_default(setting_key)
-        else:
-            return JsonResponse({"status": "error"}, status=405)
+def test_mqttmanager(request):
+    if request.method != "GET":
+        return JsonResponse({"status": "error"}, status=405)
 
-        return JsonResponse(
-            {
-                "status": "ok",
-                "settings": settings,
-            }
-        )
+    address = request.GET.get("address")
+    port = request.GET.get("port")
+    if not address or not port:
+        return JsonResponse({"status": "error", "message": "address and port are required"}, status=400)
+
+    try:
+        response = requests.get(f"http://{address}:{port}/rest/settings")
+        if response.ok:
+            return JsonResponse({"status": "success"})
+        else:
+            return JsonResponse({"status": "error", "message": response.text}, status=response.status_code)
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error"}, status=500)
 
 
 ######################
@@ -164,6 +199,8 @@ def relay_groups(request):
 def rooms(request):
     if request.method == "GET":
         return rooms_get(request)
+    elif request.method == "PUT":
+        return room_put(request)
     elif request.method == "POST":
         return room_create(request)
     else:
@@ -173,6 +210,8 @@ def rooms(request):
 def settings(request):
     if request.method == "GET":
         return settings_get(request)
+    elif request.method == "POST":
+        return settings_post(request)
     else:
         return JsonResponse({"status": "error"}, status=405)
 
@@ -190,6 +229,27 @@ def settings_get(request):
     return JsonResponse({"status": "ok", "settings": settings}, status=200)
 
 
+def settings_post(request):
+    try:
+        if request.method == "POST":
+            data = json.loads(request.body)
+            if "settings" not in data:
+                return JsonResponse({"status": "error", "message": "No settings provided"}, status=400)
+            elif not isinstance(data["settings"], dict):
+                return JsonResponse({"status": "error", "message": "Settings must be a dictionary"}, status=400)
+
+            for setting_key in data["settings"]:
+                set_setting_value(setting_key, data["settings"][setting_key])
+
+            send_mqttmanager_reload_command()
+            return JsonResponse({"status": "ok"})
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
 def rooms_get(request):
     try:
         rooms = list()
@@ -201,7 +261,10 @@ def rooms_get(request):
             rooms.append(
                 {
                     "id": room.id,
-                    "name": room.friendly_name,
+                    "friendly_name": room.friendly_name,
+                    "display_order": room.displayOrder,
+                    "room_temp_provider": room.room_temp_provider,
+                    "room_temp_sensor": room.room_temp_sensor,
                 }
             )
         return JsonResponse({"status": "ok", "rooms": rooms}, status=200)
@@ -341,6 +404,64 @@ def room_entities_pages_order(request):
         return JsonResponse({"status": "error"}, status=405)
 
 
+####################
+# NSPanel REST API #
+####################
+
+
+def nspanel_delete(request, nspanel_id):
+    try:
+        if request.method == "DELETE":
+            nspanel = NSPanel.objects.get(id=nspanel_id)
+            nspanel.delete()
+            response = JsonResponse({"status": "ok"}, status=200)
+            send_mqttmanager_reload_command()
+            return response
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+def nspanel_accept(request, nspanel_id):
+    try:
+        if request.method == "POST":
+            data = json.loads(request.body)
+            if "room_id" not in data:
+                return JsonResponse({"status": "error", "message": "room_id is required"}, status=400)
+            nspanel = NSPanel.objects.get(id=nspanel_id)
+            nspanel.denied = False
+            nspanel.accepted = True
+            nspanel.room = Room.objects.get(id=data["room_id"])
+            nspanel.save()
+            response = JsonResponse({"status": "ok", "id": nspanel.id}, status=200)
+            send_mqttmanager_reload_command()
+            return response
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+def nspanel_deny(request, nspanel_id):
+    try:
+        if request.method == "POST":
+            nspanel = NSPanel.objects.get(id=nspanel_id)
+            nspanel.denied = True
+            nspanel.accepted = False
+            nspanel.save()
+            response = JsonResponse({"status": "ok", "id": nspanel.id}, status=200)
+            send_mqttmanager_reload_command()
+            return response
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
 ########################
 ### Global functions ###
 ########################
@@ -419,6 +540,31 @@ def room_entities(request, room_id):
         except Exception as ex:
             logging.exception(ex)
             return JsonResponse({"status": "error"}, status=500)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
+
+
+def room_put(request):
+    if request.method == "PUT":
+        try:
+            data = json.loads(request.body)
+            room_id = data["id"]
+            room = Room.objects.get(id=room_id)
+
+            if "friendly_name" in data:
+                room.friendly_name = data["friendly_name"]
+            if "displayOrder" in data:
+                room.displayOrder = data["display_order"]
+            if "room_temp_provider" in data:
+                room.room_temp_provider = data["room_temp_provider"]
+            if "room_temp_sensor" in data:
+                room.room_temp_sensor = data["room_temp_sensor"]
+            room.save()
+            send_mqttmanager_reload_command()
+            return JsonResponse({"status": "ok", "room_id": room.id}, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error", "message": str(ex)}, status=500)
     else:
         return JsonResponse({"status": "error"}, status=405)
 
@@ -845,6 +991,7 @@ def put_thermostat_entity(request):
             "type",
             "friendly_name",
             "step_size",
+            "use_current_temperature",
             "home_assistant_name",
             "openhab_fan_mode_item",
             "openhab_hvac_mode_item",
@@ -879,6 +1026,7 @@ def put_thermostat_entity(request):
             "preset_modes": data.get("preset_modes", []),
             "swing_modes": data.get("swing_modes", []),
             "swingh_modes": data.get("swingh_modes", []),
+            "use_current_temperature": data.get("use_current_temperature", "True") == "True",
             "home_assistant_name": data.get("home_assistant_name", ""),
             "openhab_fan_mode_item": data.get("openhab_fan_mode_item", ""),
             "openhab_hvac_mode_item": data.get("openhab_hvac_mode_item", ""),
@@ -886,6 +1034,7 @@ def put_thermostat_entity(request):
             "openhab_swing_mode_item": data.get("openhab_swing_mode_item", ""),
             "openhab_swingh_mode_item": data.get("openhab_swingh_mode_item", ""),
             "openhab_temperature_item": data.get("openhab_temperature_item", ""),
+            "openhab_current_temperature_item": data.get("openhab_current_temperature_item", ""),
             "step_size": float(data.get("step_size", 1)),
         }
         if "id" in data and data["id"]:

@@ -218,6 +218,11 @@ private:
   static inline std::vector<std::shared_ptr<NSPanel>> _nspanels;
   static inline std::mutex _nspanels_mutex;
 
+  /**
+   * Send a state update over STOMP regarding relevant entities.
+   */
+  static void _send_websocket_state_update();
+
   static inline std::vector<std::shared_ptr<RoomEntitiesPage>> _global_room_entities_pages;
   static inline std::mutex _global_room_entities_pages_mutex;
 

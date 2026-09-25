@@ -16,6 +16,7 @@
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/write.hpp>
+#include <boost/regex.hpp>
 #include <chrono>
 #include <command_manager/command_manager.hpp>
 #include <cstddef>
@@ -44,7 +45,6 @@
 #include <string>
 #include <sys/stat.h>
 #include <system_error>
-#include <vector>
 #include <websocket_server/websocket_server.hpp>
 
 NSPanel::NSPanel(uint32_t id) {
@@ -55,6 +55,10 @@ NSPanel::NSPanel(uint32_t id) {
   this->_id = id;
   SPDLOG_INFO("Loading new NSPanel with ID {}.", id);
   this->reload_config();
+  if (!this->_mqtt_config_topic.empty()) {
+    SPDLOG_INFO("Loaded accepted NSPanel {}::{}.", this->_id, this->_name);
+    this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE; // Assume offline until we have received a state update from the panel.
+  }
 
   CommandManager::attach_callback(boost::bind(&NSPanel::command_callback, this, _1));
   WebsocketServer::attach_stomp_callback(fmt::format("nspanel/{}/command", this->_mac), boost::bind(&NSPanel::handle_stomp_command_callback, this, _1));
@@ -120,7 +124,6 @@ void NSPanel::reload_config() {
     auto panel_settings = database_manager::database.get<database_manager::NSPanel>(this->_id);
     std::lock_guard<std::mutex> lock_guard(this->_settings_mutex);
 
-    bool rebuilt_mqtt = false; // Wether or not to rebuild mqtt topics and subscribe to the new topics.
     bool name_changed = false;
     bool reregister_to_ha_mqtt_discovery = false;
 
@@ -153,14 +156,12 @@ void NSPanel::reload_config() {
 
     if (this->_name.compare(panel_settings.friendly_name) != 0) {
       this->_name = panel_settings.friendly_name;
-      rebuilt_mqtt = true;
       name_changed = true;
     }
 
     bool register_relay1_as_light = this->_get_nspanel_setting_with_default("relay1_is_light", "False").compare("True") == 0;
     SPDLOG_DEBUG("Will register NSPanel {}::{} relay 1 as {}", this->_id, this->_name, register_relay1_as_light ? "light" : "relay");
     if (this->_register_relay1_as_light != register_relay1_as_light) {
-      rebuilt_mqtt = true;
       this->_register_relay1_as_light = register_relay1_as_light;
       reregister_to_ha_mqtt_discovery = true;
     }
@@ -168,7 +169,6 @@ void NSPanel::reload_config() {
     bool register_relay2_as_light = this->_get_nspanel_setting_with_default("relay2_is_light", "False").compare("True") == 0;
     SPDLOG_DEBUG("Will register NSPanel {}::{} relay 2 as {}", this->_id, this->_name, register_relay1_as_light ? "light" : "relay");
     if (this->_register_relay2_as_light != register_relay2_as_light) {
-      rebuilt_mqtt = true;
       this->_register_relay2_as_light = register_relay2_as_light;
       reregister_to_ha_mqtt_discovery = true;
     }
@@ -185,59 +185,50 @@ void NSPanel::reload_config() {
     if (panel_settings.denied) {
       SPDLOG_INFO("Loaded denied NSPanel {}::{}.", this->_id, this->_name);
       this->_state = MQTT_MANAGER_NSPANEL_STATE::DENIED;
-      rebuilt_mqtt = false;
-    }
-
-    if (panel_settings.accepted) {
-      SPDLOG_INFO("Loaded accepted NSPanel {}::{}.", this->_id, this->_name);
-      this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
-      rebuilt_mqtt = true;
+      return;
     }
 
     if (!panel_settings.denied && !panel_settings.accepted) {
       // No decission has been made on wether ot accept or deny panel. It is therefore awaiting_accept
       this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
-      rebuilt_mqtt = true;
     }
 
-    if (rebuilt_mqtt) {
-      SPDLOG_DEBUG("Building MQTT topics for NSPanel {}::{}", this->_id, this->_name);
-      this->reset_mqtt_topics();
-      // Convert stored MAC to MAC used in MQTT, ex. AA:AA:AA:BB:BB:BB to aa_aa_aa_bb_bb_bb
-      std::string mqtt_register_mac = this->_mac;
-      std::replace(mqtt_register_mac.begin(), mqtt_register_mac.end(), ':', '_');
-      std::transform(mqtt_register_mac.begin(), mqtt_register_mac.end(), mqtt_register_mac.begin(), [](unsigned char c) {
-        return std::tolower(c);
-      });
-      this->_mqtt_register_mac = mqtt_register_mac;
+    SPDLOG_DEBUG("Building MQTT topics for NSPanel {}::{}", this->_id, this->_name);
+    this->reset_mqtt_topics();
+    // Convert stored MAC to MAC used in MQTT, ex. AA:AA:AA:BB:BB:BB to aa_aa_aa_bb_bb_bb
+    std::string mqtt_register_mac = this->_mac;
+    std::replace(mqtt_register_mac.begin(), mqtt_register_mac.end(), ':', '_');
+    std::transform(mqtt_register_mac.begin(), mqtt_register_mac.end(), mqtt_register_mac.begin(), [](unsigned char c) {
+      return std::tolower(c);
+    });
+    this->_mqtt_register_mac = mqtt_register_mac;
 
-      this->_mqtt_config_topic = fmt::format("nspanel/{}/config", this->_mac);
-      this->_mqtt_log_topic = fmt::format("nspanel/{}/log", this->_name); // TODO: Remove as this is the old log topic. Use the new based on MAC-address instead.
-      this->_mqtt_command_topic = fmt::format("nspanel/{}/command", this->_mac);
-      this->_mqtt_sensor_temperature_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_temperature/config", mqtt_register_mac);
-      this->_mqtt_sensor_humidity_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_humidity/config", mqtt_register_mac);
-      this->_mqtt_sensor_pressure_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_pressure/config", mqtt_register_mac);
-      this->_mqtt_switch_relay1_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay1/config", mqtt_register_mac);
-      this->_mqtt_light_relay1_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay1/config", mqtt_register_mac);
-      this->_mqtt_switch_relay2_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay2/config", mqtt_register_mac);
-      this->_mqtt_light_relay2_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay2/config", mqtt_register_mac);
-      this->_mqtt_switch_screen_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_screen/config", mqtt_register_mac);
-      this->_mqtt_number_screen_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screen_brightness/config", mqtt_register_mac);
-      this->_mqtt_number_screensaver_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screensaver_brightness/config", mqtt_register_mac);
-      this->_mqtt_select_screensaver_topic = fmt::format("homeassistant/select/nspanelmanager/{}_screensaver_select/config", mqtt_register_mac);
-      this->_mqtt_relay1_command_topic = fmt::format("nspanel/{}/relay1_cmd", this->_mac);
-      this->_mqtt_relay1_state_topic = fmt::format("nspanel/{}/relay1_state", this->_mac);
-      this->_mqtt_relay2_command_topic = fmt::format("nspanel/{}/relay2_cmd", this->_mac);
-      this->_mqtt_relay2_state_topic = fmt::format("nspanel/{}/relay2_state", this->_mac);
-      this->_mqtt_status_topic = fmt::format("nspanel/{}/status", this->_mac);
-      this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_mac);
-      this->_mqtt_temperature_topic = fmt::format("nspanel/{}/temperature", this->_mac);
-      this->_mqtt_humidity_topic = fmt::format("nspanel/{}/humidity", this->_mac);
-      this->_mqtt_pressure_topic = fmt::format("nspanel/{}/pressure", this->_mac);
-      this->_mqtt_topic_home_page_status = fmt::format("nspanel/{}/home_page", this->_mac);
-      this->_mqtt_topic_home_page_all_rooms_status = fmt::format("nspanel/{}/home_page_all", this->_mac);
-      this->_mqtt_topic_room_entities_page_status = fmt::format("nspanel/{}/entities_page", this->_mac);
-    }
+    this->_mqtt_config_topic = fmt::format("nspanel/{}/config", this->_mac);
+    this->_mqtt_log_topic = fmt::format("nspanel/{}/log", this->_name); // TODO: Remove as this is the old log topic. Use the new based on MAC-address instead.
+    this->_mqtt_command_topic = fmt::format("nspanel/{}/command", this->_mac);
+    this->_mqtt_sensor_temperature_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_temperature/config", mqtt_register_mac);
+    this->_mqtt_sensor_humidity_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_humidity/config", mqtt_register_mac);
+    this->_mqtt_sensor_pressure_topic = fmt::format("homeassistant/sensor/nspanelmanager/{}_pressure/config", mqtt_register_mac);
+    this->_mqtt_switch_relay1_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay1/config", mqtt_register_mac);
+    this->_mqtt_light_relay1_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay1/config", mqtt_register_mac);
+    this->_mqtt_switch_relay2_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_relay2/config", mqtt_register_mac);
+    this->_mqtt_light_relay2_topic = fmt::format("homeassistant/light/nspanelmanager/{}_relay2/config", mqtt_register_mac);
+    this->_mqtt_switch_screen_topic = fmt::format("homeassistant/switch/nspanelmanager/{}_screen/config", mqtt_register_mac);
+    this->_mqtt_number_screen_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screen_brightness/config", mqtt_register_mac);
+    this->_mqtt_number_screensaver_brightness_topic = fmt::format("homeassistant/number/nspanelmanager/{}_screensaver_brightness/config", mqtt_register_mac);
+    this->_mqtt_select_screensaver_topic = fmt::format("homeassistant/select/nspanelmanager/{}_screensaver_select/config", mqtt_register_mac);
+    this->_mqtt_relay1_command_topic = fmt::format("nspanel/{}/relay1_cmd", this->_mac);
+    this->_mqtt_relay1_state_topic = fmt::format("nspanel/{}/relay1_state", this->_mac);
+    this->_mqtt_relay2_command_topic = fmt::format("nspanel/{}/relay2_cmd", this->_mac);
+    this->_mqtt_relay2_state_topic = fmt::format("nspanel/{}/relay2_state", this->_mac);
+    this->_mqtt_status_topic = fmt::format("nspanel/{}/status", this->_mac);
+    this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_mac);
+    this->_mqtt_temperature_topic = fmt::format("nspanel/{}/temperature", this->_mac);
+    this->_mqtt_humidity_topic = fmt::format("nspanel/{}/humidity", this->_mac);
+    this->_mqtt_pressure_topic = fmt::format("nspanel/{}/pressure", this->_mac);
+    this->_mqtt_topic_home_page_status = fmt::format("nspanel/{}/home_page", this->_mac);
+    this->_mqtt_topic_home_page_all_rooms_status = fmt::format("nspanel/{}/home_page_all", this->_mac);
+    this->_mqtt_topic_room_entities_page_status = fmt::format("nspanel/{}/entities_page", this->_mac);
 
     if (this->_has_registered_to_manager && !panel_settings.denied && panel_settings.accepted) {
       WebsocketServer::set_stomp_topic_retained(this->_mqtt_status_topic, true);
@@ -535,7 +526,7 @@ MQTT_MANAGER_NSPANEL_MODEL NSPanel::get_model() {
 }
 
 void NSPanel::mqtt_callback(std::string topic, std::string payload) {
-  if (payload.empty()) {
+  if (payload.empty()) [[unlikely]] {
     return;
   }
 
@@ -555,7 +546,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       }
       message_parts.push_back(message);
 
-      if (message_parts.size() == 3) {
+      if (message_parts.size() == 3) [[likely]] {
         std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         std::tm tm = *std::localtime(&now);
         std::stringstream buffer;
@@ -568,19 +559,26 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         std::string send_mac = message_parts[0];
         send_mac.erase(std::remove(send_mac.begin(), send_mac.end(), ':'), send_mac.end());
 
+        std::string message = message_parts[2];
+        size_t pos = message.find(')');
+        if (pos != std::string::npos) {
+          message.erase(0, pos + 1);
+        } else {
+        }
+
         nlohmann::json log_data;
         log_data["type"] = "log";
         log_data["time"] = buffer.str();
         log_data["panel"] = this->_name;
         log_data["mac_address"] = message_parts[0];
         log_data["level"] = message_parts[1];
-        log_data["message"] = message_parts[2];
+        log_data["message"] = message;
         WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log", this->_mac), log_data);
 
         // Save log message in backtrace for when (if) the log interface requests it.
         this->_log_messages_backlog["logs"].insert(this->_log_messages_backlog["logs"].begin(), log_data);
         // Remove older messages from backtrace.
-        if (this->_log_messages_backlog["logs"].size() > MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::MAX_LOG_BUFFER_SIZE)) {
+        if (this->_log_messages_backlog["logs"].size() > MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::MAX_LOG_BUFFER_SIZE)) [[likely]] {
           this->_log_messages_backlog["logs"].erase(this->_log_messages_backlog["logs"].begin() + MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::MAX_LOG_BUFFER_SIZE), this->_log_messages_backlog["logs"].end());
         }
         WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log_backlog", this->_mac), this->_log_messages_backlog);
@@ -641,6 +639,9 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
           break;
         case NSPanelStatusReport_state_UPDATING_LITTLEFS:
           this->_state = MQTT_MANAGER_NSPANEL_STATE::UPDATING_DATA;
+          break;
+        case NSPanelStatusReport_state_REBOOTING:
+          this->_state = MQTT_MANAGER_NSPANEL_STATE::REBOOTING;
           break;
         case NSPanelStatusReport_state_NSPanelStatusReport_state_INT_MIN_SENTINEL_DO_NOT_USE_:
         case NSPanelStatusReport_state_NSPanelStatusReport_state_INT_MAX_SENTINEL_DO_NOT_USE_:
@@ -759,6 +760,10 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
 }
 
 void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
+  if (payload.length() <= 0) [[unlikely]] {
+    return; // Message is empty.
+  }
+
   size_t trim_start_pos = payload.find_first_not_of(" \n\r\t");
   if (trim_start_pos == std::string::npos) {
     return; // Message contains no valid chars, only spaces
@@ -770,13 +775,21 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
   }
 
   if (payload.length() <= 0) [[unlikely]] {
-    return; // Message is empty.
+    return; // Message is empty
   }
 
-  payload = payload.substr(trim_start_pos, trim_end_pos + 1 - 4); // Trim spaces and such but also the first 7 chars that is the color coding for the message
-  if (payload[0] == 0x1B) {                                       // Message formated with color. Remove color
-    payload = payload.substr(7);
-  }
+  // Remove color and other ANSI formating options
+  boost::regex ansi_escape(
+      R"(\x1b(?:\[[0-9;]*[A-Za-z]|\][^\x07]*(?:\x07|\x1b\\)|[@-Z\\-_]))",
+      boost::regex::perl);
+  payload = boost::regex_replace(payload, ansi_escape, "");
+
+  // Trim spaces, tabs and other such chars from beginning and end of message
+  boost::regex start_pattern(R"(^[\t\r\n\f\v ]+)");
+  payload = boost::regex_replace(payload, start_pattern, "");
+
+  boost::regex end_pattern(R"([\t\r\n\f\v ]+$)");
+  payload = boost::regex_replace(payload, end_pattern, "");
 
   std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   std::tm tm = *std::localtime(&now);
@@ -806,6 +819,9 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
     return;
   }
 
+  // Remove first char that indicates log level. This is stored separately
+  payload = payload.substr(1);
+
   // Convert payload strings non-printable characters to their hex representation
   std::string converted_payload;
   for (char c : payload) {
@@ -816,9 +832,17 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
     }
   }
 
-  // Remove first char that indicates log level. This is stored separately
-  payload = payload.substr(1);
-  log_data["message"] = converted_payload; // TODO: Clean up message before sending it out
+  // Remove until ) as all that data has been processed and stored separately.
+  size_t pos = converted_payload.find(')');
+  if (pos != std::string::npos) [[likely]] {
+    converted_payload.erase(0, pos + 1);
+  }
+  if (converted_payload.length() > 0 && converted_payload[0] == ' ') [[likely]] {
+    converted_payload.erase(0, 1);
+  }
+
+  log_data["message"] = converted_payload;
+
   WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log", this->_mac), log_data.dump());
 
   // Save log message in backtrace for when (if) the log interface requests it.
@@ -835,14 +859,18 @@ void NSPanel::send_websocket_status_update() {
   SPDLOG_TRACE("Sending websocket status update for {}::{}", this->_id, this->_name);
   nlohmann::json status_data = {
       {"id", this->_id},
+      {"mac", this->_mac},
       {"name", this->_name},
       {"ip_address", this->_ip_address},
       {"rssi", this->_rssi},
       {"temperature", this->_temperature},
+      {"temperature_unit", MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::USE_FAHRENHEIT) ? "°F" : "°C"},
       {"humidity", this->_humidity},
       {"pressure", this->_pressure},
       {"ram_usage", this->_heap_used_pct},
       {"update_progress", this->_update_progress},
+      {"accepted", this->_state != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT},
+      {"denied", this->_state == MQTT_MANAGER_NSPANEL_STATE::DENIED},
   };
   status_data["warnings"] = nlohmann::json::array({});
   for (NSPanelWarningWebsocketRepresentation warning : this->_nspanel_warnings) {
@@ -852,26 +880,36 @@ void NSPanel::send_websocket_status_update() {
     });
   }
 
+  if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::WEB) {
+    status_data["model"] = "web";
+  } else if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::SONOFF) {
+    status_data["model"] = "sonoff";
+  } else if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::CUSTOM) {
+    status_data["model"] = "custom";
+  } else {
+    status_data["model"] = "unknown";
+  }
+
   // Check if NSPanel has firmware, littlefs or tft file updates available and set appropriate warning.
   // Only check for models that actually have firmware, littlefs and TFT.
-  if (this->_model != MQTT_MANAGER_NSPANEL_MODEL::WEB) {
+  if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::SONOFF || this->_model == MQTT_MANAGER_NSPANEL_MODEL::CUSTOM) {
     if (this->_current_firmware_md5_checksum.empty() || this->_current_littlefs_md5_checksum.empty()) {
       status_data["warnings"].push_back(nlohmann::json{
           {"level", "warning"},
-          {"text", "Manager has no checksum for installed firmware on panel. If this doesn't go away within 5 minutes, try performing a firmware update from the manager."}});
+          {"text", "Manager has no checksum for installed firmware on panel. If this doesn't go away within 5 minutes, try performing a firmware update."}});
     } else if (this->has_firmware_update() || this->has_littlefs_update()) {
       status_data["warnings"].push_back(nlohmann::json{
-          {"level", "warning"},
-          {"text", "Firmware update available"}});
+          {"level", "info"},
+          {"text", "Firmware update available. Perform firmware update to ensure optimal compatibility with manager and latest features and bug fixes."}});
     }
     if (this->_current_tft_md5_checksum.empty()) {
       status_data["warnings"].push_back(nlohmann::json{
           {"level", "warning"},
-          {"text", "Manager has no checksum for installed GUI on panel. If this doesn't go away within 5 minutes, try performing a GUI update from the manager."}});
+          {"text", "Manager has no checksum for installed GUI on panel. If this doesn't go away within 5 minutes, try performing a GUI update."}});
     } else if (this->has_tft_update()) {
       status_data["warnings"].push_back(nlohmann::json{
-          {"level", "warning"},
-          {"text", "GUI update available"}});
+          {"level", "info"},
+          {"text", "GUI update available. Perform GUI update to ensure optimal compatibility with new firmware."}});
     }
   }
 
@@ -900,10 +938,14 @@ void NSPanel::send_websocket_status_update() {
   case MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT:
     status_data["state"] = "awaiting_accept";
     break;
+  case MQTT_MANAGER_NSPANEL_STATE::REBOOTING:
+    status_data["state"] = "rebooting";
+    break;
   default:
     status_data["state"] = "unknown";
     break;
   }
+  WebsocketServer::set_stomp_topic_retained(this->_mqtt_status_topic, true);
   WebsocketServer::update_stomp_topic_value(this->_mqtt_status_topic, status_data);
 }
 
@@ -1099,6 +1141,9 @@ nlohmann::json NSPanel::get_websocket_json_representation() {
   case MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT:
     data["state"] = "awaiting_accept";
     break;
+  case MQTT_MANAGER_NSPANEL_STATE::REBOOTING:
+    data["state"] = "rebooting";
+    break;
   default:
     data["state"] = "unknown";
     break;
@@ -1268,9 +1313,11 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
     database_manager::NSPanel panel_settings;
     if (panel_exists) {
       panel_settings = database_manager::database.get<database_manager::NSPanel>(this->_id);
+    } else {
+      // Panel does not yet exist, take name from register request
+      panel_settings.friendly_name = register_request_payload.at("friendly_name").get<std::string>();
     }
     panel_settings.mac_address = this->_mac;
-    panel_settings.friendly_name = register_request_payload.at("friendly_name").get<std::string>();
     switch (this->_model) {
     case MQTT_MANAGER_NSPANEL_MODEL::SONOFF:
       panel_settings.model = "sonoff";
