@@ -274,6 +274,16 @@ def rooms_get(request):
         return JsonResponse({"status": "error"}, status=500)
 
 
+# The entities page layouts the panel GUI has.
+PAGE_SIZES = (4, 8, 12)
+
+
+def get_page_size_error(page_type):
+    if page_type not in PAGE_SIZES:
+        return f"Unsupported page size {page_type!r}. Expected one of: {', '.join(map(str, PAGE_SIZES))}."
+    return None
+
+
 def put_room_entities_order(request, room_id):
     if request.method == "PUT":
         try:
@@ -332,6 +342,9 @@ def room_entities_pages(request, room_id):
         for field in required_fields:
             if field not in data:
                 return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+        page_size_error = get_page_size_error(data["type"])
+        if page_size_error:
+            return JsonResponse({"status": "error", "message": page_size_error}, status=400)
 
         room = Room.objects.get(id=room_id)
         pages = RoomEntitiesPage.objects.filter(room=room).order_by("display_order")
@@ -372,7 +385,15 @@ def room_entities_page(request, page_id):
         try:
             data = json.loads(request.body)
             db_page = RoomEntitiesPage.objects.get(id=page_id)
-            db_page.page_type = data.get("number_of_entities", db_page.page_type)
+            new_page_type = data.get("number_of_entities", db_page.page_type)
+            if new_page_type != db_page.page_type:
+                page_size_error = get_page_size_error(new_page_type)
+                if page_size_error:
+                    return JsonResponse({"status": "error", "message": page_size_error}, status=400)
+                # Shrinking must not leave entities in slots the panel no longer shows.
+                if db_page.entity_set.filter(room_view_position__gte=new_page_type).exists() or db_page.scene_set.filter(room_view_position__gte=new_page_type).exists():
+                    return JsonResponse({"status": "error", "message": f"Move or remove the entities in slots {new_page_type + 1} and above before shrinking this page."}, status=400)
+            db_page.page_type = new_page_type
             db_page.display_order = data.get("display_order", db_page.display_order)
             db_page.save()
             send_mqttmanager_reload_command()
@@ -503,6 +524,9 @@ def global_entities_pages(request):
         for field in required_fields:
             if field not in data:
                 return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+        page_size_error = get_page_size_error(data["type"])
+        if page_size_error:
+            return JsonResponse({"status": "error", "message": page_size_error}, status=400)
 
         pages = RoomEntitiesPage.objects.filter(room=None).order_by("display_order")
         new_display_order = 0  # Default to zero of no pages exists

@@ -3,8 +3,6 @@ Moving and deleting entities and managing entities pages, through the REST endpo
 React entities-page view calls.
 """
 
-from unittest import expectedFailure
-
 from django.urls import reverse
 
 from web.models import Entity, RoomEntitiesPage, Scene
@@ -203,9 +201,7 @@ class EntitiesPageTests(NSPMTestCase):
         self.assertEqual(RoomEntitiesPage.objects.count(), before)
         self.assertManagerNotReloaded()
 
-    @expectedFailure
     def test_create_page_with_unsupported_size_is_rejected(self):
-        # KNOWN GAP: panels only support 4, 8 or 12 entity pages but any number is stored.
         before = RoomEntitiesPage.objects.count()
 
         self.assertRejected(self.create_page(6))
@@ -261,13 +257,30 @@ class EntitiesPageTests(NSPMTestCase):
 
         self.assertManagerReloaded(times=1)
 
-    @expectedFailure
     def test_shrinking_page_does_not_strand_entities(self):
-        # KNOWN GAP: shrinking a 12-slot page to 4 leaves entities in slots 4-11 attached to
-        # the page but never shown on the panel. Either reject the change or relocate them.
         page = RoomEntitiesPage.objects.create(room=self.room, page_type=12, is_scenes_page=False, display_order=2)
         light = self.make_light(self.room, page=page, slot=9)
 
-        self.put_json(reverse("rest_room_entities_page", kwargs={"page_id": page.id}), {"number_of_entities": 4})
+        response = self.put_json(reverse("rest_room_entities_page", kwargs={"page_id": page.id}), {"number_of_entities": 4})
 
+        self.assertRejected(response)
+        page.refresh_from_db()
+        self.assertEqual(page.page_type, 12)
         self.assertLoadableByManager(light)
+        self.assertManagerNotReloaded()
+
+    def test_shrinking_page_with_free_trailing_slots(self):
+        page = RoomEntitiesPage.objects.create(room=self.room, page_type=12, is_scenes_page=False, display_order=2)
+        light = self.make_light(self.room, page=page, slot=3)
+
+        response = self.put_json(reverse("rest_room_entities_page", kwargs={"page_id": page.id}), {"number_of_entities": 4})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertLoadableByManager(light)
+
+    def test_resize_to_unsupported_size_is_rejected(self):
+        page = self.entities_page(self.room)
+
+        self.assertRejected(self.put_json(reverse("rest_room_entities_page", kwargs={"page_id": page.id}), {"number_of_entities": 6}))
+        page.refresh_from_db()
+        self.assertEqual(page.page_type, 4)
