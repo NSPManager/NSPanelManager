@@ -155,10 +155,7 @@ class LightTests(EntityRESTCommonTests, EntityRESTTestCase):
         self.assertRejected(self.client.post(reverse(self.url), {}))
         self.assertFalse(Entity.objects.exists())
 
-    @expectedFailure
     def test_unknown_controller_is_rejected(self):
-        # KNOWN GAP: controller is stored as given. MQTTManager logs an error and silently
-        # treats an unknown controller as Home Assistant.
         self.assertCreatesNothing(self.save(self.payload(controller="zigbee")))
 
     def test_page_from_another_room_is_rejected(self):
@@ -236,6 +233,10 @@ class ButtonTests(EntityRESTCommonTests, EntityRESTTestCase):
         button = Entity.objects.get()
         self.assertEqual(button.entity_data["home_assistant_name"], "input_button.doorbell")
         self.assertLoadableByManager(button)
+
+    def test_openhab_controller_is_rejected(self):
+        # MQTTManager only has Home Assistant and MQTT ("nspm") buttons.
+        self.assertCreatesNothing(self.save(self.payload(controller="openhab")))
 
 
 class ThermostatTests(EntityRESTCommonTests, EntityRESTTestCase):
@@ -328,12 +329,8 @@ class SceneTests(EntityRESTCommonTests, EntityRESTTestCase):
         self.assertIsNone(scene.room)
         self.assertLoadableByManager(scene)
 
-    @expectedFailure
     def test_home_assistant_scene_without_backend_name_is_rejected(self):
-        # KNOWN GAP: an empty backend_name is accepted; the scene can never be activated.
         self.assertCreatesNothing(self.save(self.payload(backend_name="")))
 
-    @expectedFailure
     def test_unknown_scene_type_is_rejected(self):
-        # KNOWN GAP: MQTTManager ignores scenes whose scene_type it does not recognise.
         self.assertCreatesNothing(self.save(self.payload(scene_type="zigbee")))

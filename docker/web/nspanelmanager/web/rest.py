@@ -760,6 +760,25 @@ def get_scene(request, scene_id):
 
 
 ### Generic Entity section ###
+# The controllers MQTTManager's entity classes (docker/MQTTManager/include/{light,switch,button,thermostat}/)
+# accept for each entity type. Anything else is logged as an error when it loads the entity.
+ENTITY_CONTROLLERS = {
+    Entity.EntityType.LIGHT: ("home_assistant", "openhab"),
+    Entity.EntityType.SWITCH: ("home_assistant", "openhab"),
+    Entity.EntityType.BUTTON: ("home_assistant", "nspm"),
+    Entity.EntityType.THERMOSTAT: ("home_assistant", "openhab"),
+}
+
+# The scene types MQTTManager's EntityManager loads. It ignores scenes of any other type.
+SCENE_TYPES = ("home_assistant", "openhab", "nspm_scene")
+
+
+def get_controller_error(entity_type, controller):
+    if controller not in ENTITY_CONTROLLERS[entity_type]:
+        return f"Unknown controller {controller!r}. Expected one of: {', '.join(ENTITY_CONTROLLERS[entity_type])}."
+    return None
+
+
 def get_placement_error(obj, room, entities_page, room_view_position):
     """Return why obj (an Entity or Scene) cannot go in that slot, or None if it can.
 
@@ -852,6 +871,10 @@ def put_light_entity(request):
             if field not in data:
                 return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
 
+        controller_error = get_controller_error(Entity.EntityType.LIGHT, data["controller"])
+        if controller_error:
+            return JsonResponse({"status": "error", "message": controller_error}, status=400)
+
         entity_data = {
             "controller": data["controller"],
             "home_assistant_name": data.get("home_assistant_name", ""),
@@ -925,6 +948,10 @@ def put_switch_entity(request):
             if field not in data:
                 return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
 
+        controller_error = get_controller_error(Entity.EntityType.SWITCH, data["controller"])
+        if controller_error:
+            return JsonResponse({"status": "error", "message": controller_error}, status=400)
+
         entity_data = {
             "openhab_item_switch": data.get("openhab_item_switch", ""),
             "home_assistant_name": data.get("home_assistant_name", ""),
@@ -990,6 +1017,10 @@ def put_button_entity(request):
         for field in required_fields:
             if field not in data:
                 return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        controller_error = get_controller_error(Entity.EntityType.BUTTON, data["controller"])
+        if controller_error:
+            return JsonResponse({"status": "error", "message": controller_error}, status=400)
 
         entity_data = {
             "mqtt_topic": data.get("mqtt_topic", ""),
@@ -1077,6 +1108,10 @@ def put_thermostat_entity(request):
                     for field in required_mode_fields:
                         if field not in item:
                             return JsonResponse({"status": "error", "message": f"Missing required field in {mode}. Missing field: {field}"}, status=400)
+
+        controller_error = get_controller_error(Entity.EntityType.THERMOSTAT, data["controller"])
+        if controller_error:
+            return JsonResponse({"status": "error", "message": controller_error}, status=400)
 
         entity_data = {
             "controller": data.get("controller", ""),
@@ -1284,6 +1319,11 @@ def put_scene_entity(request):
         for field in required_fields:
             if field not in data:
                 return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        if data["scene_type"] not in SCENE_TYPES:
+            return JsonResponse({"status": "error", "message": f"Unknown scene_type {data['scene_type']!r}. Expected one of: {', '.join(SCENE_TYPES)}."}, status=400)
+        if data["scene_type"] != "nspm_scene" and not data["backend_name"]:
+            return JsonResponse({"status": "error", "message": "backend_name is required for Home Assistant and OpenHAB scenes."}, status=400)
 
         if "id" in data and data["id"]:
             new_scene = Scene.objects.get(id=int(data["id"]))
