@@ -3,8 +3,6 @@ Panel lifecycle (accept, deny, delete, unblock), the per-panel settings form, an
 legacy panel-facing api/ endpoints.
 """
 
-from unittest import expectedFailure
-
 from django.urls import reverse
 
 from web.models import Entity, NSPanel
@@ -246,11 +244,7 @@ class LegacyPanelAPITests(NSPMTestCase):
         self.room = self.make_room("Kitchen")
         self.panel = self.make_panel(self.room, "Kitchen panel", mac="C0:49:EF:00:00:01")
 
-    @expectedFailure
     def test_get_nspanel_config(self):
-        # KNOWN BUG: get_nspanel_config() reads nspanel.button1_detached_mode_light, which was
-        # renamed to button1_detached_mode_entity, so it always returns 500. (The URL is marked
-        # "TODO: Remove" in urls.py; deleting it would also resolve this.)
         response = self.client.get(reverse("get_nspanel_config"), {"mac": self.panel.mac_address})
 
         self.assertEqual(response.status_code, 200)

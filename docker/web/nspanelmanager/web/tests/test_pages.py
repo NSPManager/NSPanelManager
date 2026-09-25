@@ -4,8 +4,6 @@ view context (e.g. a renamed model field referenced from a template), which othe
 only show up when someone opens the page.
 """
 
-from unittest import expectedFailure
-
 from django.urls import reverse
 
 from web.models import Message, RelayGroup
@@ -128,19 +126,9 @@ class PageRenderTests(NSPMTestCase):
 
         self.assertRejected(self.client.get(reverse("htmx_partial_select_weather_outside_temperature_sensor_provider")))
 
-    @expectedFailure
-    def test_unused_legacy_partials_render(self):
-        # KNOWN BUG: two routes nothing in the UI calls any more are broken. Fix or delete them.
-        # - nspanel_index_view: the nspanel_status_header component picks its template by URL
-        #   name and has none for this URL, so rendering raises ImproperlyConfigured.
-        # - edit_entities_page: its template was removed with the move to React.
-        self.assertRenders(reverse("htmx_partial_nspanel_index_view", kwargs={"nspanel_id": self.panel.id}))
-        self.assertRenders(reverse("htmx_partial_edit_entities_page", kwargs={"page_id": self.entities_page(self.room).id}))
-
     def test_unknown_objects_are_rejected(self):
         for url in (
             reverse("edit_nspanel", kwargs={"panel_id": 999}),
-            reverse("htmx_partial_nspanel_index_view", kwargs={"nspanel_id": 999}),
             reverse("htmx_modal_edit_relay_group", kwargs={"relay_group_id": 999}),
         ):
             with self.subTest(url=url):
