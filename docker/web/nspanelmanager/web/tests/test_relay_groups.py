@@ -4,8 +4,6 @@ Covered through both the form views and the htmx endpoints, plus the REST listin
 MQTTManager reads.
 """
 
-from unittest import expectedFailure
-
 from django.urls import reverse
 
 from web.models import NSPanel, RelayGroup, RelayGroupBinding
@@ -145,11 +143,7 @@ class RelayGroupHTMXTests(RelayGroupTestCase):
         self.assertFalse(RelayGroup.objects.exists())
         self.assertFalse(RelayGroupBinding.objects.exists())
 
-    @expectedFailure
     def test_save_and_delete_group_reload_manager(self):
-        # KNOWN BUG: unlike the form views, the htmx relay_group_save() and relay_group_delete()
-        # never call send_mqttmanager_reload_command(), so MQTTManager keeps driving the relays
-        # of a deleted group until its next reload.
         self.client.post(reverse("htmx_save_relay_group"), {"name": "Porch"})
         self.client.delete(reverse("htmx_delete_relay_group", kwargs={"relay_group_id": self.group.id}))
 

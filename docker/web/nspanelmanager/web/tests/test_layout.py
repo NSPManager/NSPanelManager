@@ -153,11 +153,7 @@ class DeleteEntityTests(NSPMTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertFalse(Scene.objects.exists())
 
-    @expectedFailure
     def test_delete_scene_reloads_manager(self):
-        # KNOWN BUG: DELETE /rest/scenes/<id> removes the row but never calls
-        # send_mqttmanager_reload_command(), so the panel keeps showing the scene until
-        # something else triggers a reload.
         scene = self.make_scene(self.room)
 
         self.client.delete(reverse("rest_get_scene", kwargs={"scene_id": scene.id}))
@@ -263,10 +259,7 @@ class EntitiesPageTests(NSPMTestCase):
         page.refresh_from_db()
         self.assertEqual(page.page_type, 12)
 
-    @expectedFailure
     def test_resize_page_reloads_manager(self):
-        # KNOWN BUG: PUT /rest/entities_pages/<id> saves the new size but never calls
-        # send_mqttmanager_reload_command(), so panels keep the old layout.
         page = self.entities_page(self.room)
 
         self.put_json(reverse("rest_room_entities_page", kwargs={"page_id": page.id}), {"number_of_entities": 12})

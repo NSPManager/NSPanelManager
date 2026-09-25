@@ -105,6 +105,7 @@ def nspanel_delete(request, nspanel_id):
         if request.method == "DELETE":
             nspanel = NSPanel.objects.get(id=nspanel_id)
             nspanel.delete()
+            send_mqttmanager_reload_command()
             response = HttpResponse("", status=200)
             response["HX-Redirect"] = "/"
             return response
@@ -267,6 +268,7 @@ def relay_group_save(request):
             rg = RelayGroup()
         rg.friendly_name = request.POST["name"]
         rg.save()
+        send_mqttmanager_reload_command()
 
         response = HttpResponse()
         response["HX-Refresh"] = "true"
@@ -278,6 +280,7 @@ def relay_group_delete(request, relay_group_id):
     if request.method == "DELETE":
         rg = RelayGroup.objects.get(id=relay_group_id)
         rg.delete()
+        send_mqttmanager_reload_command()
 
         response = HttpResponse()
         response["HX-Refresh"] = "true"

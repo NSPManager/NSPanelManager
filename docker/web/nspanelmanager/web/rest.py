@@ -368,6 +368,7 @@ def room_entities_page(request, page_id):
             db_page.page_type = data.get("number_of_entities", db_page.page_type)
             db_page.display_order = data.get("display_order", db_page.display_order)
             db_page.save()
+            send_mqttmanager_reload_command()
             return JsonResponse({"status": "ok"}, status=200)
         except Exception as ex:
             logging.exception(ex)
@@ -732,6 +733,7 @@ def get_scene(request, scene_id):
         elif request.method == "DELETE":
             scene = Scene.objects.get(id=scene_id)
             scene.delete()
+            send_mqttmanager_reload_command()
             return JsonResponse({"status": "success"})
     except Exception as ex:
         logging.exception(ex)

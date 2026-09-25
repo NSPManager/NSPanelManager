@@ -66,10 +66,7 @@ class PanelLifecycleTests(NSPMTestCase):
         self.assertFalse(NSPanel.objects.exists())
         self.assertEqual(get_nspanel_setting_with_default(self.panel.id, "screen_dim_level", "gone"), "gone")
 
-    @expectedFailure
     def test_delete_panel_reloads_manager(self):
-        # KNOWN BUG: nspanel_delete() never calls send_mqttmanager_reload_command() (deny and
-        # unblock both do), so MQTTManager keeps the deleted panel until its next reload.
         self.client.delete(reverse("htmx_nspanel_delete", kwargs={"nspanel_id": self.panel.id}))
 
         self.assertManagerReloaded(times=1)
