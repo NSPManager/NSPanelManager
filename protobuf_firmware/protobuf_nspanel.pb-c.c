@@ -343,6 +343,12 @@ void   nspanel_mqttmanager_command__thermostat_command__init
   static const NSPanelMQTTManagerCommand__ThermostatCommand init_value = NSPANEL_MQTTMANAGER_COMMAND__THERMOSTAT_COMMAND__INIT;
   *message = init_value;
 }
+void   nspanel_mqttmanager_command__media_player_command__init
+                     (NSPanelMQTTManagerCommand__MediaPlayerCommand         *message)
+{
+  static const NSPanelMQTTManagerCommand__MediaPlayerCommand init_value = NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__INIT;
+  *message = init_value;
+}
 void   nspanel_mqttmanager_command__init
                      (NSPanelMQTTManagerCommand         *message)
 {
@@ -1354,7 +1360,7 @@ const ProtobufCMessageDescriptor nspanel_status_report__descriptor =
   (ProtobufCMessageInit) nspanel_status_report__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCEnumValue nspanel_room_entities_page__entity_slot__entity_type__enum_values_by_number[6] =
+static const ProtobufCEnumValue nspanel_room_entities_page__entity_slot__entity_type__enum_values_by_number[7] =
 {
   { "ENTITY_TYPE_UNSPECIFIED", "NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_UNSPECIFIED", 0 },
   { "ENTITY_TYPE_LIGHT", "NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_LIGHT", 1 },
@@ -1362,14 +1368,16 @@ static const ProtobufCEnumValue nspanel_room_entities_page__entity_slot__entity_
   { "ENTITY_TYPE_BUTTON", "NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_BUTTON", 3 },
   { "ENTITY_TYPE_THERMOSTAT", "NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_THERMOSTAT", 4 },
   { "ENTITY_TYPE_SCENE", "NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_SCENE", 5 },
+  { "ENTITY_TYPE_MEDIA_PLAYER", "NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_MEDIA_PLAYER", 6 },
 };
 static const ProtobufCIntRange nspanel_room_entities_page__entity_slot__entity_type__value_ranges[] = {
-{0, 0},{0, 6}
+{0, 0},{0, 7}
 };
-static const ProtobufCEnumValueIndex nspanel_room_entities_page__entity_slot__entity_type__enum_values_by_name[6] =
+static const ProtobufCEnumValueIndex nspanel_room_entities_page__entity_slot__entity_type__enum_values_by_name[7] =
 {
   { "ENTITY_TYPE_BUTTON", 3 },
   { "ENTITY_TYPE_LIGHT", 1 },
+  { "ENTITY_TYPE_MEDIA_PLAYER", 6 },
   { "ENTITY_TYPE_SCENE", 5 },
   { "ENTITY_TYPE_SWITCH", 2 },
   { "ENTITY_TYPE_THERMOSTAT", 4 },
@@ -1382,9 +1390,9 @@ const ProtobufCEnumDescriptor nspanel_room_entities_page__entity_slot__entity_ty
   "EntityType",
   "NSPanelRoomEntitiesPage__EntitySlot__EntityType",
   "",
-  6,
+  7,
   nspanel_room_entities_page__entity_slot__entity_type__enum_values_by_number,
-  6,
+  7,
   nspanel_room_entities_page__entity_slot__entity_type__enum_values_by_name,
   1,
   nspanel_room_entities_page__entity_slot__entity_type__value_ranges,
@@ -2586,6 +2594,169 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_command
   (ProtobufCMessageInit) nspanel_mqttmanager_command__thermostat_command__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
+static const ProtobufCEnumValue nspanel_mqttmanager_command__media_player_command__playback_action__enum_values_by_number[5] =
+{
+  { "NONE", "NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION__NONE", 0 },
+  { "PLAY", "NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION__PLAY", 1 },
+  { "PAUSE", "NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION__PAUSE", 2 },
+  { "NEXT_TRACK", "NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION__NEXT_TRACK", 3 },
+  { "PREVIOUS_TRACK", "NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION__PREVIOUS_TRACK", 4 },
+};
+static const ProtobufCIntRange nspanel_mqttmanager_command__media_player_command__playback_action__value_ranges[] = {
+{0, 0},{0, 5}
+};
+static const ProtobufCEnumValueIndex nspanel_mqttmanager_command__media_player_command__playback_action__enum_values_by_name[5] =
+{
+  { "NEXT_TRACK", 3 },
+  { "NONE", 0 },
+  { "PAUSE", 2 },
+  { "PLAY", 1 },
+  { "PREVIOUS_TRACK", 4 },
+};
+const ProtobufCEnumDescriptor nspanel_mqttmanager_command__media_player_command__playback_action__descriptor =
+{
+  PROTOBUF_C__ENUM_DESCRIPTOR_MAGIC,
+  "NSPanelMQTTManagerCommand.MediaPlayerCommand.PlaybackAction",
+  "PlaybackAction",
+  "NSPanelMQTTManagerCommand__MediaPlayerCommand__PlaybackAction",
+  "",
+  5,
+  nspanel_mqttmanager_command__media_player_command__playback_action__enum_values_by_number,
+  5,
+  nspanel_mqttmanager_command__media_player_command__playback_action__enum_values_by_name,
+  1,
+  nspanel_mqttmanager_command__media_player_command__playback_action__value_ranges,
+  NULL,NULL,NULL,NULL   /* reserved[1234] */
+};
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__media_player_command__field_descriptors[8] =
+{
+  {
+    "media_player_id",
+    1,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__MediaPlayerCommand, media_player_id),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "playback_action",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_ENUM,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__MediaPlayerCommand, playback_action),
+    &nspanel_mqttmanager_command__media_player_command__playback_action__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "has_volume",
+    3,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__MediaPlayerCommand, has_volume),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "volume",
+    4,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__MediaPlayerCommand, volume),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "has_source_volume",
+    5,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__MediaPlayerCommand, has_source_volume),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "source_volume",
+    6,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__MediaPlayerCommand, source_volume),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "has_muted",
+    7,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__MediaPlayerCommand, has_muted),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "muted",
+    8,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__MediaPlayerCommand, muted),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned nspanel_mqttmanager_command__media_player_command__field_indices_by_name[] = {
+  6,   /* field[6] = has_muted */
+  4,   /* field[4] = has_source_volume */
+  2,   /* field[2] = has_volume */
+  0,   /* field[0] = media_player_id */
+  7,   /* field[7] = muted */
+  1,   /* field[1] = playback_action */
+  5,   /* field[5] = source_volume */
+  3,   /* field[3] = volume */
+};
+static const ProtobufCIntRange nspanel_mqttmanager_command__media_player_command__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 8 }
+};
+const ProtobufCMessageDescriptor nspanel_mqttmanager_command__media_player_command__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "NSPanelMQTTManagerCommand.MediaPlayerCommand",
+  "MediaPlayerCommand",
+  "NSPanelMQTTManagerCommand__MediaPlayerCommand",
+  "",
+  sizeof(NSPanelMQTTManagerCommand__MediaPlayerCommand),
+  8,
+  nspanel_mqttmanager_command__media_player_command__field_descriptors,
+  nspanel_mqttmanager_command__media_player_command__field_indices_by_name,
+  1,  nspanel_mqttmanager_command__media_player_command__number_ranges,
+  (ProtobufCMessageInit) nspanel_mqttmanager_command__media_player_command__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
 static const ProtobufCEnumValue nspanel_mqttmanager_command__affect_lights_options__enum_values_by_number[3] =
 {
   { "ALL", "NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__ALL", 0 },
@@ -2616,7 +2787,7 @@ const ProtobufCEnumDescriptor nspanel_mqttmanager_command__affect_lights_options
   nspanel_mqttmanager_command__affect_lights_options__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descriptors[9] =
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descriptors[10] =
 {
   {
     "first_page_turn_on",
@@ -2715,6 +2886,18 @@ static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__field_descrip
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
+    "media_player_command",
+    9,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    offsetof(NSPanelMQTTManagerCommand, command_data_case),
+    offsetof(NSPanelMQTTManagerCommand, media_player_command),
+    &nspanel_mqttmanager_command__media_player_command__descriptor,
+    NULL,
+    0 | PROTOBUF_C_FIELD_FLAG_ONEOF,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
     "nspanel_id",
     100,
     PROTOBUF_C_LABEL_NONE,
@@ -2732,7 +2915,8 @@ static const unsigned nspanel_mqttmanager_command__field_indices_by_name[] = {
   1,   /* field[1] = first_page_turn_off */
   0,   /* field[0] = first_page_turn_on */
   2,   /* field[2] = light_command */
-  8,   /* field[8] = nspanel_id */
+  8,   /* field[8] = media_player_command */
+  9,   /* field[9] = nspanel_id */
   4,   /* field[4] = save_scene_command */
   7,   /* field[7] = thermostat_command */
   6,   /* field[6] = thermostat_temperature_command */
@@ -2741,8 +2925,8 @@ static const unsigned nspanel_mqttmanager_command__field_indices_by_name[] = {
 static const ProtobufCIntRange nspanel_mqttmanager_command__number_ranges[2 + 1] =
 {
   { 1, 0 },
-  { 100, 8 },
-  { 0, 9 }
+  { 100, 9 },
+  { 0, 10 }
 };
 const ProtobufCMessageDescriptor nspanel_mqttmanager_command__descriptor =
 {
@@ -2752,7 +2936,7 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__descriptor =
   "NSPanelMQTTManagerCommand",
   "",
   sizeof(NSPanelMQTTManagerCommand),
-  9,
+  10,
   nspanel_mqttmanager_command__field_descriptors,
   nspanel_mqttmanager_command__field_indices_by_name,
   2,  nspanel_mqttmanager_command__number_ranges,

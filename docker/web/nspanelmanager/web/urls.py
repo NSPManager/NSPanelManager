@@ -93,6 +93,8 @@ urlpatterns = [
     path("rest/entities/buttons", rest.entities_buttons, name="rest_entities_buttons"),
     # Thermostats entities
     path("rest/entities/thermostats", rest.entities_thermostats, name="rest_entities_thermostats"),
+    # Media player entities
+    path("rest/entities/media_players", rest.entities_media_players, name="rest_entities_media_players"),
     # Scene entities
     path("rest/entities/scenes", rest.entities_scenes, name="rest_entities_scenes"),
     #######################

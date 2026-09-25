@@ -60,6 +60,11 @@ NSPanel::NSPanel(uint32_t id) {
     this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE; // Assume offline until we have received a state update from the panel.
   }
 
+  if (!this->_mqtt_config_topic.empty()) {
+    SPDLOG_INFO("Loaded accepted NSPanel {}::{}.", this->_id, this->_name);
+    this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
+  }
+
   CommandManager::attach_callback(boost::bind(&NSPanel::command_callback, this, _1));
   WebsocketServer::attach_stomp_callback(fmt::format("nspanel/{}/command", this->_mac), boost::bind(&NSPanel::handle_stomp_command_callback, this, _1));
 

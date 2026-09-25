@@ -82,6 +82,11 @@ public:
   static void load_thermostats();
 
   /*
+   * Load all media players from the DB and remove any existing media player that no longer exist.
+   */
+  static void load_media_players();
+
+  /*
    * Load all switches from the DB and remove any existing switch that no longer exist.
    */
   static void load_switches();

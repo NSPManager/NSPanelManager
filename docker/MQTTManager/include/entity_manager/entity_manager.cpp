@@ -6,6 +6,8 @@
 #include "light/home_assistant_light.hpp"
 #include "light/light.hpp"
 #include "light/openhab_light.hpp"
+#include "media_player/home_assistant_media_player.hpp"
+#include "media_player/media_player.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "protobuf_nspanel.pb.h"
 #include "room/room.hpp"
@@ -85,6 +87,7 @@ void EntityManager::load_entities() {
   EntityManager::load_lights();
   EntityManager::load_buttons();
   EntityManager::load_thermostats();
+  EntityManager::load_media_players();
   EntityManager::load_switches();
   EntityManager::load_scenes();
   EntityManager::load_global_room_entities_pages();
@@ -308,6 +311,51 @@ void EntityManager::load_thermostats() {
     }
   }
   SPDLOG_DEBUG("Loaded {} thermostats", thermostat_ids.size());
+}
+
+void EntityManager::load_media_players() {
+  auto media_player_ids = database_manager::database.select(&database_manager::Entity::id, sqlite_orm::from<database_manager::Entity>(),
+                                                            sqlite_orm::where(sqlite_orm::glob(&database_manager::Entity::entity_type, "media_player")));
+  SPDLOG_INFO("Loading {} media players.", media_player_ids.size());
+
+  // Check if any existing media player has been removed.
+  EntityManager::_entities.erase(std::remove_if(EntityManager::_entities.begin(), EntityManager::_entities.end(), [&media_player_ids](auto entity) {
+                                   return entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::MEDIA_PLAYER && std::find_if(media_player_ids.begin(), media_player_ids.end(), [&entity](auto id) { return id == entity->get_id(); }) == media_player_ids.end();
+                                 }),
+                                 EntityManager::_entities.end());
+
+  // Cause existing media players to reload config or add a new media player if it does not exist.
+  for (auto &media_player_id : media_player_ids) {
+    auto existing_media_player = EntityManager::get_entity_by_id<MediaPlayerEntity>(MQTT_MANAGER_ENTITY_TYPE::MEDIA_PLAYER, media_player_id);
+    if (existing_media_player) [[likely]] {
+      (*existing_media_player)->reload_config();
+    } else {
+      std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
+
+      try {
+        auto media_player_settings = database_manager::database.get<database_manager::Entity>(media_player_id);
+        nlohmann::json entity_data = media_player_settings.get_entity_data_json();
+        if (entity_data.contains("controller")) {
+          std::string controller = entity_data["controller"];
+          if (controller.compare("home_assistant") == 0) {
+            std::shared_ptr<MediaPlayerEntity> media_player_entity = std::make_shared<HomeAssistantMediaPlayer>(media_player_settings.id);
+            SPDLOG_INFO("Media player {}::{} was found in database but not in config. Creating media player.", media_player_entity->get_id(), media_player_entity->get_name());
+            EntityManager::_entities.push_back(media_player_entity);
+          } else if (controller.compare("openhab") == 0) {
+            SPDLOG_ERROR("Media player {}::{} is controlled by OpenHAB, which is not implemented for media players. Will ignore entity.", media_player_settings.id, media_player_settings.friendly_name);
+          } else {
+            SPDLOG_ERROR("Unknown media player type '{}'. Will ignore entity.", controller);
+          }
+        } else {
+          SPDLOG_ERROR("Media player {}::{} does not define a controller!", media_player_settings.id, media_player_settings.friendly_name);
+        }
+      } catch (std::exception &e) {
+        SPDLOG_ERROR("Caught exception: {}", e.what());
+        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+      }
+    }
+  }
+  SPDLOG_DEBUG("Loaded {} media players", media_player_ids.size());
 }
 
 void EntityManager::load_switches() {

@@ -144,6 +144,7 @@ message NSPanelRoomEntitiesPage {
       ENTITY_TYPE_BUTTON = 3;
       ENTITY_TYPE_THERMOSTAT = 4;
       ENTITY_TYPE_SCENE = 5;
+      ENTITY_TYPE_MEDIA_PLAYER = 6;
     }
     EntityType type = 8;
     int32 id = 9;
@@ -249,6 +250,25 @@ message NSPanelMQTTManagerCommand {
     string new_value = 3;
   }
 
+  message MediaPlayerCommand {
+    enum PlaybackAction {
+      NONE = 0;
+      PLAY = 1;
+      PAUSE = 2;
+      NEXT_TRACK = 3;
+      PREVIOUS_TRACK = 4;
+    }
+
+    int32 media_player_id = 1;
+    PlaybackAction playback_action = 2;
+    bool has_volume = 3;
+    int32 volume = 4; // Volume in 0-100%
+    bool has_source_volume = 5;
+    int32 source_volume = 6; // Volume in 0-100%
+    bool has_muted = 7;
+    bool muted = 8;
+  }
+
   oneof CommandData {
     FirstPageTurnLightOn first_page_turn_on = 1;
     FirstPageTurnLightOff first_page_turn_off = 2;
@@ -259,6 +279,7 @@ message NSPanelMQTTManagerCommand {
 
     ThermostatTemperatureCommand thermostat_temperature_command = 7;
     ThermostatCommand thermostat_command = 8;
+    MediaPlayerCommand media_player_command = 9;
   }
 
   int32 nspanel_id = 100;

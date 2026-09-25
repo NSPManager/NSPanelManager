@@ -56,6 +56,9 @@ extern NSPanelEntityStateDefaultTypeInternal _NSPanelEntityState_default_instanc
 class NSPanelEntityState_Light;
 struct NSPanelEntityState_LightDefaultTypeInternal;
 extern NSPanelEntityState_LightDefaultTypeInternal _NSPanelEntityState_Light_default_instance_;
+class NSPanelEntityState_MediaPlayer;
+struct NSPanelEntityState_MediaPlayerDefaultTypeInternal;
+extern NSPanelEntityState_MediaPlayerDefaultTypeInternal _NSPanelEntityState_MediaPlayer_default_instance_;
 class NSPanelEntityState_Thermostat;
 struct NSPanelEntityState_ThermostatDefaultTypeInternal;
 extern NSPanelEntityState_ThermostatDefaultTypeInternal _NSPanelEntityState_Thermostat_default_instance_;
@@ -102,6 +105,44 @@ inline const std::string& NSPanelEntityState_Light_LightMode_Name(NSPanelEntityS
 inline bool NSPanelEntityState_Light_LightMode_Parse(absl::string_view name, NSPanelEntityState_Light_LightMode* value) {
   return ::google::protobuf::internal::ParseNamedEnum<NSPanelEntityState_Light_LightMode>(
       NSPanelEntityState_Light_LightMode_descriptor(), name, value);
+}
+enum NSPanelEntityState_MediaPlayer_PlaybackState : int {
+  NSPanelEntityState_MediaPlayer_PlaybackState_UNKNOWN = 0,
+  NSPanelEntityState_MediaPlayer_PlaybackState_OFF = 1,
+  NSPanelEntityState_MediaPlayer_PlaybackState_ON = 2,
+  NSPanelEntityState_MediaPlayer_PlaybackState_IDLE = 3,
+  NSPanelEntityState_MediaPlayer_PlaybackState_PLAYING = 4,
+  NSPanelEntityState_MediaPlayer_PlaybackState_PAUSED = 5,
+  NSPanelEntityState_MediaPlayer_PlaybackState_BUFFERING = 6,
+  NSPanelEntityState_MediaPlayer_PlaybackState_NSPanelEntityState_MediaPlayer_PlaybackState_INT_MIN_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::min(),
+  NSPanelEntityState_MediaPlayer_PlaybackState_NSPanelEntityState_MediaPlayer_PlaybackState_INT_MAX_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::max(),
+};
+
+bool NSPanelEntityState_MediaPlayer_PlaybackState_IsValid(int value);
+extern const uint32_t NSPanelEntityState_MediaPlayer_PlaybackState_internal_data_[];
+constexpr NSPanelEntityState_MediaPlayer_PlaybackState NSPanelEntityState_MediaPlayer_PlaybackState_PlaybackState_MIN = static_cast<NSPanelEntityState_MediaPlayer_PlaybackState>(0);
+constexpr NSPanelEntityState_MediaPlayer_PlaybackState NSPanelEntityState_MediaPlayer_PlaybackState_PlaybackState_MAX = static_cast<NSPanelEntityState_MediaPlayer_PlaybackState>(6);
+constexpr int NSPanelEntityState_MediaPlayer_PlaybackState_PlaybackState_ARRAYSIZE = 6 + 1;
+const ::google::protobuf::EnumDescriptor*
+NSPanelEntityState_MediaPlayer_PlaybackState_descriptor();
+template <typename T>
+const std::string& NSPanelEntityState_MediaPlayer_PlaybackState_Name(T value) {
+  static_assert(std::is_same<T, NSPanelEntityState_MediaPlayer_PlaybackState>::value ||
+                    std::is_integral<T>::value,
+                "Incorrect type passed to PlaybackState_Name().");
+  return NSPanelEntityState_MediaPlayer_PlaybackState_Name(static_cast<NSPanelEntityState_MediaPlayer_PlaybackState>(value));
+}
+template <>
+inline const std::string& NSPanelEntityState_MediaPlayer_PlaybackState_Name(NSPanelEntityState_MediaPlayer_PlaybackState value) {
+  return ::google::protobuf::internal::NameOfDenseEnum<NSPanelEntityState_MediaPlayer_PlaybackState_descriptor,
+                                                 0, 6>(
+      static_cast<int>(value));
+}
+inline bool NSPanelEntityState_MediaPlayer_PlaybackState_Parse(absl::string_view name, NSPanelEntityState_MediaPlayer_PlaybackState* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<NSPanelEntityState_MediaPlayer_PlaybackState>(
+      NSPanelEntityState_MediaPlayer_PlaybackState_descriptor(), name, value);
 }
 
 // ===================================================================
@@ -296,6 +337,417 @@ class NSPanelEntityState_Thermostat_ThermostatOption_ThermostatOptionValue final
                           const NSPanelEntityState_Thermostat_ThermostatOption_ThermostatOptionValue& from_msg);
     ::google::protobuf::internal::ArenaStringPtr value_;
     ::google::protobuf::internal::ArenaStringPtr icon_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_protobuf_5fnspanel_5fentity_2eproto;
+};
+// -------------------------------------------------------------------
+
+class NSPanelEntityState_MediaPlayer final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:NSPanelEntityState.MediaPlayer) */ {
+ public:
+  inline NSPanelEntityState_MediaPlayer() : NSPanelEntityState_MediaPlayer(nullptr) {}
+  ~NSPanelEntityState_MediaPlayer() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR NSPanelEntityState_MediaPlayer(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline NSPanelEntityState_MediaPlayer(const NSPanelEntityState_MediaPlayer& from) : NSPanelEntityState_MediaPlayer(nullptr, from) {}
+  inline NSPanelEntityState_MediaPlayer(NSPanelEntityState_MediaPlayer&& from) noexcept
+      : NSPanelEntityState_MediaPlayer(nullptr, std::move(from)) {}
+  inline NSPanelEntityState_MediaPlayer& operator=(const NSPanelEntityState_MediaPlayer& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline NSPanelEntityState_MediaPlayer& operator=(NSPanelEntityState_MediaPlayer&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const NSPanelEntityState_MediaPlayer& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const NSPanelEntityState_MediaPlayer* internal_default_instance() {
+    return reinterpret_cast<const NSPanelEntityState_MediaPlayer*>(
+        &_NSPanelEntityState_MediaPlayer_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 4;
+  friend void swap(NSPanelEntityState_MediaPlayer& a, NSPanelEntityState_MediaPlayer& b) { a.Swap(&b); }
+  inline void Swap(NSPanelEntityState_MediaPlayer* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(NSPanelEntityState_MediaPlayer* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  NSPanelEntityState_MediaPlayer* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<NSPanelEntityState_MediaPlayer>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const NSPanelEntityState_MediaPlayer& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const NSPanelEntityState_MediaPlayer& from) { NSPanelEntityState_MediaPlayer::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(NSPanelEntityState_MediaPlayer* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "NSPanelEntityState.MediaPlayer"; }
+
+ protected:
+  explicit NSPanelEntityState_MediaPlayer(::google::protobuf::Arena* arena);
+  NSPanelEntityState_MediaPlayer(::google::protobuf::Arena* arena, const NSPanelEntityState_MediaPlayer& from);
+  NSPanelEntityState_MediaPlayer(::google::protobuf::Arena* arena, NSPanelEntityState_MediaPlayer&& from) noexcept
+      : NSPanelEntityState_MediaPlayer(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+  using PlaybackState = NSPanelEntityState_MediaPlayer_PlaybackState;
+  static constexpr PlaybackState UNKNOWN = NSPanelEntityState_MediaPlayer_PlaybackState_UNKNOWN;
+  static constexpr PlaybackState OFF = NSPanelEntityState_MediaPlayer_PlaybackState_OFF;
+  static constexpr PlaybackState ON = NSPanelEntityState_MediaPlayer_PlaybackState_ON;
+  static constexpr PlaybackState IDLE = NSPanelEntityState_MediaPlayer_PlaybackState_IDLE;
+  static constexpr PlaybackState PLAYING = NSPanelEntityState_MediaPlayer_PlaybackState_PLAYING;
+  static constexpr PlaybackState PAUSED = NSPanelEntityState_MediaPlayer_PlaybackState_PAUSED;
+  static constexpr PlaybackState BUFFERING = NSPanelEntityState_MediaPlayer_PlaybackState_BUFFERING;
+  static inline bool PlaybackState_IsValid(int value) {
+    return NSPanelEntityState_MediaPlayer_PlaybackState_IsValid(value);
+  }
+  static constexpr PlaybackState PlaybackState_MIN = NSPanelEntityState_MediaPlayer_PlaybackState_PlaybackState_MIN;
+  static constexpr PlaybackState PlaybackState_MAX = NSPanelEntityState_MediaPlayer_PlaybackState_PlaybackState_MAX;
+  static constexpr int PlaybackState_ARRAYSIZE = NSPanelEntityState_MediaPlayer_PlaybackState_PlaybackState_ARRAYSIZE;
+  static inline const ::google::protobuf::EnumDescriptor* PlaybackState_descriptor() {
+    return NSPanelEntityState_MediaPlayer_PlaybackState_descriptor();
+  }
+  template <typename T>
+  static inline const std::string& PlaybackState_Name(T value) {
+    return NSPanelEntityState_MediaPlayer_PlaybackState_Name(value);
+  }
+  static inline bool PlaybackState_Parse(absl::string_view name, PlaybackState* value) {
+    return NSPanelEntityState_MediaPlayer_PlaybackState_Parse(name, value);
+  }
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kNameFieldNumber = 2,
+    kMediaTitleFieldNumber = 4,
+    kMediaArtistFieldNumber = 5,
+    kAlbumArtUrlFieldNumber = 16,
+    kMediaPlayerIdFieldNumber = 1,
+    kStateFieldNumber = 3,
+    kVolumeFieldNumber = 6,
+    kSourceVolumeFieldNumber = 9,
+    kIsMutedFieldNumber = 7,
+    kHasSourceVolumeFieldNumber = 8,
+    kCanPlayFieldNumber = 10,
+    kCanPauseFieldNumber = 11,
+    kCanNextTrackFieldNumber = 12,
+    kCanPreviousTrackFieldNumber = 13,
+    kCanSetVolumeFieldNumber = 14,
+    kCanMuteFieldNumber = 15,
+    kVolumeStepFieldNumber = 17,
+  };
+  // string name = 2;
+  void clear_name() ;
+  const std::string& name() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  std::string* mutable_name();
+  PROTOBUF_NODISCARD std::string* release_name();
+  void set_allocated_name(std::string* value);
+
+  private:
+  const std::string& _internal_name() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_name(
+      const std::string& value);
+  std::string* _internal_mutable_name();
+
+  public:
+  // string media_title = 4;
+  void clear_media_title() ;
+  const std::string& media_title() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_media_title(Arg_&& arg, Args_... args);
+  std::string* mutable_media_title();
+  PROTOBUF_NODISCARD std::string* release_media_title();
+  void set_allocated_media_title(std::string* value);
+
+  private:
+  const std::string& _internal_media_title() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_media_title(
+      const std::string& value);
+  std::string* _internal_mutable_media_title();
+
+  public:
+  // string media_artist = 5;
+  void clear_media_artist() ;
+  const std::string& media_artist() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_media_artist(Arg_&& arg, Args_... args);
+  std::string* mutable_media_artist();
+  PROTOBUF_NODISCARD std::string* release_media_artist();
+  void set_allocated_media_artist(std::string* value);
+
+  private:
+  const std::string& _internal_media_artist() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_media_artist(
+      const std::string& value);
+  std::string* _internal_mutable_media_artist();
+
+  public:
+  // string album_art_url = 16;
+  void clear_album_art_url() ;
+  const std::string& album_art_url() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_album_art_url(Arg_&& arg, Args_... args);
+  std::string* mutable_album_art_url();
+  PROTOBUF_NODISCARD std::string* release_album_art_url();
+  void set_allocated_album_art_url(std::string* value);
+
+  private:
+  const std::string& _internal_album_art_url() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_album_art_url(
+      const std::string& value);
+  std::string* _internal_mutable_album_art_url();
+
+  public:
+  // int32 media_player_id = 1;
+  void clear_media_player_id() ;
+  ::int32_t media_player_id() const;
+  void set_media_player_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_media_player_id() const;
+  void _internal_set_media_player_id(::int32_t value);
+
+  public:
+  // .NSPanelEntityState.MediaPlayer.PlaybackState state = 3;
+  void clear_state() ;
+  ::NSPanelEntityState_MediaPlayer_PlaybackState state() const;
+  void set_state(::NSPanelEntityState_MediaPlayer_PlaybackState value);
+
+  private:
+  ::NSPanelEntityState_MediaPlayer_PlaybackState _internal_state() const;
+  void _internal_set_state(::NSPanelEntityState_MediaPlayer_PlaybackState value);
+
+  public:
+  // int32 volume = 6;
+  void clear_volume() ;
+  ::int32_t volume() const;
+  void set_volume(::int32_t value);
+
+  private:
+  ::int32_t _internal_volume() const;
+  void _internal_set_volume(::int32_t value);
+
+  public:
+  // int32 source_volume = 9;
+  void clear_source_volume() ;
+  ::int32_t source_volume() const;
+  void set_source_volume(::int32_t value);
+
+  private:
+  ::int32_t _internal_source_volume() const;
+  void _internal_set_source_volume(::int32_t value);
+
+  public:
+  // bool is_muted = 7;
+  void clear_is_muted() ;
+  bool is_muted() const;
+  void set_is_muted(bool value);
+
+  private:
+  bool _internal_is_muted() const;
+  void _internal_set_is_muted(bool value);
+
+  public:
+  // bool has_source_volume = 8;
+  void clear_has_source_volume() ;
+  bool has_source_volume() const;
+  void set_has_source_volume(bool value);
+
+  private:
+  bool _internal_has_source_volume() const;
+  void _internal_set_has_source_volume(bool value);
+
+  public:
+  // bool can_play = 10;
+  void clear_can_play() ;
+  bool can_play() const;
+  void set_can_play(bool value);
+
+  private:
+  bool _internal_can_play() const;
+  void _internal_set_can_play(bool value);
+
+  public:
+  // bool can_pause = 11;
+  void clear_can_pause() ;
+  bool can_pause() const;
+  void set_can_pause(bool value);
+
+  private:
+  bool _internal_can_pause() const;
+  void _internal_set_can_pause(bool value);
+
+  public:
+  // bool can_next_track = 12;
+  void clear_can_next_track() ;
+  bool can_next_track() const;
+  void set_can_next_track(bool value);
+
+  private:
+  bool _internal_can_next_track() const;
+  void _internal_set_can_next_track(bool value);
+
+  public:
+  // bool can_previous_track = 13;
+  void clear_can_previous_track() ;
+  bool can_previous_track() const;
+  void set_can_previous_track(bool value);
+
+  private:
+  bool _internal_can_previous_track() const;
+  void _internal_set_can_previous_track(bool value);
+
+  public:
+  // bool can_set_volume = 14;
+  void clear_can_set_volume() ;
+  bool can_set_volume() const;
+  void set_can_set_volume(bool value);
+
+  private:
+  bool _internal_can_set_volume() const;
+  void _internal_set_can_set_volume(bool value);
+
+  public:
+  // bool can_mute = 15;
+  void clear_can_mute() ;
+  bool can_mute() const;
+  void set_can_mute(bool value);
+
+  private:
+  bool _internal_can_mute() const;
+  void _internal_set_can_mute(bool value);
+
+  public:
+  // int32 volume_step = 17;
+  void clear_volume_step() ;
+  ::int32_t volume_step() const;
+  void set_volume_step(::int32_t value);
+
+  private:
+  ::int32_t _internal_volume_step() const;
+  void _internal_set_volume_step(::int32_t value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:NSPanelEntityState.MediaPlayer)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      5, 17, 0,
+      95, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_NSPanelEntityState_MediaPlayer_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const NSPanelEntityState_MediaPlayer& from_msg);
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    ::google::protobuf::internal::ArenaStringPtr media_title_;
+    ::google::protobuf::internal::ArenaStringPtr media_artist_;
+    ::google::protobuf::internal::ArenaStringPtr album_art_url_;
+    ::int32_t media_player_id_;
+    int state_;
+    ::int32_t volume_;
+    ::int32_t source_volume_;
+    bool is_muted_;
+    bool has_source_volume_;
+    bool can_play_;
+    bool can_pause_;
+    bool can_next_track_;
+    bool can_previous_track_;
+    bool can_set_volume_;
+    bool can_mute_;
+    ::int32_t volume_step_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -1152,13 +1604,14 @@ class NSPanelEntityState final : public ::google::protobuf::Message
   enum EntityCase {
     kLight = 1,
     kThermostat = 2,
+    kMediaPlayer = 3,
     ENTITY_NOT_SET = 0,
   };
   static inline const NSPanelEntityState* internal_default_instance() {
     return reinterpret_cast<const NSPanelEntityState*>(
         &_NSPanelEntityState_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 4;
+  static constexpr int kIndexInFileMessages = 5;
   friend void swap(NSPanelEntityState& a, NSPanelEntityState& b) { a.Swap(&b); }
   inline void Swap(NSPanelEntityState* other) {
     if (other == this) return;
@@ -1226,11 +1679,13 @@ class NSPanelEntityState final : public ::google::protobuf::Message
   // nested types ----------------------------------------------------
   using Light = NSPanelEntityState_Light;
   using Thermostat = NSPanelEntityState_Thermostat;
+  using MediaPlayer = NSPanelEntityState_MediaPlayer;
 
   // accessors -------------------------------------------------------
   enum : int {
     kLightFieldNumber = 1,
     kThermostatFieldNumber = 2,
+    kMediaPlayerFieldNumber = 3,
   };
   // .NSPanelEntityState.Light light = 1;
   bool has_light() const;
@@ -1270,6 +1725,25 @@ class NSPanelEntityState final : public ::google::protobuf::Message
   ::NSPanelEntityState_Thermostat* _internal_mutable_thermostat();
 
   public:
+  // .NSPanelEntityState.MediaPlayer media_player = 3;
+  bool has_media_player() const;
+  private:
+  bool _internal_has_media_player() const;
+
+  public:
+  void clear_media_player() ;
+  const ::NSPanelEntityState_MediaPlayer& media_player() const;
+  PROTOBUF_NODISCARD ::NSPanelEntityState_MediaPlayer* release_media_player();
+  ::NSPanelEntityState_MediaPlayer* mutable_media_player();
+  void set_allocated_media_player(::NSPanelEntityState_MediaPlayer* value);
+  void unsafe_arena_set_allocated_media_player(::NSPanelEntityState_MediaPlayer* value);
+  ::NSPanelEntityState_MediaPlayer* unsafe_arena_release_media_player();
+
+  private:
+  const ::NSPanelEntityState_MediaPlayer& _internal_media_player() const;
+  ::NSPanelEntityState_MediaPlayer* _internal_mutable_media_player();
+
+  public:
   void clear_entity();
   EntityCase entity_case() const;
   // @@protoc_insertion_point(class_scope:NSPanelEntityState)
@@ -1277,11 +1751,12 @@ class NSPanelEntityState final : public ::google::protobuf::Message
   class _Internal;
   void set_has_light();
   void set_has_thermostat();
+  void set_has_media_player();
   inline bool has_entity() const;
   inline void clear_has_entity();
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      0, 2, 2,
+      0, 3, 3,
       0, 2>
       _table_;
 
@@ -1307,6 +1782,7 @@ class NSPanelEntityState final : public ::google::protobuf::Message
       ::google::protobuf::internal::ConstantInitialized _constinit_;
       ::NSPanelEntityState_Light* light_;
       ::NSPanelEntityState_Thermostat* thermostat_;
+      ::NSPanelEntityState_MediaPlayer* media_player_;
     } entity_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     ::uint32_t _oneof_case_[1];
@@ -2102,6 +2578,496 @@ NSPanelEntityState_Thermostat::_internal_mutable_options() {
 
 // -------------------------------------------------------------------
 
+// NSPanelEntityState_MediaPlayer
+
+// int32 media_player_id = 1;
+inline void NSPanelEntityState_MediaPlayer::clear_media_player_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.media_player_id_ = 0;
+}
+inline ::int32_t NSPanelEntityState_MediaPlayer::media_player_id() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.media_player_id)
+  return _internal_media_player_id();
+}
+inline void NSPanelEntityState_MediaPlayer::set_media_player_id(::int32_t value) {
+  _internal_set_media_player_id(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.media_player_id)
+}
+inline ::int32_t NSPanelEntityState_MediaPlayer::_internal_media_player_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.media_player_id_;
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_media_player_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.media_player_id_ = value;
+}
+
+// string name = 2;
+inline void NSPanelEntityState_MediaPlayer::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+}
+inline const std::string& NSPanelEntityState_MediaPlayer::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelEntityState_MediaPlayer::set_name(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.name)
+}
+inline std::string* NSPanelEntityState_MediaPlayer::mutable_name() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.MediaPlayer.name)
+  return _s;
+}
+inline const std::string& NSPanelEntityState_MediaPlayer::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_name(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.Set(value, GetArena());
+}
+inline std::string* NSPanelEntityState_MediaPlayer::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.name_.Mutable( GetArena());
+}
+inline std::string* NSPanelEntityState_MediaPlayer::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelEntityState.MediaPlayer.name)
+  return _impl_.name_.Release();
+}
+inline void NSPanelEntityState_MediaPlayer::set_allocated_name(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.name_.IsDefault()) {
+          _impl_.name_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelEntityState.MediaPlayer.name)
+}
+
+// .NSPanelEntityState.MediaPlayer.PlaybackState state = 3;
+inline void NSPanelEntityState_MediaPlayer::clear_state() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.state_ = 0;
+}
+inline ::NSPanelEntityState_MediaPlayer_PlaybackState NSPanelEntityState_MediaPlayer::state() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.state)
+  return _internal_state();
+}
+inline void NSPanelEntityState_MediaPlayer::set_state(::NSPanelEntityState_MediaPlayer_PlaybackState value) {
+  _internal_set_state(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.state)
+}
+inline ::NSPanelEntityState_MediaPlayer_PlaybackState NSPanelEntityState_MediaPlayer::_internal_state() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelEntityState_MediaPlayer_PlaybackState>(_impl_.state_);
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_state(::NSPanelEntityState_MediaPlayer_PlaybackState value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.state_ = value;
+}
+
+// string media_title = 4;
+inline void NSPanelEntityState_MediaPlayer::clear_media_title() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.media_title_.ClearToEmpty();
+}
+inline const std::string& NSPanelEntityState_MediaPlayer::media_title() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.media_title)
+  return _internal_media_title();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelEntityState_MediaPlayer::set_media_title(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.media_title_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.media_title)
+}
+inline std::string* NSPanelEntityState_MediaPlayer::mutable_media_title() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_media_title();
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.MediaPlayer.media_title)
+  return _s;
+}
+inline const std::string& NSPanelEntityState_MediaPlayer::_internal_media_title() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.media_title_.Get();
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_media_title(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.media_title_.Set(value, GetArena());
+}
+inline std::string* NSPanelEntityState_MediaPlayer::_internal_mutable_media_title() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.media_title_.Mutable( GetArena());
+}
+inline std::string* NSPanelEntityState_MediaPlayer::release_media_title() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelEntityState.MediaPlayer.media_title)
+  return _impl_.media_title_.Release();
+}
+inline void NSPanelEntityState_MediaPlayer::set_allocated_media_title(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.media_title_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.media_title_.IsDefault()) {
+          _impl_.media_title_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelEntityState.MediaPlayer.media_title)
+}
+
+// string media_artist = 5;
+inline void NSPanelEntityState_MediaPlayer::clear_media_artist() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.media_artist_.ClearToEmpty();
+}
+inline const std::string& NSPanelEntityState_MediaPlayer::media_artist() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.media_artist)
+  return _internal_media_artist();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelEntityState_MediaPlayer::set_media_artist(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.media_artist_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.media_artist)
+}
+inline std::string* NSPanelEntityState_MediaPlayer::mutable_media_artist() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_media_artist();
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.MediaPlayer.media_artist)
+  return _s;
+}
+inline const std::string& NSPanelEntityState_MediaPlayer::_internal_media_artist() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.media_artist_.Get();
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_media_artist(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.media_artist_.Set(value, GetArena());
+}
+inline std::string* NSPanelEntityState_MediaPlayer::_internal_mutable_media_artist() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.media_artist_.Mutable( GetArena());
+}
+inline std::string* NSPanelEntityState_MediaPlayer::release_media_artist() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelEntityState.MediaPlayer.media_artist)
+  return _impl_.media_artist_.Release();
+}
+inline void NSPanelEntityState_MediaPlayer::set_allocated_media_artist(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.media_artist_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.media_artist_.IsDefault()) {
+          _impl_.media_artist_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelEntityState.MediaPlayer.media_artist)
+}
+
+// int32 volume = 6;
+inline void NSPanelEntityState_MediaPlayer::clear_volume() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.volume_ = 0;
+}
+inline ::int32_t NSPanelEntityState_MediaPlayer::volume() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.volume)
+  return _internal_volume();
+}
+inline void NSPanelEntityState_MediaPlayer::set_volume(::int32_t value) {
+  _internal_set_volume(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.volume)
+}
+inline ::int32_t NSPanelEntityState_MediaPlayer::_internal_volume() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.volume_;
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_volume(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.volume_ = value;
+}
+
+// bool is_muted = 7;
+inline void NSPanelEntityState_MediaPlayer::clear_is_muted() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.is_muted_ = false;
+}
+inline bool NSPanelEntityState_MediaPlayer::is_muted() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.is_muted)
+  return _internal_is_muted();
+}
+inline void NSPanelEntityState_MediaPlayer::set_is_muted(bool value) {
+  _internal_set_is_muted(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.is_muted)
+}
+inline bool NSPanelEntityState_MediaPlayer::_internal_is_muted() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.is_muted_;
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_is_muted(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.is_muted_ = value;
+}
+
+// bool has_source_volume = 8;
+inline void NSPanelEntityState_MediaPlayer::clear_has_source_volume() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_source_volume_ = false;
+}
+inline bool NSPanelEntityState_MediaPlayer::has_source_volume() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.has_source_volume)
+  return _internal_has_source_volume();
+}
+inline void NSPanelEntityState_MediaPlayer::set_has_source_volume(bool value) {
+  _internal_set_has_source_volume(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.has_source_volume)
+}
+inline bool NSPanelEntityState_MediaPlayer::_internal_has_source_volume() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.has_source_volume_;
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_has_source_volume(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_source_volume_ = value;
+}
+
+// int32 source_volume = 9;
+inline void NSPanelEntityState_MediaPlayer::clear_source_volume() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.source_volume_ = 0;
+}
+inline ::int32_t NSPanelEntityState_MediaPlayer::source_volume() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.source_volume)
+  return _internal_source_volume();
+}
+inline void NSPanelEntityState_MediaPlayer::set_source_volume(::int32_t value) {
+  _internal_set_source_volume(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.source_volume)
+}
+inline ::int32_t NSPanelEntityState_MediaPlayer::_internal_source_volume() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.source_volume_;
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_source_volume(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.source_volume_ = value;
+}
+
+// bool can_play = 10;
+inline void NSPanelEntityState_MediaPlayer::clear_can_play() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_play_ = false;
+}
+inline bool NSPanelEntityState_MediaPlayer::can_play() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.can_play)
+  return _internal_can_play();
+}
+inline void NSPanelEntityState_MediaPlayer::set_can_play(bool value) {
+  _internal_set_can_play(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.can_play)
+}
+inline bool NSPanelEntityState_MediaPlayer::_internal_can_play() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.can_play_;
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_can_play(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_play_ = value;
+}
+
+// bool can_pause = 11;
+inline void NSPanelEntityState_MediaPlayer::clear_can_pause() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_pause_ = false;
+}
+inline bool NSPanelEntityState_MediaPlayer::can_pause() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.can_pause)
+  return _internal_can_pause();
+}
+inline void NSPanelEntityState_MediaPlayer::set_can_pause(bool value) {
+  _internal_set_can_pause(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.can_pause)
+}
+inline bool NSPanelEntityState_MediaPlayer::_internal_can_pause() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.can_pause_;
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_can_pause(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_pause_ = value;
+}
+
+// bool can_next_track = 12;
+inline void NSPanelEntityState_MediaPlayer::clear_can_next_track() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_next_track_ = false;
+}
+inline bool NSPanelEntityState_MediaPlayer::can_next_track() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.can_next_track)
+  return _internal_can_next_track();
+}
+inline void NSPanelEntityState_MediaPlayer::set_can_next_track(bool value) {
+  _internal_set_can_next_track(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.can_next_track)
+}
+inline bool NSPanelEntityState_MediaPlayer::_internal_can_next_track() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.can_next_track_;
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_can_next_track(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_next_track_ = value;
+}
+
+// bool can_previous_track = 13;
+inline void NSPanelEntityState_MediaPlayer::clear_can_previous_track() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_previous_track_ = false;
+}
+inline bool NSPanelEntityState_MediaPlayer::can_previous_track() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.can_previous_track)
+  return _internal_can_previous_track();
+}
+inline void NSPanelEntityState_MediaPlayer::set_can_previous_track(bool value) {
+  _internal_set_can_previous_track(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.can_previous_track)
+}
+inline bool NSPanelEntityState_MediaPlayer::_internal_can_previous_track() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.can_previous_track_;
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_can_previous_track(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_previous_track_ = value;
+}
+
+// bool can_set_volume = 14;
+inline void NSPanelEntityState_MediaPlayer::clear_can_set_volume() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_set_volume_ = false;
+}
+inline bool NSPanelEntityState_MediaPlayer::can_set_volume() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.can_set_volume)
+  return _internal_can_set_volume();
+}
+inline void NSPanelEntityState_MediaPlayer::set_can_set_volume(bool value) {
+  _internal_set_can_set_volume(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.can_set_volume)
+}
+inline bool NSPanelEntityState_MediaPlayer::_internal_can_set_volume() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.can_set_volume_;
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_can_set_volume(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_set_volume_ = value;
+}
+
+// bool can_mute = 15;
+inline void NSPanelEntityState_MediaPlayer::clear_can_mute() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_mute_ = false;
+}
+inline bool NSPanelEntityState_MediaPlayer::can_mute() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.can_mute)
+  return _internal_can_mute();
+}
+inline void NSPanelEntityState_MediaPlayer::set_can_mute(bool value) {
+  _internal_set_can_mute(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.can_mute)
+}
+inline bool NSPanelEntityState_MediaPlayer::_internal_can_mute() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.can_mute_;
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_can_mute(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_mute_ = value;
+}
+
+// string album_art_url = 16;
+inline void NSPanelEntityState_MediaPlayer::clear_album_art_url() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.album_art_url_.ClearToEmpty();
+}
+inline const std::string& NSPanelEntityState_MediaPlayer::album_art_url() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.album_art_url)
+  return _internal_album_art_url();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelEntityState_MediaPlayer::set_album_art_url(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.album_art_url_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.album_art_url)
+}
+inline std::string* NSPanelEntityState_MediaPlayer::mutable_album_art_url() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_album_art_url();
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.MediaPlayer.album_art_url)
+  return _s;
+}
+inline const std::string& NSPanelEntityState_MediaPlayer::_internal_album_art_url() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.album_art_url_.Get();
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_album_art_url(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.album_art_url_.Set(value, GetArena());
+}
+inline std::string* NSPanelEntityState_MediaPlayer::_internal_mutable_album_art_url() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.album_art_url_.Mutable( GetArena());
+}
+inline std::string* NSPanelEntityState_MediaPlayer::release_album_art_url() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelEntityState.MediaPlayer.album_art_url)
+  return _impl_.album_art_url_.Release();
+}
+inline void NSPanelEntityState_MediaPlayer::set_allocated_album_art_url(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.album_art_url_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.album_art_url_.IsDefault()) {
+          _impl_.album_art_url_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelEntityState.MediaPlayer.album_art_url)
+}
+
+// int32 volume_step = 17;
+inline void NSPanelEntityState_MediaPlayer::clear_volume_step() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.volume_step_ = 0;
+}
+inline ::int32_t NSPanelEntityState_MediaPlayer::volume_step() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.MediaPlayer.volume_step)
+  return _internal_volume_step();
+}
+inline void NSPanelEntityState_MediaPlayer::set_volume_step(::int32_t value) {
+  _internal_set_volume_step(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.MediaPlayer.volume_step)
+}
+inline ::int32_t NSPanelEntityState_MediaPlayer::_internal_volume_step() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.volume_step_;
+}
+inline void NSPanelEntityState_MediaPlayer::_internal_set_volume_step(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.volume_step_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // NSPanelEntityState
 
 // .NSPanelEntityState.Light light = 1;
@@ -2262,6 +3228,85 @@ inline ::NSPanelEntityState_Thermostat* NSPanelEntityState::mutable_thermostat()
   return _msg;
 }
 
+// .NSPanelEntityState.MediaPlayer media_player = 3;
+inline bool NSPanelEntityState::has_media_player() const {
+  return entity_case() == kMediaPlayer;
+}
+inline bool NSPanelEntityState::_internal_has_media_player() const {
+  return entity_case() == kMediaPlayer;
+}
+inline void NSPanelEntityState::set_has_media_player() {
+  _impl_._oneof_case_[0] = kMediaPlayer;
+}
+inline void NSPanelEntityState::clear_media_player() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (entity_case() == kMediaPlayer) {
+    if (GetArena() == nullptr) {
+      delete _impl_.entity_.media_player_;
+    } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.entity_.media_player_);
+    }
+    clear_has_entity();
+  }
+}
+inline ::NSPanelEntityState_MediaPlayer* NSPanelEntityState::release_media_player() {
+  // @@protoc_insertion_point(field_release:NSPanelEntityState.media_player)
+  if (entity_case() == kMediaPlayer) {
+    clear_has_entity();
+    auto* temp = _impl_.entity_.media_player_;
+    if (GetArena() != nullptr) {
+      temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
+    }
+    _impl_.entity_.media_player_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::NSPanelEntityState_MediaPlayer& NSPanelEntityState::_internal_media_player() const {
+  return entity_case() == kMediaPlayer ? *_impl_.entity_.media_player_ : reinterpret_cast<::NSPanelEntityState_MediaPlayer&>(::_NSPanelEntityState_MediaPlayer_default_instance_);
+}
+inline const ::NSPanelEntityState_MediaPlayer& NSPanelEntityState::media_player() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.media_player)
+  return _internal_media_player();
+}
+inline ::NSPanelEntityState_MediaPlayer* NSPanelEntityState::unsafe_arena_release_media_player() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:NSPanelEntityState.media_player)
+  if (entity_case() == kMediaPlayer) {
+    clear_has_entity();
+    auto* temp = _impl_.entity_.media_player_;
+    _impl_.entity_.media_player_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void NSPanelEntityState::unsafe_arena_set_allocated_media_player(::NSPanelEntityState_MediaPlayer* value) {
+  // We rely on the oneof clear method to free the earlier contents
+  // of this oneof. We can directly use the pointer we're given to
+  // set the new value.
+  clear_entity();
+  if (value) {
+    set_has_media_player();
+    _impl_.entity_.media_player_ = value;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:NSPanelEntityState.media_player)
+}
+inline ::NSPanelEntityState_MediaPlayer* NSPanelEntityState::_internal_mutable_media_player() {
+  if (entity_case() != kMediaPlayer) {
+    clear_entity();
+    set_has_media_player();
+    _impl_.entity_.media_player_ =
+        ::google::protobuf::Message::DefaultConstruct<::NSPanelEntityState_MediaPlayer>(GetArena());
+  }
+  return _impl_.entity_.media_player_;
+}
+inline ::NSPanelEntityState_MediaPlayer* NSPanelEntityState::mutable_media_player() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::NSPanelEntityState_MediaPlayer* _msg = _internal_mutable_media_player();
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.media_player)
+  return _msg;
+}
+
 inline bool NSPanelEntityState::has_entity() const {
   return entity_case() != ENTITY_NOT_SET;
 }
@@ -2286,6 +3331,12 @@ struct is_proto_enum<::NSPanelEntityState_Light_LightMode> : std::true_type {};
 template <>
 inline const EnumDescriptor* GetEnumDescriptor<::NSPanelEntityState_Light_LightMode>() {
   return ::NSPanelEntityState_Light_LightMode_descriptor();
+}
+template <>
+struct is_proto_enum<::NSPanelEntityState_MediaPlayer_PlaybackState> : std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor<::NSPanelEntityState_MediaPlayer_PlaybackState>() {
+  return ::NSPanelEntityState_MediaPlayer_PlaybackState_descriptor();
 }
 
 }  // namespace protobuf

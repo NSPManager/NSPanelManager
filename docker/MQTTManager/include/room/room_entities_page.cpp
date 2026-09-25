@@ -2,6 +2,7 @@
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include "light/light.hpp"
+#include "media_player/media_player.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_nspanel.pb.h"
@@ -231,6 +232,18 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
       entity_slot->set_id(thermostat->get_id());
 
       SPDLOG_DEBUG("Thermostat icon: {} (0x{:X})", entity_slot->icon(), entity_slot->icon()[0]);
+    } else if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::MEDIA_PLAYER) {
+      std::shared_ptr<MediaPlayerEntity> media_player = std::static_pointer_cast<MediaPlayerEntity>(entity);
+      NSPanelRoomEntitiesPage_EntitySlot *entity_slot = proto_state.add_entities();
+      entity_slot->set_name(media_player->get_name());
+      entity_slot->set_room_view_position(i);
+      entity_slot->set_icon(media_player->get_icon());
+      entity_slot->set_pco(media_player->get_icon_color());
+      entity_slot->set_pco2(media_player->get_icon_active_color());
+      entity_slot->set_can_save_scene(false); // Entity is not a scene.
+      entity_slot->set_mqtt_state_topic(media_player->get_mqtt_state_topic());
+      entity_slot->set_type(NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_MEDIA_PLAYER);
+      entity_slot->set_id(media_player->get_id());
     } else {
       SPDLOG_ERROR("Unknown entity type {} while processing EntityWrapper while building NSPanelRoomEntitiesPage protobuf object.", (int)entity->get_type());
     }

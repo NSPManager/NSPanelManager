@@ -33,6 +33,7 @@ typedef struct NSPanelMQTTManagerCommand__SaveSceneCommand NSPanelMQTTManagerCom
 typedef struct NSPanelMQTTManagerCommand__ButtonPressed NSPanelMQTTManagerCommand__ButtonPressed;
 typedef struct NSPanelMQTTManagerCommand__ThermostatTemperatureCommand NSPanelMQTTManagerCommand__ThermostatTemperatureCommand;
 typedef struct NSPanelMQTTManagerCommand__ThermostatCommand NSPanelMQTTManagerCommand__ThermostatCommand;
+typedef struct NSPanelMQTTManagerCommand__MediaPlayerCommand NSPanelMQTTManagerCommand__MediaPlayerCommand;
 
 
 /* --- enums --- */
@@ -81,9 +82,18 @@ typedef enum _NSPanelRoomEntitiesPage__EntitySlot__EntityType {
   NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_SWITCH = 2,
   NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_BUTTON = 3,
   NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_THERMOSTAT = 4,
-  NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_SCENE = 5
+  NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_SCENE = 5,
+  NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_MEDIA_PLAYER = 6
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE)
 } NSPanelRoomEntitiesPage__EntitySlot__EntityType;
+typedef enum _NSPanelMQTTManagerCommand__MediaPlayerCommand__PlaybackAction {
+  NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION__NONE = 0,
+  NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION__PLAY = 1,
+  NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION__PAUSE = 2,
+  NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION__NEXT_TRACK = 3,
+  NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION__PREVIOUS_TRACK = 4
+    PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION)
+} NSPanelMQTTManagerCommand__MediaPlayerCommand__PlaybackAction;
 typedef enum _NSPanelMQTTManagerCommand__AffectLightsOptions {
   NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__ALL = 0,
   NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__TABLE_LIGHTS = 1,
@@ -434,6 +444,29 @@ struct  NSPanelMQTTManagerCommand__ThermostatCommand
     , 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string }
 
 
+struct  NSPanelMQTTManagerCommand__MediaPlayerCommand
+{
+  ProtobufCMessage base;
+  int32_t media_player_id;
+  NSPanelMQTTManagerCommand__MediaPlayerCommand__PlaybackAction playback_action;
+  protobuf_c_boolean has_volume;
+  /*
+   * Volume in 0-100%
+   */
+  int32_t volume;
+  protobuf_c_boolean has_source_volume;
+  /*
+   * Volume in 0-100%
+   */
+  int32_t source_volume;
+  protobuf_c_boolean has_muted;
+  protobuf_c_boolean muted;
+};
+#define NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__media_player_command__descriptor) \
+    , 0, NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION__NONE, 0, 0, 0, 0, 0, 0 }
+
+
 typedef enum {
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__NOT_SET = 0,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_ON = 1,
@@ -443,7 +476,8 @@ typedef enum {
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_SAVE_SCENE_COMMAND = 5,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_BUTTON_PRESSED = 6,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_TEMPERATURE_COMMAND = 7,
-  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_COMMAND = 8
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_COMMAND = 8,
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_MEDIA_PLAYER_COMMAND = 9
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__CASE)
 } NSPanelMQTTManagerCommand__CommandDataCase;
 
@@ -464,6 +498,7 @@ struct  NSPanelMQTTManagerCommand
     NSPanelMQTTManagerCommand__ButtonPressed *button_pressed;
     NSPanelMQTTManagerCommand__ThermostatTemperatureCommand *thermostat_temperature_command;
     NSPanelMQTTManagerCommand__ThermostatCommand *thermostat_command;
+    NSPanelMQTTManagerCommand__MediaPlayerCommand *media_player_command;
   };
 };
 #define NSPANEL_MQTTMANAGER_COMMAND__INIT \
@@ -618,6 +653,9 @@ void   nspanel_mqttmanager_command__thermostat_temperature_command__init
 /* NSPanelMQTTManagerCommand__ThermostatCommand methods */
 void   nspanel_mqttmanager_command__thermostat_command__init
                      (NSPanelMQTTManagerCommand__ThermostatCommand         *message);
+/* NSPanelMQTTManagerCommand__MediaPlayerCommand methods */
+void   nspanel_mqttmanager_command__media_player_command__init
+                     (NSPanelMQTTManagerCommand__MediaPlayerCommand         *message);
 /* NSPanelMQTTManagerCommand methods */
 void   nspanel_mqttmanager_command__init
                      (NSPanelMQTTManagerCommand         *message);
@@ -690,6 +728,9 @@ typedef void (*NSPanelMQTTManagerCommand__ThermostatTemperatureCommand_Closure)
 typedef void (*NSPanelMQTTManagerCommand__ThermostatCommand_Closure)
                  (const NSPanelMQTTManagerCommand__ThermostatCommand *message,
                   void *closure_data);
+typedef void (*NSPanelMQTTManagerCommand__MediaPlayerCommand_Closure)
+                 (const NSPanelMQTTManagerCommand__MediaPlayerCommand *message,
+                  void *closure_data);
 typedef void (*NSPanelMQTTManagerCommand_Closure)
                  (const NSPanelMQTTManagerCommand *message,
                   void *closure_data);
@@ -723,6 +764,8 @@ extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__save_scene_
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__button_pressed__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_temperature_command__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_command__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__media_player_command__descriptor;
+extern const ProtobufCEnumDescriptor    nspanel_mqttmanager_command__media_player_command__playback_action__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_mqttmanager_command__affect_lights_options__descriptor;
 
 PROTOBUF_C__END_DECLS
