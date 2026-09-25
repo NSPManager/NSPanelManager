@@ -3,8 +3,6 @@ Creating and editing entities through the /rest/entities/* endpoints, using the 
 payloads the React "add/edit entity" modal sends.
 """
 
-from unittest import expectedFailure
-
 from django.urls import reverse
 
 from web.models import Entity, Scene
@@ -84,6 +82,11 @@ class EntityRESTCommonTests:
     def test_edit_unknown_id_is_rejected(self):
         self.assertCreatesNothing(self.save(self.payload(id=999)))
 
+    def test_other_methods_are_rejected(self):
+        # POST carries a valid payload, so only the method check can stop it being saved.
+        self.assertEqual(self.client.get(reverse(self.url)).status_code, 405)
+        self.assertCreatesNothing(self.post_json(reverse(self.url), self.payload()))
+
     def test_add_to_occupied_slot_is_rejected(self):
         self.save(self.payload(slot=0))
 
@@ -149,11 +152,6 @@ class LightTests(EntityRESTCommonTests, EntityRESTTestCase):
 
         data = Entity.objects.get().entity_data
         self.assertEqual((data["can_dim"], data["can_rgb"], data["is_ceiling_light"]), (False, True, False))
-
-    def test_other_methods_are_rejected(self):
-        self.assertRejected(self.client.get(reverse(self.url)))
-        self.assertRejected(self.client.post(reverse(self.url), {}))
-        self.assertFalse(Entity.objects.exists())
 
     def test_unknown_controller_is_rejected(self):
         self.assertCreatesNothing(self.save(self.payload(controller="zigbee")))
@@ -284,12 +282,6 @@ class ThermostatTests(EntityRESTCommonTests, EntityRESTTestCase):
 
     def test_non_numeric_step_size_is_rejected(self):
         self.assertCreatesNothing(self.save(self.payload(step_size="lots")))
-
-    @expectedFailure
-    def test_other_methods_are_rejected(self):
-        # KNOWN GAP: the method check in entities_thermostats() is commented out, so any
-        # method is handled as a save. A GET only fails because it has no JSON body.
-        self.assertEqual(self.client.get(reverse(self.url)).status_code, 405)
 
 
 class SceneTests(EntityRESTCommonTests, EntityRESTTestCase):

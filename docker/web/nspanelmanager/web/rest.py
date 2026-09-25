@@ -868,7 +868,7 @@ def entities_lights(request):
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=405)
 
 
 def put_light_entity(request):
@@ -952,7 +952,7 @@ def entities_switches(request):
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=405)
 
 
 def put_switch_entity(request):
@@ -1021,7 +1021,7 @@ def entities_buttons(request):
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=405)
 
 
 def put_button_entity(request):
@@ -1087,12 +1087,12 @@ def put_button_entity(request):
 
 def entities_thermostats(request):
     try:
-        # if request.method == "PUT":
-        return put_thermostat_entity(request)
+        if request.method == "PUT":
+            return put_thermostat_entity(request)
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=405)
 
 
 def put_thermostat_entity(request):
@@ -1318,12 +1318,12 @@ def put_media_player_entity(request):
 
 def entities_scenes(request):
     try:
-        # if request.method == "PUT":
-        return put_scene_entity(request)
+        if request.method == "PUT":
+            return put_scene_entity(request)
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=405)
 
 
 def put_scene_entity(request):
