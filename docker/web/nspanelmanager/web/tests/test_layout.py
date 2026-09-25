@@ -102,17 +102,14 @@ class MoveEntityTests(NSPMTestCase):
     def test_other_methods_are_rejected(self):
         self.assertEqual(self.client.get(reverse("rest_put_room_entities_order", kwargs={"room_id": self.room.id})).status_code, 405)
 
-    @expectedFailure
     def test_failed_reorder_changes_nothing(self):
-        # KNOWN GAP: the reorder is not atomic. Entities before the bad entry in the list are
-        # already saved when it fails, so the DB is left half-reordered, and MQTTManager is
-        # not told to reload.
         light = self.make_light(self.room, slot=0)
 
         response = self.save_order([position(light, self.page, 3), {"id": 999, "entities_page_id": self.page.id, "room_view_position": 0}])
 
         self.assertRejected(response)
         self.assertAt(light, self.page, 0)
+        self.assertManagerNotReloaded()
 
     @expectedFailure
     def test_move_to_slot_outside_page_is_rejected(self):

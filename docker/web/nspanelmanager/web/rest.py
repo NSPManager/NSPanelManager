@@ -278,16 +278,18 @@ def put_room_entities_order(request, room_id):
     if request.method == "PUT":
         try:
             data = json.loads(request.body)
-            for entity in data["entities"]:
-                db_entity = Entity.objects.get(id=entity["id"])
-                db_entity.room_view_position = entity["room_view_position"]
-                db_entity.entities_page_id = entity["entities_page_id"]
-                db_entity.save()
-            for scene in data["scenes"]:
-                db_scene = Scene.objects.get(id=scene["id"])
-                db_scene.room_view_position = scene["room_view_position"]
-                db_scene.entities_page_id = scene["entities_page_id"]
-                db_scene.save()
+            # All or nothing: a bad entry must not leave the entries before it already moved.
+            with transaction.atomic():
+                for entity in data["entities"]:
+                    db_entity = Entity.objects.get(id=entity["id"])
+                    db_entity.room_view_position = entity["room_view_position"]
+                    db_entity.entities_page_id = entity["entities_page_id"]
+                    db_entity.save()
+                for scene in data["scenes"]:
+                    db_scene = Scene.objects.get(id=scene["id"])
+                    db_scene.room_view_position = scene["room_view_position"]
+                    db_scene.entities_page_id = scene["entities_page_id"]
+                    db_scene.save()
             send_mqttmanager_reload_command()
             return JsonResponse({"status": "ok"}, status=200)
         except Exception as ex:
