@@ -7,6 +7,7 @@ from re import A
 
 import requests
 from django.core.files.storage import FileSystemStorage
+from django.db import transaction
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -18,7 +19,7 @@ from web.settings_helper import (
     set_setting_value,
 )
 
-from .apps import send_mqttmanager_reload_command
+from .apps import create_entity_pages_for_room, send_mqttmanager_reload_command
 from .models import Entity, LightState, NSPanel, RelayGroup, Room, RoomEntitiesPage, Scene, Settings
 
 ########################
@@ -524,7 +525,12 @@ def room_delete(request, room_id):
     if request.method == "DELETE":
         try:
             room = Room.objects.get(id=room_id)
+            # Panels are not deleted with their room. As in the UI's delete_room view, move them to another room.
+            new_room = Room.objects.exclude(id=room.id).first()
+            if new_room:
+                NSPanel.objects.filter(room=room).update(room=new_room)
             room.delete()
+            send_mqttmanager_reload_command()
             return JsonResponse({"status": "ok", "room_id": room_id}, status=200)
         except Exception as ex:
             logging.exception(ex)
@@ -575,9 +581,15 @@ def room_create(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            new_room = Room()
-            new_room.friendly_name = data["name"]
-            new_room.save()
+            max_length = Room._meta.get_field("friendly_name").max_length
+            if not data["name"] or len(data["name"]) > max_length:
+                return JsonResponse({"status": "error", "message": f"Room name must be 1 to {max_length} characters"}, status=400)
+            with transaction.atomic():
+                new_room = Room()
+                new_room.friendly_name = data["name"]
+                new_room.save()
+                create_entity_pages_for_room(new_room)
+            send_mqttmanager_reload_command()
             return JsonResponse({"status": "ok", "room_id": new_room.id}, status=200)
         except Exception as ex:
             logging.exception(ex)

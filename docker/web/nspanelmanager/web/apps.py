@@ -74,28 +74,34 @@ def send_mqttmanager_reload_command():
 
 
 def create_entity_pages_for_all_rooms():
-    from .models import Room, RoomEntitiesPage
+    from .models import Room
 
     for room in Room.objects.all():
-        # Check if an existing scenes page exists, if it does not, create one
-        existing_pages = RoomEntitiesPage.objects.filter(room=room, is_scenes_page=True)
-        if not existing_pages.exists():
-            page = RoomEntitiesPage()
-            page.room = room
-            page.display_order = 0
-            page.page_type = 4
-            page.is_scenes_page = True
-            page.save()
+        create_entity_pages_for_room(room)
 
-        # Check if an existing entities page exists, if it doesn not, create one.
-        existing_pages = RoomEntitiesPage.objects.filter(room=room, is_scenes_page=False)
-        if not existing_pages.exists():
-            page = RoomEntitiesPage()
-            page.room = room
-            page.display_order = 0
-            page.page_type = 4
-            page.is_scenes_page = False
-            page.save()
+
+def create_entity_pages_for_room(room):
+    from .models import RoomEntitiesPage
+
+    # Check if an existing scenes page exists, if it does not, create one
+    existing_pages = RoomEntitiesPage.objects.filter(room=room, is_scenes_page=True)
+    if not existing_pages.exists():
+        page = RoomEntitiesPage()
+        page.room = room
+        page.display_order = 0
+        page.page_type = 4
+        page.is_scenes_page = True
+        page.save()
+
+    # Check if an existing entities page exists, if it doesn not, create one.
+    existing_pages = RoomEntitiesPage.objects.filter(room=room, is_scenes_page=False)
+    if not existing_pages.exists():
+        page = RoomEntitiesPage()
+        page.room = room
+        page.display_order = 0
+        page.page_type = 4
+        page.is_scenes_page = False
+        page.save()
 
 
 def create_global_scenes_page():

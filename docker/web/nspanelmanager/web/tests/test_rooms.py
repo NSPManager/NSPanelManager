@@ -1,5 +1,4 @@
 import json
-from unittest import expectedFailure
 
 from django.urls import reverse
 
@@ -144,10 +143,7 @@ class RoomRESTTests(NSPMTestCase):
 
         self.assertEqual(response.json()["rooms"], [{"id": lounge.id, "name": "Lounge"}])
 
-    @expectedFailure
     def test_delete_room_reloads_manager(self):
-        # KNOWN GAP: unlike the UI's delete_room view, DELETE /rest/rooms/<id> never calls
-        # send_mqttmanager_reload_command(), and does not move the room's panels elsewhere.
         room = self.make_room("Office")
         self.make_room("Lounge")
 
@@ -155,19 +151,23 @@ class RoomRESTTests(NSPMTestCase):
 
         self.assertManagerReloaded(times=1)
 
-    @expectedFailure
+    def test_delete_room_rehomes_panels(self):
+        office = self.make_room("Office")
+        lounge = self.make_room("Lounge")
+        panel = self.make_panel(office)
+
+        self.client.delete(reverse("rest_room_delete", kwargs={"room_id": office.id}))
+
+        panel.refresh_from_db()
+        self.assertEqual(panel.room, lounge)
+
     def test_created_room_has_entity_pages(self):
-        # KNOWN GAP: unlike the UI, the REST API creates a room with no entities/scenes
-        # pages. They only appear after the next restart (create_entity_pages_for_all_rooms).
         response = self.post_json(reverse("rest_rooms_create"), {"name": "Office"})
 
         room_id = response.json()["room_id"]
         self.assertEqual(RoomEntitiesPage.objects.filter(room_id=room_id).count(), 2)
 
-    @expectedFailure
     def test_create_room_rejects_overlong_name(self):
-        # KNOWN GAP: Room.friendly_name is max_length=30 but nothing validates it and
-        # SQLite does not enforce VARCHAR lengths, so any length is stored.
         response = self.post_json(reverse("rest_rooms_create"), {"name": "x" * 100})
 
         self.assertRejected(response)
