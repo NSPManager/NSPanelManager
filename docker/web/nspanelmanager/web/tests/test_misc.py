@@ -5,7 +5,7 @@ modal, hostname lookup and read-only listings.
 
 import json
 import socket
-from unittest import expectedFailure, mock
+from unittest import mock
 
 from django.urls import reverse
 
@@ -153,10 +153,7 @@ class ReadOnlyListingTests(NSPMTestCase):
         self.assertEqual(self.client.get(reverse("get_scenes")).json()["scenes"][0]["scene_id"], scene.id)
         self.assertEqual(self.client.get(reverse("get_nspanel_config", kwargs={"room_id": self.room.id})).json()["name"], "Kitchen")
 
-    @expectedFailure
     def test_scenes_listing_filters_by_scene_id(self):
-        # KNOWN BUG: scenes_get() checks for a "light_id" parameter but then filters on
-        # "scene_id", so ?scene_id=N is ignored and every scene is returned.
         scene = self.make_scene(self.room, "Dinner")
         self.make_scene(self.room, "Breakfast")
 

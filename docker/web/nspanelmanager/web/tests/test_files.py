@@ -6,7 +6,6 @@ endpoints panels use to decide whether to update and to fetch the image.
 import hashlib
 import shutil
 import tempfile
-from unittest import expectedFailure
 
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import override_settings
@@ -93,13 +92,13 @@ class FirmwareTests(FileTestCase):
 
         self.assertManagerNotReloaded()
 
-    @expectedFailure
     def test_checksum_of_missing_image_is_not_found(self):
-        # KNOWN GAP: when no image has been uploaded the checksum endpoints return HTTP 200 with
-        # the body "None" (str(None)), which a panel cannot tell apart from a real checksum.
-        response = self.client.get(reverse("checksum_firmware"))
-
-        self.assertEqual(response.status_code, 404)
+        panel = self.make_panel(self.make_room())
+        for url in (reverse("checksum_firmware"), reverse("checksum_data_file"), reverse("checksum_tft_file", kwargs={"panel_id": panel.id})):
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 404)
+                self.assertEqual(response.content, b"")
 
 
 class DataFileTests(FileTestCase):

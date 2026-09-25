@@ -221,12 +221,9 @@ def settings_get(request):
     settings = {}
     for setting in Settings.objects.all():
         settings[setting.name] = setting.value
-    settings["home_assistant_token_set"] = settings.get("home_assistant_token", "") != ""
-    del settings["home_assistant_token"]
-    settings["openhab_token_set"] = settings.get("openhab_token", "") != ""
-    del settings["openhab_token"]
-    settings["mqtt_password_set"] = settings.get("mqtt_password", "") != ""
-    del settings["mqtt_password"]
+    # Never return secrets, only whether they are set. Any of them may never have been saved.
+    for secret in ("home_assistant_token", "openhab_token", "mqtt_password"):
+        settings[f"{secret}_set"] = settings.pop(secret, "") != ""
     return JsonResponse({"status": "ok", "settings": settings}, status=200)
 
 
@@ -671,7 +668,7 @@ def scenes(request):
 def scenes_get(request):
     try:
         scenes = []
-        if request.GET.get("light_id"):
+        if request.GET.get("scene_id"):
             scenes_objects = Scene.objects.filter(id=request.GET.get("scene_id"))
         elif request.GET.get("room_id"):
             scenes_objects = Scene.objects.filter(room_id=request.GET.get("room_id"))

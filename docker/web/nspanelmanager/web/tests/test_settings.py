@@ -3,8 +3,6 @@ Global settings: the settings page form, weather & time, theme, the first-run se
 wizard, the settings REST endpoints and web.settings_helper.
 """
 
-from unittest import expectedFailure
-
 from django.urls import reverse
 
 from web.models import NSPanelSettings, Settings
@@ -230,14 +228,16 @@ class SettingsRESTTests(NSPMTestCase):
     def test_settings_endpoint_is_read_only(self):
         self.assertEqual(self.client.post(reverse("rest_settings")).status_code, 405)
 
-    @expectedFailure
     def test_settings_endpoint_works_before_all_secrets_are_set(self):
-        # KNOWN BUG: settings_get() does `del settings["openhab_token"]` (and the same for the
-        # other secrets) without checking the key exists, so it returns 500 until every
-        # secret setting has been saved at least once, e.g. if OpenHAB was never configured.
         set_setting_value("mqtt_password", "hunter2")
 
-        self.assertEqual(self.client.get(reverse("rest_settings")).status_code, 200)
+        response = self.client.get(reverse("rest_settings"))
+
+        self.assertEqual(response.status_code, 200)
+        settings = response.json()["settings"]
+        self.assertEqual((settings["mqtt_password_set"], settings["home_assistant_token_set"], settings["openhab_token_set"]), (True, True, False))
+        self.assertNotIn("mqtt_password", settings)
+        self.assertNotIn("home_assistant_token", settings)
 
     def test_mqttmanager_can_read_a_setting(self):
         set_setting_value("color_temp_min", "2000")
