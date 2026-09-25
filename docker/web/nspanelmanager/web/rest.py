@@ -103,7 +103,7 @@ banned_setting_keys = [
 
 
 def mqttmanager_get_setting(request, setting_key):
-    if setting_key in banned_setting_keys:
+    if setting_key.upper() in banned_setting_keys:
         return JsonResponse({"status": "error"}, status=403)  # Return error forbidden
 
     try:

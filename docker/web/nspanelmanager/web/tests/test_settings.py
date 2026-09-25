@@ -264,11 +264,9 @@ class SettingsRESTTests(NSPMTestCase):
                 self.assertEqual(self.client.get(reverse("rest_mqttmanager_get_setting", kwargs={"setting_key": key})).status_code, 403)
         self.assertEqual(self.post_json(reverse("rest_mqttmanager_settings_post"), {"settings": ["color_temp_min", "OPENHAB_TOKEN"]}).status_code, 403)
 
-    @expectedFailure
     def test_mqttmanager_settings_endpoint_refuses_secrets(self):
-        # KNOWN BUG: banned_setting_keys in rest.py is upper case ("HOME_ASSISTANT_TOKEN") but
-        # settings are stored lower case ("home_assistant_token") and the check is
-        # case-sensitive, so the secrets it is meant to protect are returned.
+        # banned_setting_keys is upper case but settings are stored lower case, so the check
+        # must be case-insensitive or the secrets it protects are returned.
         self.configure_secrets()
 
         for key in ("mqtt_password", "home_assistant_token", "openhab_token"):
