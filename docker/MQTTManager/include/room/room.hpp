@@ -137,7 +137,7 @@ private:
   std::thread _update_room_state_thread;
   std::mutex _status_update_mutex;
   std::condition_variable _room_update_condition_variable;
-  std::atomic<bool> _room_status_updated = false;
+  bool _room_status_updated = false;
 
   /*
    * Create a protobuf room state object and send out to _mqtt_state_topic.

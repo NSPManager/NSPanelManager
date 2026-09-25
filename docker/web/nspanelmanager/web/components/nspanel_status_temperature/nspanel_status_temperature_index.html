@@ -1,0 +1,41 @@
+<script type="module">
+  import { define, html } from '/static/node_modules/hybrids/src/index.js';
+
+  stomp_subscribe("nspanel/{{ nspanel.mac_address }}/status", (message) => {
+    var element = document.getElementById(`nspanel-temperature-status-{{ nspanel.id }}`);
+    var data = JSON.parse(message.body);
+    element.state = data.state;
+    element.temperature = Math.round(data.temperature*10)/10;
+  })
+
+  define({
+    tag: "nspanel-temperature-status",
+    nspanel_id: '',
+    state: '',
+    temperature: '',
+    temperature_unit: '',
+    render: ({id, nspanel_id, state, temperature, temperature_unit}) => {
+      if (state == "offline" || state == "unknown") {
+        return html`
+           <div class="icon-text">
+                <span class="icon me-1">
+                    <i class="mdi mdi-thermometer"></i>
+                </span>
+                <span id="temperature-${nspanel_id}" class="text-sm">?${temperature_unit}</span>
+            </div>
+        `;
+      } else {
+        return html`
+            <div class="icon-text">
+                <span class="icon me-1">
+                    <i class="mdi mdi-thermometer"></i>
+                </span>
+                <span id="temperature-${nspanel_id}" class="text-sm">${temperature}${temperature_unit}</span>
+            </div>
+        `;
+      }
+    },
+  })
+</script>
+
+<nspanel-temperature-status id="nspanel-temperature-status-{{ nspanel.id }}" nspanel_id="{{ nspanel.id }}" state="" temperature="" temperature_unit="{{ temperature_unit }}"></nspanel-temperature-status>

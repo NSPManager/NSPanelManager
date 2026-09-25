@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAvailableEntitiesStore } from "../../../stores/AvailableEntitiesStore";
 import { type IOptionType } from "../../../stores/AvailableEntitiesStore";
 import { useEntitiesPagesStore } from "../../../stores/EntitiesPagesStore";
-import { Notify } from "../../NSPanelToastContainer";
 
 const schema = z.object({
   id: z.number().nullable(),
@@ -125,6 +124,7 @@ const MultiStep_AddEditEntity_Step3_Light = ({
 
   function onSave(values: LightFormData) {
     // PUT request using fetch with error handling
+    console.log("Updating entity with data:", values);
     fetch("/rest/entities/lights", {
       credentials: "same-origin",
       method: "PUT",
@@ -136,6 +136,7 @@ const MultiStep_AddEditEntity_Step3_Light = ({
     })
       .then(async (response) => {
         const data = await response.json();
+        console.log("Entity created/updated. Got response:", data);
 
         // check for error response
         if (!response.ok) {
@@ -147,11 +148,11 @@ const MultiStep_AddEditEntity_Step3_Light = ({
       })
       .catch((error) => {
         // setErrorMessage(error);
-        Notify({ message: `Error saving entity. Error: ${error}`, level: "error", duration: 10000 });
+        console.error("There was an error!", error);
       });
   }
 
-  const classNames: ClassNamesConfig<IOptionType, false, GroupBase<IOptionType>> = {
+  const classNames: ClassNamesConfig<{ value: string; label: string }, false, GroupBase<{ value: string; label: string }>> = {
     control: (state) => `${state.isFocused ? "border" : "border-0"} border-accent p-2.5 text-sm rounded-box bg-base-300 rounded-md`,
     menu: () => "bg-base-300 p-2.5 rounded-box",
     option: (state) => `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`,

@@ -43,15 +43,15 @@ uint16_t ThermostatEntity::get_room_id() {
 }
 
 void ThermostatEntity::reload_config() {
-  auto thermostat_entity = database_manager::database.get<database_manager::Entity>(this->_id);
-  this->_name = thermostat_entity.friendly_name;
+  auto switch_entity = database_manager::database.get<database_manager::Entity>(this->_id);
+  this->_name = switch_entity.friendly_name;
   SPDLOG_DEBUG("Loading thermostat {}::{}.", this->_id, this->_name);
 
-  this->_room_id = thermostat_entity.room_id;
-  this->_entity_page_id = thermostat_entity.entities_page_id;
-  this->_entity_page_slot = thermostat_entity.room_view_position;
+  this->_room_id = switch_entity.room_id;
+  this->_entity_page_id = switch_entity.entities_page_id;
+  this->_entity_page_slot = switch_entity.room_view_position;
 
-  nlohmann::json entity_data = thermostat_entity.get_entity_data_json();
+  nlohmann::json entity_data = switch_entity.get_entity_data_json();
   if (entity_data.contains("controller")) {
     std::string controller = entity_data["controller"];
     if (controller.compare("home_assistant") == 0) {
@@ -77,10 +77,6 @@ void ThermostatEntity::reload_config() {
     } catch (std::exception &ex) {
       SPDLOG_ERROR("Caught exception while trying to set step size for {}::{}. Error: {}", this->_id, this->_name, ex.what());
     }
-  }
-
-  if (entity_data.contains("use_current_temperature") && entity_data.at("use_current_temperature").is_boolean()) {
-    this->_use_current_temperature = entity_data.at("use_current_temperature").get<bool>();
   }
 
   this->_supported_fan_modes.clear();
@@ -323,17 +319,12 @@ void ThermostatEntity::send_state_update_to_nspanel() {
   th_status->set_step_size(this->_step_size);
   th_status->set_has_current_temperature(false);
 
-  if (this->_use_current_temperature && this->_current_temperature_sensor_available) {
-    th_status->set_current_temperature(this->_current_temperature_sensor);
-    th_status->set_has_current_temperature(true);
-  } else {
-    auto room = EntityManager::get_room(this->_room_id);
-    if (room && (*room)->has_temperature_sensor()) {
-      auto room_temp = (*room)->get_temperature();
-      if (room_temp) {
-        th_status->set_current_temperature(*room_temp);
-        th_status->set_has_current_temperature(true);
-      }
+  auto room = EntityManager::get_room(this->_room_id);
+  if (room && (*room)->has_temperature_sensor()) {
+    auto room_temp = (*room)->get_temperature();
+    if (room_temp) {
+      th_status->set_current_temperature(*room_temp);
+      th_status->set_has_current_temperature(true);
     }
   }
 

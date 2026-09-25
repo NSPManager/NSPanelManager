@@ -6,7 +6,6 @@
 #include "thermostat/thermostat.hpp"
 #include <boost/bind.hpp>
 #include <boost/exception/diagnostic_information.hpp>
-#include <charconv>
 #include <cstdint>
 #include <gtest/gtest.h>
 #include <home_assistant_manager/home_assistant_manager.hpp>
@@ -158,7 +157,6 @@ void HomeAssistantThermostat::home_assistant_event_callback(nlohmann::json data)
       nlohmann::json new_state_data = data["event"]["data"]["new_state"];
       nlohmann::json new_state_attributes = new_state_data["attributes"];
       bool changed_attribute = false;
-      // SPDLOG_DEBUG("Event data new_state: {}", new_state_data.dump(4));
 
       try {
         if (new_state_data.contains("state") && !new_state_data["state"].is_null()) {
@@ -246,27 +244,17 @@ void HomeAssistantThermostat::home_assistant_event_callback(nlohmann::json data)
           }
         }
 
-        if (this->_use_current_temperature && new_state_attributes.contains("current_temperature") && !new_state_attributes["current_temperature"].is_null()) {
-          float temperature = new_state_attributes.at("current_temperature").get<float>();
-          if (temperature != this->_current_temperature_sensor) {
-            this->_current_temperature_sensor = temperature;
-            this->_current_temperature_sensor_available = true;
-            changed_attribute = true;
-            SPDLOG_DEBUG("Thermostat {}::{} got new temperature sensor reading: {}", this->_id, this->_name, temperature);
-          }
-        }
-
         if (new_state_attributes.contains("temperature") && !new_state_attributes["temperature"].is_null()) {
           float temperature = new_state_attributes.at("temperature").get<float>();
           if (temperature != this->_current_temperature) {
             this->_current_temperature = temperature;
-            this->_requested_temperature = temperature;
             changed_attribute = true;
-            SPDLOG_DEBUG("Thermostat {}::{} got new target temperature: {}", this->_id, this->_name, temperature);
+            SPDLOG_DEBUG("Thermostat {}::{} got new temperature: {}", this->_id, this->_name, temperature);
           }
         } else {
           SPDLOG_WARN("Received state update for {}::{} but update has no valid set temperature.", this->_id, this->_name);
         }
+
       } catch (std::exception &e) {
         SPDLOG_ERROR("Caught exception when trying to update state for light {}::{} message: {}. Working data: {}", this->_id, this->_name, boost::diagnostic_information(e, true), new_state_attributes.dump());
       }

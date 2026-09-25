@@ -41,3 +41,8 @@ firmware/NSPanelManagerFirmware/CMakeLists.txt
 
 # MacOS
 .DS_Store
+
+# Ignore only neccesary files from LaTeX manual
+docs/tex/*
+!docs/tex/*.pdf
+!docs/tex/*.tex

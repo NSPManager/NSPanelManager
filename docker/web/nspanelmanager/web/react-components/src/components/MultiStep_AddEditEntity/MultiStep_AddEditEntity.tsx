@@ -11,7 +11,6 @@ import { useEntitiesPagesStore } from "../../stores/EntitiesPagesStore";
 import { useSettingsStore } from "../../stores/SettingsStore";
 import { AnimatePresence } from "framer-motion";
 import { motion } from "framer-motion";
-import { Notify } from "../NSPanelToastContainer";
 // import Step2 from "./step2_select_controller";
 // import Step3 from "./Step3";
 
@@ -117,9 +116,9 @@ const MultiStep_AddOrEditEntity = ({
       if (maxHeightString.endsWith("%")) {
         // Convert percentage to pixels based on window height
         maxHeight = Math.trunc((window.innerHeight * maxHeight) / 100);
+        contentRef.current.classList.toggle("overflow-y-auto", contentRef.current.scrollHeight > maxHeight);
+        contentRef.current.classList.toggle("overflow-y-visible", contentRef.current.scrollHeight <= maxHeight);
       }
-      contentRef.current.classList.toggle("overflow-y-auto", contentRef.current.scrollHeight > maxHeight);
-      contentRef.current.classList.toggle("overflow-y-visible", contentRef.current.scrollHeight <= maxHeight);
     }
   };
 
@@ -280,7 +279,7 @@ const MultiStep_AddOrEditEntity = ({
                       />
                     );
                   default:
-                    Notify({ message: `Unknown entity type while trying to edit entity. Type: ${formData.entity_type}`, level: "error", duration: 10000 });
+                    console.error("Unknown entity type while trying to edit entity. Type: ", formData.entity_type);
                     return <span className="text-lg text-error">Unknown entity type: {formData.entity_type}</span>;
                 }
               }

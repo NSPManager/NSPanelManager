@@ -1,0 +1,50 @@
+import { create } from "zustand";
+import { stomp_subscribe } from "./stomp_wrapper";
+
+interface INSPanelInfoData {
+  id: number;
+  mac: string;
+}
+
+interface IEntityStatesData {
+  nspanels: INSPanelInfoData[];
+}
+
+export interface INSpanelData {
+  type: "entity" | "scene" | "entity_page";
+  config?: IEntityOrSceneData;
+  entity_page_config?: IEntityPageData;
+}
+
+interface IEntityStatesStore {
+  status: "none" | "loading" | "loaded";
+  nspanels: INSPanelInfoData[];
+  fetchData: () => Promise<void>;
+}
+
+function getCookie(name: string) {
+  let cookieValue = "";
+  if (document.cookie && document.cookie !== "") {
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === name + "=") {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+export const useEntityStatesStore = create<IEntityStatesStore>((set) => ({
+  status: "none",
+  nspanels: [],
+  fetchData: async () => {
+    set({ status: "loading" });
+    stomp_subscribe("entity_states", (message) => {
+      const json_data = JSON.parse(message.body);
+      set({ nspanels: json_data.nspanels, status: "loaded" });
+    });
+  },
+}));

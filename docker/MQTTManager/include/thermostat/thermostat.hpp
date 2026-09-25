@@ -190,16 +190,6 @@ protected:
   uint8_t _entity_page_slot;
   float _step_size;
 
-  // The last read temperature value from the thermostat or selected temperature item
-  float _current_temperature_sensor = 0;
-
-  // Is the _current_temperature value available or should we fallback to room temperature
-  bool _current_temperature_sensor_available = false;
-
-  // Use the current temperature from the thermostat or openhab item
-  // Otherwise, fallback to room temperature or internal thermistor if no room temperature is available
-  bool _use_current_temperature = false;
-
   static constexpr const char *mode_label = "Mode";
   static constexpr const char *fan_label = "Fan";
   static constexpr const char *preset_label = "Presets";

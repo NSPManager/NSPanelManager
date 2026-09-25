@@ -33,14 +33,9 @@ if [ "$IS_DEVEL" == "yes" ]; then
     # Hot-load NVM
     source /root/.bash_env
 
-    # Install NODE and Python
-
-
     echo "Installing Node.js via NVM"
     nvm install
 
     cd /usr/src/app/nspanelmanager/web/react-components/
     npm install
-
-    npm install typescript
 fi
