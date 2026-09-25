@@ -132,7 +132,7 @@ const MultiStep_AddEditEntity_Step3_Scene = ({
       });
   }
 
-  const classNames: ClassNamesConfig<{ value: string; label: string }, false, GroupBase<{ value: string; label: string }>> = {
+  const classNames: ClassNamesConfig<IOptionType, false, GroupBase<IOptionType>> = {
     control: (state) => `${state.isFocused ? "border" : "border-0"} border-accent p-2.5 text-sm rounded-box bg-base-300 rounded-md`,
     menu: () => "bg-base-300 p-2.5 rounded-box",
     option: (state) => `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`,

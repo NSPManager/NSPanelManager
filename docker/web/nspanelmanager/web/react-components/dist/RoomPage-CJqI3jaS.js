@@ -1,11 +1,11 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-C6rLzdiH.js";
-import { a as useWatch, i as useForm, r as useAvailableEntitiesStore } from "./MultiStep_AddEditEntity-CzmAzsp_.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-B71mxhCj.js";
-import { n as Notify } from "./NSPanelToastContainer-C1l0BoFj.js";
-import EntitiesPagesView from "./EntitiesPagesView--5Zbbhhv.js";
-import { t as useStompStore } from "./StompStore-CO5yTj2W.js";
-import { t as useEntityStatesStore } from "./EntityStore-DkPSX9oD.js";
-import { b as require_Icon, u as mdiTextShort } from "./mdi-BFaD4ORU.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-BELnHkx2.js";
+import { a as useWatch, i as useForm, r as useAvailableEntitiesStore } from "./MultiStep_AddEditEntity-D6sSc-s2.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-doppudd5.js";
+import { n as Notify } from "./NSPanelToastContainer-CSal8dJj.js";
+import EntitiesPagesView from "./EntitiesPagesView-CFt3I69O.js";
+import { t as useStompStore } from "./StompStore-CHy7gCAt.js";
+import { t as useEntityStatesStore } from "./EntityStore-DZJg_-pl.js";
+import { b as require_Icon, u as mdiTextShort } from "./mdi-CuGYvFfv.js";
 //#region src/components/RoomPage/RoomPage.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_Icon = require_Icon();
@@ -176,7 +176,6 @@ function RoomPage({ room_id }) {
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 									className: "outline-none rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name",
 									type: "text",
-									name: "friendly_name",
 									...register("friendly_name")
 								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 									className: "inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent",

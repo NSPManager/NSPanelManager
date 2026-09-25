@@ -28,7 +28,7 @@ export default function RoomPage({ room_id }: { room_id: number }) {
       room_temp_sensor: room?.room_temp_sensor,
     },
   });
-  const selected_room_temp_sensor = useWatch({ control, name: "room_temp_sensor" });
+  void useWatch({ control, name: "room_temp_sensor" });
   const current_friendly_name = useWatch({ control, name: "friendly_name" });
 
   function getCookie(name: string) {
@@ -121,7 +121,7 @@ export default function RoomPage({ room_id }: { room_id: number }) {
   }
 
   // Class names for the select component.
-  const classNames: ClassNamesConfig<{ value: string; label: string }, false, GroupBase<{ value: string; label: string }>> = {
+  const classNames: ClassNamesConfig<IOptionType, false, GroupBase<IOptionType>> = {
     control: (state) => `${state.isFocused ? "border" : "border-0"} border-accent p-2.5 text-sm rounded-box bg-base-300 text-base-content rounded-md`,
     menu: () => "bg-base-300 p-2.5 rounded-box text-base-content",
     option: (state) => `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`,
@@ -167,8 +167,6 @@ export default function RoomPage({ room_id }: { room_id: number }) {
                 <input
                   className="outline-none rounded-none bg-base-300 border-neutral rounded-e-md border border-l-0 focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/name"
                   type="text"
-                  name="friendly_name"
-                  // value={room.friendly_name}
                   {...register("friendly_name")}
                 />
                 <span className="inline-flex items-center px-3 text-sm border border-neutral rounded-e-0 rounded-s-md peer-focus/name:border-accent">

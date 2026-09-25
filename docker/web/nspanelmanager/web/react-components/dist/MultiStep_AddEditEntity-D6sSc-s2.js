@@ -1,10 +1,10 @@
-import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-C6rLzdiH.js";
-import { t as create } from "./react-Dx4svSE2.js";
-import { t as useSettingsStore } from "./SettingsStore-DEE6z-od.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-B71mxhCj.js";
-import { n as Notify } from "./NSPanelToastContainer-C1l0BoFj.js";
-import { t as motion } from "./proxy-RB9Gckuq.js";
-import { t as AnimatePresence } from "./AnimatePresence-WFQ6otv5.js";
+import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-BELnHkx2.js";
+import { t as create } from "./react-prBK1Gtt.js";
+import { t as useSettingsStore } from "./SettingsStore-CHxKdt7f.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-doppudd5.js";
+import { n as Notify } from "./NSPanelToastContainer-CSal8dJj.js";
+import { t as motion } from "./proxy-B1Ceffil.js";
+import { t as AnimatePresence } from "./AnimatePresence-DTHwshb8.js";
 //#region src/stores/EntitiesPagesStore.ts
 function getCookie$1(name) {
 	let cookieValue = "";
@@ -9150,7 +9150,6 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 								className: "flex items-center ps-3 w-full",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 									type: "radio",
-									name: "use_current_temperature",
 									value: "False",
 									...register("use_current_temperature"),
 									checked: getValues("use_current_temperature") == "False",
@@ -9167,7 +9166,6 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 								className: "flex items-center ps-3 w-full",
 								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 									type: "radio",
-									name: "use_current_temperature",
 									value: "True",
 									...register("use_current_temperature"),
 									checked: getValues("use_current_temperature") == "True",

@@ -301,7 +301,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
     },
   });
   const { entities } = useEntitiesPagesStore.getState();
-  const useCurrentTemperature = watch("use_current_temperature");
+  void watch("use_current_temperature");
 
   const {
     fields: fanModeFields,
@@ -459,7 +459,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
     }
   }
 
-  const classNames: ClassNamesConfig<{ value: string; label: string }, false, GroupBase<{ value: string; label: string }>> = {
+  const classNames: ClassNamesConfig<IOptionType, false, GroupBase<IOptionType>> = {
     control: (state) => `${state.isFocused ? "border" : "border-0"} border-accent p-2.5 text-sm rounded-box bg-base-300 text-base-content rounded-md`,
     menu: () => "bg-base-300 p-2.5 rounded-box text-base-content",
     option: (state) => `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`,
@@ -655,7 +655,6 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
             <div className="flex items-center ps-3 w-full">
               <input
                 type="radio"
-                name="use_current_temperature"
                 value="False"
                 {...register("use_current_temperature")}
                 checked={getValues("use_current_temperature") == "False"}
@@ -668,7 +667,6 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
             <div className="flex items-center ps-3 w-full">
               <input
                 type="radio"
-                name="use_current_temperature"
                 value="True"
                 {...register("use_current_temperature")}
                 checked={getValues("use_current_temperature") == "True"}

@@ -1,6 +1,6 @@
-import { c as __toESM, n as require_react_dom, r as require_react, t as require_jsx_runtime } from "./main-C6rLzdiH.js";
-import { t as create } from "./react-Dx4svSE2.js";
-import { n as MultiStep_AddOrEditEntity, o as useEntitiesPagesStore } from "./MultiStep_AddEditEntity-CzmAzsp_.js";
+import { c as __toESM, n as require_react_dom, r as require_react, t as require_jsx_runtime } from "./main-BELnHkx2.js";
+import { t as create } from "./react-prBK1Gtt.js";
+import { n as MultiStep_AddOrEditEntity, o as useEntitiesPagesStore } from "./MultiStep_AddEditEntity-D6sSc-s2.js";
 //#region node_modules/@preact/signals-core/dist/signals-core.module.js
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var i = Symbol.for("preact-signals");
@@ -7878,7 +7878,7 @@ var EntitiesPagesView = ({ room_id, type }) => {
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 			className: "text-xl",
 			children: [
-				useRoomsStore.getState().rooms?.find((r) => r.id == room_id)?.name,
+				useRoomsStore.getState().rooms?.find((r) => r.id == room_id)?.friendly_name,
 				" ",
 				(() => {
 					if (type == "entity") return "entities";
