@@ -1,5 +1,4 @@
-from django.contrib import admin
-from django.urls import include, path
+from django.urls import path
 
 from . import api, htmx, rest, views
 
@@ -52,13 +51,20 @@ urlpatterns = [
     #####################
     # Fetch entities from home assistant:
     path("rest/home_assistant/entities", rest.get_home_assistant_entities, name="rest_get_home_assistant_entities"),
+    path("rest/home_assistant/test", rest.test_home_assistant, name="rest_test_home_assistant"),
     # Fetch entities from OpenHAB:
     path("rest/openhab/items", rest.get_openhab_items, name="rest_get_openhab_items"),
+    path("rest/openhab/test", rest.test_openhab, name="rest_test_openhab"),
     # MQTTManager endpoints
     path("rest/mqttmanager/settings/<str:setting_key>", rest.mqttmanager_get_setting, name="rest_mqttmanager_get_setting"),
-    path("rest/mqttmanager/settings", rest.mqttmanager_settings_post, name="rest_mqttmanager_settings_post"),
+    # Test if we can react manager on given IP and port
+    path("rest/mqttmanager/test", rest.test_mqttmanager, name="rest_test_mqttmanager"),
     # Relay groups
     path("rest/relay_groups", rest.relay_groups, name="rest_relay_groups"),
+    # Delete NSPanel by ID:
+    path("rest/nspanel/<int:nspanel_id>", rest.nspanel_delete, name="delete_nspanel"),
+    path("rest/nspanel/<int:nspanel_id>/accept", rest.nspanel_accept, name="nspanel_accept"),
+    path("rest/nspanel/<int:nspanel_id>/deny", rest.nspanel_deny, name="nspanel_deny"),
     # Global URLs
     path("rest/global/entities_pages", rest.global_entities_pages, name="rest_global_entities_pages"),
     path("rest/entities_pages/order", rest.room_entities_pages_order, name="rest_room_entities_pages_order"),
@@ -94,8 +100,6 @@ urlpatterns = [
     #######################
     ### HTMX "API" URLs ###
     #######################
-    path("htmx/partial/index_nspanels_section/", htmx.partial_index_nspanels_section, name="htmx_partial_index_nspanels_section"),
-    path("htmx/partial/nspanel_index_view/<int:nspanel_id>", htmx.partial_nspanel_index_view, name="htmx_partial_nspanel_index_view"),
     path("htmx/unblock_nspanel/<int:nspanel_id>", htmx.unblock_nspanel, name="htmx_unblock_nspanel"),
     path("htmx/partial/handle_entity_modal_result", htmx.handle_entity_modal_result, name="htmx_handle_entity_modal_result"),
     path("htmx/partial/select_new_entity_type_react/<int:entities_page_id>/<int:room_view_position>", htmx.partial_add_entity_to_entities_page_select_entity_type_react, name="htmx_partial_select_new_entity_type_react"),
@@ -127,13 +131,6 @@ urlpatterns = [
     path("htmx/interface/theme", htmx.interface_theme, name="htmx_interface_theme"),
     path("htmx/show_messages", htmx.show_messages, name="htmx_show_messages"),
     path("htmx/mark_message_read/<int:message_id>", htmx.mark_message_read, name="htmx_mark_message_read"),
-    # HTMX initial setup URLs
-    path("htmx/initial_setup/welcome", htmx.initial_setup_welcome, name="htmx_initial_setup_welcome"),
-    path("htmx/initial_setup/manager_settings", htmx.initial_setup_manager_settings, name="htmx_initial_setup_manager_settings"),
-    path("htmx/initial_setup/mqtt_settings", htmx.initial_setup_mqtt_settings, name="htmx_initial_setup_mqtt_settings"),
-    path("htmx/initial_setup/home_assistant_settings", htmx.initial_setup_home_assistant_settings, name="htmx_initial_setup_home_assistant_settings"),
-    path("htmx/initial_setup/openhab_settings", htmx.initial_setup_openhab_settings, name="htmx_initial_setup_openhab_settings"),
-    path("htmx/initial_setup/finished", htmx.initial_setup_finished, name="htmx_initial_setup_finished"),
     # HTMX relay group URLs
     path("htmx/relay_groups/create_new_modal", htmx.relay_group_create_new_modal, name="htmx_modal_create_new_relay_group"),
     path("htmx/relay_groups/edit_modal/<int:relay_group_id>", htmx.relay_group_edit_modal, name="htmx_modal_edit_relay_group"),

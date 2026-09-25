@@ -3,7 +3,7 @@ import logging
 from .models import NSPanel, NSPanelSettings, Settings
 
 
-def get_setting_with_default(name) -> str:
+def get_setting_with_default(name: str) -> str:
     objects = Settings.objects.filter(name=name)
     if objects.count() > 0:
         return str(objects.first().value)
@@ -12,12 +12,12 @@ def get_setting_with_default(name) -> str:
         return ""
 
 
-def does_setting_exist(name):
+def does_setting_exist(name: str) -> bool:
     objects = Settings.objects.filter(name=name)
     return objects.count() > 0
 
 
-def set_setting_value(name, value):
+def set_setting_value(name: str, value):
     Settings.objects.update_or_create(name=name, defaults={"value": value})
 
 

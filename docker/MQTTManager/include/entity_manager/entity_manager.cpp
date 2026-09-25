@@ -9,7 +9,6 @@
 #include "media_player/home_assistant_media_player.hpp"
 #include "media_player/media_player.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
-#include "protobuf_general.pb.h"
 #include "protobuf_nspanel.pb.h"
 #include "room/room.hpp"
 #include "room/room_entities_page.hpp"
@@ -29,14 +28,12 @@
 #include <boost/stacktrace/frame.hpp>
 #include <boost/stacktrace/stacktrace_fwd.hpp>
 #include <chrono>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <database_manager/database_manager.hpp>
 #include <entity_manager/entity_manager.hpp>
 #include <expected>
-#include <iterator>
 #include <memory>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <mutex>
@@ -107,6 +104,7 @@ void EntityManager::load_entities() {
   // publish with an empty payload clears the retained message on the broker.
   // Without this call, panels would never receive the aggregate until the next
   // light-state change.
+  EntityManager::_send_websocket_state_update();
   EntityManager::_room_updated_callback(nullptr);
 }
 
@@ -963,12 +961,9 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
     if (new_panel != nullptr) {
       std::lock_guard<std::mutex> lock_guard(EntityManager::_nspanels_mutex);
       EntityManager::_nspanels.push_back(new_panel);
-      nlohmann::json data = {
-          {"event_type", "register_request"},
-          {"nspanel_id", new_panel->get_id()}};
-      WebsocketServer::update_stomp_topic_value("mqttmanager/events", data);
     }
   }
+  EntityManager::_send_websocket_state_update();
 }
 
 std::expected<std::shared_ptr<NSPanel>, EntityManager::EntityError> EntityManager::get_nspanel_by_id(uint id) {
@@ -1004,4 +999,20 @@ std::expected<std::shared_ptr<NSPanel>, EntityManager::EntityError> EntityManage
   }
   SPDLOG_TRACE("Did not find NSPanel by MAC {}", mac);
   return std::unexpected(EntityManager::EntityError::NOT_FOUND);
+}
+
+void EntityManager::_send_websocket_state_update() {
+  nlohmann::json data = {
+      {"nspanels", nlohmann::json::array()}};
+  {
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
+    for (auto nspanel : EntityManager::_nspanels) {
+      data["nspanels"].push_back({
+          {"id", nspanel->get_id()},
+          {"mac", nspanel->get_mac()},
+      });
+    }
+  }
+  WebsocketServer::set_stomp_topic_retained("entity_states", true);
+  WebsocketServer::update_stomp_topic_value("entity_states", data);
 }

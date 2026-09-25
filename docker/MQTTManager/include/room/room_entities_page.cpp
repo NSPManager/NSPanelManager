@@ -162,11 +162,11 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
   for (int i = 0; i < this->_page_settings.page_type; i++) {
     auto entity_result = EntityManager::get_entity_by_page_id_and_slot(this->_id, i);
     if (!entity_result) {
-      SPDLOG_DEBUG("No entity assigned to slot {}", i);
+      SPDLOG_TRACE("No entity assigned to slot {}", i);
       continue; // No entity assigned in slot, move to next slot.
     }
     auto entity = entity_result.value();
-    SPDLOG_DEBUG("Got shared ptr for entity with ID {}", entity->get_id());
+    SPDLOG_TRACE("Got shared ptr for entity with ID {}", entity->get_id());
 
     if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::LIGHT) {
       std::shared_ptr<Light> light = std::static_pointer_cast<Light>(entity);
@@ -259,7 +259,5 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
     } else {
       SPDLOG_ERROR("Failed to serialize protobuf for entity page {} state.", this->_id);
     }
-  } else {
-    SPDLOG_DEBUG("Did not send update, no difference.");
   }
 }
