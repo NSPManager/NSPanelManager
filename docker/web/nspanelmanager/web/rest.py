@@ -278,6 +278,10 @@ def put_room_entities_order(request, room_id):
     if request.method == "PUT":
         try:
             data = json.loads(request.body)
+            for item in data["entities"] + data["scenes"]:
+                page = RoomEntitiesPage.objects.get(id=item["entities_page_id"])
+                if not 0 <= item["room_view_position"] < page.page_type:
+                    return JsonResponse({"status": "error", "message": f"room_view_position must be between 0 and {page.page_type - 1} on page {page.id}."}, status=400)
             # All or nothing: a bad entry must not leave the entries before it already moved.
             with transaction.atomic():
                 for entity in data["entities"]:
@@ -756,6 +760,24 @@ def get_scene(request, scene_id):
 
 
 ### Generic Entity section ###
+def get_placement_error(obj, room, entities_page, room_view_position):
+    """Return why obj (an Entity or Scene) cannot go in that slot, or None if it can.
+
+    Only a new or changed placement is checked, so entities saved before these checks
+    existed can still be edited without being moved.
+    """
+    room_id = room.id if room else None
+    if obj.pk is not None and (obj.room_id, obj.entities_page_id, obj.room_view_position) == (room_id, entities_page.id, room_view_position):
+        return None
+    if entities_page.room_id != room_id:
+        return "The entities page belongs to a different room."
+    if not 0 <= room_view_position < entities_page.page_type:
+        return f"room_view_position must be between 0 and {entities_page.page_type - 1} on this page."
+    if type(obj).objects.filter(entities_page=entities_page, room_view_position=room_view_position).exclude(pk=obj.pk).exists():
+        return "That position on the page is already taken."
+    return None
+
+
 def get_rest_entitiy_representation(entity_id):
     entity = Entity.objects.get(id=entity_id)
     return {
@@ -849,10 +871,17 @@ def put_light_entity(request):
             new_light = Entity()
             new_light.entity_type = Entity.EntityType.LIGHT
 
+        room = Room.objects.get(id=int(data["room_id"]))
+        entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        room_view_position = int(data["room_view_position"])
+        placement_error = get_placement_error(new_light, room, entities_page, room_view_position)
+        if placement_error:
+            return JsonResponse({"status": "error", "message": placement_error}, status=400)
+
         new_light.friendly_name = data["friendly_name"]
-        new_light.room = Room.objects.get(id=int(data["room_id"]))
-        new_light.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
-        new_light.room_view_position = int(data["room_view_position"])
+        new_light.room = room
+        new_light.entities_page = entities_page
+        new_light.room_view_position = room_view_position
 
         new_light.entity_data = entity_data
         new_light.save()
@@ -907,10 +936,17 @@ def put_switch_entity(request):
             new_switch = Entity()
             new_switch.entity_type = Entity.EntityType.SWITCH
 
+        room = Room.objects.get(id=int(data["room_id"]))
+        entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        room_view_position = int(data["room_view_position"])
+        placement_error = get_placement_error(new_switch, room, entities_page, room_view_position)
+        if placement_error:
+            return JsonResponse({"status": "error", "message": placement_error}, status=400)
+
         new_switch.friendly_name = data["friendly_name"]
-        new_switch.room = Room.objects.get(id=int(data["room_id"]))
-        new_switch.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
-        new_switch.room_view_position = int(data["room_view_position"])
+        new_switch.room = room
+        new_switch.entities_page = entities_page
+        new_switch.room_view_position = room_view_position
 
         new_switch.entity_data = entity_data
         new_switch.save()
@@ -967,10 +1003,17 @@ def put_button_entity(request):
             new_button = Entity()
             new_button.entity_type = Entity.EntityType.BUTTON
 
+        room = Room.objects.get(id=int(data["room_id"]))
+        entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        room_view_position = int(data["room_view_position"])
+        placement_error = get_placement_error(new_button, room, entities_page, room_view_position)
+        if placement_error:
+            return JsonResponse({"status": "error", "message": placement_error}, status=400)
+
         new_button.friendly_name = data["friendly_name"]
-        new_button.room = Room.objects.get(id=int(data["room_id"]))
-        new_button.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
-        new_button.room_view_position = int(data["room_view_position"])
+        new_button.room = room
+        new_button.entities_page = entities_page
+        new_button.room_view_position = room_view_position
 
         new_button.entity_data = entity_data
         new_button.save()
@@ -1059,10 +1102,17 @@ def put_thermostat_entity(request):
             new_thermostat = Entity()
             new_thermostat.entity_type = Entity.EntityType.THERMOSTAT
 
+        room = Room.objects.get(id=int(data["room_id"]))
+        entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        room_view_position = int(data["room_view_position"])
+        placement_error = get_placement_error(new_thermostat, room, entities_page, room_view_position)
+        if placement_error:
+            return JsonResponse({"status": "error", "message": placement_error}, status=400)
+
         new_thermostat.friendly_name = data["friendly_name"]
-        new_thermostat.room = Room.objects.get(id=int(data["room_id"]))
-        new_thermostat.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
-        new_thermostat.room_view_position = int(data["room_view_position"])
+        new_thermostat.room = room
+        new_thermostat.entities_page = entities_page
+        new_thermostat.room_view_position = room_view_position
 
         new_thermostat.entity_data = entity_data
         new_thermostat.save()
@@ -1240,10 +1290,17 @@ def put_scene_entity(request):
         else:
             new_scene = Scene()
 
+        room = Room.objects.get(id=int(data["room_id"])) if data["room_id"] else None
+        entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        room_view_position = int(data["room_view_position"])
+        placement_error = get_placement_error(new_scene, room, entities_page, room_view_position)
+        if placement_error:
+            return JsonResponse({"status": "error", "message": placement_error}, status=400)
+
         new_scene.friendly_name = data["friendly_name"]
-        new_scene.room = Room.objects.get(id=int(data["room_id"])) if data["room_id"] else None
-        new_scene.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
-        new_scene.room_view_position = int(data["room_view_position"])
+        new_scene.room = room
+        new_scene.entities_page = entities_page
+        new_scene.room_view_position = room_view_position
 
         new_scene.scene_type = data.get("scene_type", "")
         new_scene.backend_name = data.get("backend_name", "")

@@ -84,17 +84,13 @@ class EntityRESTCommonTests:
     def test_edit_unknown_id_is_rejected(self):
         self.assertCreatesNothing(self.save(self.payload(id=999)))
 
-    @expectedFailure
     def test_add_to_occupied_slot_is_rejected(self):
-        # KNOWN GAP: nothing checks the slot is free, so two entities end up in one slot.
         self.save(self.payload(slot=0))
 
         self.assertRejected(self.save(self.payload(slot=0)))
         self.assertEqual(self.model.objects.count(), 1)
 
-    @expectedFailure
     def test_add_to_slot_outside_page_is_rejected(self):
-        # KNOWN GAP: room_view_position is not checked against the page size (4 here).
         self.assertCreatesNothing(self.save(self.payload(slot=7)))
 
 
@@ -165,13 +161,20 @@ class LightTests(EntityRESTCommonTests, EntityRESTTestCase):
         # treats an unknown controller as Home Assistant.
         self.assertCreatesNothing(self.save(self.payload(controller="zigbee")))
 
-    @expectedFailure
     def test_page_from_another_room_is_rejected(self):
-        # KNOWN GAP: room_id and entities_page_id are not checked against each other, so an
-        # entity can belong to one room but be displayed on another room's page.
         other_page = self.entities_page(self.make_room("Lounge"))
 
         self.assertCreatesNothing(self.save(self.payload(entities_page_id=other_page.id)))
+
+    def test_entity_saved_before_placement_checks_can_still_be_edited(self):
+        # Only a changed placement is validated, so rows already in a bad slot stay editable.
+        light = self.make_light(self.room, slot=7)
+
+        response = self.save(self.payload(slot=7, id=light.id, friendly_name="Renamed"))
+
+        self.assertEqual(response.status_code, 200)
+        light.refresh_from_db()
+        self.assertEqual(light.friendly_name, "Renamed")
 
 
 class SwitchTests(EntityRESTCommonTests, EntityRESTTestCase):

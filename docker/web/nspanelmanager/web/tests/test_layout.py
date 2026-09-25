@@ -111,9 +111,7 @@ class MoveEntityTests(NSPMTestCase):
         self.assertAt(light, self.page, 0)
         self.assertManagerNotReloaded()
 
-    @expectedFailure
     def test_move_to_slot_outside_page_is_rejected(self):
-        # KNOWN GAP: room_view_position is not checked against the page size.
         light = self.make_light(self.room, slot=0)
 
         self.assertRejected(self.save_order([position(light, self.page, 11)]))
