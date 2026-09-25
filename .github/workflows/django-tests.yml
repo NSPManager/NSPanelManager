@@ -1,0 +1,32 @@
+name: "Django tests"
+
+on:
+  pull_request:
+    paths:
+      - "docker/web/**"
+      - ".github/workflows/django-tests.yml"
+  push:
+    branches:
+      - "main"
+      - "devel"
+    paths:
+      - "docker/web/**"
+      - ".github/workflows/django-tests.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12" # Matches the python:3.12 base image in docker/Dockerfile
+          cache: pip
+          cache-dependency-path: docker/web/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r docker/web/requirements.txt
+
+      - name: Run tests
+        run: docker/web/run_tests.sh -v 2
