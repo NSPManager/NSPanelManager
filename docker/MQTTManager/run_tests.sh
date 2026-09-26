@@ -7,17 +7,22 @@
 # Output is also written to tests/last_run.log. The first run builds all Conan dependencies
 # and takes a while; later runs reuse the nspm-mqttmanager-conan and -build Docker volumes.
 # To start from scratch: docker volume rm nspm-mqttmanager-conan nspm-mqttmanager-build
+#
+# NSPM_TEST_CONAN_CACHE and NSPM_TEST_BUILD_DIR override those volumes with another volume name
+# or an absolute host path (CI uses a host directory so it can cache it between runs).
 cd "$(dirname "$0")" || exit 1
 
 IMAGE=nspm-mqttmanager-tests
 LOG=tests/last_run.log
+CONAN_CACHE=${NSPM_TEST_CONAN_CACHE:-nspm-mqttmanager-conan}
+BUILD_DIR=${NSPM_TEST_BUILD_DIR:-nspm-mqttmanager-build}
 
 {
   docker build -q -t "$IMAGE" tests/docker &&
     docker run --rm \
       -v "$PWD":/src:ro \
-      -v nspm-mqttmanager-conan:/root/.conan2/p \
-      -v nspm-mqttmanager-build:/MQTTManager/build \
+      -v "$CONAN_CACHE":/root/.conan2/p \
+      -v "$BUILD_DIR":/MQTTManager/build \
       "$IMAGE" bash /src/tests/docker/run_in_container.sh "$@"
 } 2>&1 | tee "$LOG"
 status=${PIPESTATUS[0]}

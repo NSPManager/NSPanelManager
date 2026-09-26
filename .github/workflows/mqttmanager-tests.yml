@@ -1,0 +1,46 @@
+name: "MQTTManager tests"
+
+on:
+  pull_request:
+    paths:
+      - "docker/MQTTManager/**"
+      - ".github/workflows/mqttmanager-tests.yml"
+  push:
+    branches:
+      - "main"
+      - "devel"
+    paths:
+      - "docker/MQTTManager/**"
+      - ".github/workflows/mqttmanager-tests.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    # Building the Conan dependencies from source takes about an hour when the cache is cold.
+    timeout-minutes: 120
+    env:
+      # Host directory mounted as the container's Conan package cache (see run_tests.sh).
+      NSPM_TEST_CONAN_CACHE: ${{ github.workspace }}/.conan-cache
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore Conan packages
+        id: conan-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.NSPM_TEST_CONAN_CACHE }}
+          key: mqttmanager-conan-${{ hashFiles('docker/MQTTManager/conanfile.py', 'docker/MQTTManager/tests/docker/Dockerfile') }}
+          restore-keys: mqttmanager-conan-
+
+      - name: Build and run tests
+        run: |
+          mkdir -p "$NSPM_TEST_CONAN_CACHE"
+          docker/MQTTManager/run_tests.sh
+
+      # Saved even when the tests fail, so a failing test does not cost another dependency build.
+      - name: Save Conan packages
+        if: always() && steps.conan-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.NSPM_TEST_CONAN_CACHE }}
+          key: ${{ steps.conan-cache.outputs.cache-primary-key }}
