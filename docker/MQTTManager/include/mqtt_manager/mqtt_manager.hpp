@@ -17,6 +17,11 @@
 #include <string>
 #include <unordered_map>
 
+#if defined(TEST_MODE) && TEST_MODE == 1
+#include <utility>
+#include <vector>
+#endif
+
 struct MQTTMessage {
   std::string topic;
   std::string message;
@@ -106,7 +111,25 @@ public:
    */
   static void clear_retain(const std::string &topic);
 
+#if defined(TEST_MODE) && TEST_MODE == 1
+  struct TestPublishedMessage {
+    std::string topic;
+    std::string payload;
+    bool retain;
+  };
+
+  // Everything passed to publish since the last call, whether or not the MQTT client is connected.
+  static std::vector<TestPublishedMessage> test_take_published_messages() {
+    std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_test_published_messages_mutex);
+    return std::exchange(MQTT_Manager::_test_published_messages, {});
+  }
+#endif
+
 private:
+#if defined(TEST_MODE) && TEST_MODE == 1
+  static inline std::mutex _test_published_messages_mutex;
+  static inline std::vector<TestPublishedMessage> _test_published_messages;
+#endif
   static inline boost::lockfree::spsc_queue<MQTTMessage, boost::lockfree::capacity<256>> _mqtt_message_queue;
   static inline std::thread _process_messages_thread;
   static inline mqtt::client *_mqtt_client = nullptr;

@@ -29,6 +29,7 @@ target_link_libraries(nspm_mqttmanager_tests PRIVATE
     MQTTManager_DatabaseManager MQTTManager_Entity
     MQTT_Manager MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager
     MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_CommandManager
+    MQTTManager_Switch MQTTManager_Button MQTTManager_Thermostat MQTTManager_MediaPlayer MQTTManager_NSPanel
     gtest::gtest
 )
 

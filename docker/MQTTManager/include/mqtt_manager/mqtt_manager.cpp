@@ -292,6 +292,13 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
     return; // It's not allowed to publish to empty topic.
   }
 
+#if defined(TEST_MODE) && TEST_MODE == 1
+  {
+    std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_test_published_messages_mutex);
+    MQTT_Manager::_test_published_messages.push_back({topic, payload, retain});
+  }
+#endif
+
   if (retain) {
     MQTT_Manager::_mqtt_retain_buffer[topic] = payload;
   }
