@@ -100,3 +100,12 @@ TEST_F(NSPMButtonTest, press_uses_the_current_database_values) {
   ASSERT_EQ(messages.size(), 1);
   EXPECT_EQ(messages[0].payload, "open");
 }
+
+TEST_F(NSPMButtonTest, loads_without_errors) {
+  ScopedEntity row("button", "Garage door", django_button_data("nspm", "", "garage/door/set", "toggle"));
+  nspm_test::ScopedErrorLog log;
+
+  NSPMButton garage(row.id);
+
+  EXPECT_EQ(log.errors(), std::vector<std::string>());
+}
