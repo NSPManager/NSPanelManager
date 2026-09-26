@@ -11,6 +11,8 @@
 #include <nlohmann/json.hpp>
 #include <openhab_manager/openhab_manager.hpp>
 #include <optional>
+#include <spdlog/sinks/ringbuffer_sink.h>
+#include <spdlog/spdlog.h>
 #include <string>
 #include <vector>
 
@@ -208,6 +210,31 @@ inline std::vector<MQTT_Manager::TestPublishedMessage> mqtt_published_to(const s
   }
   return messages;
 }
+
+// Records the errors logged while it is in scope.
+class ScopedErrorLog {
+public:
+  ScopedErrorLog() : _sink(std::make_shared<spdlog::sinks::ringbuffer_sink_mt>(1000)) {
+    _sink->set_level(spdlog::level::err);
+    _sink->set_pattern("%v");
+    spdlog::default_logger()->sinks().push_back(_sink);
+  }
+
+  ~ScopedErrorLog() {
+    auto &sinks = spdlog::default_logger()->sinks();
+    sinks.erase(std::remove(sinks.begin(), sinks.end(), _sink), sinks.end());
+  }
+
+  ScopedErrorLog(const ScopedErrorLog &) = delete;
+  ScopedErrorLog &operator=(const ScopedErrorLog &) = delete;
+
+  std::vector<std::string> errors() {
+    return _sink->last_formatted();
+  }
+
+private:
+  std::shared_ptr<spdlog::sinks::ringbuffer_sink_mt> _sink;
+};
 
 // Starts each test with nothing recorded as sent, so a test only sees what it caused.
 class SendCaptureTest : public ::testing::Test {

@@ -217,6 +217,16 @@ TEST_F(EntityManagerRoomTest, reload_renames_rooms) {
   EXPECT_EQ((*EntityManager::get_room(study_id))->get_name(), "Room test library");
 }
 
+TEST_F(EntityManagerRoomTest, room_without_temperature_sensor_loads_without_errors) {
+  nspm_test::ScopedErrorLog log;
+
+  nspm_test::create_room("Room test hallway");
+
+  for (auto &error : log.errors()) {
+    EXPECT_EQ(error.find("temperature provider"), std::string::npos) << error;
+  }
+}
+
 TEST_F(EntityManagerRoomTest, unknown_room_is_not_found) {
   auto room = EntityManager::get_room(999999);
 
