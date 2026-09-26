@@ -6,6 +6,7 @@ export DOCKER_BUILDKIT=1
 
 TARGETPLATFORM=""
 CONFIG_SEED_PATH="$(pwd)"
+CONFIG_SEED_PATH_SET=0
 CONTAINER_NAME="nspanelmanager"
 EXTERNAL_PORT=8000
 
@@ -23,6 +24,7 @@ while true; do
     ;;
   --config-seed-path)
     CONFIG_SEED_PATH="$2"
+    CONFIG_SEED_PATH_SET=1
     shift
     shift
     ;;
@@ -34,6 +36,18 @@ while true; do
   *) break ;;
   esac
 done
+
+if [ "$CONFIG_SEED_PATH_SET" == 1 ]; then
+  for f in db.sqlite3 secret.key; do
+    if [ ! -e "${CONFIG_SEED_PATH}/web/nspanelmanager/${f}" ]; then
+      echo "ERROR: --config-seed-path given but ${CONFIG_SEED_PATH}/web/nspanelmanager/${f} does not exist." >&2
+      exit 1
+    fi
+  done
+  if [ -e "data/nspanelmanager_db.sqlite3" ] || [ -e "data/secret.key" ]; then
+    echo "WARNING: data/ already contains a database or secret key; existing files will not be overwritten from --config-seed-path." >&2
+  fi
+fi
 
 mkdir -p data
 
