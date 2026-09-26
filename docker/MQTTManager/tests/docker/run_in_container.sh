@@ -10,6 +10,8 @@ cd /MQTTManager
 
 echo "--> Installing dependencies with Conan (slow the first time, cached afterwards)"
 conan install . --build=missing
+# Keep only the built packages; the build and source trees are several GB and not needed again.
+conan cache clean "*" --build --source --temp
 
 echo "--> Building tests"
 cmake -S . -B build/Debug \
