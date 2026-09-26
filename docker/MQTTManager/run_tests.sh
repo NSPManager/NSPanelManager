@@ -10,6 +10,7 @@
 #
 # NSPM_TEST_CONAN_CACHE and NSPM_TEST_BUILD_DIR override those volumes with another volume name
 # or an absolute host path (CI uses a host directory so it can cache it between runs).
+# NSPM_TEST_RESULTS_DIR, an absolute host path, also writes JUnit XML results there.
 cd "$(dirname "$0")" || exit 1
 
 IMAGE=nspm-mqttmanager-tests
@@ -17,12 +18,20 @@ LOG=tests/last_run.log
 CONAN_CACHE=${NSPM_TEST_CONAN_CACHE:-nspm-mqttmanager-conan}
 BUILD_DIR=${NSPM_TEST_BUILD_DIR:-nspm-mqttmanager-build}
 
+RESULTS_MOUNT=()
+if [ -n "${NSPM_TEST_RESULTS_DIR:-}" ]; then
+  mkdir -p "$NSPM_TEST_RESULTS_DIR"
+  RESULTS_MOUNT=(-v "$NSPM_TEST_RESULTS_DIR":/results)
+  set -- --gtest_output=xml:/results/mqttmanager-tests.xml "$@"
+fi
+
 {
   docker build -q -t "$IMAGE" tests/docker &&
     docker run --rm \
       -v "$PWD":/src:ro \
       -v "$CONAN_CACHE":/root/.conan2/p \
       -v "$BUILD_DIR":/MQTTManager/build \
+      "${RESULTS_MOUNT[@]}" \
       "$IMAGE" bash /src/tests/docker/run_in_container.sh "$@"
 } 2>&1 | tee "$LOG"
 status=${PIPESTATUS[0]}
