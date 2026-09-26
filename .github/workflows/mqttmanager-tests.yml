@@ -36,6 +36,20 @@ jobs:
         run: |
           mkdir -p "$NSPM_TEST_CONAN_CACHE"
           docker/MQTTManager/run_tests.sh
+        env:
+          NSPM_TEST_RESULTS_DIR: ${{ github.workspace }}/test-results
+
+      # annotate_only writes the job summary and failure annotations without creating a
+      # check run, which needs checks: write and so fails on pull requests from forks.
+      - name: Report test results
+        if: ${{ !cancelled() }}
+        uses: mikepenz/action-junit-report@v6
+        with:
+          report_paths: test-results/*.xml
+          annotate_only: true
+          detailed_summary: true
+          include_passed: true
+          require_tests: true
 
       # Saved even when the tests fail, so a failing test does not cost another dependency build.
       - name: Save Conan packages
