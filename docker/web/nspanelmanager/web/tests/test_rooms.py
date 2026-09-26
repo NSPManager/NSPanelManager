@@ -1,4 +1,5 @@
 import json
+from unittest import expectedFailure
 
 from django.urls import reverse
 
@@ -103,7 +104,7 @@ class RoomRESTTests(NSPMTestCase):
         self.assertFalse(Room.objects.exists())
 
     def test_rooms_endpoint_rejects_unsupported_methods(self):
-        self.assertEqual(self.client.put(reverse("rest_rooms_create")).status_code, 405)
+        self.assertEqual(self.client.delete(reverse("rest_rooms_create")).status_code, 405)
         room = self.make_room()
         self.assertEqual(self.client.get(reverse("rest_room_delete", kwargs={"room_id": room.id})).status_code, 405)
 
@@ -133,7 +134,8 @@ class RoomRESTTests(NSPMTestCase):
         response = self.client.get(reverse("rest_rooms_create"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["rooms"], [{"id": office.id, "name": "Office"}, {"id": lounge.id, "name": "Lounge"}])
+        self.assertEqual([(r["id"], r["friendly_name"]) for r in response.json()["rooms"]], [(office.id, "Office"), (lounge.id, "Lounge")])
+        self.assertEqual(set(response.json()["rooms"][0]), {"id", "friendly_name", "display_order", "room_temp_provider", "room_temp_sensor"})
 
     def test_get_single_room(self):
         self.make_room("Office")
@@ -141,7 +143,30 @@ class RoomRESTTests(NSPMTestCase):
 
         response = self.client.get(reverse("rest_rooms_create"), {"id": lounge.id})
 
-        self.assertEqual(response.json()["rooms"], [{"id": lounge.id, "name": "Lounge"}])
+        self.assertEqual([(r["id"], r["friendly_name"]) for r in response.json()["rooms"]], [(lounge.id, "Lounge")])
+
+    def test_update_room(self):
+        room = self.make_room("Office")
+
+        response = self.put_json(reverse("rest_rooms_create"), {"id": room.id, "friendly_name": "Study", "room_temp_provider": "home_assistant", "room_temp_sensor": "sensor.study"})
+
+        self.assertEqual(response.status_code, 200)
+        room.refresh_from_db()
+        self.assertEqual((room.friendly_name, room.room_temp_provider, room.room_temp_sensor), ("Study", "home_assistant", "sensor.study"))
+        self.assertManagerReloaded(times=1)
+
+    @expectedFailure
+    def test_update_room_display_order(self):
+        # KNOWN BUG: room_put checks for "displayOrder" but reads data["display_order"], so
+        # sending display_order (the key GET /rest/rooms returns) is silently ignored and
+        # sending displayOrder raises KeyError and returns 500.
+        room = self.make_room("Office")
+
+        response = self.put_json(reverse("rest_rooms_create"), {"id": room.id, "display_order": 7})
+
+        self.assertEqual(response.status_code, 200)
+        room.refresh_from_db()
+        self.assertEqual(room.displayOrder, 7)
 
     def test_delete_room_reloads_manager(self):
         room = self.make_room("Office")

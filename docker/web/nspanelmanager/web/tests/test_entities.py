@@ -247,6 +247,7 @@ class ThermostatTests(EntityRESTCommonTests, EntityRESTTestCase):
             "type": "thermostat",
             "friendly_name": "Heat pump",
             "step_size": "0.5",
+            "use_current_temperature": "True",
             "home_assistant_name": "climate.kitchen",
             "openhab_fan_mode_item": "",
             "openhab_hvac_mode_item": "",
@@ -269,6 +270,7 @@ class ThermostatTests(EntityRESTCommonTests, EntityRESTTestCase):
         self.assertEqual(thermostat.entity_data["step_size"], 0.5)
         self.assertEqual([m["value"] for m in thermostat.entity_data["hvac_modes"]], ["heat", "cool"])
         self.assertEqual(thermostat.entity_data["home_assistant_name"], "climate.kitchen")
+        self.assertIs(thermostat.entity_data["use_current_temperature"], True)
         self.assertLoadableByManager(thermostat)
         self.assertManagerReloaded(times=1)
 

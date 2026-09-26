@@ -52,18 +52,15 @@ class PageRenderTests(NSPMTestCase):
             with self.subTest(url=url):
                 self.assertRenders(url)
 
-    def test_index_prompts_for_manager_address_until_configured(self):
-        self.assertContains(self.assertRenders(reverse("index")), "No manager address configured")
+    def test_index_shows_initial_setup_until_manager_address_is_configured(self):
+        self.assertContains(self.assertRenders(reverse("index")), "data-react-component='InitialSetup'")
 
-    def test_index_lists_panels_but_not_denied_ones(self):
-        response = self.assertRenders(reverse("htmx_partial_index_nspanels_section"))
+        set_setting_value("manager_address", "192.168.1.10")
 
-        self.assertContains(response, "Kitchen panel")
-        self.assertNotContains(response, "Denied panel")
+        self.assertNotContains(self.assertRenders(reverse("index")), "data-react-component='InitialSetup'")
 
     def test_htmx_partials(self):
         partials = [
-            reverse("htmx_partial_index_nspanels_section"),
             reverse("htmx_partial_select_new_entity_type_react", kwargs={"entities_page_id": self.entities_page(self.room).id, "room_view_position": 1}),
             reverse("htmx_partial_select_weather_location"),
             reverse("htmx_partial_select_weather_outside_temperature_sensor"),
@@ -75,18 +72,6 @@ class PageRenderTests(NSPMTestCase):
         for url in partials:
             with self.subTest(url=url):
                 self.assertRenders(url)
-
-    def test_initial_setup_modals(self):
-        for name in (
-            "htmx_initial_setup_welcome",
-            "htmx_initial_setup_manager_settings",
-            "htmx_initial_setup_mqtt_settings",
-            "htmx_initial_setup_home_assistant_settings",
-            "htmx_initial_setup_openhab_settings",
-            "htmx_initial_setup_finished",
-        ):
-            with self.subTest(name=name):
-                self.assertRenders(reverse(name))
 
     def test_sensor_pickers_list_home_assistant_entities(self):
         self.home_assistant.add("sensor.kitchen_temperature", friendly_name="Kitchen temperature")

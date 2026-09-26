@@ -155,13 +155,6 @@ class WeatherAndThemeTests(NSPMTestCase):
         self.assertEqual(setting("use_fahrenheit"), "True")
         self.assertManagerReloaded(times=1)
 
-    def test_fahrenheit_is_shown_on_the_dashboard(self):
-        self.client.post(reverse("weather_and_time"), WEATHER_FORM)
-        room = self.make_room()
-        self.make_panel(room, accepted=True)
-
-        self.assertContains(self.client.get(reverse("htmx_partial_index_nspanels_section")), "°F")
-
     def test_weather_form_missing_field_is_rejected(self):
         form = {k: v for k, v in WEATHER_FORM.items() if k != "use_fahrenheit"}
 
@@ -177,32 +170,44 @@ class WeatherAndThemeTests(NSPMTestCase):
 
 
 class InitialSetupTests(NSPMTestCase):
-    """The first-run wizard: each step saves its settings and returns the next step."""
+    """The first-run wizard (React InitialSetup) saves everything in one POST /rest/settings."""
 
-    def test_wizard_saves_each_step(self):
-        steps = [
-            ("htmx_initial_setup_manager_settings", {"manager_address": "192.168.1.10", "manager_port": "8000"}, "mqtt_server"),
-            ("htmx_initial_setup_mqtt_settings", {"mqtt_server": "mqtt.local", "mqtt_port": "1883", "mqtt_username": "u", "mqtt_password": "p"}, "home_assistant_address"),
-            ("htmx_initial_setup_home_assistant_settings", {"home_assistant_address": "http://ha.local", "home_assistant_token": "t"}, "openhab_address"),
-            ("htmx_initial_setup_openhab_settings", {"openhab_address": "", "openhab_token": ""}, None),
-        ]
-        for url_name, form, next_step_field in steps:
-            with self.subTest(step=url_name):
-                response = self.client.post(reverse(url_name), form)
-                self.assertEqual(response.status_code, 200)
-                if next_step_field:
-                    self.assertContains(response, f'name="{next_step_field}"')
-                for name, value in form.items():
-                    self.assertEqual(setting(name), value)
-        self.assertManagerReloaded(times=4)
+    WIZARD_SETTINGS = {
+        "manager_address": "192.168.1.10",
+        "manager_port": "8000",
+        "mqtt_server": "mqtt.local",
+        "mqtt_port": "1883",
+        "mqtt_username": "u",
+        "mqtt_password": "p",
+        "home_assistant_address": "http://ha.local",
+        "home_assistant_token": "t",
+        "openhab_address": "",
+        "openhab_token": "",
+    }
 
-    def test_step_only_changes_submitted_fields(self):
+    def test_wizard_saves_all_settings(self):
+        response = self.post_json(reverse("rest_settings"), {"settings": self.WIZARD_SETTINGS})
+
+        self.assertEqual(response.status_code, 200)
+        for name, value in self.WIZARD_SETTINGS.items():
+            self.assertEqual(setting(name), value)
+        self.assertManagerReloaded(times=1)
+
+    def test_only_submitted_settings_change(self):
         set_setting_value("mqtt_password", "keep-me")
 
-        self.client.post(reverse("htmx_initial_setup_mqtt_settings"), {"mqtt_server": "mqtt.local"})
+        self.post_json(reverse("rest_settings"), {"settings": {"mqtt_server": "mqtt.local"}})
 
         self.assertEqual(setting("mqtt_server"), "mqtt.local")
         self.assertEqual(setting("mqtt_password"), "keep-me")
+
+    def test_bad_payloads_are_rejected(self):
+        before = list(Settings.objects.values_list("name", "value"))
+        for body in ({}, {"settings": ["mqtt_server"]}, {"settings": "mqtt_server"}):
+            with self.subTest(body=body):
+                self.assertEqual(self.post_json(reverse("rest_settings"), body).status_code, 400)
+        self.assertEqual(list(Settings.objects.values_list("name", "value")), before)
+        self.assertManagerNotReloaded()
 
 
 class SettingsRESTTests(NSPMTestCase):
@@ -225,8 +230,8 @@ class SettingsRESTTests(NSPMTestCase):
         self.assertEqual((settings["mqtt_password_set"], settings["home_assistant_token_set"], settings["openhab_token_set"]), (True, True, False))
         self.assertNotIn("hunter2", response.content.decode())
 
-    def test_settings_endpoint_is_read_only(self):
-        self.assertEqual(self.client.post(reverse("rest_settings")).status_code, 405)
+    def test_settings_endpoint_rejects_unsupported_methods(self):
+        self.assertEqual(self.client.put(reverse("rest_settings")).status_code, 405)
 
     def test_settings_endpoint_works_before_all_secrets_are_set(self):
         set_setting_value("mqtt_password", "hunter2")
@@ -246,23 +251,13 @@ class SettingsRESTTests(NSPMTestCase):
 
         self.assertEqual(response.json(), {"status": "ok", "settings": {"color_temp_min": "2000"}})
 
-    def test_mqttmanager_can_read_several_settings(self):
-        set_setting_value("color_temp_min", "2000")
-        set_setting_value("color_temp_max", "6000")
-
-        response = self.post_json(reverse("rest_mqttmanager_settings_post"), {"settings": ["color_temp_min", "color_temp_max"]})
-
-        self.assertEqual(response.json()["settings"], {"color_temp_min": "2000", "color_temp_max": "6000"})
-
-    def test_mqttmanager_settings_endpoints_check_method(self):
+    def test_mqttmanager_settings_endpoint_checks_method(self):
         self.assertEqual(self.client.post(reverse("rest_mqttmanager_get_setting", kwargs={"setting_key": "x"})).status_code, 405)
-        self.assertEqual(self.client.get(reverse("rest_mqttmanager_settings_post")).status_code, 405)
 
     def test_mqttmanager_settings_endpoint_refuses_banned_keys_as_listed(self):
         for key in ("MQTT_PASSWORD", "HOME_ASSISTANT_TOKEN"):
             with self.subTest(key=key):
                 self.assertEqual(self.client.get(reverse("rest_mqttmanager_get_setting", kwargs={"setting_key": key})).status_code, 403)
-        self.assertEqual(self.post_json(reverse("rest_mqttmanager_settings_post"), {"settings": ["color_temp_min", "OPENHAB_TOKEN"]}).status_code, 403)
 
     def test_mqttmanager_settings_endpoint_refuses_secrets(self):
         # banned_setting_keys is upper case but settings are stored lower case, so the check
@@ -272,7 +267,6 @@ class SettingsRESTTests(NSPMTestCase):
         for key in ("mqtt_password", "home_assistant_token", "openhab_token"):
             with self.subTest(key=key):
                 self.assertEqual(self.client.get(reverse("rest_mqttmanager_get_setting", kwargs={"setting_key": key})).status_code, 403)
-        self.assertEqual(self.post_json(reverse("rest_mqttmanager_settings_post"), {"settings": ["mqtt_password"]}).status_code, 403)
 
 
 class SettingsHelperTests(NSPMTestCase):
