@@ -26,7 +26,21 @@ jobs:
           cache-dependency-path: docker/web/requirements.txt
 
       - name: Install dependencies
-        run: pip install -r docker/web/requirements.txt
+        run: pip install -r docker/web/requirements.txt unittest-xml-reporting
 
       - name: Run tests
         run: docker/web/run_tests.sh -v 2
+        env:
+          NSPM_TEST_JUNIT_DIR: ${{ github.workspace }}/test-results
+
+      # annotate_only writes the job summary and failure annotations without creating a
+      # check run, which needs checks: write and so fails on pull requests from forks.
+      - name: Report test results
+        if: ${{ !cancelled() }}
+        uses: mikepenz/action-junit-report@v6
+        with:
+          report_paths: test-results/*.xml
+          annotate_only: true
+          detailed_summary: true
+          include_passed: true
+          require_tests: true
