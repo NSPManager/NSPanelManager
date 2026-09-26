@@ -206,6 +206,7 @@ private:
       {MQTT_MANAGER_SETTING::OPENHAB_TOKEN, {"openhab_token", ""}},
       {MQTT_MANAGER_SETTING::OPENHAB_BRIGHTNESS_CHANNEL_MAX, {"openhab_brightness_channel_max", "255"}},
       {MQTT_MANAGER_SETTING::OPENHAB_BRIGHTNESS_CHANNEL_MIN, {"openhab_brightness_channel_min", "0"}},
+      {MQTT_MANAGER_SETTING::OPENHAB_RGB_CHANNEL_NAME, {"openhab_rgb_channel_name", ""}},
       {MQTT_MANAGER_SETTING::OUTSIDE_TEMP_SENSOR_ENTITY_ID, {"outside_temp_sensor_entity_id", ""}},
       {MQTT_MANAGER_SETTING::OUTSIDE_TEMP_SENSOR_PROVIDER, {"outside_temp_sensor_provider", ""}},
       {MQTT_MANAGER_SETTING::WEATHER_PRECIPITATION_FORMAT, {"weather_precipitation_format", "mm"}},
