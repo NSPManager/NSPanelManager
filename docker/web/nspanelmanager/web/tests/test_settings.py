@@ -169,27 +169,29 @@ class WeatherAndThemeTests(NSPMTestCase):
         self.assertContains(self.client.get(reverse("index")), "dracula")
 
 
+# Everything the React first-run wizard submits.
+WIZARD_SETTINGS = {
+    "manager_address": "192.168.1.10",
+    "manager_port": "8000",
+    "mqtt_server": "mqtt.local",
+    "mqtt_port": "1883",
+    "mqtt_username": "u",
+    "mqtt_password": "p",
+    "home_assistant_address": "http://ha.local",
+    "home_assistant_token": "t",
+    "openhab_address": "",
+    "openhab_token": "",
+}
+
+
 class InitialSetupTests(NSPMTestCase):
     """The first-run wizard (React InitialSetup) saves everything in one POST /rest/settings."""
 
-    WIZARD_SETTINGS = {
-        "manager_address": "192.168.1.10",
-        "manager_port": "8000",
-        "mqtt_server": "mqtt.local",
-        "mqtt_port": "1883",
-        "mqtt_username": "u",
-        "mqtt_password": "p",
-        "home_assistant_address": "http://ha.local",
-        "home_assistant_token": "t",
-        "openhab_address": "",
-        "openhab_token": "",
-    }
-
     def test_wizard_saves_all_settings(self):
-        response = self.post_json(reverse("rest_settings"), {"settings": self.WIZARD_SETTINGS})
+        response = self.post_json(reverse("rest_settings"), {"settings": WIZARD_SETTINGS})
 
         self.assertEqual(response.status_code, 200)
-        for name, value in self.WIZARD_SETTINGS.items():
+        for name, value in WIZARD_SETTINGS.items():
             self.assertEqual(setting(name), value)
         self.assertManagerReloaded(times=1)
 
