@@ -3,13 +3,19 @@ project(nspm_mqttmanager)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 23)
-set(TEST_MODE 0)
+# Build the unit tests (tests/) and compile the inline TEST_MODE tests into the libraries.
+# Run them with ./run_tests.sh, or `ctest` in the build directory.
+option(NSPM_BUILD_TESTS "Build the MQTTManager unit tests" OFF)
 set(CMAKE_INCLUDE_SRC_DIRECTORY /MQTTManager/include)
 set(PROTOBUF_SRC_DIRECTORY /MQTTManager/include/protobuf)
 
 add_compile_options(-rdynamic -g)
 add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE BOOST_STACKTRACE_USE_BACKTRACE BOOST_BIND_GLOBAL_PLACEHOLDERS BOOST_STACKTRACE_LIBCXX_RUNTIME_MAY_CAUSE_MEMORY_LEAK)
-add_compile_definitions(TEST_MODE=0)
+if(NSPM_BUILD_TESTS)
+    add_compile_definitions(TEST_MODE=1)
+else()
+    add_compile_definitions(TEST_MODE=0)
+endif()
 
 # Statically link libraries
 IF(DEFINED ENV{STRIP})
@@ -151,7 +157,7 @@ add_executable(${PROJECT_NAME} src/main.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(${PROJECT_NAME} MQTT_Manager MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager MQTTManager_NextionImageServer MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_CommandManager gtest::gtest)
 
-if (TEST_MODE==1)
+if(NSPM_BUILD_TESTS)
     enable_testing()
-    gtest_discover_tests(${PROJECT_NAME})
+    add_subdirectory(tests)
 endif()
