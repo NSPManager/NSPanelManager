@@ -75,6 +75,9 @@ OpenhabLight::OpenhabLight(uint32_t light_id) : Light(light_id) {
       this->_openhab_control_mode = MQTT_MANAGER_OPENHAB_CONTROL_MODE::SWITCH;
       if (entity_data.contains("openhab_item_switch")) {
         this->_openhab_on_off_item = entity_data["openhab_item_switch"];
+      } else if (entity_data.contains("openhab_item_dimmer")) {
+        // Newer releases of NSPanelManager use "openhab_item_dimmer" regardless of light type/capabilities
+        this->_openhab_on_off_item = entity_data["openhab_item_dimmer"];
       } else {
         SPDLOG_ERROR("No openhab on/off item defined for light {}::{}", this->_id, this->_name);
       }
@@ -83,6 +86,9 @@ OpenhabLight::OpenhabLight(uint32_t light_id) : Light(light_id) {
       this->_openhab_control_mode = MQTT_MANAGER_OPENHAB_CONTROL_MODE::SWITCH;
       if (entity_data.contains("openhab_item_switch")) {
         this->_openhab_on_off_item = entity_data["openhab_item_switch"];
+      } else if (entity_data.contains("openhab_item_dimmer")) {
+        // Newer releases of NSPanelManager use "openhab_item_dimmer" regardless of light type/capabilities
+        this->_openhab_on_off_item = entity_data["openhab_item_dimmer"];
       } else {
         SPDLOG_ERROR("No openhab on/off item defined for light {}::{}", this->_id, this->_name);
       }
@@ -92,6 +98,9 @@ OpenhabLight::OpenhabLight(uint32_t light_id) : Light(light_id) {
     this->_openhab_control_mode = MQTT_MANAGER_OPENHAB_CONTROL_MODE::SWITCH;
     if (entity_data.contains("openhab_item_switch")) {
       this->_openhab_on_off_item = entity_data["openhab_item_switch"];
+    } else if (entity_data.contains("openhab_item_dimmer")) {
+      // Newer releases of NSPanelManager use "openhab_item_dimmer" regardless of light type/capabilities
+      this->_openhab_on_off_item = entity_data["openhab_item_dimmer"];
     } else {
       SPDLOG_ERROR("No openhab on/off item defined for light {}::{}", this->_id, this->_name);
     }

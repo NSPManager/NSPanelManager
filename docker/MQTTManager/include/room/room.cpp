@@ -281,6 +281,7 @@ void Room::page_changed_callback(RoomEntitiesPage *page) {
       std::lock_guard<std::mutex> mutex_guard(this->_status_update_mutex);
       this->_room_status_updated = false;
     }
+    SPDLOG_DEBUG("Sending notify of state update in room {}::{}", this->_id, this->_name);
     this->_room_update_condition_variable.notify_all();
   }
 }

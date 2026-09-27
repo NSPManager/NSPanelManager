@@ -19,6 +19,7 @@ class CompressorRecipe(ConanFile):
         self.requires("boost/1.84.0")
         self.requires("protobuf/5.27.0")
         self.requires("sqlite_orm/1.9.1")
+        self.requires("stb/cci.20240531")  # Header-only image decoding/resizing for the Nextion image server
         # Testing tools:
         self.requires("gtest/1.16.0")
 

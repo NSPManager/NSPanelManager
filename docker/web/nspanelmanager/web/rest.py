@@ -5,6 +5,7 @@ import socket
 from pprint import pprint
 from re import A
 
+import requests
 from django.core.files.storage import FileSystemStorage
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -33,6 +34,25 @@ def get_home_assistant_entities(request):
     return JsonResponse(web.home_assistant_api.get_all_home_assistant_items(filter_params))
 
 
+def test_home_assistant(request):
+    if request.method != "GET":
+        return JsonResponse({"status": "error"}, status=405)
+
+    address = request.GET.get("address")
+    token = request.GET.get("token")
+    if not address or not token:
+        return JsonResponse({"status": "error", "message": "address and token are required"}, status=400)
+
+    try:
+        response = requests.get(f"{address}/api/states", headers={"Authorization": f"Bearer {token}"})
+        if response.ok:
+            return JsonResponse({"status": "success"})
+        else:
+            return JsonResponse({"status": "error", "message": response.text}, status=response.status_code)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+
 def get_openhab_items(request):
     if request.method != "GET":
         return JsonResponse({"status": "error"}, status=405)
@@ -43,6 +63,25 @@ def get_openhab_items(request):
     openhab_items["items"].extend(openhab_scenes["items"])
     openhab_items["errors"].extend(openhab_scenes["errors"])
     return JsonResponse(openhab_items)
+
+
+def test_openhab(request):
+    if request.method != "GET":
+        return JsonResponse({"status": "error"}, status=405)
+
+    address = request.GET.get("address")
+    token = request.GET.get("token")
+    if not address or not token:
+        return JsonResponse({"status": "error", "message": "address and token are required"}, status=400)
+
+    try:
+        response = requests.get(f"{address}/rest/items", headers={"Authorization": f"Bearer {token}"})
+        if response.ok:
+            return JsonResponse({"status": "success"})
+        else:
+            return JsonResponse({"status": "error", "message": response.text}, status=response.status_code)
+    except Exception as e:
+        return JsonResponse({"status": "error", "message": str(e)}, status=500)
 
 
 ##########################
@@ -87,28 +126,24 @@ def mqttmanager_get_setting(request, setting_key):
 
 
 @csrf_exempt
-def mqttmanager_settings_post(request):
-    try:
-        settings = {}
-        if request.method == "POST":
-            data = json.loads(request.body)
-            for setting_key in data["settings"]:
-                if setting_key in banned_setting_keys:
-                    return JsonResponse({"status": "error"}, status=403)  # Return error forbidden
-                settings[setting_key] = get_setting_with_default(setting_key)
-        else:
-            return JsonResponse({"status": "error"}, status=405)
+def test_mqttmanager(request):
+    if request.method != "GET":
+        return JsonResponse({"status": "error"}, status=405)
 
-        return JsonResponse(
-            {
-                "status": "ok",
-                "settings": settings,
-            }
-        )
+    address = request.GET.get("address")
+    port = request.GET.get("port")
+    if not address or not port:
+        return JsonResponse({"status": "error", "message": "address and port are required"}, status=400)
+
+    try:
+        response = requests.get(f"http://{address}:{port}/rest/settings")
+        if response.ok:
+            return JsonResponse({"status": "success"})
+        else:
+            return JsonResponse({"status": "error", "message": response.text}, status=response.status_code)
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error"}, status=500)
 
 
 ######################
@@ -164,6 +199,8 @@ def relay_groups(request):
 def rooms(request):
     if request.method == "GET":
         return rooms_get(request)
+    elif request.method == "PUT":
+        return room_put(request)
     elif request.method == "POST":
         return room_create(request)
     else:
@@ -173,6 +210,8 @@ def rooms(request):
 def settings(request):
     if request.method == "GET":
         return settings_get(request)
+    elif request.method == "POST":
+        return settings_post(request)
     else:
         return JsonResponse({"status": "error"}, status=405)
 
@@ -190,6 +229,27 @@ def settings_get(request):
     return JsonResponse({"status": "ok", "settings": settings}, status=200)
 
 
+def settings_post(request):
+    try:
+        if request.method == "POST":
+            data = json.loads(request.body)
+            if "settings" not in data:
+                return JsonResponse({"status": "error", "message": "No settings provided"}, status=400)
+            elif not isinstance(data["settings"], dict):
+                return JsonResponse({"status": "error", "message": "Settings must be a dictionary"}, status=400)
+
+            for setting_key in data["settings"]:
+                set_setting_value(setting_key, data["settings"][setting_key])
+
+            send_mqttmanager_reload_command()
+            return JsonResponse({"status": "ok"})
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
 def rooms_get(request):
     try:
         rooms = list()
@@ -201,7 +261,10 @@ def rooms_get(request):
             rooms.append(
                 {
                     "id": room.id,
-                    "name": room.friendly_name,
+                    "friendly_name": room.friendly_name,
+                    "display_order": room.displayOrder,
+                    "room_temp_provider": room.room_temp_provider,
+                    "room_temp_sensor": room.room_temp_sensor,
                 }
             )
         return JsonResponse({"status": "ok", "rooms": rooms}, status=200)
@@ -341,6 +404,64 @@ def room_entities_pages_order(request):
         return JsonResponse({"status": "error"}, status=405)
 
 
+####################
+# NSPanel REST API #
+####################
+
+
+def nspanel_delete(request, nspanel_id):
+    try:
+        if request.method == "DELETE":
+            nspanel = NSPanel.objects.get(id=nspanel_id)
+            nspanel.delete()
+            response = JsonResponse({"status": "ok"}, status=200)
+            send_mqttmanager_reload_command()
+            return response
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+def nspanel_accept(request, nspanel_id):
+    try:
+        if request.method == "POST":
+            data = json.loads(request.body)
+            if "room_id" not in data:
+                return JsonResponse({"status": "error", "message": "room_id is required"}, status=400)
+            nspanel = NSPanel.objects.get(id=nspanel_id)
+            nspanel.denied = False
+            nspanel.accepted = True
+            nspanel.room = Room.objects.get(id=data["room_id"])
+            nspanel.save()
+            response = JsonResponse({"status": "ok", "id": nspanel.id}, status=200)
+            send_mqttmanager_reload_command()
+            return response
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+def nspanel_deny(request, nspanel_id):
+    try:
+        if request.method == "POST":
+            nspanel = NSPanel.objects.get(id=nspanel_id)
+            nspanel.denied = True
+            nspanel.accepted = False
+            nspanel.save()
+            response = JsonResponse({"status": "ok", "id": nspanel.id}, status=200)
+            send_mqttmanager_reload_command()
+            return response
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
 ########################
 ### Global functions ###
 ########################
@@ -419,6 +540,31 @@ def room_entities(request, room_id):
         except Exception as ex:
             logging.exception(ex)
             return JsonResponse({"status": "error"}, status=500)
+    else:
+        return JsonResponse({"status": "error"}, status=405)
+
+
+def room_put(request):
+    if request.method == "PUT":
+        try:
+            data = json.loads(request.body)
+            room_id = data["id"]
+            room = Room.objects.get(id=room_id)
+
+            if "friendly_name" in data:
+                room.friendly_name = data["friendly_name"]
+            if "displayOrder" in data:
+                room.displayOrder = data["display_order"]
+            if "room_temp_provider" in data:
+                room.room_temp_provider = data["room_temp_provider"]
+            if "room_temp_sensor" in data:
+                room.room_temp_sensor = data["room_temp_sensor"]
+            room.save()
+            send_mqttmanager_reload_command()
+            return JsonResponse({"status": "ok", "room_id": room.id}, status=200)
+        except Exception as ex:
+            logging.exception(ex)
+            return JsonResponse({"status": "error", "message": str(ex)}, status=500)
     else:
         return JsonResponse({"status": "error"}, status=405)
 
@@ -845,6 +991,7 @@ def put_thermostat_entity(request):
             "type",
             "friendly_name",
             "step_size",
+            "use_current_temperature",
             "home_assistant_name",
             "openhab_fan_mode_item",
             "openhab_hvac_mode_item",
@@ -879,6 +1026,7 @@ def put_thermostat_entity(request):
             "preset_modes": data.get("preset_modes", []),
             "swing_modes": data.get("swing_modes", []),
             "swingh_modes": data.get("swingh_modes", []),
+            "use_current_temperature": data.get("use_current_temperature", "True") == "True",
             "home_assistant_name": data.get("home_assistant_name", ""),
             "openhab_fan_mode_item": data.get("openhab_fan_mode_item", ""),
             "openhab_hvac_mode_item": data.get("openhab_hvac_mode_item", ""),
@@ -886,6 +1034,7 @@ def put_thermostat_entity(request):
             "openhab_swing_mode_item": data.get("openhab_swing_mode_item", ""),
             "openhab_swingh_mode_item": data.get("openhab_swingh_mode_item", ""),
             "openhab_temperature_item": data.get("openhab_temperature_item", ""),
+            "openhab_current_temperature_item": data.get("openhab_current_temperature_item", ""),
             "step_size": float(data.get("step_size", 1)),
         }
         if "id" in data and data["id"]:
@@ -901,6 +1050,134 @@ def put_thermostat_entity(request):
 
         new_thermostat.entity_data = entity_data
         new_thermostat.save()
+        send_mqttmanager_reload_command()
+
+        return JsonResponse({"status": "ok"}, status=200)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+########################
+# Media player section #
+########################
+
+
+# How the volume of the source feeding a media player is found in Home Assistant.
+# See HomeAssistantSourceVolumeStrategy in the MQTTManager for what each one expects.
+MEDIA_PLAYER_SOURCE_VOLUME_STRATEGIES = ["none", "player_attributes", "source_entity"]
+
+# Volume in % that one volume up/down press on the panel changes, unless set per media player.
+MEDIA_PLAYER_DEFAULT_VOLUME_STEP = 5
+
+
+def entities_media_players(request):
+    try:
+        if request.method == "PUT":
+            return put_media_player_entity(request)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+
+
+def put_media_player_entity(request):
+    try:
+        required_fields = [  # Fields required for media player entities
+            "room_id",
+            "entities_page_id",
+            "room_view_position",
+            "controller",
+            "friendly_name",
+            "home_assistant_name",
+        ]
+
+        data = json.loads(request.body)
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        if data["controller"] != "home_assistant":
+            return JsonResponse({"status": "error", "message": f"Unsupported controller for media player: {data['controller']}"}, status=400)
+
+        # Source volume is optional, a media player without it only has its own volume.
+        source_volume_strategy = data.get("source_volume_strategy", "none")
+        source_entity_attribute = data.get("source_entity_attribute", "")
+        source_volume_attribute = data.get("source_volume_attribute", "")
+        if not all(isinstance(value, str) for value in [source_volume_strategy, source_entity_attribute, source_volume_attribute]):
+            return JsonResponse({"status": "error", "message": "source_volume_strategy, source_entity_attribute and source_volume_attribute must be strings."}, status=400)
+        source_entity_attribute = source_entity_attribute.strip()
+        source_volume_attribute = source_volume_attribute.strip()
+
+        # Each strategy needs different attributes on the media player in Home Assistant. Reject a combination
+        # here rather than leaving the manager to log an error and silently fall back to no source volume.
+        if source_volume_strategy not in MEDIA_PLAYER_SOURCE_VOLUME_STRATEGIES:
+            return JsonResponse({"status": "error", "message": f"Unknown source volume strategy: {source_volume_strategy}. Expected one of {', '.join(MEDIA_PLAYER_SOURCE_VOLUME_STRATEGIES)}."}, status=400)
+        if source_volume_strategy != "none" and not source_entity_attribute:
+            return JsonResponse({"status": "error", "message": f"Source volume strategy '{source_volume_strategy}' requires source_entity_attribute."}, status=400)
+        if source_volume_strategy == "player_attributes" and not source_volume_attribute:
+            return JsonResponse({"status": "error", "message": "Source volume strategy 'player_attributes' requires source_volume_attribute."}, status=400)
+
+        # How much one volume up/down press on the panel changes the volume. Optional, see below for the default.
+        volume_step = data.get("volume_step")
+        if volume_step is not None and (isinstance(volume_step, bool) or not isinstance(volume_step, int) or volume_step < 1 or volume_step > 100):
+            return JsonResponse({"status": "error", "message": "volume_step must be an integer between 1 and 100."}, status=400)
+
+        try:
+            room_id = int(data["room_id"])
+            entities_page_id = int(data["entities_page_id"])
+            room_view_position = int(data["room_view_position"])
+            media_player_id = int(data["id"]) if data.get("id") else None
+        except (TypeError, ValueError):
+            return JsonResponse({"status": "error", "message": "room_id, entities_page_id, room_view_position and id must be integers."}, status=400)
+
+        if media_player_id is not None:
+            # Only update existing media players, never another type of entity that happens to have this ID.
+            new_media_player = Entity.objects.filter(id=media_player_id).first()
+            if new_media_player is None:
+                return JsonResponse({"status": "error", "message": f"No entity with id {media_player_id}."}, status=404)
+            if new_media_player.entity_type != Entity.EntityType.MEDIA_PLAYER:
+                return JsonResponse({"status": "error", "message": f"Entity {media_player_id} is a {new_media_player.entity_type}, not a media player."}, status=409)
+        else:
+            new_media_player = Entity()
+            new_media_player.entity_type = Entity.EntityType.MEDIA_PLAYER
+
+        room = Room.objects.filter(id=room_id).first()
+        if room is None:
+            return JsonResponse({"status": "error", "message": f"No room with id {room_id}."}, status=404)
+
+        # The media player is shown in a slot on one of the room's entities pages.
+        entities_page = RoomEntitiesPage.objects.filter(id=entities_page_id).first()
+        if entities_page is None:
+            return JsonResponse({"status": "error", "message": f"No entities page with id {entities_page_id}."}, status=404)
+        if entities_page.room_id != room.id or entities_page.is_scenes_page:
+            return JsonResponse({"status": "error", "message": f"Entities page {entities_page_id} is not an entities page in room {room_id}."}, status=400)
+        if room_view_position < 0 or room_view_position >= entities_page.page_type:
+            return JsonResponse({"status": "error", "message": f"room_view_position must be between 0 and {entities_page.page_type - 1} for entities page {entities_page_id}."}, status=400)
+
+        # The slot must be free. Updating a media player in place keeps its own slot.
+        slot_taken = Entity.objects.filter(entities_page=entities_page, room_view_position=room_view_position).exclude(id=new_media_player.id).exists() or Scene.objects.filter(entities_page=entities_page, room_view_position=room_view_position).exists()
+        if slot_taken:
+            return JsonResponse({"status": "error", "message": f"Slot {room_view_position} on entities page {entities_page_id} is already in use."}, status=409)
+
+        # Without a volume step in the request, an existing media player keeps its step and a new one gets 5%.
+        if volume_step is None:
+            volume_step = new_media_player.entity_data.get("volume_step", MEDIA_PLAYER_DEFAULT_VOLUME_STEP)
+
+        entity_data = {
+            "controller": data["controller"],
+            "home_assistant_name": data["home_assistant_name"],
+            "source_volume_strategy": source_volume_strategy,
+            "source_entity_attribute": source_entity_attribute,
+            "source_volume_attribute": source_volume_attribute,
+            "volume_step": volume_step,
+        }
+        new_media_player.friendly_name = data["friendly_name"]
+        new_media_player.room = room
+        new_media_player.entities_page = entities_page
+        new_media_player.room_view_position = room_view_position
+        new_media_player.entity_data = entity_data
+        new_media_player.save()
         send_mqttmanager_reload_command()
 
         return JsonResponse({"status": "ok"}, status=200)

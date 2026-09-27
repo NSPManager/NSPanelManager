@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { useEntitiesPagesStore } from "../../../stores/EntitiesPagesStore";
 import { useEffect, useState, useRef } from "react";
+import { Notify } from "../../NSPanelToastContainer";
 
 const schema = z.object({
   id: z.number().nullable(),
@@ -18,6 +19,7 @@ const schema = z.object({
   friendly_name: z.string().min(1),
   step_size: z.float32(),
   controller: z.string(),
+  use_current_temperature: z.string(),
   home_assistant_name: z.string().optional(),
   openhab_fan_mode_item: z.string().optional(),
   openhab_hvac_mode_item: z.string().optional(),
@@ -25,6 +27,7 @@ const schema = z.object({
   openhab_swing_mode_item: z.string().optional(),
   openhab_swingh_mode_item: z.string().optional(),
   openhab_temperature_item: z.string().optional(),
+  openhab_current_temperature_item: z.string().optional(),
   fan_modes: z.array(
     z
       .object({
@@ -269,6 +272,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
     getValues,
     setValue,
     formState: { isValid },
+    watch,
   } = useForm<ThermostatFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -279,6 +283,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
       room_id: room_id,
       entities_page_id: entities_page_id,
       room_view_position: room_view_position,
+      use_current_temperature: "True",
       home_assistant_name: "",
       openhab_fan_mode_item: "",
       openhab_hvac_mode_item: "",
@@ -286,6 +291,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
       openhab_swing_mode_item: "",
       openhab_swingh_mode_item: "",
       openhab_temperature_item: "",
+      openhab_current_temperature_item: "",
       step_size: 0.5,
       fan_modes: [],
       hvac_modes: [],
@@ -295,6 +301,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
     },
   });
   const { entities } = useEntitiesPagesStore.getState();
+  void watch("use_current_temperature");
 
   const {
     fields: fanModeFields,
@@ -378,7 +385,6 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
     })
       .then(async (response) => {
         const data = await response.json();
-        console.log("Entity created/updated. Got response:", data);
 
         // check for error response
         if (!response.ok) {
@@ -390,7 +396,7 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
       })
       .catch((error) => {
         // setErrorMessage(error);
-        console.error("There was an error!", error);
+        Notify({ message: `Error saving entity. Error: ${error}`, level: "error", duration: 10000 });
       });
   }
 
@@ -453,15 +459,11 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
     }
   }
 
-  const classNames: ClassNamesConfig<{ value: string; label: string }, false, GroupBase<{ value: string; label: string }>> = {
+  const classNames: ClassNamesConfig<IOptionType, false, GroupBase<IOptionType>> = {
     control: (state) => `${state.isFocused ? "border" : "border-0"} border-accent p-2.5 text-sm rounded-box bg-base-300 text-base-content rounded-md`,
     menu: () => "bg-base-300 p-2.5 rounded-box text-base-content",
     option: (state) => `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`,
   };
-
-  console.log("Data: ", getValues());
-  const schemaCheckResult = schema.safeParse(getValues());
-  console.log("Schema check result: ", schemaCheckResult);
 
   return (
     <form onSubmit={handleSubmit(saveEntity)}>
@@ -580,40 +582,105 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
 
         {/* Temperature */}
         {controller == "openhab" && (
-          <div className="mt-4 border border-primary rounded-box p-4 pt-2">
-            <span className="text-lg mb-4">Temperature</span>
-            <div className="">
-              <label className="block mb-2 text-sm font-medium">OpenHAB target temperature item</label>
-              <Select<IOptionType>
-                options={useAvailableEntitiesStore.getState().openhab_options}
-                classNames={classNames}
-                onChange={(newValue) => setValue("openhab_temperature_item", newValue ? newValue.value : "")}
-                value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_temperature_item"))}
-                unstyled
-                components={select_components}
-                styles={{
-                  input: (base) => ({
-                    ...base,
-                    "input:focus": {
-                      boxShadow: "none",
-                    },
-                  }),
-                  // On mobile, the label will truncate automatically, so we want to
-                  // override that behaviour.
-                  multiValueLabel: (base) => ({
-                    ...base,
-                    whiteSpace: "normal",
-                    overflow: "visible",
-                  }),
-                  control: (base) => ({
-                    ...base,
-                    transition: "none",
-                  }),
-                }}
+          <>
+            <div className="mt-4 border border-primary rounded-box p-4 pt-2">
+              <span className="text-lg mb-4">Temperature</span>
+              <div className="">
+                <label className="block mb-2 text-sm font-medium">OpenHAB target temperature item</label>
+                <Select<IOptionType>
+                  options={useAvailableEntitiesStore.getState().openhab_options}
+                  classNames={classNames}
+                  onChange={(newValue) => setValue("openhab_temperature_item", newValue ? newValue.value : "")}
+                  value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_temperature_item"))}
+                  unstyled
+                  components={select_components}
+                  styles={{
+                    input: (base) => ({
+                      ...base,
+                      "input:focus": {
+                        boxShadow: "none",
+                      },
+                    }),
+                    // On mobile, the label will truncate automatically, so we want to
+                    // override that behaviour.
+                    multiValueLabel: (base) => ({
+                      ...base,
+                      whiteSpace: "normal",
+                      overflow: "visible",
+                    }),
+                    control: (base) => ({
+                      ...base,
+                      transition: "none",
+                    }),
+                  }}
+                />
+              </div>
+
+              <div className="mt-2">
+                <label className="block mb-2 text-sm font-medium">OpenHAB current temperature item</label>
+                <Select<IOptionType>
+                  options={useAvailableEntitiesStore.getState().openhab_options}
+                  classNames={classNames}
+                  onChange={(newValue) => setValue("openhab_current_temperature_item", newValue ? newValue.value : "")}
+                  value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_current_temperature_item"))}
+                  unstyled
+                  components={select_components}
+                  styles={{
+                    input: (base) => ({
+                      ...base,
+                      "input:focus": {
+                        boxShadow: "none",
+                      },
+                    }),
+                    // On mobile, the label will truncate automatically, so we want to
+                    // override that behaviour.
+                    multiValueLabel: (base) => ({
+                      ...base,
+                      whiteSpace: "normal",
+                      overflow: "visible",
+                    }),
+                    control: (base) => ({
+                      ...base,
+                      transition: "none",
+                    }),
+                  }}
+                />
+              </div>
+            </div>
+          </>
+        )}
+
+        <div className="mr-1">
+          <div className="w-full text-sm font-medium border border-neutral rounded-lg bg-base-300">
+            <div className="flex items-center ps-3 w-full">
+              <input
+                type="radio"
+                value="False"
+                {...register("use_current_temperature")}
+                checked={getValues("use_current_temperature") == "False"}
+                className="w-4 h-4 radio radio-accent"
               />
+              <label htmlFor="relay1_off" className="w-full py-3 ms-2 text-sm font-medium">
+                <span className="block mb-2 text-sm font-medium">Use current temperature from room or internal thermistor</span>
+              </label>
+            </div>
+            <div className="flex items-center ps-3 w-full">
+              <input
+                type="radio"
+                value="True"
+                {...register("use_current_temperature")}
+                checked={getValues("use_current_temperature") == "True"}
+                className="w-4 h-4 radio radio-accent"
+              />
+              <label htmlFor="relay1_on" className="w-full py-3 ms-2 text-sm font-medium">
+                {controller == "home_assistant" && (
+                  <span className="block mb-2 text-sm font-medium">Use current temperature from thermostat entity if available</span>
+                )}
+                {controller == "openhab" && <span className="block mb-2 text-sm font-medium">Use current temperature from OpenHAB item</span>}
+              </label>
             </div>
           </div>
-        )}
+        </div>
 
         {/* Fan modes */}
         <div className="mt-4 border border-primary rounded-box p-4 pt-2">

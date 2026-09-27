@@ -3,8 +3,10 @@
 #include "entity/entity.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "thermostat/thermostat.hpp"
+#include <boost/algorithm/string/replace.hpp>
 #include <boost/bind.hpp>
 #include <boost/exception/diagnostic_information.hpp>
+#include <charconv>
 #include <cstdint>
 #include <gtest/gtest.h>
 #include <nlohmann/json_fwd.hpp>
@@ -43,6 +45,7 @@ void OpenhabThermostat::reload_config() {
 
   // Detach existing event observers
   OpenhabManager::detach_event_observer(this->_openhab_target_temperature_item, boost::bind(&OpenhabThermostat::openhab_target_temperature_event_callback, this, _1));
+  OpenhabManager::detach_event_observer(this->_openhab_current_temperature_item, boost::bind(&OpenhabThermostat::openhab_current_temperature_event_callback, this, _1));
   OpenhabManager::detach_event_observer(this->_openhab_fan_mode_item, boost::bind(&OpenhabThermostat::openhab_fan_mode_event_callback, this, _1));
   OpenhabManager::detach_event_observer(this->_openhab_mode_item, boost::bind(&OpenhabThermostat::openhab_mode_event_callback, this, _1));
   OpenhabManager::detach_event_observer(this->_openhab_preset_item, boost::bind(&OpenhabThermostat::openhab_preset_event_callback, this, _1));
@@ -62,6 +65,14 @@ void OpenhabThermostat::reload_config() {
     this->_openhab_target_temperature_item = entity_data["openhab_temperature_item"];
   } else {
     SPDLOG_ERROR("No openhab_temperature_item name defined for Thermostat {}::{}", this->_id, this->_name);
+  }
+
+  if (!this->_use_current_temperature) {
+    SPDLOG_INFO("Thermostat {}::{} is configured to not use temperature current temperature item.");
+  } else if (entity_data.contains("openhab_current_temperature_item")) {
+    this->_openhab_current_temperature_item = entity_data["openhab_current_temperature_item"];
+  } else {
+    SPDLOG_ERROR("No openhab_current_temperature_item name defined for Thermostat {}::{}", this->_id, this->_name);
   }
 
   if (entity_data.contains("openhab_fan_mode_item")) {
@@ -233,7 +244,14 @@ void OpenhabThermostat::openhab_target_temperature_event_callback(nlohmann::json
           return;
         }
 
-        float target_temperature = std::round(atof(std::string(payload["value"]).c_str()));
+        std::string payload_string = payload["value"].get<std::string>();
+        float target_temperature = 0;
+        if (!payload_string.empty()) {
+          auto [ptr, ec] = std::from_chars(payload_string.data(), payload_string.data() + payload_string.size(), target_temperature);
+          if (ec == std::errc()) {
+            target_temperature = std::round(target_temperature * 10) / 10; // Round to 1 decimal
+          }
+        }
         SPDLOG_DEBUG("Thermostat {}::{} got new temperature {}, current temperature: {}.", this->_id, this->_name, target_temperature, this->_current_temperature);
         if (target_temperature != this->_current_temperature) {
           this->_current_temperature = target_temperature;
@@ -262,6 +280,81 @@ void OpenhabThermostat::openhab_target_temperature_event_callback(nlohmann::json
       if (target_temperature != this->_current_temperature) {
         this->_current_temperature = target_temperature;
         this->_requested_temperature = target_temperature;
+        this->_last_target_temperature_change = CurrentTimeMilliseconds();
+        this->send_state_update_to_nspanel();
+        this->_signal_entity_changed();
+      }
+    }
+  }
+}
+
+void OpenhabThermostat::openhab_current_temperature_event_callback(nlohmann::json data) {
+  SPDLOG_DEBUG("Thermostat {}::{} get current temperature callback!", this->_id, this->_name);
+
+  if (std::string(data["type"]).compare("ItemStateChangedEvent") == 0) {
+    // Extract topic into multiple parts
+    std::string topic = data["topic"];
+    std::vector<std::string> topic_parts;
+    boost::split(topic_parts, topic, boost::is_any_of("/"));
+    std::string topic_item = topic_parts[2];
+
+    if (topic_parts.size() < 3) {
+      SPDLOG_ERROR("Received ItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
+      return;
+    }
+
+    nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
+    if (topic_item.compare(this->_openhab_target_temperature_item) == 0) {
+      // We only care about the first event from Openhab, ignore the rest but still indicate that event was handled so the manager stops looping over all entities.
+      if (CurrentTimeMilliseconds() >= this->_last_target_temperature_change + 1000) {
+        SPDLOG_DEBUG("Thermostat {}::{}, payload: {}", this->_id, this->_name, payload.dump());
+        if (payload["value"].is_null()) { // Got state but state is NULL, ignore.
+          return;
+        } else if (payload["value"].is_string() && std::string(payload["value"]).compare("NULL") == 0) {
+          return;
+        } else if (payload["value"].is_object()) {
+          return;
+        }
+
+        std::string payload_string = payload["value"].get<std::string>();
+        float current_temperature = 0;
+        if (!payload_string.empty()) {
+          auto [ptr, ec] = std::from_chars(payload_string.data(), payload_string.data() + payload_string.size(), current_temperature);
+          if (ec == std::errc()) {
+            current_temperature = std::round(current_temperature * 10) / 10; // Round to 1 decimal
+          }
+        }
+        SPDLOG_DEBUG("Thermostat {}::{} got new temperature sensor value {}, current temperature: {}.", this->_id, this->_name, current_temperature, this->_current_temperature_sensor);
+        if (current_temperature != this->_current_temperature_sensor) {
+          this->_current_temperature_sensor = current_temperature;
+          this->send_state_update_to_nspanel();
+          this->_signal_entity_changed();
+        }
+      }
+    }
+  } else if (std::string(data["type"]).compare("ItemStateFetched") == 0) {
+    SPDLOG_TRACE("OpenHAB thermostat {}::{} Got initial data from OpenHAB via custom ItemStateFetched event.", this->_id, this->_name);
+    if (this->_openhab_target_temperature_item.compare(data["payload"]["name"]) == 0) {
+      nlohmann::json payload = data["payload"];
+      if (payload["state"].is_null()) { // Got state but state is NULL, ignore.
+        return;
+      } else if (payload["state"].is_string() && std::string(payload["state"]).compare("NULL") == 0) {
+        return;
+      } else if (payload["state"].is_object()) {
+        return;
+      }
+
+      std::string payload_string = payload["value"].get<std::string>();
+      float current_temperature = 0;
+      if (!payload_string.empty()) {
+        auto [ptr, ec] = std::from_chars(payload_string.data(), payload_string.data() + payload_string.size(), current_temperature);
+        if (ec == std::errc()) {
+          current_temperature = std::round(current_temperature * 10) / 10; // Round to 1 decimal
+        }
+      }
+      SPDLOG_DEBUG("Thermostat {}::{} got new temperature {}, current temperature: {}.", this->_id, this->_name, current_temperature, this->_current_temperature_sensor);
+      if (current_temperature != this->_current_temperature_sensor) {
+        this->_current_temperature_sensor = current_temperature;
         this->_last_target_temperature_change = CurrentTimeMilliseconds();
         this->send_state_update_to_nspanel();
         this->_signal_entity_changed();

@@ -6,6 +6,8 @@ public:
   static constexpr const char *entity_icon_switch_on = "s";
   static constexpr const char *entity_icon_switch_off = "t";
   static constexpr const char *entity_icon_button = "z";
+  // TODO: Use a dedicated media player glyph once one is added to the NSPanel icon font.
+  static constexpr const char *media_player = "x";
 
   // Misc Icons
   static constexpr const char *save_icon = "w";

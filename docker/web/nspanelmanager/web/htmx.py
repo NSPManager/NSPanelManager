@@ -20,9 +20,6 @@ from requests.sessions import Request
 
 import web.home_assistant_api
 import web.openhab_api
-from web.components.nspanel_room_entities_pages.nspanel_room_entities_pages import (
-    NSPanelRoomEntitiesPages,
-)
 from web.components.rooms_list.rooms_list import RoomsList
 from web.settings_helper import (
     delete_nspanel_setting,
@@ -46,40 +43,6 @@ from .models import (
     Scene,
     Settings,
 )
-
-
-def partial_index_nspanels_section(request):
-    if get_setting_with_default("use_fahrenheit") == "True":
-        temperature_unit = "°F"
-    else:
-        temperature_unit = "°C"
-
-    nspanels = []
-    for nspanel in NSPanel.objects.filter(denied=False):
-        panel_info = {}
-        panel_info["data"] = nspanel
-        nspanels.append(panel_info)
-
-    data = {
-        "nspanels": nspanels,
-        "temperature_unit": temperature_unit,
-    }
-
-    return render(request, "index_htmx_nspanels_section.html", data)
-
-
-def partial_nspanel_index_view(request, nspanel_id):
-    try:
-        if request.method == "GET":
-            data = {
-                "nspanel": {"data": NSPanel.objects.get(id=nspanel_id)},
-            }
-            return render(request, "partial/nspanel_index_view_htmx.html", data)
-        else:
-            return JsonResponse({"status": "error"}, status=405)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
 
 
 @csrf_exempt
@@ -120,6 +83,7 @@ def nspanel_deny_register_request(request, nspanel_id):
     try:
         if request.method == "POST":
             nspanel = NSPanel.objects.get(id=nspanel_id)
+            nspanel.accepted = False
             nspanel.denied = True
             nspanel.save()
 
@@ -1081,114 +1045,6 @@ def create_or_update_scene_entity(request):
         is_scenes_pages=True,
         is_global_scenes_page=(new_scene.room == None),
     )
-
-
-def initial_setup_welcome(request):
-    return render(request, "modals/initial_setup/welcome.html")
-
-
-@csrf_exempt
-def initial_setup_manager_settings(request):
-    if request.method == "POST":
-        if "manager_address" in request.POST:
-            set_setting_value("manager_address", request.POST["manager_address"])
-        if "manager_port" in request.POST:
-            set_setting_value("manager_port", request.POST["manager_port"])
-        send_mqttmanager_reload_command()
-
-        # Save settings succesfully, return the next view in the setup guide. MQTT:
-        data = {
-            "mqtt_server": get_setting_with_default("mqtt_server"),
-            "mqtt_port": get_setting_with_default("mqtt_port"),
-            "mqtt_username": get_setting_with_default("mqtt_username"),
-            "mqtt_password": get_setting_with_default("mqtt_password"),
-        }
-        return render(request, "modals/initial_setup/mqtt.html", data)
-    elif request.method == "GET":
-        data = {
-            "manager_address": get_setting_with_default("manager_address"),
-            "manager_port": get_setting_with_default("manager_port"),
-        }
-        return render(request, "modals/initial_setup/manager_settings.html", data)
-
-
-@csrf_exempt
-def initial_setup_mqtt_settings(request):
-    if request.method == "POST":
-        if "mqtt_server" in request.POST:
-            set_setting_value("mqtt_server", request.POST["mqtt_server"])
-        if "mqtt_port" in request.POST:
-            set_setting_value("mqtt_port", request.POST["mqtt_port"])
-        if "mqtt_username" in request.POST:
-            set_setting_value("mqtt_username", request.POST["mqtt_username"])
-        if "mqtt_password" in request.POST:
-            set_setting_value("mqtt_password", request.POST["mqtt_password"])
-        send_mqttmanager_reload_command()
-
-        # Save settings succesfully, return the next view in the setup guide. Home Assistant:
-        environment = environ.Env()
-        data = {
-            "home_assistant_address": get_setting_with_default("home_assistant_address"),
-            "home_assistant_token": get_setting_with_default("home_assistant_token"),
-            "is_home_assistant_addon": ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true"),
-        }
-        return render(request, "modals/initial_setup/home_assistant.html", data)
-    elif request.method == "GET":
-        data = {
-            "mqtt_server": get_setting_with_default("mqtt_server"),
-            "mqtt_port": get_setting_with_default("mqtt_port"),
-            "mqtt_username": get_setting_with_default("mqtt_username"),
-            "mqtt_password": get_setting_with_default("mqtt_password"),
-        }
-        return render(request, "modals/initial_setup/mqtt.html", data)
-
-
-@csrf_exempt
-def initial_setup_home_assistant_settings(request):
-    if request.method == "POST":
-        if "home_assistant_address" in request.POST:
-            set_setting_value("home_assistant_address", request.POST["home_assistant_address"])
-        if "home_assistant_token" in request.POST:
-            set_setting_value("home_assistant_token", request.POST["home_assistant_token"])
-        send_mqttmanager_reload_command()
-
-        # Save settings succesfully, return the next view in the setup guide. OpenHAB:
-        data = {
-            "openhab_address": get_setting_with_default("openhab_address"),
-            "openhab_token": get_setting_with_default("openhab_token"),
-        }
-        return render(request, "modals/initial_setup/openhab.html", data)
-    elif request.method == "GET":
-        environment = environ.Env()
-        data = {
-            "home_assistant_address": get_setting_with_default("home_assistant_address"),
-            "home_assistant_token": get_setting_with_default("home_assistant_token"),
-            "is_home_assistant_addon": ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true"),
-        }
-        return render(request, "modals/initial_setup/home_assistant.html", data)
-
-
-@csrf_exempt
-def initial_setup_openhab_settings(request):
-    if request.method == "POST":
-        if "openhab_address" in request.POST:
-            set_setting_value("openhab_address", request.POST["openhab_address"])
-        if "openhab_token" in request.POST:
-            set_setting_value("openhab_token", request.POST["openhab_token"])
-        send_mqttmanager_reload_command()
-
-        # Save settings succesfully, return the next view in the setup guide. Finished:
-        return render(request, "modals/initial_setup/finished.html")
-    elif request.method == "GET":
-        data = {
-            "openhab_address": get_setting_with_default("openhab_address"),
-            "openhab_token": get_setting_with_default("openhab_token"),
-        }
-        return render(request, "modals/initial_setup/openhab.html", data)
-
-
-def initial_setup_finished(request):
-    return render(request, "modals/initial_setup/finished.html")
 
 
 def show_messages(request):
