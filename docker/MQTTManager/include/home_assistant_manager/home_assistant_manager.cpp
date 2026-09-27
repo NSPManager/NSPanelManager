@@ -12,6 +12,7 @@
 #include <boost/stacktrace.hpp>
 #include <boost/stacktrace/frame.hpp>
 #include <boost/stacktrace/stacktrace_fwd.hpp>
+#include <chrono>
 #include <exception>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXSocketTLSOptions.h>
@@ -24,6 +25,7 @@
 #include <nlohmann/json_fwd.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <thread>
 #include <websocket_server/websocket_server.hpp>
 
 void HomeAssistantManager::connect() {
@@ -129,6 +131,7 @@ void HomeAssistantManager::_process_websocket_message(const std::string &message
       HomeAssistantManager::_send_auth();
     } else if (type.compare("auth_ok") == 0) {
       WebsocketServer::remove_warning("Home Assistant not connected.");
+      WebsocketServer::remove_warning("Home Assistant authentication invalid.");
       SPDLOG_INFO("Successfully authenticated to Home Assistant websocket API.");
       HomeAssistantManager::_authenticated = true;
 
@@ -139,6 +142,10 @@ void HomeAssistantManager::_process_websocket_message(const std::string &message
       HomeAssistantManager::send_json(subscribe_command);
 
       HomeAssistantManager::_request_all_states();
+    } else if (type.compare("auth_invalid") == 0) {
+      WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "Home Assistant authentication invalid.");
+      SPDLOG_ERROR("Invalid authentication token when trying to connect to Home Assistant. Will try again in 5 seconds.");
+      std::this_thread::sleep_for(std::chrono::milliseconds(5000));
     } else if (type.compare("result") == 0) {
       bool success = data["success"];
       if (!success) {

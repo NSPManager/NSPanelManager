@@ -140,7 +140,7 @@ const EntitiesPagesView = ({ room_id, type }: { room_id?: number; type: string }
     <>
       <div className="flex items-center justify-start mb-4">
         <span className="text-xl">
-          {useRoomsStore.getState().rooms?.find((r) => r.id == room_id)?.name}{" "}
+          {useRoomsStore.getState().rooms?.find((r) => r.id == room_id)?.friendly_name}{" "}
           {(() => {
             if (type == "entity") return "entities";
             if (type == "scene") return "scenes";

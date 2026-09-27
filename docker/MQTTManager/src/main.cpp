@@ -18,6 +18,7 @@
 #include <memory>
 #include <mqtt_manager/mqtt_manager.hpp>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
+#include <nextion_image_server/nextion_image_server.hpp>
 #include <signal.h>
 #include <spdlog/common.h>
 #include <spdlog/spdlog.h>
@@ -195,10 +196,14 @@ int main(int argc, char *argv[]) {
   std::thread home_assistant_manager_thread;
   std::thread openhab_manager_thread;
   std::thread websocket_server_thread;
+  std::thread nextion_image_server_thread;
   std::thread time_and_date_thread;
 
   SPDLOG_INFO("Starting Websocket Server on port 8002.");
   websocket_server_thread = std::thread(WebsocketServer::start);
+
+  SPDLOG_INFO("Starting Nextion image server on port 8003.");
+  nextion_image_server_thread = std::thread(NextionImageServer::start);
 
   SPDLOG_INFO("Config loaded. Starting components.");
 

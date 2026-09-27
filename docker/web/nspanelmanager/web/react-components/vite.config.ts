@@ -14,7 +14,8 @@ export default defineConfig({
   base: "/static/",
   build: {
     sourcemap: false,
-    minify: "esbuild",
+    // minify: "esbuild",
+    minify: false,
     outDir: "dist",
     assetsDir: "",
     assetsInlineLimit: 0,

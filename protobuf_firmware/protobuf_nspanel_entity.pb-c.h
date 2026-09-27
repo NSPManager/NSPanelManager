@@ -20,6 +20,7 @@ typedef struct NSPanelEntityState__Light NSPanelEntityState__Light;
 typedef struct NSPanelEntityState__Thermostat NSPanelEntityState__Thermostat;
 typedef struct NSPanelEntityState__Thermostat__ThermostatOption NSPanelEntityState__Thermostat__ThermostatOption;
 typedef struct NSPanelEntityState__Thermostat__ThermostatOption__ThermostatOptionValue NSPanelEntityState__Thermostat__ThermostatOption__ThermostatOptionValue;
+typedef struct NSPanelEntityState__MediaPlayer NSPanelEntityState__MediaPlayer;
 
 
 /* --- enums --- */
@@ -29,6 +30,16 @@ typedef enum _NSPanelEntityState__Light__LightMode {
   NSPANEL_ENTITY_STATE__LIGHT__LIGHT_MODE__RGB = 1
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_ENTITY_STATE__LIGHT__LIGHT_MODE)
 } NSPanelEntityState__Light__LightMode;
+typedef enum _NSPanelEntityState__MediaPlayer__PlaybackState {
+  NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__UNKNOWN = 0,
+  NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__OFF = 1,
+  NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__ON = 2,
+  NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__IDLE = 3,
+  NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__PLAYING = 4,
+  NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__PAUSED = 5,
+  NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__BUFFERING = 6
+    PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE)
+} NSPanelEntityState__MediaPlayer__PlaybackState;
 
 /* --- messages --- */
 
@@ -93,10 +104,51 @@ struct  NSPanelEntityState__Thermostat
     , 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0,NULL }
 
 
+struct  NSPanelEntityState__MediaPlayer
+{
+  ProtobufCMessage base;
+  int32_t media_player_id;
+  char *name;
+  NSPanelEntityState__MediaPlayer__PlaybackState state;
+  char *media_title;
+  char *media_artist;
+  /*
+   * Volume in 0-100%
+   */
+  int32_t volume;
+  protobuf_c_boolean is_muted;
+  /*
+   * Some setups (for example multi-room audio matrices) have a separate volume
+   * for the source feeding this player. Only valid if has_source_volume is set.
+   */
+  protobuf_c_boolean has_source_volume;
+  /*
+   * Volume in 0-100%
+   */
+  int32_t source_volume;
+  protobuf_c_boolean can_play;
+  protobuf_c_boolean can_pause;
+  protobuf_c_boolean can_next_track;
+  protobuf_c_boolean can_previous_track;
+  protobuf_c_boolean can_set_volume;
+  protobuf_c_boolean can_mute;
+  /*
+   * URL to fetch the current album art from, normally served by the manager.
+   * Empty when there is no art. The URL changes whenever the art changes, so
+   * the panel can compare it with the last URL to tell when to fetch again.
+   */
+  char *album_art_url;
+};
+#define NSPANEL_ENTITY_STATE__MEDIA_PLAYER__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_entity_state__media_player__descriptor) \
+    , 0, (char *)protobuf_c_empty_string, NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__UNKNOWN, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string }
+
+
 typedef enum {
   NSPANEL_ENTITY_STATE__ENTITY__NOT_SET = 0,
   NSPANEL_ENTITY_STATE__ENTITY_LIGHT = 1,
-  NSPANEL_ENTITY_STATE__ENTITY_THERMOSTAT = 2
+  NSPANEL_ENTITY_STATE__ENTITY_THERMOSTAT = 2,
+  NSPANEL_ENTITY_STATE__ENTITY_MEDIA_PLAYER = 3
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_ENTITY_STATE__ENTITY__CASE)
 } NSPanelEntityState__EntityCase;
 
@@ -107,6 +159,7 @@ struct  NSPanelEntityState
   union {
     NSPanelEntityState__Light *light;
     NSPanelEntityState__Thermostat *thermostat;
+    NSPanelEntityState__MediaPlayer *media_player;
   };
 };
 #define NSPANEL_ENTITY_STATE__INIT \
@@ -126,6 +179,9 @@ void   nspanel_entity_state__thermostat__thermostat_option__init
 /* NSPanelEntityState__Thermostat methods */
 void   nspanel_entity_state__thermostat__init
                      (NSPanelEntityState__Thermostat         *message);
+/* NSPanelEntityState__MediaPlayer methods */
+void   nspanel_entity_state__media_player__init
+                     (NSPanelEntityState__MediaPlayer         *message);
 /* NSPanelEntityState methods */
 void   nspanel_entity_state__init
                      (NSPanelEntityState         *message);
@@ -159,6 +215,9 @@ typedef void (*NSPanelEntityState__Thermostat__ThermostatOption_Closure)
 typedef void (*NSPanelEntityState__Thermostat_Closure)
                  (const NSPanelEntityState__Thermostat *message,
                   void *closure_data);
+typedef void (*NSPanelEntityState__MediaPlayer_Closure)
+                 (const NSPanelEntityState__MediaPlayer *message,
+                  void *closure_data);
 typedef void (*NSPanelEntityState_Closure)
                  (const NSPanelEntityState *message,
                   void *closure_data);
@@ -174,6 +233,8 @@ extern const ProtobufCEnumDescriptor    nspanel_entity_state__light__light_mode_
 extern const ProtobufCMessageDescriptor nspanel_entity_state__thermostat__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_entity_state__thermostat__thermostat_option__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_entity_state__thermostat__thermostat_option__thermostat_option_value__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_entity_state__media_player__descriptor;
+extern const ProtobufCEnumDescriptor    nspanel_entity_state__media_player__playback_state__descriptor;
 
 PROTOBUF_C__END_DECLS
 
