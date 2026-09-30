@@ -86,6 +86,18 @@ public:
     std::lock_guard<std::mutex> lock_guard(OpenhabManager::_test_sent_messages_mutex);
     return std::exchange(OpenhabManager::_test_sent_messages, {});
   }
+
+  // Deliver a message as if it had been received on the OpenHAB websocket.
+  static void test_process_websocket_message(const std::string &message) {
+    OpenhabManager::_process_websocket_message(message);
+  }
+
+  // Set where REST requests go without (re)connecting the websocket.
+  static void test_set_rest_api(const std::string &address, const std::string &token) {
+    std::lock_guard<std::mutex> lock_guard(OpenhabManager::_setting_values_mutex);
+    OpenhabManager::_openhab_address = address;
+    OpenhabManager::_openhab_token = token;
+  }
 #endif
 
 private:
