@@ -18,6 +18,7 @@
 #include <boost/iostreams/write.hpp>
 #include <boost/regex.hpp>
 #include <chrono>
+#include <cmath>
 #include <command_manager/command_manager.hpp>
 #include <cstddef>
 #include <cstdint>
@@ -31,6 +32,7 @@
 #include <iomanip>
 #include <ixwebsocket/IXWebSocketSendInfo.h>
 #include <light/light.hpp>
+#include <limits>
 #include <mutex>
 #include <netinet/in.h>
 #include <nlohmann/json.hpp>
@@ -55,12 +57,7 @@ NSPanel::NSPanel(uint32_t id) {
   this->_id = id;
   SPDLOG_INFO("Loading new NSPanel with ID {}.", id);
   this->reload_config();
-  if (!this->_mqtt_config_topic.empty()) {
-    SPDLOG_INFO("Loaded accepted NSPanel {}::{}.", this->_id, this->_name);
-    this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE; // Assume offline until we have received a state update from the panel.
-  }
-
-  if (!this->_mqtt_config_topic.empty()) {
+  if (!this->_mqtt_config_topic.empty() && this->_state != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
     SPDLOG_INFO("Loaded accepted NSPanel {}::{}.", this->_id, this->_name);
     this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
   }
@@ -172,7 +169,7 @@ void NSPanel::reload_config() {
     }
 
     bool register_relay2_as_light = this->_get_nspanel_setting_with_default("relay2_is_light", "False").compare("True") == 0;
-    SPDLOG_DEBUG("Will register NSPanel {}::{} relay 2 as {}", this->_id, this->_name, register_relay1_as_light ? "light" : "relay");
+    SPDLOG_DEBUG("Will register NSPanel {}::{} relay 2 as {}", this->_id, this->_name, register_relay2_as_light ? "light" : "relay");
     if (this->_register_relay2_as_light != register_relay2_as_light) {
       this->_register_relay2_as_light = register_relay2_as_light;
       reregister_to_ha_mqtt_discovery = true;
@@ -183,6 +180,8 @@ void NSPanel::reload_config() {
       this->_heap_used_pct = 0;
       this->_nspanel_warnings.clear();
       this->_temperature = 0;
+      this->_humidity = 0;
+      this->_pressure = 0;
       this->_update_progress = 0;
     }
 
@@ -196,6 +195,9 @@ void NSPanel::reload_config() {
     if (!panel_settings.denied && !panel_settings.accepted) {
       // No decission has been made on wether ot accept or deny panel. It is therefore awaiting_accept
       this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
+    } else if (this->_state == MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT || this->_state == MQTT_MANAGER_NSPANEL_STATE::DENIED) {
+      // The panel has just been accepted. Wait for it to register again.
+      this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
     }
 
     SPDLOG_DEBUG("Building MQTT topics for NSPanel {}::{}", this->_id, this->_name);
@@ -228,6 +230,9 @@ void NSPanel::reload_config() {
     this->_mqtt_relay2_state_topic = fmt::format("nspanel/{}/relay2_state", this->_mac);
     this->_mqtt_status_topic = fmt::format("nspanel/{}/status", this->_mac);
     this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_mac);
+    this->_mqtt_mac_log_topic = fmt::format("nspanel/{}/log", this->_mac);
+    this->_mqtt_legacy_status_topic = fmt::format("nspanel/{}/status", this->_name);               // TODO: Remove me and use only topic based on MAC-address instead
+    this->_mqtt_legacy_status_report_topic = fmt::format("nspanel/{}/status_report", this->_name); // TODO: Remove me and use only topic based on MAC-address instead
     this->_mqtt_temperature_topic = fmt::format("nspanel/{}/temperature", this->_mac);
     this->_mqtt_humidity_topic = fmt::format("nspanel/{}/humidity", this->_mac);
     this->_mqtt_pressure_topic = fmt::format("nspanel/{}/pressure", this->_mac);
@@ -244,9 +249,9 @@ void NSPanel::reload_config() {
       MQTT_Manager::subscribe(this->_mqtt_relay1_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
       MQTT_Manager::subscribe(this->_mqtt_relay2_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
       MQTT_Manager::subscribe(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));                                // TODO: Remove me and use only topic based on MAC-address instead
-      MQTT_Manager::subscribe(fmt::format("nspanel/{}/status", this->_name), boost::bind(&NSPanel::mqtt_callback, this, _1, _2));        // TODO: Remove me and use only topic based on MAC-address instead
-      MQTT_Manager::subscribe(fmt::format("nspanel/{}/status_report", this->_name), boost::bind(&NSPanel::mqtt_callback, this, _1, _2)); // TODO: Remove me and use only topic based on MAC-address instead
-      MQTT_Manager::subscribe(fmt::format("nspanel/{}/log", this->_mac), boost::bind(&NSPanel::mqtt_log_callback, this, _1, _2));
+      MQTT_Manager::subscribe(this->_mqtt_legacy_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+      MQTT_Manager::subscribe(this->_mqtt_legacy_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+      MQTT_Manager::subscribe(this->_mqtt_mac_log_topic, boost::bind(&NSPanel::mqtt_log_callback, this, _1, _2));
       MQTT_Manager::subscribe(this->_mqtt_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
       MQTT_Manager::subscribe(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     }
@@ -304,6 +309,9 @@ void NSPanel::send_config() {
   config.set_button1_upper_temperature(0);
   config.set_button2_lower_temperature(0);
   config.set_button2_upper_temperature(0);
+  if ((*default_room)->has_temperature_sensor()) {
+    config.set_inside_temperature_sensor_mqtt_topic((*default_room)->get_temperature_sensor_mqtt_topic());
+  }
 
   ButtonMode b1_mode = static_cast<ButtonMode>(this->_settings.button1_mode);
   if (b1_mode == ButtonMode::DIRECT) {
@@ -312,12 +320,12 @@ void NSPanel::send_config() {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_FOLLOW);
   } else if (b1_mode == ButtonMode::THERMOSTAT_HEATING) {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_HEAT);
-    config.set_button1_lower_temperature(std::stoi(this->_get_nspanel_setting_with_default("button1_relay_lower_temperature", "0")));
-    config.set_button1_upper_temperature(std::stoi(this->_get_nspanel_setting_with_default("button1_relay_upper_temperature", "0")));
+    config.set_button1_lower_temperature(this->_get_nspanel_temperature_limit_setting("button1_relay_lower_temperature"));
+    config.set_button1_upper_temperature(this->_get_nspanel_temperature_limit_setting("button1_relay_upper_temperature"));
   } else if (b1_mode == ButtonMode::THERMOSTAT_COOLING) {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
-    config.set_button1_lower_temperature(std::stoi(this->_get_nspanel_setting_with_default("button1_relay_lower_temperature", "0")));
-    config.set_button1_upper_temperature(std::stoi(this->_get_nspanel_setting_with_default("button1_relay_upper_temperature", "0")));
+    config.set_button1_lower_temperature(this->_get_nspanel_temperature_limit_setting("button1_relay_lower_temperature"));
+    config.set_button1_upper_temperature(this->_get_nspanel_temperature_limit_setting("button1_relay_upper_temperature"));
   } else {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
@@ -329,12 +337,12 @@ void NSPanel::send_config() {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_FOLLOW);
   } else if (b2_mode == ButtonMode::THERMOSTAT_HEATING) {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_HEAT);
-    config.set_button2_lower_temperature(std::stoi(this->_get_nspanel_setting_with_default("button2_relay_lower_temperature", "0")));
-    config.set_button2_upper_temperature(std::stoi(this->_get_nspanel_setting_with_default("button2_relay_upper_temperature", "0")));
+    config.set_button2_lower_temperature(this->_get_nspanel_temperature_limit_setting("button2_relay_lower_temperature"));
+    config.set_button2_upper_temperature(this->_get_nspanel_temperature_limit_setting("button2_relay_upper_temperature"));
   } else if (b2_mode == ButtonMode::THERMOSTAT_COOLING) {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
-    config.set_button2_lower_temperature(std::stoi(this->_get_nspanel_setting_with_default("button2_relay_lower_temperature", "0")));
-    config.set_button2_upper_temperature(std::stoi(this->_get_nspanel_setting_with_default("button2_relay_upper_temperature", "0")));
+    config.set_button2_lower_temperature(this->_get_nspanel_temperature_limit_setting("button2_relay_lower_temperature"));
+    config.set_button2_upper_temperature(this->_get_nspanel_temperature_limit_setting("button2_relay_upper_temperature"));
   } else {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
@@ -477,6 +485,7 @@ void NSPanel::send_config() {
 
 NSPanel::~NSPanel() {
   SPDLOG_INFO("Destroying NSPanel {}::{}", this->_id, this->_name);
+  CommandManager::detach_callback(boost::bind(&NSPanel::command_callback, this, _1));
   WebsocketServer::detach_stomp_callback(fmt::format("nspanel/{}/command", this->_mac), boost::bind(&NSPanel::handle_stomp_command_callback, this, _1));
 
   this->reset_mqtt_topics();
@@ -489,6 +498,9 @@ void NSPanel::reset_mqtt_topics() {
   MQTT_Manager::detach_callback(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
   MQTT_Manager::detach_callback(this->_mqtt_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
   MQTT_Manager::detach_callback(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+  MQTT_Manager::detach_callback(this->_mqtt_mac_log_topic, boost::bind(&NSPanel::mqtt_log_callback, this, _1, _2));
+  MQTT_Manager::detach_callback(this->_mqtt_legacy_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+  MQTT_Manager::detach_callback(this->_mqtt_legacy_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
 
   // This nspanel was removed. Clear any retain on any MQTT topic.
   MQTT_Manager::clear_retain(this->_mqtt_command_topic);
@@ -1685,4 +1697,31 @@ std::string NSPanel::_get_nspanel_setting_with_default(std::string key, std::str
   } catch (std::exception &ex) {
   }
   return default_value;
+}
+
+int NSPanel::_get_nspanel_temperature_limit_setting(std::string key) {
+  // The limits are free text in the web interface, so a bad value must not stop the config being sent.
+  std::string value = this->_get_nspanel_setting_with_default(key, "0");
+  double limit = 0;
+  size_t parsed = 0;
+  try {
+    limit = std::stod(value, &parsed);
+  } catch (std::exception &ex) {
+    parsed = 0;
+  }
+  if (parsed == 0 || value.find_first_not_of(" \t", parsed) != std::string::npos || !std::isfinite(limit)) {
+    SPDLOG_ERROR("NSPanel {}::{} setting {} is '{}', which is not a number. Will send 0.", this->_id, this->_name, key, value);
+    return 0;
+  }
+  if (std::fabs(limit) > std::numeric_limits<int32_t>::max()) {
+    SPDLOG_ERROR("NSPanel {}::{} setting {} is {}, which is out of range. Will send 0.", this->_id, this->_name, key, value);
+    return 0;
+  }
+
+  // NSPanelConfig only holds whole degrees.
+  int rounded = static_cast<int>(std::lround(limit));
+  if (rounded != limit) {
+    SPDLOG_WARN("NSPanel {}::{} setting {} is {}, but panels only take whole degrees. Will send {}.", this->_id, this->_name, key, value, rounded);
+  }
+  return rounded;
 }

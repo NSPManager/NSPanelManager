@@ -16,6 +16,11 @@
 #include <spdlog/spdlog.h>
 #include <string>
 
+#if defined(TEST_MODE) && TEST_MODE == 1
+#include <utility>
+#include <vector>
+#endif
+
 class OpenhabManager {
 public:
   static void connect();
@@ -75,7 +80,31 @@ public:
     OpenhabManager::_openhab_item_observers[item].disconnect(callback);
   }
 
+#if defined(TEST_MODE) && TEST_MODE == 1
+  // Everything passed to send_json since the last call, whether or not OpenHAB is connected.
+  static std::vector<nlohmann::json> test_take_sent_messages() {
+    std::lock_guard<std::mutex> lock_guard(OpenhabManager::_test_sent_messages_mutex);
+    return std::exchange(OpenhabManager::_test_sent_messages, {});
+  }
+
+  // Deliver a message as if it had been received on the OpenHAB websocket.
+  static void test_process_websocket_message(const std::string &message) {
+    OpenhabManager::_process_websocket_message(message);
+  }
+
+  // Set where REST requests go without (re)connecting the websocket.
+  static void test_set_rest_api(const std::string &address, const std::string &token) {
+    std::lock_guard<std::mutex> lock_guard(OpenhabManager::_setting_values_mutex);
+    OpenhabManager::_openhab_address = address;
+    OpenhabManager::_openhab_token = token;
+  }
+#endif
+
 private:
+#if defined(TEST_MODE) && TEST_MODE == 1
+  static inline std::mutex _test_sent_messages_mutex;
+  static inline std::vector<nlohmann::json> _test_sent_messages;
+#endif
   static void _process_openhab_event(nlohmann::json &event_data);
   // Callback registration for items
   static inline boost::ptr_map<std::string, boost::signals2::signal<void(nlohmann::json data)>> _openhab_item_observers;

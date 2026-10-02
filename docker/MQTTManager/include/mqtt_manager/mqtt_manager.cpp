@@ -218,7 +218,13 @@ void MQTT_Manager::_reconnect_mqtt_client() {
                         "online", true);
 
   // Loop over retained MQTT messages and send them again to the MQTT broker as it may have restarted and lost retained messages.
-  for (auto it = MQTT_Manager::_mqtt_retain_buffer.cbegin(); it != MQTT_Manager::_mqtt_retain_buffer.cend(); it++) {
+  // Publish from a copy, as publish() writes to the buffer.
+  std::unordered_map<std::string, std::string> retained_messages;
+  {
+    std::lock_guard<std::mutex> retain_buffer_guard(MQTT_Manager::_mqtt_retain_buffer_mutex);
+    retained_messages = MQTT_Manager::_mqtt_retain_buffer;
+  }
+  for (auto it = retained_messages.cbegin(); it != retained_messages.cend(); it++) {
     MQTT_Manager::publish(it->first, it->second, true);
   }
 
@@ -250,6 +256,7 @@ void MQTT_Manager::_reconnect_mqtt_client() {
 
   // Send buffered messages if any
   try {
+    std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
     auto it = MQTT_Manager::_mqtt_messages_buffer.cbegin();
     while (it != MQTT_Manager::_mqtt_messages_buffer.cend()) {
       MQTT_Manager::_mqtt_client->publish((*it));
@@ -292,7 +299,15 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
     return; // It's not allowed to publish to empty topic.
   }
 
+#if defined(TEST_MODE) && TEST_MODE == 1
+  {
+    std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_test_published_messages_mutex);
+    MQTT_Manager::_test_published_messages.push_back({topic, payload, retain});
+  }
+#endif
+
   if (retain) {
+    std::lock_guard<std::mutex> retain_buffer_guard(MQTT_Manager::_mqtt_retain_buffer_mutex);
     MQTT_Manager::_mqtt_retain_buffer[topic] = payload;
   }
 
@@ -346,7 +361,10 @@ void MQTT_Manager::clear_retain(const std::string &topic) {
     return;
   }
 
-  MQTT_Manager::_mqtt_retain_buffer.erase(topic);
+  {
+    std::lock_guard<std::mutex> retain_buffer_guard(MQTT_Manager::_mqtt_retain_buffer_mutex);
+    MQTT_Manager::_mqtt_retain_buffer.erase(topic);
+  }
 
   std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
   WebsocketServer::set_stomp_topic_retained(fmt::format("mqtt/{}", topic), false);

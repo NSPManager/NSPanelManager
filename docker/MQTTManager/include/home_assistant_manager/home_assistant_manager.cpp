@@ -188,6 +188,12 @@ void HomeAssistantManager::_send_auth() {
 
 void HomeAssistantManager::send_json(nlohmann::json &data) {
   data["id"] = HomeAssistantManager::_next_message_id++;
+#if defined(TEST_MODE) && TEST_MODE == 1
+  {
+    std::lock_guard<std::mutex> lock_guard(HomeAssistantManager::_test_sent_messages_mutex);
+    HomeAssistantManager::_test_sent_messages.push_back(data);
+  }
+#endif
   std::string buffer = data.dump();
   HomeAssistantManager::_send_string(buffer);
 }

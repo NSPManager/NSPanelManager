@@ -35,6 +35,12 @@ OpenhabLight::OpenhabLight(uint32_t light_id) : Light(light_id) {
   this->_last_on_off_change = 0;
   this->_last_brightness_change = 0;
   this->_last_color_temp_change = 0;
+  this->_last_group_brightness_item_state_changed_event_ms = 0;
+  this->_last_group_color_temp_item_state_changed_event_ms = 0;
+  this->_last_group_rgb_item_state_changed_event_ms = 0;
+  this->_openhab_group_brightness_item_state_changed_event_thread_running = false;
+  this->_openhab_group_color_temp_item_state_changed_event_thread_running = false;
+  this->_openhab_group_rgb_item_state_changed_event_thread_running = false;
   this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
   this->_current_brightness = 0;
   this->_current_color_temperature = 0;

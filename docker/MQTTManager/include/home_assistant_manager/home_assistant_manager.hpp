@@ -10,6 +10,12 @@
 #include <nlohmann/json_fwd.hpp>
 #include <string>
 
+#if defined(TEST_MODE) && TEST_MODE == 1
+#include <nlohmann/json.hpp>
+#include <utility>
+#include <vector>
+#endif
+
 class HomeAssistantManager {
 public:
   static void init(); // Start a new thread and connect to HA.
@@ -41,7 +47,25 @@ public:
     HomeAssistantManager::_home_assistant_observers[item].disconnect(callback);
   }
 
+#if defined(TEST_MODE) && TEST_MODE == 1
+  // Everything passed to send_json since the last call, whether or not Home Assistant is connected.
+  static std::vector<nlohmann::json> test_take_sent_messages() {
+    std::lock_guard<std::mutex> lock_guard(HomeAssistantManager::_test_sent_messages_mutex);
+    return std::exchange(HomeAssistantManager::_test_sent_messages, {});
+  }
+
+  // Deliver an event as if it had been received from Home Assistant.
+  static void test_process_event(nlohmann::json &event_data) {
+    HomeAssistantManager::_process_home_assistant_event(event_data);
+  }
+#endif
+
 private:
+#if defined(TEST_MODE) && TEST_MODE == 1
+  static inline std::mutex _test_sent_messages_mutex;
+  static inline std::vector<nlohmann::json> _test_sent_messages;
+#endif
+
   // Request all states that Home Assistant has as there is no way to only request state of one object.
   static void _request_all_states();
 
