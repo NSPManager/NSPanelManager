@@ -18,6 +18,7 @@
 #include <boost/iostreams/write.hpp>
 #include <boost/regex.hpp>
 #include <chrono>
+#include <cmath>
 #include <command_manager/command_manager.hpp>
 #include <cstddef>
 #include <cstdint>
@@ -31,6 +32,7 @@
 #include <iomanip>
 #include <ixwebsocket/IXWebSocketSendInfo.h>
 #include <light/light.hpp>
+#include <limits>
 #include <mutex>
 #include <netinet/in.h>
 #include <nlohmann/json.hpp>
@@ -1700,10 +1702,26 @@ std::string NSPanel::_get_nspanel_setting_with_default(std::string key, std::str
 int NSPanel::_get_nspanel_temperature_limit_setting(std::string key) {
   // The limits are free text in the web interface, so a bad value must not stop the config being sent.
   std::string value = this->_get_nspanel_setting_with_default(key, "0");
+  double limit = 0;
+  size_t parsed = 0;
   try {
-    return std::stoi(value);
+    limit = std::stod(value, &parsed);
   } catch (std::exception &ex) {
-    SPDLOG_ERROR("NSPanel {}::{} setting {} is '{}', which is not a whole number. Will send 0.", this->_id, this->_name, key, value);
+    parsed = 0;
+  }
+  if (parsed == 0 || value.find_first_not_of(" \t", parsed) != std::string::npos || !std::isfinite(limit)) {
+    SPDLOG_ERROR("NSPanel {}::{} setting {} is '{}', which is not a number. Will send 0.", this->_id, this->_name, key, value);
     return 0;
   }
+  if (std::fabs(limit) > std::numeric_limits<int32_t>::max()) {
+    SPDLOG_ERROR("NSPanel {}::{} setting {} is {}, which is out of range. Will send 0.", this->_id, this->_name, key, value);
+    return 0;
+  }
+
+  // NSPanelConfig only holds whole degrees.
+  int rounded = static_cast<int>(std::lround(limit));
+  if (rounded != limit) {
+    SPDLOG_WARN("NSPanel {}::{} setting {} is {}, but panels only take whole degrees. Will send {}.", this->_id, this->_name, key, value, rounded);
+  }
+  return rounded;
 }

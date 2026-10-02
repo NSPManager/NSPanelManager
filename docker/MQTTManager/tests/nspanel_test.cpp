@@ -295,9 +295,12 @@ TEST_F(NSPanelTest, thermostat_button_modes_send_their_temperature_limits) {
 TEST_F(NSPanelTest, invalid_temperature_limit_is_sent_as_zero) {
   update_row([](auto &settings) {
     settings.button1_mode = THERMOSTAT_HEATING;
+    settings.button2_mode = THERMOSTAT_COOLING;
   });
   set_panel_setting("button1_relay_lower_temperature", "eighteen");
   set_panel_setting("button1_relay_upper_temperature", "21");
+  set_panel_setting("button2_relay_lower_temperature", "21abc"); // std::stoi would have read 21.
+  set_panel_setting("button2_relay_upper_temperature", "21,5");
   ScopedErrorLog log;
 
   load_panel();
@@ -306,24 +309,48 @@ TEST_F(NSPanelTest, invalid_temperature_limit_is_sent_as_zero) {
   ASSERT_TRUE(config.has_value());
   EXPECT_EQ(config->button1_lower_temperature(), 0);
   EXPECT_EQ(config->button1_upper_temperature(), 21);
+  EXPECT_EQ(config->button2_lower_temperature(), 0);
+  EXPECT_EQ(config->button2_upper_temperature(), 0);
   auto errors = log.errors();
-  EXPECT_TRUE(std::any_of(errors.begin(), errors.end(), [](auto &error) { return error.find("'eighteen'") != std::string::npos; }));
+  for (auto value : {"'eighteen'", "'21abc'", "'21,5'"}) {
+    SCOPED_TRACE(value);
+    EXPECT_TRUE(std::any_of(errors.begin(), errors.end(), [&value](auto &error) { return error.find(value) != std::string::npos && error.find("not a number") != std::string::npos; }));
+  }
 }
 
-// The limits are whole degrees in NSPanelConfig, so a decimal limit is truncated.
-TEST_F(NSPanelTest, decimal_temperature_limit_is_truncated) {
+TEST_F(NSPanelTest, out_of_range_temperature_limit_is_sent_as_zero) {
   update_row([](auto &settings) {
-    settings.button2_mode = THERMOSTAT_COOLING;
+    settings.button1_mode = THERMOSTAT_HEATING;
   });
-  set_panel_setting("button2_relay_lower_temperature", "21.5");
-  set_panel_setting("button2_relay_upper_temperature", "24.9");
+  set_panel_setting("button1_relay_lower_temperature", "1e20");
+  ScopedErrorLog log;
 
   load_panel();
 
   auto config = last_published_config();
   ASSERT_TRUE(config.has_value());
-  EXPECT_EQ(config->button2_lower_temperature(), 21);
+  EXPECT_EQ(config->button1_lower_temperature(), 0);
+  auto errors = log.errors();
+  EXPECT_TRUE(std::any_of(errors.begin(), errors.end(), [](auto &error) { return error.find("is 1e20, which is out of range") != std::string::npos; }));
+}
+
+// NSPanelConfig only holds whole degrees.
+TEST_F(NSPanelTest, decimal_temperature_limit_is_rounded) {
+  update_row([](auto &settings) {
+    settings.button2_mode = THERMOSTAT_COOLING;
+  });
+  set_panel_setting("button2_relay_lower_temperature", "21.5");
+  set_panel_setting("button2_relay_upper_temperature", "24.4");
+  ScopedErrorLog log(spdlog::level::warn);
+
+  load_panel();
+
+  auto config = last_published_config();
+  ASSERT_TRUE(config.has_value());
+  EXPECT_EQ(config->button2_lower_temperature(), 22);
   EXPECT_EQ(config->button2_upper_temperature(), 24);
+  auto warnings = log.errors();
+  EXPECT_TRUE(std::any_of(warnings.begin(), warnings.end(), [](auto &warning) { return warning.find("is 21.5, but panels only take whole degrees. Will send 22.") != std::string::npos; }));
 }
 
 TEST_F(NSPanelTest, temperature_limits_are_only_sent_in_thermostat_modes) {

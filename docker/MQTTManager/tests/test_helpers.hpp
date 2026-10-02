@@ -211,11 +211,11 @@ inline std::vector<MQTT_Manager::TestPublishedMessage> mqtt_published_to(const s
   return messages;
 }
 
-// Records the errors logged while it is in scope.
+// Records the errors (or, given a lower level, also the less severe messages) logged while it is in scope.
 class ScopedErrorLog {
 public:
-  ScopedErrorLog() : _sink(std::make_shared<spdlog::sinks::ringbuffer_sink_mt>(1000)) {
-    _sink->set_level(spdlog::level::err);
+  explicit ScopedErrorLog(spdlog::level::level_enum level = spdlog::level::err) : _sink(std::make_shared<spdlog::sinks::ringbuffer_sink_mt>(1000)) {
+    _sink->set_level(level);
     _sink->set_pattern("%v");
     spdlog::default_logger()->sinks().push_back(_sink);
   }
