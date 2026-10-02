@@ -172,7 +172,7 @@ void NSPanel::reload_config() {
     }
 
     bool register_relay2_as_light = this->_get_nspanel_setting_with_default("relay2_is_light", "False").compare("True") == 0;
-    SPDLOG_DEBUG("Will register NSPanel {}::{} relay 2 as {}", this->_id, this->_name, register_relay1_as_light ? "light" : "relay");
+    SPDLOG_DEBUG("Will register NSPanel {}::{} relay 2 as {}", this->_id, this->_name, register_relay2_as_light ? "light" : "relay");
     if (this->_register_relay2_as_light != register_relay2_as_light) {
       this->_register_relay2_as_light = register_relay2_as_light;
       reregister_to_ha_mqtt_discovery = true;
@@ -183,6 +183,8 @@ void NSPanel::reload_config() {
       this->_heap_used_pct = 0;
       this->_nspanel_warnings.clear();
       this->_temperature = 0;
+      this->_humidity = 0;
+      this->_pressure = 0;
       this->_update_progress = 0;
     }
 

@@ -221,21 +221,21 @@ private:
 
   // MQTT Stuff:
   // Wether or not relay1 should be registered to Home Assistant as a switch or light.
-  bool _register_relay1_as_light;
+  bool _register_relay1_as_light = false;
   // The topic to send commands to the relay1
   std::string _mqtt_relay1_command_topic;
   // The topic where relay1 state is published
   std::string _mqtt_relay1_state_topic;
   // Wether or not relay1 is on
-  bool _relay1_state;
+  bool _relay1_state = false;
   // Wether or not relay2 should be registered to Home Assistant as a switch or light.
-  bool _register_relay2_as_light;
+  bool _register_relay2_as_light = false;
   // The topic to send commands to the relay2
   std::string _mqtt_relay2_command_topic;
   // The topic where relay2 state is published
   std::string _mqtt_relay2_state_topic;
   // Wether or not relay2 is on
-  bool _relay2_state;
+  bool _relay2_state = false;
   // The topic to capture logs from MQTT
   std::string _mqtt_log_topic;
   // The topic to capture status (online/offline) from MQTT
