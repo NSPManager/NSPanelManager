@@ -20,6 +20,13 @@ uint64_t CurrentTimeMilliseconds() {
 }
 
 OpenhabThermostat::OpenhabThermostat(uint32_t thermostat_id) : ThermostatEntity(thermostat_id) {
+  this->_last_target_temperature_change = 0;
+  this->_last_fan_mode_change = 0;
+  this->_last_mode_change = 0;
+  this->_last_preset_change = 0;
+  this->_last_swing_change = 0;
+  this->_last_swingh_change = 0;
+
   // Process Home Assistant specific details. General thermostat data is loaded in the "ThermostatEntity" constructor.
   if (this->_controller != MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB) {
     SPDLOG_ERROR("OpenhabThermostat has not been recognized as controlled by OPENHAB. Will stop processing thermostat.");
