@@ -228,6 +228,9 @@ void NSPanel::reload_config() {
     this->_mqtt_relay2_state_topic = fmt::format("nspanel/{}/relay2_state", this->_mac);
     this->_mqtt_status_topic = fmt::format("nspanel/{}/status", this->_mac);
     this->_mqtt_status_report_topic = fmt::format("nspanel/{}/status_report", this->_mac);
+    this->_mqtt_mac_log_topic = fmt::format("nspanel/{}/log", this->_mac);
+    this->_mqtt_legacy_status_topic = fmt::format("nspanel/{}/status", this->_name);               // TODO: Remove me and use only topic based on MAC-address instead
+    this->_mqtt_legacy_status_report_topic = fmt::format("nspanel/{}/status_report", this->_name); // TODO: Remove me and use only topic based on MAC-address instead
     this->_mqtt_temperature_topic = fmt::format("nspanel/{}/temperature", this->_mac);
     this->_mqtt_humidity_topic = fmt::format("nspanel/{}/humidity", this->_mac);
     this->_mqtt_pressure_topic = fmt::format("nspanel/{}/pressure", this->_mac);
@@ -244,9 +247,9 @@ void NSPanel::reload_config() {
       MQTT_Manager::subscribe(this->_mqtt_relay1_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
       MQTT_Manager::subscribe(this->_mqtt_relay2_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
       MQTT_Manager::subscribe(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));                                // TODO: Remove me and use only topic based on MAC-address instead
-      MQTT_Manager::subscribe(fmt::format("nspanel/{}/status", this->_name), boost::bind(&NSPanel::mqtt_callback, this, _1, _2));        // TODO: Remove me and use only topic based on MAC-address instead
-      MQTT_Manager::subscribe(fmt::format("nspanel/{}/status_report", this->_name), boost::bind(&NSPanel::mqtt_callback, this, _1, _2)); // TODO: Remove me and use only topic based on MAC-address instead
-      MQTT_Manager::subscribe(fmt::format("nspanel/{}/log", this->_mac), boost::bind(&NSPanel::mqtt_log_callback, this, _1, _2));
+      MQTT_Manager::subscribe(this->_mqtt_legacy_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+      MQTT_Manager::subscribe(this->_mqtt_legacy_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+      MQTT_Manager::subscribe(this->_mqtt_mac_log_topic, boost::bind(&NSPanel::mqtt_log_callback, this, _1, _2));
       MQTT_Manager::subscribe(this->_mqtt_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
       MQTT_Manager::subscribe(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
     }
@@ -480,6 +483,7 @@ void NSPanel::send_config() {
 
 NSPanel::~NSPanel() {
   SPDLOG_INFO("Destroying NSPanel {}::{}", this->_id, this->_name);
+  CommandManager::detach_callback(boost::bind(&NSPanel::command_callback, this, _1));
   WebsocketServer::detach_stomp_callback(fmt::format("nspanel/{}/command", this->_mac), boost::bind(&NSPanel::handle_stomp_command_callback, this, _1));
 
   this->reset_mqtt_topics();
@@ -492,6 +496,9 @@ void NSPanel::reset_mqtt_topics() {
   MQTT_Manager::detach_callback(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
   MQTT_Manager::detach_callback(this->_mqtt_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
   MQTT_Manager::detach_callback(this->_mqtt_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+  MQTT_Manager::detach_callback(this->_mqtt_mac_log_topic, boost::bind(&NSPanel::mqtt_log_callback, this, _1, _2));
+  MQTT_Manager::detach_callback(this->_mqtt_legacy_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
+  MQTT_Manager::detach_callback(this->_mqtt_legacy_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
 
   // This nspanel was removed. Clear any retain on any MQTT topic.
   MQTT_Manager::clear_retain(this->_mqtt_command_topic);

@@ -242,6 +242,11 @@ private:
   std::string _mqtt_status_topic;
   // The topic to capture status reports from MQTT
   std::string _mqtt_status_report_topic;
+  // The topic to capture logs from MQTT, based on MAC-address
+  std::string _mqtt_mac_log_topic;
+  // The old name based status and status report topics, still subscribed to for older firmware
+  std::string _mqtt_legacy_status_topic;
+  std::string _mqtt_legacy_status_report_topic;
   // The topic to send out temperature in raw format instead of encoded in protobuf status report
   std::string _mqtt_temperature_topic;
   // The topic to send out humidity in raw format instead of encoded in protobuf status report

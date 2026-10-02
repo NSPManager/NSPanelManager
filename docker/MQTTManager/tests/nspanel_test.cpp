@@ -574,11 +574,9 @@ TEST_F(NSPanelTest, detached_button_activates_a_scene_in_the_panels_room) {
   EXPECT_EQ(calls[0]["service_data"]["variables"]["nspanelmanager"]["triggering_room_id"], panel_rooms().room_id);
 }
 
-// KNOWN BUG: ~NSPanel() never detaches its CommandManager callback, nor its subscriptions to
-// nspanel/<mac>/log and the legacy nspanel/<name>/status and nspanel/<name>/status_report
-// topics. After a panel is deleted, the next button press from any panel, or the next log line
-// from the deleted panel, calls into the destroyed NSPanel.
-TEST_F(NSPanelTest, DISABLED_destroyed_panel_leaves_no_callbacks_behind) {
+// A callback left behind would call into the destroyed NSPanel on the next button press from any
+// panel, or the next message on one of the deleted panel's topics.
+TEST_F(NSPanelTest, destroyed_panel_leaves_no_callbacks_behind) {
   size_t command_callbacks = CommandManager::test_callback_count();
   load_panel();
 
@@ -588,5 +586,20 @@ TEST_F(NSPanelTest, DISABLED_destroyed_panel_leaves_no_callbacks_behind) {
   for (auto topic : {"nspanel/" + PANEL_MAC + "/log", "nspanel/" + PANEL_NAME + "/status", "nspanel/" + PANEL_NAME + "/status_report", "nspanel/" + PANEL_MAC + "/status"}) {
     SCOPED_TRACE(topic);
     EXPECT_EQ(MQTT_Manager::test_callback_count(topic), 0);
+  }
+}
+
+TEST_F(NSPanelTest, renamed_panel_moves_its_legacy_subscriptions_to_the_new_name) {
+  load_panel();
+
+  update_row([](auto &settings) {
+    settings.friendly_name = "Renamed hall panel";
+  });
+  panel->reload_config();
+
+  for (auto suffix : {"/status", "/status_report", "/log"}) {
+    SCOPED_TRACE(suffix);
+    EXPECT_EQ(MQTT_Manager::test_callback_count("nspanel/" + PANEL_NAME + suffix), 0);
+    EXPECT_EQ(MQTT_Manager::test_callback_count("nspanel/Renamed hall panel" + std::string(suffix)), 1);
   }
 }
