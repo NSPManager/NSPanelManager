@@ -697,6 +697,13 @@ def download_tft(request, panel_id):
         return HttpResponse(fs.open(tft_file).read(), content_type="application/octet-stream")
 
 
+def checksum_response(md5sum):
+    # A panel compares the body against its stored checksum, so never send "None" as if it were one.
+    if md5sum is None:
+        return HttpResponse("", status=404)
+    return HttpResponse(md5sum)
+
+
 def checksum_firmware(request):
     if "model" in request.GET:
         model = request.GET["model"]
@@ -706,7 +713,7 @@ def checksum_firmware(request):
         # As model was not specified, default to sonoff as that was the original model
         model = "sonoff"
 
-    return HttpResponse(get_file_md5sum(f"firmware/{model}/firmware.bin"))
+    return checksum_response(get_file_md5sum(f"firmware/{model}/firmware.bin"))
 
 
 def checksum_data_file(request):
@@ -718,7 +725,7 @@ def checksum_data_file(request):
         # As model was not specified, default to sonoff as that was the original model
         model = "sonoff"
 
-    return HttpResponse(get_file_md5sum(f"firmware/{model}/data_file.bin"))
+    return checksum_response(get_file_md5sum(f"firmware/{model}/data_file.bin"))
 
 
 def checksum_tft_file(request, panel_id):
@@ -739,7 +746,7 @@ def checksum_tft_file(request, panel_id):
     else:
         print(f"ERROR! Could not determine TFT file for NSPanel with ID {panel_id}")
 
-    return HttpResponse(get_file_md5sum(tft_file))
+    return checksum_response(get_file_md5sum(tft_file))
 
 
 def get_manual(request):

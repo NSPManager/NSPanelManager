@@ -28,9 +28,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
+# Persistent data (secret key, database). Overridable so that tests can run outside the container.
+DATA_DIR = environment("NSPM_DATA_DIR", default="/data")
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = ""
-SECRET_KEY_PATH = "/data/secret.key"
+SECRET_KEY_PATH = os.path.join(DATA_DIR, "secret.key")
 if os.path.exists(SECRET_KEY_PATH):
     with open(SECRET_KEY_PATH) as f:
         SECRET_KEY = f.read()
@@ -107,7 +110,7 @@ WSGI_APPLICATION = "nspanelmanager.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "/data/nspanelmanager_db.sqlite3", "timeout": 20}}
+DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": os.path.join(DATA_DIR, "nspanelmanager_db.sqlite3"), "timeout": 20}}
 
 LOGGING = {
     "version": 1,
