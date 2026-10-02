@@ -24,6 +24,9 @@ foreach(library ${NSPM_LIBRARIES_WITH_INLINE_TESTS})
 endforeach()
 target_link_options(nspm_mqttmanager_tests PRIVATE "LINKER:--whole-archive" ${NSPM_INLINE_TEST_ARCHIVES} "LINKER:--no-whole-archive")
 
+# Export the executable's symbols so the crash handler in main.cpp can name the functions in a backtrace.
+target_link_options(nspm_mqttmanager_tests PRIVATE -rdynamic)
+
 target_link_libraries(nspm_mqttmanager_tests PRIVATE
     ${NSPM_LIBRARIES_WITH_INLINE_TESTS}
     MQTTManager_DatabaseManager MQTTManager_Entity
