@@ -32,11 +32,12 @@ enum DjangoButtonMode {
   THERMOSTAT_COOLING = 5,
 };
 
-// Two rooms shared by every test here (rooms are never removed, see create_room). The first has
-// one entities page and one scenes page.
+// Rooms shared by every test here (rooms are never removed, see create_room). The first has one
+// entities page and one scenes page, the sensor room has a Home Assistant temperature sensor.
 struct PanelRooms {
   int room_id;
   int other_room_id;
+  int sensor_room_id;
   int entities_page_id;
   int scenes_page_id;
 };
@@ -46,6 +47,11 @@ const PanelRooms &panel_rooms() {
     PanelRooms rooms;
     rooms.room_id = nspm_test::create_room("Panel config room");
     rooms.other_room_id = nspm_test::create_room("Panel config other room");
+    database_manager::Room sensor_room;
+    sensor_room.friendly_name = "Panel config sensor room";
+    sensor_room.room_temp_provider = "home_assistant";
+    sensor_room.room_temp_sensor = "sensor.panel_config_temperature";
+    rooms.sensor_room_id = database_manager::database.insert(sensor_room);
     database_manager::RoomEntitiesPage page;
     page.room_id = rooms.room_id;
     page.page_type = 4;
@@ -167,6 +173,7 @@ TEST_F(NSPanelTest, config_defaults_without_panel_settings) {
   EXPECT_EQ(config->screensaver_activation_timeout(), std::stoi(MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::SCREENSAVER_ACTIVATION_TIMEOUT)));
   EXPECT_TRUE(config->relay1_relay_group().empty());
   EXPECT_TRUE(config->relay2_relay_group().empty());
+  EXPECT_TRUE(config->inside_temperature_sensor_mqtt_topic().empty());
 }
 
 TEST_F(NSPanelTest, panel_settings_are_sent_in_the_config) {
@@ -207,6 +214,21 @@ TEST_F(NSPanelTest, temperature_calibration_is_sent_in_tenths_of_a_degree) {
   auto config = last_published_config();
   ASSERT_TRUE(config.has_value());
   EXPECT_EQ(config->temperature_calibration(), -15);
+}
+
+TEST_F(NSPanelTest, room_temperature_sensor_topic_is_sent_in_the_config) {
+  update_row([](auto &settings) {
+    settings.room_id = panel_rooms().sensor_room_id;
+  });
+
+  load_panel();
+
+  auto config = last_published_config();
+  ASSERT_TRUE(config.has_value());
+  auto room = EntityManager::get_room(panel_rooms().sensor_room_id);
+  ASSERT_TRUE(room.has_value());
+  EXPECT_FALSE(config->inside_temperature_sensor_mqtt_topic().empty());
+  EXPECT_EQ(config->inside_temperature_sensor_mqtt_topic(), (*room)->get_temperature_sensor_mqtt_topic());
 }
 
 TEST_F(NSPanelTest, a_shown_screensaver_is_never_fully_dimmed) {

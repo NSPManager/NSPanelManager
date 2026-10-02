@@ -304,6 +304,9 @@ void NSPanel::send_config() {
   config.set_button1_upper_temperature(0);
   config.set_button2_lower_temperature(0);
   config.set_button2_upper_temperature(0);
+  if ((*default_room)->has_temperature_sensor()) {
+    config.set_inside_temperature_sensor_mqtt_topic((*default_room)->get_temperature_sensor_mqtt_topic());
+  }
 
   ButtonMode b1_mode = static_cast<ButtonMode>(this->_settings.button1_mode);
   if (b1_mode == ButtonMode::DIRECT) {
