@@ -323,6 +323,26 @@ class SceneTests(EntityRESTCommonTests, EntityRESTTestCase):
         self.assertIsNone(scene.room)
         self.assertLoadableByManager(scene)
 
+    def test_add_home_assistant_script_as_a_room_scene(self):
+        self.assertEqual(self.save(self.payload(friendly_name="Lights out", backend_name="script.lights_out")).status_code, 200)
+
+        scene = Scene.objects.get()
+        self.assertEqual((scene.scene_type, scene.backend_name), ("home_assistant", "script.lights_out"))
+        self.assertEqual(scene.room, self.room)
+        self.assertLoadableByManager(scene)
+        self.assertManagerReloaded(times=1)
+
+    def test_add_home_assistant_script_as_a_global_scene(self):
+        page = self.global_scenes_page()
+
+        response = self.save(self.payload(room_id=None, entities_page_id=page.id, friendly_name="All off", backend_name="script.all_off"))
+
+        self.assertEqual(response.status_code, 200)
+        scene = Scene.objects.get()
+        self.assertIsNone(scene.room)
+        self.assertEqual(scene.backend_name, "script.all_off")
+        self.assertLoadableByManager(scene)
+
     def test_home_assistant_scene_without_backend_name_is_rejected(self):
         self.assertCreatesNothing(self.save(self.payload(backend_name="")))
 

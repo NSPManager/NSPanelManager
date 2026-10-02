@@ -51,6 +51,18 @@ class EntitySourceLookupTests(NSPMTestCase):
 
         self.assertEqual([i["item_id"] for i in response.json()["items"]], ["switch.fan", "climate.lounge"])
 
+    def test_home_assistant_scripts_are_offered_with_scenes(self):
+        # The React scene picker fetches every entity and keeps scene.* and script.* itself.
+        self.home_assistant.add("scene.movie_time", friendly_name="Movie time")
+        self.home_assistant.add("script.lights_out", friendly_name="Lights out")
+        self.home_assistant.add("light.kitchen")
+
+        response = self.client.get(reverse("rest_get_home_assistant_entities"))
+
+        items = {i["item_id"]: i["label"] for i in response.json()["items"]}
+        self.assertEqual(items["scene.movie_time"], "Movie time")
+        self.assertEqual(items["script.lights_out"], "Lights out")
+
     def test_entity_without_friendly_name_is_labelled_by_id(self):
         self.home_assistant.add("light.unnamed")
 
