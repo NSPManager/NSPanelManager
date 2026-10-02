@@ -123,6 +123,12 @@ public:
     std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_test_published_messages_mutex);
     return std::exchange(MQTT_Manager::_test_published_messages, {});
   }
+
+  // Number of callbacks attached to a topic.
+  static size_t test_callback_count(const std::string &topic) {
+    std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
+    return MQTT_Manager::_mqtt_callbacks.count(topic) > 0 ? MQTT_Manager::_mqtt_callbacks.at(topic).num_slots() : 0;
+  }
 #endif
 
 private:
