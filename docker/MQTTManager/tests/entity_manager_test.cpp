@@ -296,3 +296,138 @@ TEST_F(EntityManagerNSPanelTest, script_activated_from_a_panel_gets_the_panels_r
   ASSERT_EQ(calls.size(), 1);
   EXPECT_EQ(calls[0]["service_data"]["variables"]["nspanelmanager"]["triggering_room_id"], study_id);
 }
+
+// A scene or script tapped on a panel's scenes or entities page arrives as a
+// ToggleEntityFromEntitiesPage command carrying the panel's id.
+class EntityManagerSceneCommandTest : public EntityManagerNSPanelTest {
+protected:
+  static void SetUpTestSuite() {
+    EntityManagerNSPanelTest::SetUpTestSuite();
+    kitchen_id = nspm_test::create_room("Scene command kitchen");
+  }
+
+  static void tap(int nspanel_id, int entity_page_id, int entity_slot) {
+    NSPanelMQTTManagerCommand command;
+    command.set_nspanel_id(nspanel_id);
+    command.mutable_toggle_entity_from_entities_page()->set_entity_page_id(entity_page_id);
+    command.mutable_toggle_entity_from_entities_page()->set_entity_slot(entity_slot);
+    EntityManager::test_process_command(command);
+  }
+
+  // Renames a room until it goes out of scope.
+  class ScopedRoomName {
+  public:
+    ScopedRoomName(int room_id, const std::string &name) : _room_id(room_id) {
+      _old_name = database_manager::database.get<database_manager::Room>(room_id).friendly_name;
+      rename(name);
+    }
+
+    ~ScopedRoomName() {
+      rename(_old_name);
+    }
+
+  private:
+    void rename(const std::string &name) {
+      auto row = database_manager::database.get<database_manager::Room>(_room_id);
+      row.friendly_name = name;
+      database_manager::database.update(row);
+      EntityManager::load_rooms();
+    }
+
+    int _room_id;
+    std::string _old_name;
+  };
+
+  static inline int kitchen_id;
+};
+
+TEST_F(EntityManagerSceneCommandTest, tapping_a_script_sends_the_panels_room_and_the_scripts_room) {
+  ScopedScene script("home_assistant", "Lights out", "script.lights_out", kitchen_id, 5151, 3);
+  EntityManager::load_scenes();
+
+  tap(panel->id, 5151, 3);
+
+  auto calls = home_assistant_service_calls();
+  ASSERT_EQ(calls.size(), 1);
+  EXPECT_EQ(calls[0]["domain"], "script");
+  EXPECT_EQ(calls[0]["service"], "turn_on");
+  EXPECT_EQ(calls[0]["target"]["entity_id"], "script.lights_out");
+  EXPECT_EQ(calls[0]["service_data"]["variables"]["nspanelmanager"], nlohmann::json({
+                                                                         {"scene_name", "Lights out"},
+                                                                         {"scene_id", script.id},
+                                                                         {"triggering_room_id", study_id},
+                                                                         {"triggering_room_name", "Room test study"},
+                                                                         {"scene_room_id", kitchen_id},
+                                                                         {"scene_room_name", "Scene command kitchen"},
+                                                                     }));
+}
+
+TEST_F(EntityManagerSceneCommandTest, tapping_a_global_script_sends_the_panels_room) {
+  ScopedScene script("home_assistant", "All off", "script.all_off", std::nullopt, 5151, 4);
+  EntityManager::load_scenes();
+
+  tap(panel->id, 5151, 4);
+
+  auto calls = home_assistant_service_calls();
+  ASSERT_EQ(calls.size(), 1);
+  EXPECT_EQ(calls[0]["service_data"]["variables"]["nspanelmanager"], nlohmann::json({
+                                                                         {"scene_name", "All off"},
+                                                                         {"scene_id", script.id},
+                                                                         {"triggering_room_id", study_id},
+                                                                         {"triggering_room_name", "Room test study"},
+                                                                     }));
+}
+
+TEST_F(EntityManagerSceneCommandTest, tapping_a_scene_turns_it_on) {
+  ScopedScene scene("home_assistant", "Movie time", "scene.movie_time", kitchen_id, 5151, 5);
+  EntityManager::load_scenes();
+
+  tap(panel->id, 5151, 5);
+
+  auto calls = home_assistant_service_calls();
+  ASSERT_EQ(calls.size(), 1);
+  EXPECT_EQ(calls[0], nlohmann::json({{"type", "call_service"}, {"domain", "scene"}, {"service", "turn_on"}, {"target", {{"entity_id", "scene.movie_time"}}}}));
+}
+
+// The script still runs, it just can't be told which room it was started from.
+TEST_F(EntityManagerSceneCommandTest, script_tapped_on_an_unknown_panel_runs_without_a_triggering_room) {
+  ScopedScene script("home_assistant", "Lights out", "script.lights_out", kitchen_id, 5151, 6);
+  EntityManager::load_scenes();
+
+  tap(999999, 5151, 6);
+
+  auto calls = home_assistant_service_calls();
+  ASSERT_EQ(calls.size(), 1);
+  auto context = calls[0]["service_data"]["variables"]["nspanelmanager"];
+  EXPECT_FALSE(context.contains("triggering_room_id"));
+  EXPECT_FALSE(context.contains("triggering_room_name"));
+  EXPECT_EQ(context["scene_room_id"], kitchen_id);
+}
+
+TEST_F(EntityManagerSceneCommandTest, script_follows_the_panel_when_it_moves_room) {
+  ScopedScene script("home_assistant", "All off", "script.all_off", std::nullopt, 5151, 7);
+  EntityManager::load_scenes();
+  auto row = database_manager::database.get<database_manager::NSPanel>(panel->id);
+  row.room_id = kitchen_id;
+  database_manager::database.update(row);
+  EntityManager::load_nspanels();
+
+  tap(panel->id, 5151, 7);
+
+  auto calls = home_assistant_service_calls();
+  ASSERT_EQ(calls.size(), 1);
+  EXPECT_EQ(calls[0]["service_data"]["variables"]["nspanelmanager"]["triggering_room_id"], kitchen_id);
+  EXPECT_EQ(calls[0]["service_data"]["variables"]["nspanelmanager"]["triggering_room_name"], "Scene command kitchen");
+}
+
+TEST_F(EntityManagerSceneCommandTest, script_follows_a_renamed_room) {
+  ScopedScene script("home_assistant", "All off", "script.all_off", std::nullopt, 5151, 8);
+  EntityManager::load_scenes();
+  ScopedRoomName renamed(study_id, "Renamed study");
+
+  tap(panel->id, 5151, 8);
+
+  auto calls = home_assistant_service_calls();
+  ASSERT_EQ(calls.size(), 1);
+  EXPECT_EQ(calls[0]["service_data"]["variables"]["nspanelmanager"]["triggering_room_name"], "Renamed study");
+}

@@ -601,6 +601,52 @@ TEST_F(NSPanelTest, detached_button_activates_a_scene_in_the_panels_room) {
   EXPECT_EQ(calls[0]["service_data"]["variables"]["nspanelmanager"]["triggering_room_id"], panel_rooms().room_id);
 }
 
+TEST_F(NSPanelTest, detached_button_runs_a_script_with_the_panels_room_and_the_scripts_room) {
+  OnExit unload_scene{[] { EntityManager::load_scenes(); }}; // Runs after the row is removed.
+  ScopedScene script("home_assistant", "Lights out", "script.lights_out", panel_rooms().other_room_id);
+  EntityManager::load_scenes();
+  update_row([&](auto &settings) {
+    settings.button1_mode = DETACHED;
+    settings.button1_detached_mode_entity_id = script.id;
+  });
+  load_panel();
+  home_assistant_service_calls();
+
+  press_button(1, row->id);
+
+  auto calls = home_assistant_service_calls();
+  ASSERT_EQ(calls.size(), 1);
+  EXPECT_EQ(calls[0]["domain"], "script");
+  EXPECT_EQ(calls[0]["service"], "turn_on");
+  EXPECT_EQ(calls[0]["target"]["entity_id"], "script.lights_out");
+  EXPECT_EQ(calls[0]["service_data"]["variables"]["nspanelmanager"], nlohmann::json({
+                                                                         {"scene_name", "Lights out"},
+                                                                         {"scene_id", script.id},
+                                                                         {"triggering_room_id", panel_rooms().room_id},
+                                                                         {"triggering_room_name", "Panel config room"},
+                                                                         {"scene_room_id", panel_rooms().other_room_id},
+                                                                         {"scene_room_name", "Panel config other room"},
+                                                                     }));
+}
+
+TEST_F(NSPanelTest, detached_button_turns_on_a_scene) {
+  OnExit unload_scene{[] { EntityManager::load_scenes(); }}; // Runs after the row is removed.
+  ScopedScene scene("home_assistant", "Movie time", "scene.movie_time", std::nullopt);
+  EntityManager::load_scenes();
+  update_row([&](auto &settings) {
+    settings.button1_mode = DETACHED;
+    settings.button1_detached_mode_entity_id = scene.id;
+  });
+  load_panel();
+  home_assistant_service_calls();
+
+  press_button(1, row->id);
+
+  auto calls = home_assistant_service_calls();
+  ASSERT_EQ(calls.size(), 1);
+  EXPECT_EQ(calls[0], nlohmann::json({{"type", "call_service"}, {"domain", "scene"}, {"service", "turn_on"}, {"target", {{"entity_id", "scene.movie_time"}}}}));
+}
+
 // A callback left behind would call into the destroyed NSPanel on the next button press from any
 // panel, or the next message on one of the deleted panel's topics.
 TEST_F(NSPanelTest, destroyed_panel_leaves_no_callbacks_behind) {
