@@ -424,10 +424,7 @@ TEST_F(NSPanelTest, denied_panel_is_not_sent_a_config) {
   EXPECT_FALSE(last_published_config().has_value());
 }
 
-// KNOWN BUG: reload_config() marks a panel that is neither accepted nor denied as AWAITING_ACCEPT,
-// but the NSPanel constructor then overwrites the state with WAITING. A newly discovered panel
-// is reported to the web interface as "waiting" and with "accepted": true.
-TEST_F(NSPanelTest, DISABLED_panel_not_yet_accepted_is_awaiting_accept) {
+TEST_F(NSPanelTest, panel_not_yet_accepted_is_awaiting_accept) {
   update_row([](auto &settings) {
     settings.accepted = false;
     settings.denied = false;
@@ -436,6 +433,60 @@ TEST_F(NSPanelTest, DISABLED_panel_not_yet_accepted_is_awaiting_accept) {
   load_panel();
 
   EXPECT_EQ(panel->get_state(), MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT);
+}
+
+TEST_F(NSPanelTest, accepted_panel_is_loaded_as_waiting) {
+  load_panel();
+
+  EXPECT_EQ(panel->get_state(), MQTT_MANAGER_NSPANEL_STATE::WAITING);
+}
+
+// Accepting in the web interface sets accepted and reloads the manager. The panel must leave
+// AWAITING_ACCEPT/DENIED, as register requests from panels in those states are ignored.
+TEST_F(NSPanelTest, accepting_a_pending_panel_moves_it_to_waiting) {
+  update_row([](auto &settings) {
+    settings.accepted = false;
+    settings.denied = false;
+  });
+  load_panel();
+
+  update_row([](auto &settings) {
+    settings.accepted = true;
+  });
+  panel->reload_config();
+
+  EXPECT_EQ(panel->get_state(), MQTT_MANAGER_NSPANEL_STATE::WAITING);
+}
+
+TEST_F(NSPanelTest, accepting_a_denied_panel_moves_it_to_waiting) {
+  update_row([](auto &settings) {
+    settings.accepted = false;
+    settings.denied = true;
+  });
+  load_panel();
+
+  update_row([](auto &settings) {
+    settings.accepted = true;
+    settings.denied = false;
+  });
+  panel->reload_config();
+
+  EXPECT_EQ(panel->get_state(), MQTT_MANAGER_NSPANEL_STATE::WAITING);
+}
+
+TEST_F(NSPanelTest, denying_a_pending_panel_marks_it_denied) {
+  update_row([](auto &settings) {
+    settings.accepted = false;
+    settings.denied = false;
+  });
+  load_panel();
+
+  update_row([](auto &settings) {
+    settings.denied = true;
+  });
+  panel->reload_config();
+
+  EXPECT_EQ(panel->get_state(), MQTT_MANAGER_NSPANEL_STATE::DENIED);
 }
 
 TEST_F(NSPanelTest, commands_go_to_the_mac_and_legacy_name_topics) {

@@ -55,12 +55,7 @@ NSPanel::NSPanel(uint32_t id) {
   this->_id = id;
   SPDLOG_INFO("Loading new NSPanel with ID {}.", id);
   this->reload_config();
-  if (!this->_mqtt_config_topic.empty()) {
-    SPDLOG_INFO("Loaded accepted NSPanel {}::{}.", this->_id, this->_name);
-    this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE; // Assume offline until we have received a state update from the panel.
-  }
-
-  if (!this->_mqtt_config_topic.empty()) {
+  if (!this->_mqtt_config_topic.empty() && this->_state != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
     SPDLOG_INFO("Loaded accepted NSPanel {}::{}.", this->_id, this->_name);
     this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
   }
@@ -198,6 +193,9 @@ void NSPanel::reload_config() {
     if (!panel_settings.denied && !panel_settings.accepted) {
       // No decission has been made on wether ot accept or deny panel. It is therefore awaiting_accept
       this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
+    } else if (this->_state == MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT || this->_state == MQTT_MANAGER_NSPANEL_STATE::DENIED) {
+      // The panel has just been accepted. Wait for it to register again.
+      this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
     }
 
     SPDLOG_DEBUG("Building MQTT topics for NSPanel {}::{}", this->_id, this->_name);
