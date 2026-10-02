@@ -176,6 +176,8 @@ public:
 
 private:
   std::string _get_nspanel_setting_with_default(std::string key, std::string default_value);
+  // A thermostat temperature limit setting, or 0 if it is not a number.
+  int _get_nspanel_temperature_limit_setting(std::string key);
 
   // Vars:
   uint32_t _id;

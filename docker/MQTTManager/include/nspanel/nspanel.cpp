@@ -315,12 +315,12 @@ void NSPanel::send_config() {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_FOLLOW);
   } else if (b1_mode == ButtonMode::THERMOSTAT_HEATING) {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_HEAT);
-    config.set_button1_lower_temperature(std::stoi(this->_get_nspanel_setting_with_default("button1_relay_lower_temperature", "0")));
-    config.set_button1_upper_temperature(std::stoi(this->_get_nspanel_setting_with_default("button1_relay_upper_temperature", "0")));
+    config.set_button1_lower_temperature(this->_get_nspanel_temperature_limit_setting("button1_relay_lower_temperature"));
+    config.set_button1_upper_temperature(this->_get_nspanel_temperature_limit_setting("button1_relay_upper_temperature"));
   } else if (b1_mode == ButtonMode::THERMOSTAT_COOLING) {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
-    config.set_button1_lower_temperature(std::stoi(this->_get_nspanel_setting_with_default("button1_relay_lower_temperature", "0")));
-    config.set_button1_upper_temperature(std::stoi(this->_get_nspanel_setting_with_default("button1_relay_upper_temperature", "0")));
+    config.set_button1_lower_temperature(this->_get_nspanel_temperature_limit_setting("button1_relay_lower_temperature"));
+    config.set_button1_upper_temperature(this->_get_nspanel_temperature_limit_setting("button1_relay_upper_temperature"));
   } else {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
@@ -332,12 +332,12 @@ void NSPanel::send_config() {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_FOLLOW);
   } else if (b2_mode == ButtonMode::THERMOSTAT_HEATING) {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_HEAT);
-    config.set_button2_lower_temperature(std::stoi(this->_get_nspanel_setting_with_default("button2_relay_lower_temperature", "0")));
-    config.set_button2_upper_temperature(std::stoi(this->_get_nspanel_setting_with_default("button2_relay_upper_temperature", "0")));
+    config.set_button2_lower_temperature(this->_get_nspanel_temperature_limit_setting("button2_relay_lower_temperature"));
+    config.set_button2_upper_temperature(this->_get_nspanel_temperature_limit_setting("button2_relay_upper_temperature"));
   } else if (b2_mode == ButtonMode::THERMOSTAT_COOLING) {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
-    config.set_button2_lower_temperature(std::stoi(this->_get_nspanel_setting_with_default("button2_relay_lower_temperature", "0")));
-    config.set_button2_upper_temperature(std::stoi(this->_get_nspanel_setting_with_default("button2_relay_upper_temperature", "0")));
+    config.set_button2_lower_temperature(this->_get_nspanel_temperature_limit_setting("button2_relay_lower_temperature"));
+    config.set_button2_upper_temperature(this->_get_nspanel_temperature_limit_setting("button2_relay_upper_temperature"));
   } else {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
@@ -1688,4 +1688,15 @@ std::string NSPanel::_get_nspanel_setting_with_default(std::string key, std::str
   } catch (std::exception &ex) {
   }
   return default_value;
+}
+
+int NSPanel::_get_nspanel_temperature_limit_setting(std::string key) {
+  // The limits are free text in the web interface, so a bad value must not stop the config being sent.
+  std::string value = this->_get_nspanel_setting_with_default(key, "0");
+  try {
+    return std::stoi(value);
+  } catch (std::exception &ex) {
+    SPDLOG_ERROR("NSPanel {}::{} setting {} is '{}', which is not a whole number. Will send 0.", this->_id, this->_name, key, value);
+    return 0;
+  }
 }
