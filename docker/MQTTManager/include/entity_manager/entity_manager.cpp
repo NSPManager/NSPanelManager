@@ -121,10 +121,13 @@ void EntityManager::load_rooms() {
   SPDLOG_INFO("Loading {} rooms.", room_ids.size());
 
   // Remove room if it does no longer exist
-  EntityManager::_rooms.erase(std::remove_if(EntityManager::_rooms.begin(), EntityManager::_rooms.end(), [&room_ids](auto room) {
-                                return std::find_if(room_ids.begin(), room_ids.end(), [&room](auto id) { return id == room->get_id(); }) == room_ids.end();
-                              }),
-                              EntityManager::_rooms.end());
+  {
+    std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
+    EntityManager::_rooms.erase(std::remove_if(EntityManager::_rooms.begin(), EntityManager::_rooms.end(), [&room_ids](auto room) {
+                                  return std::find_if(room_ids.begin(), room_ids.end(), [&room](auto id) { return id == room->get_id(); }) == room_ids.end();
+                                }),
+                                EntityManager::_rooms.end());
+  }
 
   // Cause existing room to reload config or add a new room if it does not exist.
   for (auto &room_id : room_ids) {
@@ -142,6 +145,7 @@ void EntityManager::load_rooms() {
     }
   }
 
+  std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
   std::sort(EntityManager::_rooms.begin(), EntityManager::_rooms.end(), [](const std::shared_ptr<Room> &a, const std::shared_ptr<Room> &b) {
     return a->get_display_order() < b->get_display_order();
   });
@@ -573,9 +577,16 @@ void EntityManager::update_all_rooms_status() {
     uint16_t num_kelvin_lights_ceiling = 0; // Total number of ceiling lights with color temperature
     uint16_t num_kelvin_lights_table = 0;   // Total number of table lights with color temperature
 
+    // Work on a copy, as load_rooms() may change the list meanwhile.
+    std::vector<std::shared_ptr<Room>> rooms;
+    {
+      std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
+      rooms = EntityManager::_rooms;
+    }
+
     // Determine if any light is on in any of the rooms
     bool any_light_on = false;
-    for (auto room : EntityManager::_rooms) {
+    for (auto room : rooms) {
       std::vector<std::shared_ptr<Light>> entities = room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
       for (auto light : entities) {
         if (light->get_state() && light->get_controlled_from_main_page()) {
@@ -585,7 +596,7 @@ void EntityManager::update_all_rooms_status() {
       }
     }
 
-    for (auto room : EntityManager::_rooms) {
+    for (auto room : rooms) {
       for (auto &light : room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT)) {
         // Light is not controlled from main page, exclude it from calculations.
         if (!light->get_controlled_from_main_page()) {
