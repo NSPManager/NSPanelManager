@@ -1,12 +1,14 @@
 FROM --platform=$BUILDPLATFORM node:20-alpine AS ui-builder
 ARG BUILDTIME
+# Branch, tag or full commit hash of NSPanelManager-Web-UI to build, e.g. --build-arg WEB_UI_REF=devel.
+ARG WEB_UI_REF=main
 WORKDIR /ui-app
 
 # Install git to clone your frontend repository
 RUN apk add --no-cache git
 
 # Clone the UI repo
-RUN echo "Building UI at $BUILDTIME" && git clone https://github.com/NSPManager/NSPanelManager-Web-UI.git . # Use the echo to force a rebuild of this step.
+RUN echo "Building UI at $BUILDTIME" && git clone https://github.com/NSPManager/NSPanelManager-Web-UI.git . && git fetch origin "$WEB_UI_REF" && git checkout --detach FETCH_HEAD # Use the echo to force a rebuild of this step.
 
 # Install dependencies and build
 RUN npm install
