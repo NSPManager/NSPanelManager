@@ -101,7 +101,6 @@ urlpatterns = [
     ### HTMX "API" URLs ###
     #######################
     path("htmx/unblock_nspanel/<int:nspanel_id>", htmx.unblock_nspanel, name="htmx_unblock_nspanel"),
-    path("htmx/partial/handle_entity_modal_result", htmx.handle_entity_modal_result, name="htmx_handle_entity_modal_result"),
     path("htmx/partial/select_new_entity_type_react/<int:entities_page_id>/<int:room_view_position>", htmx.partial_add_entity_to_entities_page_select_entity_type_react, name="htmx_partial_select_new_entity_type_react"),
     path("htmx/partial/select_new_entity_type/<str:action>/<str:action_args>", htmx.partial_add_entity_to_entities_page_select_entity_type, name="htmx_partial_select_new_entity_type"),
     path("htmx/partial/select_new_entity_source/<str:action>/<str:action_args>", htmx.partial_add_entity_to_entities_page_select_entity_source, name="htmx_partial_select_new_entity_source"),
@@ -111,13 +110,7 @@ urlpatterns = [
     path("htmx/partial/add_light_entity_to_room/<int:room_id>", htmx.partial_entity_add_light_entity, name="htmx_partial_add_light_entity"),
     path("htmx/partial/edit_light_entity_in_room/<int:light_id>", htmx.partial_entity_edit_light_entity, name="htmx_partial_edit_light_entity"),
     path("htmx/partial/edit_scene_entity/<int:scene_id>", htmx.partial_entity_edit_scene_entity, name="htmx_partial_edit_scene_entity"),
-    path("htmx/partial/remove_entity_from_page_slot/<int:page_id>/<int:slot_id>", htmx.partial_remove_entity_from_page_slot, name="htmx_partial_remove_entity_from_page_slot"),
     path("htmx/partial/edit_entities_page/<int:page_id>", htmx.partial_edit_entities_page, name="htmx_partial_edit_entities_page"),
-    path("htmx/partial/edit_entities_page/<int:page_id>/save/<int:page_type>", htmx.partial_save_edit_entities_page, name="htmx_partial_save_edit_entities_page"),
-    path("htmx/partial/move_entity", htmx.partial_move_entity, name="htmx_partial_move_entity"),
-    path("htmx/partial/reorder_entity_pages", htmx.partial_move_entities_pages, name="htmx_partial_move_entities_pages"),
-    path("htmx/partial/delete_entities_page/<int:page_id>", htmx.partial_delete_entities_page, name="htmx_partial_delete_entities_page"),
-    path("htmx/partial/create_entities_page_in_room/<int:room_id>/<int:page_type>/<str:is_scenes_page>/<str:is_global_scenes_page>", htmx.create_entities_page_in_room, name="htmx_create_entities_page_in_room"),
     path("htmx/partial/reorder_rooms", htmx.partial_reorder_rooms, name="htmx_partial_reorder_rooms"),
     path("htmx/nspanels/<int:nspanel_id>/accept_register_request", htmx.nspanel_accept_register_request, name="htmx_nspanel_accept_register_request"),
     path("htmx/nspanels/<int:nspanel_id>/deny_register_request", htmx.nspanel_deny_register_request, name="htmx_nspanel_deny_register_request"),
