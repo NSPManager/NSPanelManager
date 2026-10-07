@@ -76,6 +76,19 @@ message NSPanelConfig {
   int32 button1_upper_temperature = 42; // At what temperature should relay1 turn off (heating) or on (cooling) when in thermostat mode.
   int32 button2_lower_temperature = 43; // At what temperature should relay2 turn on (heating) or off (cooling) when in thermostat mode.
   int32 button2_upper_temperature = 44; // At what temperature should relay2 turn off (heating) or on (cooling) when in thermostat mode.
+
+  // Sounds played by the panel buzzer, one entry per event. An event without an entry, or with an empty rtttl, is silent.
+  // Panels ignore events they do not know about.
+  enum NSPanelSoundEvent {
+    TOUCH = 0;           // The screen was touched
+    SCENE_ACTIVATED = 1; // A scene was triggered from the panel. Played instead of the TOUCH sound for that touch.
+    SCENE_SAVED = 2;     // A scene was saved from the panel
+  }
+  message Sound {
+    NSPanelSoundEvent event = 1;
+    string rtttl = 2; // Melody in RTTTL format, ex. "touch:d=32,o=6,b=190:g6,16p,32c7"
+  }
+  repeated Sound sounds = 45;
 }
 
 enum NSPanelWarningLevel {

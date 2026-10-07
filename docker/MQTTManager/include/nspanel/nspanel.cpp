@@ -47,6 +47,8 @@
 #include <string>
 #include <sys/stat.h>
 #include <system_error>
+#include <tuple>
+#include <vector>
 #include <websocket_server/websocket_server.hpp>
 
 NSPanel::NSPanel(uint32_t id) {
@@ -477,6 +479,21 @@ void NSPanel::send_config() {
     }
   } else {
     SPDLOG_WARN("No global entities pages were loaded while building config for NSPanel {}::{}", this->_id, this->_name);
+  }
+
+  // Load buzzer sounds. A panel setting overrides the global one, an empty value means no sound for that event.
+  const std::vector<std::tuple<NSPanelConfig_NSPanelSoundEvent, std::string, MQTT_MANAGER_SETTING>> sound_settings = {
+      {NSPanelConfig_NSPanelSoundEvent_TOUCH, "buzzer_sound_touch", MQTT_MANAGER_SETTING::BUZZER_SOUND_TOUCH},
+      {NSPanelConfig_NSPanelSoundEvent_SCENE_ACTIVATED, "buzzer_sound_scene_activated", MQTT_MANAGER_SETTING::BUZZER_SOUND_SCENE_ACTIVATED},
+      {NSPanelConfig_NSPanelSoundEvent_SCENE_SAVED, "buzzer_sound_scene_saved", MQTT_MANAGER_SETTING::BUZZER_SOUND_SCENE_SAVED},
+  };
+  for (const auto &[event, nspanel_setting_key, global_setting] : sound_settings) {
+    std::string rtttl = this->_get_nspanel_setting_with_default(nspanel_setting_key, MqttManagerConfig::get_setting_with_default<std::string>(global_setting));
+    if (!rtttl.empty()) {
+      NSPanelConfig_Sound *sound = config.add_sounds();
+      sound->set_event(event);
+      sound->set_rtttl(rtttl);
+    }
   }
 
   SPDLOG_DEBUG("Sending updated NSPanelConfig to panel {}::{} over MQTT.", this->_id, this->_name);
