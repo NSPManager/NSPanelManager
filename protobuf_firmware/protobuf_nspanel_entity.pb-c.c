@@ -31,6 +31,12 @@ void   nspanel_entity_state__thermostat__init
   static const NSPanelEntityState__Thermostat init_value = NSPANEL_ENTITY_STATE__THERMOSTAT__INIT;
   *message = init_value;
 }
+void   nspanel_entity_state__media_player__source_selection__init
+                     (NSPanelEntityState__MediaPlayer__SourceSelection         *message)
+{
+  static const NSPanelEntityState__MediaPlayer__SourceSelection init_value = NSPANEL_ENTITY_STATE__MEDIA_PLAYER__SOURCE_SELECTION__INIT;
+  *message = init_value;
+}
 void   nspanel_entity_state__media_player__init
                      (NSPanelEntityState__MediaPlayer         *message)
 {
@@ -509,6 +515,70 @@ const ProtobufCMessageDescriptor nspanel_entity_state__thermostat__descriptor =
   (ProtobufCMessageInit) nspanel_entity_state__thermostat__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
+static const ProtobufCFieldDescriptor nspanel_entity_state__media_player__source_selection__field_descriptors[3] =
+{
+  {
+    "sources",
+    1,
+    PROTOBUF_C_LABEL_REPEATED,
+    PROTOBUF_C_TYPE_STRING,
+    offsetof(NSPanelEntityState__MediaPlayer__SourceSelection, n_sources),
+    offsetof(NSPanelEntityState__MediaPlayer__SourceSelection, sources),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "current_source",
+    2,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__MediaPlayer__SourceSelection, current_source),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "can_select",
+    3,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__MediaPlayer__SourceSelection, can_select),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned nspanel_entity_state__media_player__source_selection__field_indices_by_name[] = {
+  2,   /* field[2] = can_select */
+  1,   /* field[1] = current_source */
+  0,   /* field[0] = sources */
+};
+static const ProtobufCIntRange nspanel_entity_state__media_player__source_selection__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 3 }
+};
+const ProtobufCMessageDescriptor nspanel_entity_state__media_player__source_selection__descriptor =
+{
+  PROTOBUF_C__MESSAGE_DESCRIPTOR_MAGIC,
+  "NSPanelEntityState.MediaPlayer.SourceSelection",
+  "SourceSelection",
+  "NSPanelEntityState__MediaPlayer__SourceSelection",
+  "",
+  sizeof(NSPanelEntityState__MediaPlayer__SourceSelection),
+  3,
+  nspanel_entity_state__media_player__source_selection__field_descriptors,
+  nspanel_entity_state__media_player__source_selection__field_indices_by_name,
+  1,  nspanel_entity_state__media_player__source_selection__number_ranges,
+  (ProtobufCMessageInit) nspanel_entity_state__media_player__source_selection__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
 static const ProtobufCEnumValue nspanel_entity_state__media_player__playback_state__enum_values_by_number[7] =
 {
   { "UNKNOWN", "NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__UNKNOWN", 0 },
@@ -547,7 +617,7 @@ const ProtobufCEnumDescriptor nspanel_entity_state__media_player__playback_state
   nspanel_entity_state__media_player__playback_state__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_entity_state__media_player__field_descriptors[16] =
+static const ProtobufCFieldDescriptor nspanel_entity_state__media_player__field_descriptors[19] =
 {
   {
     "media_player_id",
@@ -741,6 +811,42 @@ static const ProtobufCFieldDescriptor nspanel_entity_state__media_player__field_
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "volume_step",
+    17,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__MediaPlayer, volume_step),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "player_sources",
+    18,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__MediaPlayer, player_sources),
+    &nspanel_entity_state__media_player__source_selection__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "source_player_sources",
+    19,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__MediaPlayer, source_player_sources),
+    &nspanel_entity_state__media_player__source_selection__descriptor,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_entity_state__media_player__field_indices_by_name[] = {
   15,   /* field[15] = album_art_url */
@@ -756,14 +862,17 @@ static const unsigned nspanel_entity_state__media_player__field_indices_by_name[
   0,   /* field[0] = media_player_id */
   3,   /* field[3] = media_title */
   1,   /* field[1] = name */
+  17,   /* field[17] = player_sources */
+  18,   /* field[18] = source_player_sources */
   8,   /* field[8] = source_volume */
   2,   /* field[2] = state */
   5,   /* field[5] = volume */
+  16,   /* field[16] = volume_step */
 };
 static const ProtobufCIntRange nspanel_entity_state__media_player__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 16 }
+  { 0, 19 }
 };
 const ProtobufCMessageDescriptor nspanel_entity_state__media_player__descriptor =
 {
@@ -773,7 +882,7 @@ const ProtobufCMessageDescriptor nspanel_entity_state__media_player__descriptor 
   "NSPanelEntityState__MediaPlayer",
   "",
   sizeof(NSPanelEntityState__MediaPlayer),
-  16,
+  19,
   nspanel_entity_state__media_player__field_descriptors,
   nspanel_entity_state__media_player__field_indices_by_name,
   1,  nspanel_entity_state__media_player__number_ranges,

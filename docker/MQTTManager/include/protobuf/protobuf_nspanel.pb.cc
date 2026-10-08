@@ -233,7 +233,13 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
 
 inline constexpr NSPanelMQTTManagerCommand_MediaPlayerCommand::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
-      : media_player_id_{0},
+      : select_player_source_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        select_source_player_source_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        media_player_id_{0},
         playback_action_{static_cast< ::NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction >(0)},
         volume_{0},
         has_volume_{false},
@@ -875,6 +881,8 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.source_volume_),
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.has_muted_),
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.muted_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.select_player_source_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.select_source_player_source_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -917,7 +925,7 @@ static const ::_pbi::MigrationSchema
         {249, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand)},
         {259, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ThermostatCommand)},
         {270, -1, -1, sizeof(::NSPanelMQTTManagerCommand_MediaPlayerCommand)},
-        {286, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
+        {288, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelConfig_RoomInfo_default_instance_._instance,
@@ -1039,7 +1047,7 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "astItem\022\024\n\014weather_icon\030\001 \001(\t\022\034\n\024precipi"
     "tation_string\030\002 \001(\t\022!\n\031temperature_maxmi"
     "n_string\030\003 \001(\t\022\023\n\013wind_string\030\004 \001(\t\022\026\n\016d"
-    "isplay_string\030\005 \001(\t\"\272\020\n\031NSPanelMQTTManag"
+    "isplay_string\030\005 \001(\t\"\375\020\n\031NSPanelMQTTManag"
     "erCommand\022M\n\022first_page_turn_on\030\001 \001(\0132/."
     "NSPanelMQTTManagerCommand.FirstPageTurnL"
     "ightOnH\000\022O\n\023first_page_turn_off\030\002 \001(\01320."
@@ -1081,26 +1089,28 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "atTemperatureCommand\022\025\n\rthermostat_id\030\001 "
     "\001(\005\022\023\n\013temperature\030\002 \001(\002\032M\n\021ThermostatCo"
     "mmand\022\025\n\rthermostat_id\030\001 \001(\005\022\016\n\006option\030\002"
-    " \001(\t\022\021\n\tnew_value\030\003 \001(\t\032\321\002\n\022MediaPlayerC"
+    " \001(\t\022\021\n\tnew_value\030\003 \001(\t\032\224\003\n\022MediaPlayerC"
     "ommand\022\027\n\017media_player_id\030\001 \001(\005\022U\n\017playb"
     "ack_action\030\002 \001(\0162<.NSPanelMQTTManagerCom"
     "mand.MediaPlayerCommand.PlaybackAction\022\022"
     "\n\nhas_volume\030\003 \001(\010\022\016\n\006volume\030\004 \001(\005\022\031\n\021ha"
     "s_source_volume\030\005 \001(\010\022\025\n\rsource_volume\030\006"
-    " \001(\005\022\021\n\thas_muted\030\007 \001(\010\022\r\n\005muted\030\010 \001(\010\"S"
-    "\n\016PlaybackAction\022\010\n\004NONE\020\000\022\010\n\004PLAY\020\001\022\t\n\005"
-    "PAUSE\020\002\022\016\n\nNEXT_TRACK\020\003\022\022\n\016PREVIOUS_TRAC"
-    "K\020\004\"D\n\023AffectLightsOptions\022\007\n\003ALL\020\000\022\020\n\014T"
-    "ABLE_LIGHTS\020\001\022\022\n\016CEILING_LIGHTS\020\002B\r\n\013Com"
-    "mandData*[\n\023NSPanelWarningLevel\022\014\n\010CRITI"
-    "CAL\020\000\022\t\n\005ERROR\020\001\022\013\n\007WARNING\020\002\022\010\n\004INFO\020\003\022"
-    "\t\n\005DEBUG\020\004\022\t\n\005TRACE\020\005b\006proto3"
+    " \001(\005\022\021\n\thas_muted\030\007 \001(\010\022\r\n\005muted\030\010 \001(\010\022\034"
+    "\n\024select_player_source\030\t \001(\t\022#\n\033select_s"
+    "ource_player_source\030\n \001(\t\"S\n\016PlaybackAct"
+    "ion\022\010\n\004NONE\020\000\022\010\n\004PLAY\020\001\022\t\n\005PAUSE\020\002\022\016\n\nNE"
+    "XT_TRACK\020\003\022\022\n\016PREVIOUS_TRACK\020\004\"D\n\023Affect"
+    "LightsOptions\022\007\n\003ALL\020\000\022\020\n\014TABLE_LIGHTS\020\001"
+    "\022\022\n\016CEILING_LIGHTS\020\002B\r\n\013CommandData*[\n\023N"
+    "SPanelWarningLevel\022\014\n\010CRITICAL\020\000\022\t\n\005ERRO"
+    "R\020\001\022\013\n\007WARNING\020\002\022\010\n\004INFO\020\003\022\t\n\005DEBUG\020\004\022\t\n"
+    "\005TRACE\020\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_2eproto = {
     false,
     false,
-    6069,
+    6136,
     descriptor_table_protodef_protobuf_5fnspanel_2eproto,
     "protobuf_nspanel.proto",
     &descriptor_table_protobuf_5fnspanel_2eproto_once,
@@ -7521,15 +7531,38 @@ NSPanelMQTTManagerCommand_MediaPlayerCommand::NSPanelMQTTManagerCommand_MediaPla
   SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:NSPanelMQTTManagerCommand.MediaPlayerCommand)
 }
+inline PROTOBUF_NDEBUG_INLINE NSPanelMQTTManagerCommand_MediaPlayerCommand::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::NSPanelMQTTManagerCommand_MediaPlayerCommand& from_msg)
+      : select_player_source_(arena, from.select_player_source_),
+        select_source_player_source_(arena, from.select_source_player_source_),
+        _cached_size_{0} {}
+
 NSPanelMQTTManagerCommand_MediaPlayerCommand::NSPanelMQTTManagerCommand_MediaPlayerCommand(
-    ::google::protobuf::Arena* arena, const NSPanelMQTTManagerCommand_MediaPlayerCommand& from)
-    : NSPanelMQTTManagerCommand_MediaPlayerCommand(arena) {
-  MergeFrom(from);
+    ::google::protobuf::Arena* arena,
+    const NSPanelMQTTManagerCommand_MediaPlayerCommand& from)
+    : ::google::protobuf::Message(arena) {
+  NSPanelMQTTManagerCommand_MediaPlayerCommand* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, media_player_id_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, media_player_id_),
+           offsetof(Impl_, source_volume_) -
+               offsetof(Impl_, media_player_id_) +
+               sizeof(Impl_::source_volume_));
+
+  // @@protoc_insertion_point(copy_constructor:NSPanelMQTTManagerCommand.MediaPlayerCommand)
 }
 inline PROTOBUF_NDEBUG_INLINE NSPanelMQTTManagerCommand_MediaPlayerCommand::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility,
     ::google::protobuf::Arena* arena)
-      : _cached_size_{0} {}
+      : select_player_source_(arena),
+        select_source_player_source_(arena),
+        _cached_size_{0} {}
 
 inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::SharedCtor(::_pb::Arena* arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
@@ -7547,6 +7580,8 @@ NSPanelMQTTManagerCommand_MediaPlayerCommand::~NSPanelMQTTManagerCommand_MediaPl
 }
 inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::SharedDtor() {
   ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.select_player_source_.Destroy();
+  _impl_.select_source_player_source_.Destroy();
   _impl_.~Impl_();
 }
 
@@ -7571,15 +7606,15 @@ NSPanelMQTTManagerCommand_MediaPlayerCommand::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<3, 8, 0, 0, 2> NSPanelMQTTManagerCommand_MediaPlayerCommand::_table_ = {
+const ::_pbi::TcParseTable<4, 10, 0, 108, 2> NSPanelMQTTManagerCommand_MediaPlayerCommand::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    8, 56,  // max_field_number, fast_idx_mask
+    10, 120,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967040,  // skipmap
+    4294966272,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    8,  // num_field_entries
+    10,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     &_NSPanelMQTTManagerCommand_MediaPlayerCommand_default_instance_._instance,
@@ -7589,9 +7624,7 @@ const ::_pbi::TcParseTable<3, 8, 0, 0, 2> NSPanelMQTTManagerCommand_MediaPlayerC
     ::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_MediaPlayerCommand>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // bool muted = 8;
-    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.muted_), 63>(),
-     {64, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.muted_)}},
+    {::_pbi::TcParser::MiniParse, {}},
     // int32 media_player_id = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.media_player_id_), 63>(),
      {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.media_player_id_)}},
@@ -7613,6 +7646,20 @@ const ::_pbi::TcParseTable<3, 8, 0, 0, 2> NSPanelMQTTManagerCommand_MediaPlayerC
     // bool has_muted = 7;
     {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.has_muted_), 63>(),
      {56, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.has_muted_)}},
+    // bool muted = 8;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.muted_), 63>(),
+     {64, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.muted_)}},
+    // string select_player_source = 9;
+    {::_pbi::TcParser::FastUS1,
+     {74, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.select_player_source_)}},
+    // string select_source_player_source = 10;
+    {::_pbi::TcParser::FastUS1,
+     {82, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.select_source_player_source_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
@@ -7640,9 +7687,19 @@ const ::_pbi::TcParseTable<3, 8, 0, 0, 2> NSPanelMQTTManagerCommand_MediaPlayerC
     // bool muted = 8;
     {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.muted_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // string select_player_source = 9;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.select_player_source_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // string select_source_player_source = 10;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.select_source_player_source_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
   // no aux_entries
   {{
+    "\54\0\0\0\0\0\0\0\0\24\33\0\0\0\0\0"
+    "NSPanelMQTTManagerCommand.MediaPlayerCommand"
+    "select_player_source"
+    "select_source_player_source"
   }},
 };
 
@@ -7653,6 +7710,8 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand_MediaPlayerCommand::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  _impl_.select_player_source_.ClearToEmpty();
+  _impl_.select_source_player_source_.ClearToEmpty();
   ::memset(&_impl_.media_player_id_, 0, static_cast<::size_t>(
       reinterpret_cast<char*>(&_impl_.source_volume_) -
       reinterpret_cast<char*>(&_impl_.media_player_id_)) + sizeof(_impl_.source_volume_));
@@ -7722,6 +7781,22 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand_MediaPlayerCommand::Clear() {
         8, this->_internal_muted(), target);
   }
 
+  // string select_player_source = 9;
+  if (!this->_internal_select_player_source().empty()) {
+    const std::string& _s = this->_internal_select_player_source();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelMQTTManagerCommand.MediaPlayerCommand.select_player_source");
+    target = stream->WriteStringMaybeAliased(9, _s, target);
+  }
+
+  // string select_source_player_source = 10;
+  if (!this->_internal_select_source_player_source().empty()) {
+    const std::string& _s = this->_internal_select_source_player_source();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelMQTTManagerCommand.MediaPlayerCommand.select_source_player_source");
+    target = stream->WriteStringMaybeAliased(10, _s, target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -7740,6 +7815,18 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand_MediaPlayerCommand::Clear() {
   (void) cached_has_bits;
 
   ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // string select_player_source = 9;
+  if (!this->_internal_select_player_source().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_select_player_source());
+  }
+
+  // string select_source_player_source = 10;
+  if (!this->_internal_select_source_player_source().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_select_source_player_source());
+  }
+
   // int32 media_player_id = 1;
   if (this->_internal_media_player_id() != 0) {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
@@ -7796,6 +7883,12 @@ void NSPanelMQTTManagerCommand_MediaPlayerCommand::MergeImpl(::google::protobuf:
   ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
+  if (!from._internal_select_player_source().empty()) {
+    _this->_internal_set_select_player_source(from._internal_select_player_source());
+  }
+  if (!from._internal_select_source_player_source().empty()) {
+    _this->_internal_set_select_source_player_source(from._internal_select_source_player_source());
+  }
   if (from._internal_media_player_id() != 0) {
     _this->_impl_.media_player_id_ = from._impl_.media_player_id_;
   }
@@ -7833,7 +7926,11 @@ void NSPanelMQTTManagerCommand_MediaPlayerCommand::CopyFrom(const NSPanelMQTTMan
 
 void NSPanelMQTTManagerCommand_MediaPlayerCommand::InternalSwap(NSPanelMQTTManagerCommand_MediaPlayerCommand* PROTOBUF_RESTRICT other) {
   using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.select_player_source_, &other->_impl_.select_player_source_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.select_source_player_source_, &other->_impl_.select_source_player_source_, arena);
   ::google::protobuf::internal::memswap<
       PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.source_volume_)
       + sizeof(NSPanelMQTTManagerCommand_MediaPlayerCommand::_impl_.source_volume_)
