@@ -2422,6 +2422,8 @@ class NSPanelMQTTManagerCommand_MediaPlayerCommand final : public ::google::prot
 
   // accessors -------------------------------------------------------
   enum : int {
+    kSelectPlayerSourceFieldNumber = 9,
+    kSelectSourcePlayerSourceFieldNumber = 10,
     kMediaPlayerIdFieldNumber = 1,
     kPlaybackActionFieldNumber = 2,
     kVolumeFieldNumber = 4,
@@ -2431,6 +2433,38 @@ class NSPanelMQTTManagerCommand_MediaPlayerCommand final : public ::google::prot
     kMutedFieldNumber = 8,
     kSourceVolumeFieldNumber = 6,
   };
+  // string select_player_source = 9;
+  void clear_select_player_source() ;
+  const std::string& select_player_source() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_select_player_source(Arg_&& arg, Args_... args);
+  std::string* mutable_select_player_source();
+  PROTOBUF_NODISCARD std::string* release_select_player_source();
+  void set_allocated_select_player_source(std::string* value);
+
+  private:
+  const std::string& _internal_select_player_source() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_select_player_source(
+      const std::string& value);
+  std::string* _internal_mutable_select_player_source();
+
+  public:
+  // string select_source_player_source = 10;
+  void clear_select_source_player_source() ;
+  const std::string& select_source_player_source() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_select_source_player_source(Arg_&& arg, Args_... args);
+  std::string* mutable_select_source_player_source();
+  PROTOBUF_NODISCARD std::string* release_select_source_player_source();
+  void set_allocated_select_source_player_source(std::string* value);
+
+  private:
+  const std::string& _internal_select_source_player_source() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_select_source_player_source(
+      const std::string& value);
+  std::string* _internal_mutable_select_source_player_source();
+
+  public:
   // int32 media_player_id = 1;
   void clear_media_player_id() ;
   ::int32_t media_player_id() const;
@@ -2516,8 +2550,8 @@ class NSPanelMQTTManagerCommand_MediaPlayerCommand final : public ::google::prot
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      3, 8, 0,
-      0, 2>
+      4, 10, 0,
+      108, 2>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -2537,6 +2571,8 @@ class NSPanelMQTTManagerCommand_MediaPlayerCommand final : public ::google::prot
     inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const NSPanelMQTTManagerCommand_MediaPlayerCommand& from_msg);
+    ::google::protobuf::internal::ArenaStringPtr select_player_source_;
+    ::google::protobuf::internal::ArenaStringPtr select_source_player_source_;
     ::int32_t media_player_id_;
     int playback_action_;
     ::int32_t volume_;
@@ -10095,6 +10131,106 @@ inline bool NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_muted() cons
 inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_set_muted(bool value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.muted_ = value;
+}
+
+// string select_player_source = 9;
+inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::clear_select_player_source() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.select_player_source_.ClearToEmpty();
+}
+inline const std::string& NSPanelMQTTManagerCommand_MediaPlayerCommand::select_player_source() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_player_source)
+  return _internal_select_player_source();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelMQTTManagerCommand_MediaPlayerCommand::set_select_player_source(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.select_player_source_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_player_source)
+}
+inline std::string* NSPanelMQTTManagerCommand_MediaPlayerCommand::mutable_select_player_source() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_select_player_source();
+  // @@protoc_insertion_point(field_mutable:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_player_source)
+  return _s;
+}
+inline const std::string& NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_select_player_source() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.select_player_source_.Get();
+}
+inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_set_select_player_source(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.select_player_source_.Set(value, GetArena());
+}
+inline std::string* NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_mutable_select_player_source() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.select_player_source_.Mutable( GetArena());
+}
+inline std::string* NSPanelMQTTManagerCommand_MediaPlayerCommand::release_select_player_source() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_player_source)
+  return _impl_.select_player_source_.Release();
+}
+inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::set_allocated_select_player_source(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.select_player_source_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.select_player_source_.IsDefault()) {
+          _impl_.select_player_source_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_player_source)
+}
+
+// string select_source_player_source = 10;
+inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::clear_select_source_player_source() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.select_source_player_source_.ClearToEmpty();
+}
+inline const std::string& NSPanelMQTTManagerCommand_MediaPlayerCommand::select_source_player_source() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_source_player_source)
+  return _internal_select_source_player_source();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelMQTTManagerCommand_MediaPlayerCommand::set_select_source_player_source(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.select_source_player_source_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_source_player_source)
+}
+inline std::string* NSPanelMQTTManagerCommand_MediaPlayerCommand::mutable_select_source_player_source() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_select_source_player_source();
+  // @@protoc_insertion_point(field_mutable:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_source_player_source)
+  return _s;
+}
+inline const std::string& NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_select_source_player_source() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.select_source_player_source_.Get();
+}
+inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_set_select_source_player_source(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.select_source_player_source_.Set(value, GetArena());
+}
+inline std::string* NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_mutable_select_source_player_source() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.select_source_player_source_.Mutable( GetArena());
+}
+inline std::string* NSPanelMQTTManagerCommand_MediaPlayerCommand::release_select_source_player_source() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_source_player_source)
+  return _impl_.select_source_player_source_.Release();
+}
+inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::set_allocated_select_source_player_source(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.select_source_player_source_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.select_source_player_source_.IsDefault()) {
+          _impl_.select_source_player_source_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_source_player_source)
 }
 
 // -------------------------------------------------------------------
