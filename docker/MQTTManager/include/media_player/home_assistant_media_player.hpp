@@ -23,6 +23,8 @@ public:
   void set_volume(uint8_t volume);
   void set_source_volume(uint8_t volume);
   void set_muted(bool muted);
+  void select_player_source(const std::string &source);
+  void select_source_player_source(const std::string &source);
 
 protected:
   /**
@@ -50,9 +52,9 @@ private:
   std::shared_ptr<HomeAssistantSourceVolumeStrategy> _get_source_volume_strategy();
 
   /**
-   * Update source volume from the strategy and send the new state to the NSPanel.
+   * Update source volume and source player sources from the strategy and send the new state to the NSPanel.
    */
-  void _update_source_volume_and_send_state();
+  void _update_source_player_and_send_state();
 
   /**
    * Call a "media_player" domain service in Home Assistant.

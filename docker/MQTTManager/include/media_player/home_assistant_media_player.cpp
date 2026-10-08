@@ -1,6 +1,7 @@
 #include "home_assistant_media_player.hpp"
 #include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
+#include "media_player/home_assistant_source_player.hpp"
 #include "media_player/home_assistant_source_volume.hpp"
 #include "media_player/media_player.hpp"
 #include "protobuf_nspanel_entity.pb.h"
@@ -67,7 +68,7 @@ void HomeAssistantMediaPlayer::reload_config() {
 
   this->_create_source_volume_strategy(entity_data.value_or(nlohmann::json::object()));
   // The name or source volume might have changed, unchanged states are not sent again.
-  this->_update_source_volume_and_send_state();
+  this->_update_source_player_and_send_state();
 
   if (home_assistant_name_changed && !this->_home_assistant_name.empty()) {
     // This will also request the current state from Home Assistant.
@@ -113,7 +114,7 @@ void HomeAssistantMediaPlayer::_create_source_volume_strategy(const nlohmann::js
   }
 
   auto strategy = std::shared_ptr<HomeAssistantSourceVolumeStrategy>(HomeAssistantSourceVolumeStrategy::create(this->_id, entity_data, [this]() {
-    this->_update_source_volume_and_send_state();
+    this->_update_source_player_and_send_state();
   }));
 
   nlohmann::json player_attributes;
@@ -132,11 +133,12 @@ std::shared_ptr<HomeAssistantSourceVolumeStrategy> HomeAssistantMediaPlayer::_ge
   return this->_source_volume_strategy;
 }
 
-void HomeAssistantMediaPlayer::_update_source_volume_and_send_state() {
+void HomeAssistantMediaPlayer::_update_source_player_and_send_state() {
   auto strategy = this->_get_source_volume_strategy();
   std::optional<uint8_t> source_volume = strategy ? strategy->get_source_volume() : std::nullopt;
   this->_has_source_volume = source_volume.has_value();
   this->_source_volume = source_volume.value_or(0);
+  this->_set_source_player_sources(strategy ? strategy->get_source_player_sources() : std::nullopt);
   this->send_state_update_to_nspanel();
 }
 
@@ -169,6 +171,7 @@ void HomeAssistantMediaPlayer::home_assistant_event_callback(nlohmann::json data
       // Entity was removed from Home Assistant.
       this->_state = NSPanelEntityState_MediaPlayer_PlaybackState_UNKNOWN;
       this->_set_album_art_source("");
+      this->_set_player_sources(MediaPlayerSources());
     } else {
       std::string new_state = new_state_data.contains("state") && new_state_data["state"].is_string() ? new_state_data["state"].get<std::string>() : "";
       if (new_state.compare("playing") == 0) {
@@ -213,6 +216,7 @@ void HomeAssistantMediaPlayer::home_assistant_event_callback(nlohmann::json data
       this->_can_previous_track = supported_features & HomeAssistantMediaPlayer::feature_previous_track;
       this->_can_set_volume = supported_features & HomeAssistantMediaPlayer::feature_volume_set;
       this->_can_mute = supported_features & HomeAssistantMediaPlayer::feature_volume_mute;
+      this->_set_player_sources(HomeAssistantSourcePlayer::sources_from_attributes(attributes));
     }
 
     std::shared_ptr<HomeAssistantSourceVolumeStrategy> strategy;
@@ -229,7 +233,7 @@ void HomeAssistantMediaPlayer::home_assistant_event_callback(nlohmann::json data
     return;
   }
 
-  this->_update_source_volume_and_send_state();
+  this->_update_source_player_and_send_state();
   if (previous_icon_color != this->get_icon_color()) {
     this->_signal_entity_changed();
   }
@@ -309,4 +313,15 @@ bool HomeAssistantMediaPlayer::_download_album_art(const std::string &source, st
 
 void HomeAssistantMediaPlayer::set_muted(bool muted) {
   this->_call_service("volume_mute", {{"is_volume_muted", muted}});
+}
+
+void HomeAssistantMediaPlayer::select_player_source(const std::string &source) {
+  this->_call_service("select_source", {{"source", source}});
+}
+
+void HomeAssistantMediaPlayer::select_source_player_source(const std::string &source) {
+  auto strategy = this->_get_source_volume_strategy();
+  if (strategy) {
+    strategy->select_source_player_source(source);
+  }
 }
