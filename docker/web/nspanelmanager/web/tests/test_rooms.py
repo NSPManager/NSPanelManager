@@ -1,6 +1,6 @@
 import json
-from unittest import expectedFailure
 
+from django.test import override_settings
 from django.urls import reverse
 
 from web.models import Entity, Room, RoomEntitiesPage, Scene
@@ -96,12 +96,14 @@ class RoomRESTTests(NSPMTestCase):
         self.assertEqual(Room.objects.get(id=room_id).friendly_name, "Office")
 
     def test_create_room_rejects_bad_payloads(self):
-        for body in ({}, {"friendly_name": "wrong key"}, "not json"):
+        for body in ({}, {"friendly_name": "wrong key"}, {"name": ""}, "not json"):
             with self.subTest(body=body):
                 response = self.post_json(reverse("rest_rooms_create"), body)
-                self.assertEqual(response.status_code, 500)
+                self.assertEqual(response.status_code, 400)
                 self.assertEqual(response.json()["status"], "error")
+                self.assertTrue(response.json()["message"])
         self.assertFalse(Room.objects.exists())
+        self.assertManagerNotReloaded()
 
     def test_rooms_endpoint_rejects_unsupported_methods(self):
         self.assertEqual(self.client.delete(reverse("rest_rooms_create")).status_code, 405)
@@ -155,11 +157,7 @@ class RoomRESTTests(NSPMTestCase):
         self.assertEqual((room.friendly_name, room.room_temp_provider, room.room_temp_sensor), ("Study", "home_assistant", "sensor.study"))
         self.assertManagerReloaded(times=1)
 
-    @expectedFailure
     def test_update_room_display_order(self):
-        # KNOWN BUG: room_put checks for "displayOrder" but reads data["display_order"], so
-        # sending display_order (the key GET /rest/rooms returns) is silently ignored and
-        # sending displayOrder raises KeyError and returns 500.
         room = self.make_room("Office")
 
         response = self.put_json(reverse("rest_rooms_create"), {"id": room.id, "display_order": 7})
@@ -167,6 +165,72 @@ class RoomRESTTests(NSPMTestCase):
         self.assertEqual(response.status_code, 200)
         room.refresh_from_db()
         self.assertEqual(room.displayOrder, 7)
+
+    @override_settings(REST_REJECT_UNKNOWN_FIELDS=False)
+    def test_update_room_ignores_unknown_fields_with_a_warning(self):
+        # Production behaviour: unknown fields are logged and ignored rather than rejected, for
+        # compatibility between UI and server versions (see WarnOnUnknownFieldsMixin).
+        # "displayOrder" was the original room_put bug.
+        room = self.make_room("Office")
+        display_order = room.displayOrder
+
+        with self.assertLogs("web.serializers", level="WARNING") as logs:
+            response = self.put_json(reverse("rest_rooms_create"), {"id": room.id, "friendly_name": "Study", "displayOrder": 7})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("RoomUpdateSerializer: ignoring unknown field(s): displayOrder", logs.output[0])
+        room.refresh_from_db()
+        self.assertEqual((room.friendly_name, room.displayOrder), ("Study", display_order))
+
+    def test_update_room_rejects_unknown_fields_under_test_settings(self):
+        room = self.make_room("Office")
+
+        response = self.put_json(reverse("rest_rooms_create"), {"id": room.id, "friendly_name": "Study", "displayOrder": 7})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["errors"], {"displayOrder": ["Unknown field."]})
+        room.refresh_from_db()
+        self.assertEqual(room.friendly_name, "Office")
+        self.assertManagerNotReloaded()
+
+    def test_update_room_without_changes_does_not_reload_manager(self):
+        room = self.make_room("Office")
+        unchanged = {"friendly_name": room.friendly_name, "display_order": room.displayOrder, "room_temp_provider": room.room_temp_provider, "room_temp_sensor": room.room_temp_sensor}
+
+        for body in ({"id": room.id}, {"id": room.id, **unchanged}):
+            with self.subTest(body=body):
+                response = self.put_json(reverse("rest_rooms_create"), body)
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.json(), {"status": "ok", "room_id": room.id})
+        self.assertManagerNotReloaded()
+
+    def test_update_room_rejects_bad_values(self):
+        room = self.make_room("Office")
+        for body in ({"friendly_name": "Study"}, {"id": room.id, "friendly_name": ""}, {"id": room.id, "friendly_name": "x" * 31}, {"id": room.id, "display_order": "first"}):
+            with self.subTest(body=body):
+                response = self.put_json(reverse("rest_rooms_create"), body)
+                self.assertEqual(response.status_code, 400)
+                self.assertEqual(response.json()["status"], "error")
+        room.refresh_from_db()
+        self.assertEqual(room.friendly_name, "Office")
+        self.assertManagerNotReloaded()
+
+    def test_update_room_can_clear_temperature_sensor(self):
+        room = self.make_room("Office")
+        Room.objects.filter(id=room.id).update(room_temp_provider="home_assistant", room_temp_sensor="sensor.office")
+
+        response = self.put_json(reverse("rest_rooms_create"), {"id": room.id, "room_temp_provider": "", "room_temp_sensor": ""})
+
+        self.assertEqual(response.status_code, 200)
+        room.refresh_from_db()
+        self.assertEqual((room.room_temp_provider, room.room_temp_sensor), ("", ""))
+
+    def test_update_unknown_room_is_rejected(self):
+        response = self.put_json(reverse("rest_rooms_create"), {"id": 999, "friendly_name": "Study"})
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["status"], "error")
+        self.assertManagerNotReloaded()
 
     def test_delete_room_reloads_manager(self):
         room = self.make_room("Office")
