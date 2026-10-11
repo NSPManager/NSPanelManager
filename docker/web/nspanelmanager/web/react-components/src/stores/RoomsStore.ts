@@ -1,32 +1,10 @@
 import { create } from "zustand";
-
-interface IRoomSettings {
-  id: number;
-  friendly_name: string;
-  display_order: number;
-  room_temp_provider: string;
-  room_temp_sensor: string;
-}
+import { api, type Room } from "../api/client";
 
 interface ISettingsStore {
   status: "none" | "loading" | "loaded";
-  rooms: IRoomSettings[] | null;
+  rooms: Room[] | null;
   fetchData: () => Promise<void>;
-}
-
-function getCookie(name: string) {
-  let cookieValue = "";
-  if (document.cookie && document.cookie !== "") {
-    const cookies = document.cookie.split(";");
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      if (cookie.substring(0, name.length + 1) === name + "=") {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
-    }
-  }
-  return cookieValue;
 }
 
 export const useRoomsStore = create<ISettingsStore>((set) => ({
@@ -34,15 +12,9 @@ export const useRoomsStore = create<ISettingsStore>((set) => ({
   rooms: null,
   fetchData: async () => {
     set({ status: "loading" });
-    fetch(`/rest/rooms`, {
-      credentials: "same-origin",
-      method: "GET",
-      mode: "same-origin",
-      headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        set((state) => ({ ...state, status: "loaded", rooms: data.rooms }));
-      });
+    const { data } = await api.GET("/rest/rooms");
+    if (data) {
+      set((state) => ({ ...state, status: "loaded", rooms: data.rooms }));
+    }
   },
 }));
