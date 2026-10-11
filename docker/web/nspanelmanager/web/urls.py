@@ -1,4 +1,5 @@
 from django.urls import path
+from drf_spectacular.views import SpectacularAPIView
 
 from . import api, htmx, rest, views
 
@@ -69,12 +70,13 @@ urlpatterns = [
     path("rest/global/entities_pages", rest.global_entities_pages, name="rest_global_entities_pages"),
     path("rest/entities_pages/order", rest.room_entities_pages_order, name="rest_room_entities_pages_order"),
     # Room URLs
-    path("rest/rooms/<int:room_id>", rest.room_delete, name="rest_room_delete"),
+    path("rest/rooms/<int:room_id>", rest.RoomView.as_view(), name="rest_room_delete"),
     path("rest/rooms/<int:room_id>/entities", rest.room_entities, name="rest_room_entities"),
     path("rest/rooms/<int:room_id>/entities/order", rest.put_room_entities_order, name="rest_put_room_entities_order"),
     path("rest/rooms/<int:room_id>/entities_pages", rest.room_entities_pages, name="rest_room_entities_pages"),
     path("rest/entities_pages/<int:page_id>", rest.room_entities_page, name="rest_room_entities_page"),
-    path("rest/rooms", rest.rooms, name="rest_rooms_create"),
+    path("rest/rooms", rest.RoomsView.as_view(), name="rest_rooms_create"),
+    path("rest/schema", SpectacularAPIView.as_view(), name="rest_schema"),
     # Settings URLs
     path("rest/settings", rest.settings, name="rest_settings"),
     # Scene URLs

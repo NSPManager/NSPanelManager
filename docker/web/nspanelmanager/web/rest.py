@@ -9,7 +9,13 @@ import requests
 from django.core.files.storage import FileSystemStorage
 from django.db import transaction
 from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
+from drf_spectacular.utils import extend_schema
+from rest_framework import serializers as drf_serializers
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.views import exception_handler as drf_exception_handler
 
 import web.home_assistant_api
 import web.openhab_api
@@ -21,6 +27,15 @@ from web.settings_helper import (
 
 from .apps import create_entity_pages_for_room, send_mqttmanager_reload_command
 from .models import Entity, LightState, NSPanel, RelayGroup, Room, RoomEntitiesPage, Scene, Settings
+from .serializers import (
+    ErrorResponseSerializer,
+    RoomCreateSerializer,
+    RoomIdResponseSerializer,
+    RoomListQuerySerializer,
+    RoomListResponseSerializer,
+    RoomSerializer,
+    RoomUpdateSerializer,
+)
 
 ########################
 # Get entities section #
@@ -196,18 +211,6 @@ def relay_groups(request):
 ####################
 
 
-@csrf_exempt
-def rooms(request):
-    if request.method == "GET":
-        return rooms_get(request)
-    elif request.method == "PUT":
-        return room_put(request)
-    elif request.method == "POST":
-        return room_create(request)
-    else:
-        return JsonResponse({"status": "error"}, status=405)
-
-
 def settings(request):
     if request.method == "GET":
         return settings_get(request)
@@ -243,29 +246,6 @@ def settings_post(request):
             return JsonResponse({"status": "ok"})
         else:
             return JsonResponse({"status": "error"}, status=405)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
-
-
-def rooms_get(request):
-    try:
-        rooms = list()
-        if request.GET.get("id"):
-            room_objects = Room.objects.filter(id=request.GET.get("id"))
-        else:
-            room_objects = Room.objects.all()
-        for room in room_objects:
-            rooms.append(
-                {
-                    "id": room.id,
-                    "friendly_name": room.friendly_name,
-                    "display_order": room.displayOrder,
-                    "room_temp_provider": room.room_temp_provider,
-                    "room_temp_sensor": room.room_temp_sensor,
-                }
-            )
-        return JsonResponse({"status": "ok", "rooms": rooms}, status=200)
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
@@ -547,25 +527,6 @@ def global_entities_pages(request):
 ######################
 
 
-@csrf_exempt
-def room_delete(request, room_id):
-    if request.method == "DELETE":
-        try:
-            room = Room.objects.get(id=room_id)
-            # Panels are not deleted with their room. As in the UI's delete_room view, move them to another room.
-            new_room = Room.objects.exclude(id=room.id).first()
-            if new_room:
-                NSPanel.objects.filter(room=room).update(room=new_room)
-            room.delete()
-            send_mqttmanager_reload_command()
-            return JsonResponse({"status": "ok", "room_id": room_id}, status=200)
-        except Exception as ex:
-            logging.exception(ex)
-            return JsonResponse({"status": "error"}, status=500)
-    else:
-        return JsonResponse({"status": "error"}, status=405)
-
-
 def room_entities(request, room_id):
     if request.method == "GET":
         try:
@@ -578,51 +539,68 @@ def room_entities(request, room_id):
         return JsonResponse({"status": "error"}, status=405)
 
 
-def room_put(request):
-    if request.method == "PUT":
-        try:
-            data = json.loads(request.body)
-            room_id = data["id"]
-            room = Room.objects.get(id=room_id)
-
-            if "friendly_name" in data:
-                room.friendly_name = data["friendly_name"]
-            if "displayOrder" in data:
-                room.displayOrder = data["display_order"]
-            if "room_temp_provider" in data:
-                room.room_temp_provider = data["room_temp_provider"]
-            if "room_temp_sensor" in data:
-                room.room_temp_sensor = data["room_temp_sensor"]
-            room.save()
-            send_mqttmanager_reload_command()
-            return JsonResponse({"status": "ok", "room_id": room.id}, status=200)
-        except Exception as ex:
-            logging.exception(ex)
-            return JsonResponse({"status": "error", "message": str(ex)}, status=500)
+def exception_handler(exc, context):
+    """REST_FRAMEWORK["EXCEPTION_HANDLER"]: keep the {"status": "error", "message": ...} shape the
+    plain views return, which the UI shows to the user, and add field errors for validation failures."""
+    response = drf_exception_handler(exc, context)
+    if response is None:
+        logging.exception(exc)
+        return Response({"status": "error", "message": str(exc)}, status=500)
+    if isinstance(exc, drf_serializers.ValidationError) and isinstance(response.data, dict):
+        errors = {field: [str(m) for m in (messages if isinstance(messages, list) else [messages])] for field, messages in response.data.items()}
+        response.data = {"status": "error", "message": "; ".join(f"{field}: {' '.join(messages)}" for field, messages in errors.items()), "errors": errors}
     else:
-        return JsonResponse({"status": "error"}, status=405)
+        response.data = {"status": "error", "message": str(response.data.get("detail", response.data) if isinstance(response.data, dict) else response.data)}
+    return response
 
 
-@csrf_exempt
-def room_create(request):
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            max_length = Room._meta.get_field("friendly_name").max_length
-            if not data["name"] or len(data["name"]) > max_length:
-                return JsonResponse({"status": "error", "message": f"Room name must be 1 to {max_length} characters"}, status=400)
-            with transaction.atomic():
-                new_room = Room()
-                new_room.friendly_name = data["name"]
-                new_room.save()
-                create_entity_pages_for_room(new_room)
+class RoomsView(APIView):
+    @extend_schema(parameters=[RoomListQuerySerializer], responses={200: RoomListResponseSerializer, 400: ErrorResponseSerializer})
+    def get(self, request):
+        query = RoomListQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        rooms = Room.objects.all()
+        if "id" in query.validated_data:
+            rooms = rooms.filter(id=query.validated_data["id"])
+        return Response({"status": "ok", "rooms": RoomSerializer(rooms, many=True).data})
+
+    @extend_schema(request=RoomUpdateSerializer, responses={200: RoomIdResponseSerializer, 400: ErrorResponseSerializer, 404: ErrorResponseSerializer})
+    def put(self, request):
+        update = RoomUpdateSerializer(data=request.data)
+        update.is_valid(raise_exception=True)
+        changes = dict(update.validated_data)
+        room = get_object_or_404(Room, id=changes.pop("id"))
+        changes = {field: value for field, value in changes.items() if getattr(room, field) != value}
+        # The UI sends every field on each save; only reload MQTTManager (and every panel's config) if something differs.
+        if changes:
+            for field, value in changes.items():
+                setattr(room, field, value)
+            room.save(update_fields=list(changes))
             send_mqttmanager_reload_command()
-            return JsonResponse({"status": "ok", "room_id": new_room.id}, status=200)
-        except Exception as ex:
-            logging.exception(ex)
-            return JsonResponse({"status": "error"}, status=500)
-    else:
-        return JsonResponse({"status": "error"}, status=405)
+        return Response({"status": "ok", "room_id": room.id})
+
+    @extend_schema(request=RoomCreateSerializer, responses={200: RoomIdResponseSerializer, 400: ErrorResponseSerializer})
+    def post(self, request):
+        create = RoomCreateSerializer(data=request.data)
+        create.is_valid(raise_exception=True)
+        with transaction.atomic():
+            new_room = Room.objects.create(friendly_name=create.validated_data["name"])
+            create_entity_pages_for_room(new_room)
+        send_mqttmanager_reload_command()
+        return Response({"status": "ok", "room_id": new_room.id})
+
+
+class RoomView(APIView):
+    @extend_schema(responses={200: RoomIdResponseSerializer, 404: ErrorResponseSerializer})
+    def delete(self, request, room_id):
+        room = get_object_or_404(Room, id=room_id)
+        # Panels are not deleted with their room. As in the UI's delete_room view, move them to another room.
+        new_room = Room.objects.exclude(id=room.id).first()
+        if new_room:
+            NSPanel.objects.filter(room=room).update(room=new_room)
+        room.delete()
+        send_mqttmanager_reload_command()
+        return Response({"status": "ok", "room_id": room_id})
 
 
 #####################
