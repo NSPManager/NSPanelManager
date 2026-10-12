@@ -61,6 +61,16 @@ fi
 
 mkdir -p MQTTManager/build/
 
+# The container's Conan config stores packages under /MQTTManager/conan_cache/,
+# which otherwise lands inside this checkout. Set NSPM_CONAN_CACHE to a host
+# directory to share one cache across checkouts and worktrees. sudo drops it
+# from the environment unless kept, e.g. sudo --preserve-env=NSPM_CONAN_CACHE.
+CONAN_CACHE_MOUNT=()
+if [ -n "$NSPM_CONAN_CACHE" ]; then
+  mkdir -p "$NSPM_CONAN_CACHE"
+  CONAN_CACHE_MOUNT=(-v "${NSPM_CONAN_CACHE}:/MQTTManager/conan_cache/")
+fi
+
 echo "--> Running as dev container. Will compile for platform '${TARGETPLATFORM}'. Will not compile MQTTManager during docker build."
 
 if [ -z "$TARGETPLATFORM" ]; then
@@ -70,6 +80,6 @@ else
 fi
 if [ "$?" == 0 ]; then
   #docker run --rm --name ${CONTAINER_NAME} --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --mac-address 02:42:ac:11:ff:ff -it -v /etc/timezone:/etc/timezone:ro -v "$(pwd)/web":/usr/src/app/ -v "$(pwd)/data":/data/ -v "$(pwd)/MQTTManager/":/MQTTManager/ -v "$(pwd)/nginx/sites-templates/":/etc/nginx/sites-templates/ -v "$(pwd)/nginx/sites-enabled/":/etc/nginx/sites-enabled/ -v "$(pwd)/HMI_files/":/usr/src/app/nspanelmanager/HMI_files/ -v "$(pwd)/../":/full_git/ -p 8000:8000 nspanelmanager /bin/bash
-  docker run --rm --name ${CONTAINER_NAME} --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --mac-address 02:42:ac:11:ff:ff -it -v /etc/localtime:/etc/localtime:ro -v "$(pwd)/web":/usr/src/app/ -v "$(pwd)/data":/data/ -v "$(pwd)/MQTTManager/":/MQTTManager/ -v "$(pwd)/nginx/sites-templates/":/etc/nginx/sites-templates/ -v "$(pwd)/nginx/sites-enabled/":/etc/nginx/sites-enabled/ -v "$(pwd)/HMI_files/":/usr/src/app/nspanelmanager/HMI_files/ -v "$(pwd)/../":/full_git/ -p ${EXTERNAL_PORT}:8000 nspanelmanager /bin/bash
+  docker run --rm --name ${CONTAINER_NAME} --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --mac-address 02:42:ac:11:ff:ff -it -v /etc/localtime:/etc/localtime:ro -v "$(pwd)/web":/usr/src/app/ -v "$(pwd)/data":/data/ -v "$(pwd)/MQTTManager/":/MQTTManager/ "${CONAN_CACHE_MOUNT[@]}" -v "$(pwd)/nginx/sites-templates/":/etc/nginx/sites-templates/ -v "$(pwd)/nginx/sites-enabled/":/etc/nginx/sites-enabled/ -v "$(pwd)/HMI_files/":/usr/src/app/nspanelmanager/HMI_files/ -v "$(pwd)/../":/full_git/ -p ${EXTERNAL_PORT}:8000 nspanelmanager /bin/bash
   docker rmi nspanelmanager
 fi
