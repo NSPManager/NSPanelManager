@@ -21,6 +21,13 @@ public:
     CommandManager::_callbacks.disconnect(callback);
   }
 
+#if defined(TEST_MODE) && TEST_MODE == 1
+  // Number of attached command callbacks.
+  static size_t test_callback_count() {
+    return CommandManager::_callbacks.num_slots();
+  }
+#endif
+
 private:
   static inline boost::signals2::signal<void(NSPanelMQTTManagerCommand &command)> _callbacks;
 };

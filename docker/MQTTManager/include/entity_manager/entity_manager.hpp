@@ -213,6 +213,13 @@ public:
   static std::expected<std::shared_ptr<NSPanel>, EntityError> get_nspanel_by_mac(std::string mac);
   static std::expected<int32_t, EntityError> get_room_id_for_panel_id(uint32_t nspanel_id);
 
+#if defined(TEST_MODE) && TEST_MODE == 1
+  // Handles a panel command as if CommandManager had delivered it, without starting init()'s threads.
+  static void test_process_command(NSPanelMQTTManagerCommand &command) {
+    EntityManager::_command_callback(command);
+  }
+#endif
+
 private:
   static inline std::vector<std::shared_ptr<MqttManagerEntity>> _entities;
   static inline std::mutex _entities_mutex;

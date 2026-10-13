@@ -17,6 +17,11 @@
 #include <string>
 #include <unordered_map>
 
+#if defined(TEST_MODE) && TEST_MODE == 1
+#include <utility>
+#include <vector>
+#endif
+
 struct MQTTMessage {
   std::string topic;
   std::string message;
@@ -106,7 +111,31 @@ public:
    */
   static void clear_retain(const std::string &topic);
 
+#if defined(TEST_MODE) && TEST_MODE == 1
+  struct TestPublishedMessage {
+    std::string topic;
+    std::string payload;
+    bool retain;
+  };
+
+  // Everything passed to publish since the last call, whether or not the MQTT client is connected.
+  static std::vector<TestPublishedMessage> test_take_published_messages() {
+    std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_test_published_messages_mutex);
+    return std::exchange(MQTT_Manager::_test_published_messages, {});
+  }
+
+  // Number of callbacks attached to a topic.
+  static size_t test_callback_count(const std::string &topic) {
+    std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
+    return MQTT_Manager::_mqtt_callbacks.count(topic) > 0 ? MQTT_Manager::_mqtt_callbacks.at(topic).num_slots() : 0;
+  }
+#endif
+
 private:
+#if defined(TEST_MODE) && TEST_MODE == 1
+  static inline std::mutex _test_published_messages_mutex;
+  static inline std::vector<TestPublishedMessage> _test_published_messages;
+#endif
   static inline boost::lockfree::spsc_queue<MQTTMessage, boost::lockfree::capacity<256>> _mqtt_message_queue;
   static inline std::thread _process_messages_thread;
   static inline mqtt::client *_mqtt_client = nullptr;
@@ -114,6 +143,7 @@ private:
   static inline std::mutex _mqtt_message_mutex;
   static inline std::list<mqtt::message_ptr> _mqtt_messages_buffer;
   static inline std::unordered_map<std::string, std::string> _mqtt_retain_buffer; // Used so that when we reconnect to an MQTT server that has restarted we can repopulate the retained messages.
+  static inline std::mutex _mqtt_retain_buffer_mutex;
 
   static void _reconnect_mqtt_client();
 

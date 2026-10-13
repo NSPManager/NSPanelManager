@@ -185,7 +185,7 @@ private:
   boost::signals2::signal<void(Room *)> _room_changed_callbacks;
 
   // Room temperature sensor provider
-  MQTT_MANAGER_ENTITY_CONTROLLER _room_temp_provider;
+  MQTT_MANAGER_ENTITY_CONTROLLER _room_temp_provider = MQTT_MANAGER_ENTITY_CONTROLLER::NONE;
 
   // Room temperature sensor item name/home assistant entity id
   std::string _room_temp_sensor;

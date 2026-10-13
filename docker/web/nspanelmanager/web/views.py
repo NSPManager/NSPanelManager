@@ -395,7 +395,6 @@ def settings_page(request):
     data["openhab_token"] = get_setting_with_default("openhab_token")
     data["openhab_brightness_channel_min"] = get_setting_with_default("openhab_brightness_channel_min")
     data["openhab_brightness_channel_max"] = get_setting_with_default("openhab_brightness_channel_max")
-    data["openhab_rgb_channel_name"] = get_setting_with_default("openhab_rgb_channel_name")
     data["raise_to_100_light_level"] = get_setting_with_default("raise_to_100_light_level")
     data["min_button_push_time"] = get_setting_with_default("min_button_push_time")
     data["button_long_press_time"] = get_setting_with_default("button_long_press_time")

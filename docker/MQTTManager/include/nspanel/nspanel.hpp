@@ -176,6 +176,8 @@ public:
 
 private:
   std::string _get_nspanel_setting_with_default(std::string key, std::string default_value);
+  // A thermostat temperature limit setting, or 0 if it is not a number.
+  int _get_nspanel_temperature_limit_setting(std::string key);
 
   // Vars:
   uint32_t _id;
@@ -219,27 +221,32 @@ private:
 
   // MQTT Stuff:
   // Wether or not relay1 should be registered to Home Assistant as a switch or light.
-  bool _register_relay1_as_light;
+  bool _register_relay1_as_light = false;
   // The topic to send commands to the relay1
   std::string _mqtt_relay1_command_topic;
   // The topic where relay1 state is published
   std::string _mqtt_relay1_state_topic;
   // Wether or not relay1 is on
-  bool _relay1_state;
+  bool _relay1_state = false;
   // Wether or not relay2 should be registered to Home Assistant as a switch or light.
-  bool _register_relay2_as_light;
+  bool _register_relay2_as_light = false;
   // The topic to send commands to the relay2
   std::string _mqtt_relay2_command_topic;
   // The topic where relay2 state is published
   std::string _mqtt_relay2_state_topic;
   // Wether or not relay2 is on
-  bool _relay2_state;
+  bool _relay2_state = false;
   // The topic to capture logs from MQTT
   std::string _mqtt_log_topic;
   // The topic to capture status (online/offline) from MQTT
   std::string _mqtt_status_topic;
   // The topic to capture status reports from MQTT
   std::string _mqtt_status_report_topic;
+  // The topic to capture logs from MQTT, based on MAC-address
+  std::string _mqtt_mac_log_topic;
+  // The old name based status and status report topics, still subscribed to for older firmware
+  std::string _mqtt_legacy_status_topic;
+  std::string _mqtt_legacy_status_report_topic;
   // The topic to send out temperature in raw format instead of encoded in protobuf status report
   std::string _mqtt_temperature_topic;
   // The topic to send out humidity in raw format instead of encoded in protobuf status report

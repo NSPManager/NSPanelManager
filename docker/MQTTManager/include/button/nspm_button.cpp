@@ -18,8 +18,8 @@
 NSPMButton::NSPMButton(uint32_t button_id) : ButtonEntity(button_id) {
   // Process Home Assistant specific details. General button data is loaded in the "Button" constructor.
 
-  if (this->_controller != MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT) {
-    SPDLOG_ERROR("HomeAssistantSwitch has not been recognized as controlled by HOME_ASSISTANT. Will stop processing switch.");
+  if (this->_controller != MQTT_MANAGER_ENTITY_CONTROLLER::NSPM) {
+    SPDLOG_ERROR("NSPMButton has not been recognized as controlled by NSPM. Will stop processing button.");
     return;
   }
 
