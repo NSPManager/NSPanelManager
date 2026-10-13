@@ -409,6 +409,59 @@ TEST_F(NSPanelTest, panel_locked_to_its_room_only_gets_that_room) {
   EXPECT_EQ(std::vector<int>(config->room_infos(0).entity_page_ids().begin(), config->room_infos(0).entity_page_ids().end()), std::vector<int>({panel_rooms().entities_page_id}));
 }
 
+TEST_F(NSPanelTest, config_has_no_sounds_without_buzzer_settings) {
+  load_panel();
+
+  auto config = last_published_config();
+  ASSERT_TRUE(config.has_value());
+  EXPECT_EQ(config->sounds_size(), 0);
+}
+
+TEST_F(NSPanelTest, global_buzzer_sounds_are_sent_per_event) {
+  OnExit reset{[] {
+    MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::BUZZER_SOUND_TOUCH, "");
+    MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::BUZZER_SOUND_SCENE_ACTIVATED, "");
+    MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::BUZZER_SOUND_SCENE_SAVED, "");
+  }};
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::BUZZER_SOUND_TOUCH, "touch:d=32,o=6,b=190:g6");
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::BUZZER_SOUND_SCENE_ACTIVATED, "activated:d=16,o=6,b=180:c,e,g");
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::BUZZER_SOUND_SCENE_SAVED, "saved:d=8,o=5,b=120:c6");
+
+  load_panel();
+
+  auto config = last_published_config();
+  ASSERT_TRUE(config.has_value());
+  ASSERT_EQ(config->sounds_size(), 3);
+  EXPECT_EQ(config->sounds(0).event(), NSPanelConfig_NSPanelSoundEvent_TOUCH);
+  EXPECT_EQ(config->sounds(0).rtttl(), "touch:d=32,o=6,b=190:g6");
+  EXPECT_EQ(config->sounds(1).event(), NSPanelConfig_NSPanelSoundEvent_SCENE_ACTIVATED);
+  EXPECT_EQ(config->sounds(1).rtttl(), "activated:d=16,o=6,b=180:c,e,g");
+  EXPECT_EQ(config->sounds(2).event(), NSPanelConfig_NSPanelSoundEvent_SCENE_SAVED);
+  EXPECT_EQ(config->sounds(2).rtttl(), "saved:d=8,o=5,b=120:c6");
+}
+
+TEST_F(NSPanelTest, panel_buzzer_settings_override_the_global_sounds) {
+  OnExit reset{[] {
+    MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::BUZZER_SOUND_TOUCH, "");
+    MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::BUZZER_SOUND_SCENE_ACTIVATED, "");
+  }};
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::BUZZER_SOUND_TOUCH, "global_touch:d=32,o=6,b=190:g6");
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::BUZZER_SOUND_SCENE_ACTIVATED, "global_activated:d=16,o=6,b=180:c");
+  set_panel_setting("buzzer_sound_touch", "panel_touch:d=32,o=7,b=200:c");
+  set_panel_setting("buzzer_sound_scene_activated", ""); // Silences the event on this panel only.
+  set_panel_setting("buzzer_sound_scene_saved", "panel_saved:d=8,o=5,b=120:e");
+
+  load_panel();
+
+  auto config = last_published_config();
+  ASSERT_TRUE(config.has_value());
+  ASSERT_EQ(config->sounds_size(), 2);
+  EXPECT_EQ(config->sounds(0).event(), NSPanelConfig_NSPanelSoundEvent_TOUCH);
+  EXPECT_EQ(config->sounds(0).rtttl(), "panel_touch:d=32,o=7,b=200:c");
+  EXPECT_EQ(config->sounds(1).event(), NSPanelConfig_NSPanelSoundEvent_SCENE_SAVED);
+  EXPECT_EQ(config->sounds(1).rtttl(), "panel_saved:d=8,o=5,b=120:e");
+}
+
 TEST_F(NSPanelTest, reload_config_sends_changed_settings) {
   load_panel();
   last_published_config();
