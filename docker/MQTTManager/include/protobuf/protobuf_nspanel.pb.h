@@ -56,6 +56,9 @@ extern NSPanelConfigDefaultTypeInternal _NSPanelConfig_default_instance_;
 class NSPanelConfig_RoomInfo;
 struct NSPanelConfig_RoomInfoDefaultTypeInternal;
 extern NSPanelConfig_RoomInfoDefaultTypeInternal _NSPanelConfig_RoomInfo_default_instance_;
+class NSPanelConfig_Sound;
+struct NSPanelConfig_SoundDefaultTypeInternal;
+extern NSPanelConfig_SoundDefaultTypeInternal _NSPanelConfig_Sound_default_instance_;
 class NSPanelMQTTManagerCommand;
 struct NSPanelMQTTManagerCommandDefaultTypeInternal;
 extern NSPanelMQTTManagerCommandDefaultTypeInternal _NSPanelMQTTManagerCommand_default_instance_;
@@ -217,6 +220,40 @@ inline const std::string& NSPanelConfig_NSPanelButtonMode_Name(NSPanelConfig_NSP
 inline bool NSPanelConfig_NSPanelButtonMode_Parse(absl::string_view name, NSPanelConfig_NSPanelButtonMode* value) {
   return ::google::protobuf::internal::ParseNamedEnum<NSPanelConfig_NSPanelButtonMode>(
       NSPanelConfig_NSPanelButtonMode_descriptor(), name, value);
+}
+enum NSPanelConfig_NSPanelSoundEvent : int {
+  NSPanelConfig_NSPanelSoundEvent_TOUCH = 0,
+  NSPanelConfig_NSPanelSoundEvent_SCENE_ACTIVATED = 1,
+  NSPanelConfig_NSPanelSoundEvent_SCENE_SAVED = 2,
+  NSPanelConfig_NSPanelSoundEvent_NSPanelConfig_NSPanelSoundEvent_INT_MIN_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::min(),
+  NSPanelConfig_NSPanelSoundEvent_NSPanelConfig_NSPanelSoundEvent_INT_MAX_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::max(),
+};
+
+bool NSPanelConfig_NSPanelSoundEvent_IsValid(int value);
+extern const uint32_t NSPanelConfig_NSPanelSoundEvent_internal_data_[];
+constexpr NSPanelConfig_NSPanelSoundEvent NSPanelConfig_NSPanelSoundEvent_NSPanelSoundEvent_MIN = static_cast<NSPanelConfig_NSPanelSoundEvent>(0);
+constexpr NSPanelConfig_NSPanelSoundEvent NSPanelConfig_NSPanelSoundEvent_NSPanelSoundEvent_MAX = static_cast<NSPanelConfig_NSPanelSoundEvent>(2);
+constexpr int NSPanelConfig_NSPanelSoundEvent_NSPanelSoundEvent_ARRAYSIZE = 2 + 1;
+const ::google::protobuf::EnumDescriptor*
+NSPanelConfig_NSPanelSoundEvent_descriptor();
+template <typename T>
+const std::string& NSPanelConfig_NSPanelSoundEvent_Name(T value) {
+  static_assert(std::is_same<T, NSPanelConfig_NSPanelSoundEvent>::value ||
+                    std::is_integral<T>::value,
+                "Incorrect type passed to NSPanelSoundEvent_Name().");
+  return NSPanelConfig_NSPanelSoundEvent_Name(static_cast<NSPanelConfig_NSPanelSoundEvent>(value));
+}
+template <>
+inline const std::string& NSPanelConfig_NSPanelSoundEvent_Name(NSPanelConfig_NSPanelSoundEvent value) {
+  return ::google::protobuf::internal::NameOfDenseEnum<NSPanelConfig_NSPanelSoundEvent_descriptor,
+                                                 0, 2>(
+      static_cast<int>(value));
+}
+inline bool NSPanelConfig_NSPanelSoundEvent_Parse(absl::string_view name, NSPanelConfig_NSPanelSoundEvent* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<NSPanelConfig_NSPanelSoundEvent>(
+      NSPanelConfig_NSPanelSoundEvent_descriptor(), name, value);
 }
 enum NSPanelStatusReport_state : int {
   NSPanelStatusReport_state_ONLINE = 0,
@@ -461,7 +498,7 @@ class NSPanelWeatherUpdate_ForecastItem final : public ::google::protobuf::Messa
     return reinterpret_cast<const NSPanelWeatherUpdate_ForecastItem*>(
         &_NSPanelWeatherUpdate_ForecastItem_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 7;
+  static constexpr int kIndexInFileMessages = 8;
   friend void swap(NSPanelWeatherUpdate_ForecastItem& a, NSPanelWeatherUpdate_ForecastItem& b) { a.Swap(&b); }
   inline void Swap(NSPanelWeatherUpdate_ForecastItem* other) {
     if (other == this) return;
@@ -710,7 +747,7 @@ class NSPanelWarning final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelWarning*>(
         &_NSPanelWarning_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 2;
+  static constexpr int kIndexInFileMessages = 3;
   friend void swap(NSPanelWarning& a, NSPanelWarning& b) { a.Swap(&b); }
   inline void Swap(NSPanelWarning* other) {
     if (other == this) return;
@@ -899,7 +936,7 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelRoomStatus*>(
         &_NSPanelRoomStatus_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 6;
+  static constexpr int kIndexInFileMessages = 7;
   friend void swap(NSPanelRoomStatus& a, NSPanelRoomStatus& b) { a.Swap(&b); }
   inline void Swap(NSPanelRoomStatus* other) {
     if (other == this) return;
@@ -1229,7 +1266,7 @@ class NSPanelRoomEntitiesPage_EntitySlot final : public ::google::protobuf::Mess
     return reinterpret_cast<const NSPanelRoomEntitiesPage_EntitySlot*>(
         &_NSPanelRoomEntitiesPage_EntitySlot_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 4;
+  static constexpr int kIndexInFileMessages = 5;
   friend void swap(NSPanelRoomEntitiesPage_EntitySlot& a, NSPanelRoomEntitiesPage_EntitySlot& b) { a.Swap(&b); }
   inline void Swap(NSPanelRoomEntitiesPage_EntitySlot* other) {
     if (other == this) return;
@@ -1538,7 +1575,7 @@ class NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage final : public ::go
     return reinterpret_cast<const NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage*>(
         &_NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 12;
+  static constexpr int kIndexInFileMessages = 13;
   friend void swap(NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage& a, NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* other) {
     if (other == this) return;
@@ -1721,7 +1758,7 @@ class NSPanelMQTTManagerCommand_ThermostatTemperatureCommand final : public ::go
     return reinterpret_cast<const NSPanelMQTTManagerCommand_ThermostatTemperatureCommand*>(
         &_NSPanelMQTTManagerCommand_ThermostatTemperatureCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 15;
+  static constexpr int kIndexInFileMessages = 16;
   friend void swap(NSPanelMQTTManagerCommand_ThermostatTemperatureCommand& a, NSPanelMQTTManagerCommand_ThermostatTemperatureCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_ThermostatTemperatureCommand* other) {
     if (other == this) return;
@@ -1904,7 +1941,7 @@ class NSPanelMQTTManagerCommand_ThermostatCommand final : public ::google::proto
     return reinterpret_cast<const NSPanelMQTTManagerCommand_ThermostatCommand*>(
         &_NSPanelMQTTManagerCommand_ThermostatCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 16;
+  static constexpr int kIndexInFileMessages = 17;
   friend void swap(NSPanelMQTTManagerCommand_ThermostatCommand& a, NSPanelMQTTManagerCommand_ThermostatCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_ThermostatCommand* other) {
     if (other == this) return;
@@ -2111,7 +2148,7 @@ class NSPanelMQTTManagerCommand_SaveSceneCommand final : public ::google::protob
     return reinterpret_cast<const NSPanelMQTTManagerCommand_SaveSceneCommand*>(
         &_NSPanelMQTTManagerCommand_SaveSceneCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 13;
+  static constexpr int kIndexInFileMessages = 14;
   friend void swap(NSPanelMQTTManagerCommand_SaveSceneCommand& a, NSPanelMQTTManagerCommand_SaveSceneCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_SaveSceneCommand* other) {
     if (other == this) return;
@@ -2294,7 +2331,7 @@ class NSPanelMQTTManagerCommand_MediaPlayerCommand final : public ::google::prot
     return reinterpret_cast<const NSPanelMQTTManagerCommand_MediaPlayerCommand*>(
         &_NSPanelMQTTManagerCommand_MediaPlayerCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 17;
+  static constexpr int kIndexInFileMessages = 18;
   friend void swap(NSPanelMQTTManagerCommand_MediaPlayerCommand& a, NSPanelMQTTManagerCommand_MediaPlayerCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_MediaPlayerCommand* other) {
     if (other == this) return;
@@ -2571,7 +2608,7 @@ class NSPanelMQTTManagerCommand_LightCommand final : public ::google::protobuf::
     return reinterpret_cast<const NSPanelMQTTManagerCommand_LightCommand*>(
         &_NSPanelMQTTManagerCommand_LightCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 11;
+  static constexpr int kIndexInFileMessages = 12;
   friend void swap(NSPanelMQTTManagerCommand_LightCommand& a, NSPanelMQTTManagerCommand_LightCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_LightCommand* other) {
     if (other == this) return;
@@ -2847,7 +2884,7 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOn final : public ::google::pr
     return reinterpret_cast<const NSPanelMQTTManagerCommand_FirstPageTurnLightOn*>(
         &_NSPanelMQTTManagerCommand_FirstPageTurnLightOn_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 9;
+  static constexpr int kIndexInFileMessages = 10;
   friend void swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOn& a, NSPanelMQTTManagerCommand_FirstPageTurnLightOn& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOn* other) {
     if (other == this) return;
@@ -3090,7 +3127,7 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOff final : public ::google::p
     return reinterpret_cast<const NSPanelMQTTManagerCommand_FirstPageTurnLightOff*>(
         &_NSPanelMQTTManagerCommand_FirstPageTurnLightOff_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 10;
+  static constexpr int kIndexInFileMessages = 11;
   friend void swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOff& a, NSPanelMQTTManagerCommand_FirstPageTurnLightOff& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOff* other) {
     if (other == this) return;
@@ -3273,7 +3310,7 @@ class NSPanelMQTTManagerCommand_ButtonPressed final : public ::google::protobuf:
     return reinterpret_cast<const NSPanelMQTTManagerCommand_ButtonPressed*>(
         &_NSPanelMQTTManagerCommand_ButtonPressed_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 14;
+  static constexpr int kIndexInFileMessages = 15;
   friend void swap(NSPanelMQTTManagerCommand_ButtonPressed& a, NSPanelMQTTManagerCommand_ButtonPressed& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_ButtonPressed* other) {
     if (other == this) return;
@@ -3381,6 +3418,195 @@ class NSPanelMQTTManagerCommand_ButtonPressed final : public ::google::protobuf:
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const NSPanelMQTTManagerCommand_ButtonPressed& from_msg);
     ::int32_t button_id_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_protobuf_5fnspanel_2eproto;
+};
+// -------------------------------------------------------------------
+
+class NSPanelConfig_Sound final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:NSPanelConfig.Sound) */ {
+ public:
+  inline NSPanelConfig_Sound() : NSPanelConfig_Sound(nullptr) {}
+  ~NSPanelConfig_Sound() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR NSPanelConfig_Sound(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline NSPanelConfig_Sound(const NSPanelConfig_Sound& from) : NSPanelConfig_Sound(nullptr, from) {}
+  inline NSPanelConfig_Sound(NSPanelConfig_Sound&& from) noexcept
+      : NSPanelConfig_Sound(nullptr, std::move(from)) {}
+  inline NSPanelConfig_Sound& operator=(const NSPanelConfig_Sound& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline NSPanelConfig_Sound& operator=(NSPanelConfig_Sound&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const NSPanelConfig_Sound& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const NSPanelConfig_Sound* internal_default_instance() {
+    return reinterpret_cast<const NSPanelConfig_Sound*>(
+        &_NSPanelConfig_Sound_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 1;
+  friend void swap(NSPanelConfig_Sound& a, NSPanelConfig_Sound& b) { a.Swap(&b); }
+  inline void Swap(NSPanelConfig_Sound* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(NSPanelConfig_Sound* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  NSPanelConfig_Sound* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<NSPanelConfig_Sound>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const NSPanelConfig_Sound& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const NSPanelConfig_Sound& from) { NSPanelConfig_Sound::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(NSPanelConfig_Sound* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "NSPanelConfig.Sound"; }
+
+ protected:
+  explicit NSPanelConfig_Sound(::google::protobuf::Arena* arena);
+  NSPanelConfig_Sound(::google::protobuf::Arena* arena, const NSPanelConfig_Sound& from);
+  NSPanelConfig_Sound(::google::protobuf::Arena* arena, NSPanelConfig_Sound&& from) noexcept
+      : NSPanelConfig_Sound(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kRtttlFieldNumber = 2,
+    kEventFieldNumber = 1,
+  };
+  // string rtttl = 2;
+  void clear_rtttl() ;
+  const std::string& rtttl() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_rtttl(Arg_&& arg, Args_... args);
+  std::string* mutable_rtttl();
+  PROTOBUF_NODISCARD std::string* release_rtttl();
+  void set_allocated_rtttl(std::string* value);
+
+  private:
+  const std::string& _internal_rtttl() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_rtttl(
+      const std::string& value);
+  std::string* _internal_mutable_rtttl();
+
+  public:
+  // .NSPanelConfig.NSPanelSoundEvent event = 1;
+  void clear_event() ;
+  ::NSPanelConfig_NSPanelSoundEvent event() const;
+  void set_event(::NSPanelConfig_NSPanelSoundEvent value);
+
+  private:
+  ::NSPanelConfig_NSPanelSoundEvent _internal_event() const;
+  void _internal_set_event(::NSPanelConfig_NSPanelSoundEvent value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:NSPanelConfig.Sound)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      1, 2, 0,
+      33, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_NSPanelConfig_Sound_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const NSPanelConfig_Sound& from_msg);
+    ::google::protobuf::internal::ArenaStringPtr rtttl_;
+    int event_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -3657,7 +3883,7 @@ class NSPanelWeatherUpdate final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelWeatherUpdate*>(
         &_NSPanelWeatherUpdate_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 8;
+  static constexpr int kIndexInFileMessages = 9;
   friend void swap(NSPanelWeatherUpdate& a, NSPanelWeatherUpdate& b) { a.Swap(&b); }
   inline void Swap(NSPanelWeatherUpdate* other) {
     if (other == this) return;
@@ -3962,7 +4188,7 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelStatusReport*>(
         &_NSPanelStatusReport_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 3;
+  static constexpr int kIndexInFileMessages = 4;
   friend void swap(NSPanelStatusReport& a, NSPanelStatusReport& b) { a.Swap(&b); }
   inline void Swap(NSPanelStatusReport* other) {
     if (other == this) return;
@@ -4361,7 +4587,7 @@ class NSPanelRoomEntitiesPage final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelRoomEntitiesPage*>(
         &_NSPanelRoomEntitiesPage_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 5;
+  static constexpr int kIndexInFileMessages = 6;
   friend void swap(NSPanelRoomEntitiesPage& a, NSPanelRoomEntitiesPage& b) { a.Swap(&b); }
   inline void Swap(NSPanelRoomEntitiesPage* other) {
     if (other == this) return;
@@ -4594,7 +4820,7 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelMQTTManagerCommand*>(
         &_NSPanelMQTTManagerCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 18;
+  static constexpr int kIndexInFileMessages = 19;
   friend void swap(NSPanelMQTTManagerCommand& a, NSPanelMQTTManagerCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand* other) {
     if (other == this) return;
@@ -5001,7 +5227,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelConfig*>(
         &_NSPanelConfig_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 1;
+  static constexpr int kIndexInFileMessages = 2;
   friend void swap(NSPanelConfig& a, NSPanelConfig& b) { a.Swap(&b); }
   inline void Swap(NSPanelConfig* other) {
     if (other == this) return;
@@ -5068,6 +5294,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
   using RoomInfo = NSPanelConfig_RoomInfo;
+  using Sound = NSPanelConfig_Sound;
   using NSPanelDefaultPage = NSPanelConfig_NSPanelDefaultPage;
   static constexpr NSPanelDefaultPage HOME = NSPanelConfig_NSPanelDefaultPage_HOME;
   static constexpr NSPanelDefaultPage SCENES = NSPanelConfig_NSPanelDefaultPage_SCENES;
@@ -5132,6 +5359,26 @@ class NSPanelConfig final : public ::google::protobuf::Message
   static inline bool NSPanelButtonMode_Parse(absl::string_view name, NSPanelButtonMode* value) {
     return NSPanelConfig_NSPanelButtonMode_Parse(name, value);
   }
+  using NSPanelSoundEvent = NSPanelConfig_NSPanelSoundEvent;
+  static constexpr NSPanelSoundEvent TOUCH = NSPanelConfig_NSPanelSoundEvent_TOUCH;
+  static constexpr NSPanelSoundEvent SCENE_ACTIVATED = NSPanelConfig_NSPanelSoundEvent_SCENE_ACTIVATED;
+  static constexpr NSPanelSoundEvent SCENE_SAVED = NSPanelConfig_NSPanelSoundEvent_SCENE_SAVED;
+  static inline bool NSPanelSoundEvent_IsValid(int value) {
+    return NSPanelConfig_NSPanelSoundEvent_IsValid(value);
+  }
+  static constexpr NSPanelSoundEvent NSPanelSoundEvent_MIN = NSPanelConfig_NSPanelSoundEvent_NSPanelSoundEvent_MIN;
+  static constexpr NSPanelSoundEvent NSPanelSoundEvent_MAX = NSPanelConfig_NSPanelSoundEvent_NSPanelSoundEvent_MAX;
+  static constexpr int NSPanelSoundEvent_ARRAYSIZE = NSPanelConfig_NSPanelSoundEvent_NSPanelSoundEvent_ARRAYSIZE;
+  static inline const ::google::protobuf::EnumDescriptor* NSPanelSoundEvent_descriptor() {
+    return NSPanelConfig_NSPanelSoundEvent_descriptor();
+  }
+  template <typename T>
+  static inline const std::string& NSPanelSoundEvent_Name(T value) {
+    return NSPanelConfig_NSPanelSoundEvent_Name(value);
+  }
+  static inline bool NSPanelSoundEvent_Parse(absl::string_view name, NSPanelSoundEvent* value) {
+    return NSPanelConfig_NSPanelSoundEvent_Parse(name, value);
+  }
 
   // accessors -------------------------------------------------------
   enum : int {
@@ -5139,6 +5386,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     kGlobalSceneEntityPageIdsFieldNumber = 30,
     kRelay1RelayGroupFieldNumber = 35,
     kRelay2RelayGroupFieldNumber = 37,
+    kSoundsFieldNumber = 45,
     kNameFieldNumber = 1,
     kInsideTemperatureSensorMqttTopicFieldNumber = 40,
     kDefaultRoomFieldNumber = 2,
@@ -5243,6 +5491,23 @@ class NSPanelConfig final : public ::google::protobuf::Message
   ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_relay2_relay_group();
 
   public:
+  // repeated .NSPanelConfig.Sound sounds = 45;
+  int sounds_size() const;
+  private:
+  int _internal_sounds_size() const;
+
+  public:
+  void clear_sounds() ;
+  ::NSPanelConfig_Sound* mutable_sounds(int index);
+  ::google::protobuf::RepeatedPtrField<::NSPanelConfig_Sound>* mutable_sounds();
+
+  private:
+  const ::google::protobuf::RepeatedPtrField<::NSPanelConfig_Sound>& _internal_sounds() const;
+  ::google::protobuf::RepeatedPtrField<::NSPanelConfig_Sound>* _internal_mutable_sounds();
+  public:
+  const ::NSPanelConfig_Sound& sounds(int index) const;
+  ::NSPanelConfig_Sound* add_sounds();
+  const ::google::protobuf::RepeatedPtrField<::NSPanelConfig_Sound>& sounds() const;
   // string name = 1;
   void clear_name() ;
   const std::string& name() const;
@@ -5580,7 +5845,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 36, 1,
+      5, 37, 2,
       94, 7>
       _table_;
 
@@ -5608,6 +5873,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     mutable ::google::protobuf::internal::CachedSize _relay1_relay_group_cached_byte_size_;
     ::google::protobuf::RepeatedField<::int32_t> relay2_relay_group_;
     mutable ::google::protobuf::internal::CachedSize _relay2_relay_group_cached_byte_size_;
+    ::google::protobuf::RepeatedPtrField< ::NSPanelConfig_Sound > sounds_;
     ::google::protobuf::internal::ArenaStringPtr name_;
     ::google::protobuf::internal::ArenaStringPtr inside_temperature_sensor_mqtt_topic_;
     ::int32_t default_room_;
@@ -5773,6 +6039,82 @@ NSPanelConfig_RoomInfo::_internal_scene_page_ids() const {
 inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelConfig_RoomInfo::_internal_mutable_scene_page_ids() {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return &_impl_.scene_page_ids_;
+}
+
+// -------------------------------------------------------------------
+
+// NSPanelConfig_Sound
+
+// .NSPanelConfig.NSPanelSoundEvent event = 1;
+inline void NSPanelConfig_Sound::clear_event() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.event_ = 0;
+}
+inline ::NSPanelConfig_NSPanelSoundEvent NSPanelConfig_Sound::event() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.Sound.event)
+  return _internal_event();
+}
+inline void NSPanelConfig_Sound::set_event(::NSPanelConfig_NSPanelSoundEvent value) {
+  _internal_set_event(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.Sound.event)
+}
+inline ::NSPanelConfig_NSPanelSoundEvent NSPanelConfig_Sound::_internal_event() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelConfig_NSPanelSoundEvent>(_impl_.event_);
+}
+inline void NSPanelConfig_Sound::_internal_set_event(::NSPanelConfig_NSPanelSoundEvent value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.event_ = value;
+}
+
+// string rtttl = 2;
+inline void NSPanelConfig_Sound::clear_rtttl() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.rtttl_.ClearToEmpty();
+}
+inline const std::string& NSPanelConfig_Sound::rtttl() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.Sound.rtttl)
+  return _internal_rtttl();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelConfig_Sound::set_rtttl(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.rtttl_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelConfig.Sound.rtttl)
+}
+inline std::string* NSPanelConfig_Sound::mutable_rtttl() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_rtttl();
+  // @@protoc_insertion_point(field_mutable:NSPanelConfig.Sound.rtttl)
+  return _s;
+}
+inline const std::string& NSPanelConfig_Sound::_internal_rtttl() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.rtttl_.Get();
+}
+inline void NSPanelConfig_Sound::_internal_set_rtttl(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.rtttl_.Set(value, GetArena());
+}
+inline std::string* NSPanelConfig_Sound::_internal_mutable_rtttl() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.rtttl_.Mutable( GetArena());
+}
+inline std::string* NSPanelConfig_Sound::release_rtttl() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelConfig.Sound.rtttl)
+  return _impl_.rtttl_.Release();
+}
+inline void NSPanelConfig_Sound::set_allocated_rtttl(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.rtttl_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.rtttl_.IsDefault()) {
+          _impl_.rtttl_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.Sound.rtttl)
 }
 
 // -------------------------------------------------------------------
@@ -6721,6 +7063,55 @@ inline ::int32_t NSPanelConfig::_internal_button2_upper_temperature() const {
 inline void NSPanelConfig::_internal_set_button2_upper_temperature(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.button2_upper_temperature_ = value;
+}
+
+// repeated .NSPanelConfig.Sound sounds = 45;
+inline int NSPanelConfig::_internal_sounds_size() const {
+  return _internal_sounds().size();
+}
+inline int NSPanelConfig::sounds_size() const {
+  return _internal_sounds_size();
+}
+inline void NSPanelConfig::clear_sounds() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.sounds_.Clear();
+}
+inline ::NSPanelConfig_Sound* NSPanelConfig::mutable_sounds(int index)
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable:NSPanelConfig.sounds)
+  return _internal_mutable_sounds()->Mutable(index);
+}
+inline ::google::protobuf::RepeatedPtrField<::NSPanelConfig_Sound>* NSPanelConfig::mutable_sounds()
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_mutable_list:NSPanelConfig.sounds)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _internal_mutable_sounds();
+}
+inline const ::NSPanelConfig_Sound& NSPanelConfig::sounds(int index) const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.sounds)
+  return _internal_sounds().Get(index);
+}
+inline ::NSPanelConfig_Sound* NSPanelConfig::add_sounds() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::NSPanelConfig_Sound* _add = _internal_mutable_sounds()->Add();
+  // @@protoc_insertion_point(field_add:NSPanelConfig.sounds)
+  return _add;
+}
+inline const ::google::protobuf::RepeatedPtrField<::NSPanelConfig_Sound>& NSPanelConfig::sounds() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_list:NSPanelConfig.sounds)
+  return _internal_sounds();
+}
+inline const ::google::protobuf::RepeatedPtrField<::NSPanelConfig_Sound>&
+NSPanelConfig::_internal_sounds() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.sounds_;
+}
+inline ::google::protobuf::RepeatedPtrField<::NSPanelConfig_Sound>*
+NSPanelConfig::_internal_mutable_sounds() {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return &_impl_.sounds_;
 }
 
 // -------------------------------------------------------------------
@@ -10411,6 +10802,12 @@ struct is_proto_enum<::NSPanelConfig_NSPanelButtonMode> : std::true_type {};
 template <>
 inline const EnumDescriptor* GetEnumDescriptor<::NSPanelConfig_NSPanelButtonMode>() {
   return ::NSPanelConfig_NSPanelButtonMode_descriptor();
+}
+template <>
+struct is_proto_enum<::NSPanelConfig_NSPanelSoundEvent> : std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor<::NSPanelConfig_NSPanelSoundEvent>() {
+  return ::NSPanelConfig_NSPanelSoundEvent_descriptor();
 }
 template <>
 struct is_proto_enum<::NSPanelStatusReport_state> : std::true_type {};

@@ -72,6 +72,9 @@ enum MQTT_MANAGER_SETTING {
   OPTIMISTIC_MODE,
   LIGHT_TURN_ON_BRIGHTNESS,
   DEFAULT_NSPANEL_TYPE,
+  BUZZER_SOUND_TOUCH,
+  BUZZER_SOUND_SCENE_ACTIVATED,
+  BUZZER_SOUND_SCENE_SAVED,
   LAST, // Keep last as to be able to reference the last element in the list.
 };
 
@@ -228,6 +231,9 @@ private:
       {MQTT_MANAGER_SETTING::OPTIMISTIC_MODE, {"optimistic_mode", "True"}},
       {MQTT_MANAGER_SETTING::LIGHT_TURN_ON_BRIGHTNESS, {"light_turn_on_brightness", "50"}},
       {MQTT_MANAGER_SETTING::DEFAULT_NSPANEL_TYPE, {"default_nspanel_type", "eu"}},
+      {MQTT_MANAGER_SETTING::BUZZER_SOUND_TOUCH, {"buzzer_sound_touch", ""}}, // RTTTL, empty for no sound
+      {MQTT_MANAGER_SETTING::BUZZER_SOUND_SCENE_ACTIVATED, {"buzzer_sound_scene_activated", ""}},
+      {MQTT_MANAGER_SETTING::BUZZER_SOUND_SCENE_SAVED, {"buzzer_sound_scene_saved", ""}},
 #if defined(TEST_MODE) && TEST_MODE == 1
       {MQTT_MANAGER_SETTING::LAST, {"last", "last_value"}},
 #endif
