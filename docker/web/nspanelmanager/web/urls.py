@@ -56,7 +56,6 @@ urlpatterns = [
     path("rest/openhab/items", rest.get_openhab_items, name="rest_get_openhab_items"),
     path("rest/openhab/test", rest.test_openhab, name="rest_test_openhab"),
     # MQTTManager endpoints
-    path("rest/mqttmanager/settings/<str:setting_key>", rest.mqttmanager_get_setting, name="rest_mqttmanager_get_setting"),
     # Test if we can react manager on given IP and port
     path("rest/mqttmanager/test", rest.test_mqttmanager, name="rest_test_mqttmanager"),
     # Relay groups
@@ -117,9 +116,6 @@ urlpatterns = [
     path("htmx/partial/delete_entities_page/<int:page_id>", htmx.partial_delete_entities_page, name="htmx_partial_delete_entities_page"),
     path("htmx/partial/create_entities_page_in_room/<int:room_id>/<int:page_type>/<str:is_scenes_page>/<str:is_global_scenes_page>", htmx.create_entities_page_in_room, name="htmx_create_entities_page_in_room"),
     path("htmx/partial/reorder_rooms", htmx.partial_reorder_rooms, name="htmx_partial_reorder_rooms"),
-    path("htmx/nspanels/<int:nspanel_id>/accept_register_request", htmx.nspanel_accept_register_request, name="htmx_nspanel_accept_register_request"),
-    path("htmx/nspanels/<int:nspanel_id>/deny_register_request", htmx.nspanel_deny_register_request, name="htmx_nspanel_deny_register_request"),
-    path("htmx/nspanels/<int:nspanel_id>/delete", htmx.nspanel_delete, name="htmx_nspanel_delete"),
     path("htmx/partial/select_room_temperature_sensor_from_list/<str:entity_source>/<int:room_id>", htmx.select_room_temperature_sensor_from_list, name="htmx_partial_select_room_temperature_sensor_from_list"),
     path("htmx/partial/select_room_temperature_sensor_provider/<int:room_id>", htmx.select_room_temperature_sensor_provider, name="htmx_partial_select_room_temperature_sensor_provider"),
     path("htmx/partial/select_weather_location", htmx.select_weather_location, name="htmx_partial_select_weather_location"),

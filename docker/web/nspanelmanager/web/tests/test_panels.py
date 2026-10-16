@@ -18,32 +18,41 @@ class PanelLifecycleTests(NSPMTestCase):
         self.panel = self.make_panel(self.room, "New panel")
 
     def test_accept_register_request(self):
+        lounge = self.make_room("Lounge")
         self.panel.denied = True
         self.panel.save()
 
-        response = self.client.post(reverse("htmx_nspanel_accept_register_request", kwargs={"nspanel_id": self.panel.id}))
+        response = self.post_json(reverse("nspanel_accept", kwargs={"nspanel_id": self.panel.id}), {"room_id": lounge.id})
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response["HX-Refresh"], "true")
+        self.assertEqual(response.json(), {"status": "ok", "id": self.panel.id})
         self.panel.refresh_from_db()
-        self.assertEqual((self.panel.accepted, self.panel.denied), (True, False))
+        self.assertEqual((self.panel.accepted, self.panel.denied, self.panel.room), (True, False, lounge))
         self.assertManagerReloaded(times=1)
 
-    def test_deny_register_request(self):
-        response = self.client.post(reverse("htmx_nspanel_deny_register_request", kwargs={"nspanel_id": self.panel.id}))
-
-        self.assertEqual(response.status_code, 200)
+    def test_accept_without_room_is_rejected(self):
+        self.assertRejected(self.post_json(reverse("nspanel_accept", kwargs={"nspanel_id": self.panel.id}), {}))
         self.panel.refresh_from_db()
-        self.assertTrue(self.panel.denied)
+        self.assertFalse(self.panel.accepted)
+        self.assertManagerNotReloaded()
+
+    def test_deny_register_request(self):
+        response = self.client.post(reverse("nspanel_deny", kwargs={"nspanel_id": self.panel.id}))
+
+        self.assertEqual(response.json(), {"status": "ok", "id": self.panel.id})
+        self.panel.refresh_from_db()
+        self.assertEqual((self.panel.accepted, self.panel.denied), (False, True))
         self.assertManagerReloaded(times=1)
 
     def test_denied_panels_page_lists_denied_panel(self):
-        self.client.post(reverse("htmx_nspanel_deny_register_request", kwargs={"nspanel_id": self.panel.id}))
+        self.make_panel(self.room, "Blocked panel", mac="AA:BB:CC:DD:EE:01", denied=True)
 
-        self.assertContains(self.client.get(reverse("denied_nspanels")), "New panel")
+        response = self.client.get(reverse("denied_nspanels"))
+
+        self.assertContains(response, "Blocked panel")
+        self.assertNotContains(response, "New panel")
 
     def test_accept_and_deny_require_post(self):
-        for name in ("htmx_nspanel_accept_register_request", "htmx_nspanel_deny_register_request"):
+        for name in ("nspanel_accept", "nspanel_deny"):
             with self.subTest(name=name):
                 self.assertEqual(self.client.get(reverse(name, kwargs={"nspanel_id": self.panel.id})).status_code, 405)
         self.panel.refresh_from_db()
@@ -51,27 +60,27 @@ class PanelLifecycleTests(NSPMTestCase):
         self.assertManagerNotReloaded()
 
     def test_accept_unknown_panel_is_rejected(self):
-        self.assertRejected(self.client.post(reverse("htmx_nspanel_accept_register_request", kwargs={"nspanel_id": 999})))
+        self.assertRejected(self.post_json(reverse("nspanel_accept", kwargs={"nspanel_id": 999}), {"room_id": self.room.id}))
         self.assertManagerNotReloaded()
 
     def test_delete_panel(self):
         set_nspanel_setting_value(self.panel.id, "screen_dim_level", "50")
 
-        response = self.client.delete(reverse("htmx_nspanel_delete", kwargs={"nspanel_id": self.panel.id}))
+        response = self.client.delete(reverse("delete_nspanel", kwargs={"nspanel_id": self.panel.id}))
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response["HX-Redirect"], "/")
+        self.assertEqual(response.json(), {"status": "ok"})
         self.assertFalse(NSPanel.objects.exists())
         self.assertEqual(get_nspanel_setting_with_default(self.panel.id, "screen_dim_level", "gone"), "gone")
-
-    def test_delete_panel_reloads_manager(self):
-        self.client.delete(reverse("htmx_nspanel_delete", kwargs={"nspanel_id": self.panel.id}))
-
         self.assertManagerReloaded(times=1)
 
     def test_delete_requires_delete_method(self):
-        self.assertEqual(self.client.post(reverse("htmx_nspanel_delete", kwargs={"nspanel_id": self.panel.id})).status_code, 405)
+        self.assertEqual(self.client.post(reverse("delete_nspanel", kwargs={"nspanel_id": self.panel.id})).status_code, 405)
         self.assertTrue(NSPanel.objects.exists())
+        self.assertManagerNotReloaded()
+
+    def test_delete_unknown_panel_is_rejected(self):
+        self.assertRejected(self.client.delete(reverse("delete_nspanel", kwargs={"nspanel_id": 999})))
+        self.assertManagerNotReloaded()
 
     def test_unblock_removes_the_panel_so_it_can_register_again(self):
         for url_name, method in (("htmx_unblock_nspanel", "delete"), ("unblock_nspanel", "get")):
@@ -149,6 +158,8 @@ class PanelSettingsFormTests(NSPMTestCase):
         self.assertManagerReloaded(times=1)
 
     def test_blank_overrides_fall_back_to_global_settings(self):
+        # Start with per-panel overrides, then submit the form with those fields blank
+        # ("use global default"): saving must delete the overrides, not keep them.
         set_nspanel_setting_value(self.panel.id, "screen_dim_level", "40")
         set_nspanel_setting_value(self.panel.id, "screensaver_mode", "no_background")
 

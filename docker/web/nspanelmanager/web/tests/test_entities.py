@@ -68,15 +68,15 @@ class EntityRESTCommonTests:
     def test_edit_updates_in_place(self):
         self.save(self.payload(slot=1))
         obj = self.model.objects.get()
+        before = self.snapshot(obj)
         self.mqttmanager.reset()
 
         response = self.save(self.payload(slot=1, id=obj.id, friendly_name="Renamed"))
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.model.objects.count(), 1)
-        obj.refresh_from_db()
-        self.assertEqual(obj.friendly_name, "Renamed")
-        self.assertEqual(obj.room_view_position, 1)
+        self.assertOnlyChanged(obj, before, {"friendly_name": "Renamed"})
+        self.assertLoadableByManager(obj)
         self.assertManagerReloaded(times=1)
 
     def test_edit_unknown_id_is_rejected(self):
@@ -164,12 +164,13 @@ class LightTests(EntityRESTCommonTests, EntityRESTTestCase):
     def test_entity_saved_before_placement_checks_can_still_be_edited(self):
         # Only a changed placement is validated, so rows already in a bad slot stay editable.
         light = self.make_light(self.room, slot=7)
+        self.save(self.payload(slot=7, id=light.id))
+        before = self.snapshot(light)
 
         response = self.save(self.payload(slot=7, id=light.id, friendly_name="Renamed"))
 
         self.assertEqual(response.status_code, 200)
-        light.refresh_from_db()
-        self.assertEqual(light.friendly_name, "Renamed")
+        self.assertOnlyChanged(light, before, {"friendly_name": "Renamed"})
 
 
 class SwitchTests(EntityRESTCommonTests, EntityRESTTestCase):

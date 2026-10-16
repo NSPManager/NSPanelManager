@@ -246,30 +246,6 @@ class SettingsRESTTests(NSPMTestCase):
         self.assertNotIn("mqtt_password", settings)
         self.assertNotIn("home_assistant_token", settings)
 
-    def test_mqttmanager_can_read_a_setting(self):
-        set_setting_value("color_temp_min", "2000")
-
-        response = self.client.get(reverse("rest_mqttmanager_get_setting", kwargs={"setting_key": "color_temp_min"}))
-
-        self.assertEqual(response.json(), {"status": "ok", "settings": {"color_temp_min": "2000"}})
-
-    def test_mqttmanager_settings_endpoint_checks_method(self):
-        self.assertEqual(self.client.post(reverse("rest_mqttmanager_get_setting", kwargs={"setting_key": "x"})).status_code, 405)
-
-    def test_mqttmanager_settings_endpoint_refuses_banned_keys_as_listed(self):
-        for key in ("MQTT_PASSWORD", "HOME_ASSISTANT_TOKEN"):
-            with self.subTest(key=key):
-                self.assertEqual(self.client.get(reverse("rest_mqttmanager_get_setting", kwargs={"setting_key": key})).status_code, 403)
-
-    def test_mqttmanager_settings_endpoint_refuses_secrets(self):
-        # banned_setting_keys is upper case but settings are stored lower case, so the check
-        # must be case-insensitive or the secrets it protects are returned.
-        self.configure_secrets()
-
-        for key in ("mqtt_password", "home_assistant_token", "openhab_token"):
-            with self.subTest(key=key):
-                self.assertEqual(self.client.get(reverse("rest_mqttmanager_get_setting", kwargs={"setting_key": key})).status_code, 403)
-
 
 class SettingsHelperTests(NSPMTestCase):
     def test_global_settings(self):

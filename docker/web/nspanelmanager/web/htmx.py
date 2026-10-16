@@ -58,64 +58,6 @@ def unblock_nspanel(request, nspanel_id):
         return response
 
 
-@csrf_exempt
-def nspanel_accept_register_request(request, nspanel_id):
-    try:
-        if request.method == "POST":
-            nspanel = NSPanel.objects.get(id=nspanel_id)
-            nspanel.denied = False
-            nspanel.accepted = True
-            nspanel.save()
-            send_mqttmanager_reload_command()
-
-            response = HttpResponse("", status=200)
-            response["HX-Refresh"] = "true"
-            return response
-        else:
-            return JsonResponse({"status": "error"}, status=405)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
-
-
-@csrf_exempt
-def nspanel_deny_register_request(request, nspanel_id):
-    try:
-        if request.method == "POST":
-            nspanel = NSPanel.objects.get(id=nspanel_id)
-            nspanel.accepted = False
-            nspanel.denied = True
-            nspanel.save()
-
-            send_mqttmanager_reload_command()
-
-            response = HttpResponse("", status=200)
-            response["HX-Refresh"] = "true"
-            return response
-        else:
-            return JsonResponse({"status": "error"}, status=405)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
-
-
-@csrf_exempt
-def nspanel_delete(request, nspanel_id):
-    try:
-        if request.method == "DELETE":
-            nspanel = NSPanel.objects.get(id=nspanel_id)
-            nspanel.delete()
-            send_mqttmanager_reload_command()
-            response = HttpResponse("", status=200)
-            response["HX-Redirect"] = "/"
-            return response
-        else:
-            return JsonResponse({"status": "error"}, status=405)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
-
-
 def select_room_temperature_sensor_provider(request, room_id):
     if (get_setting_with_default("home_assistant_address") == "" or get_setting_with_default("home_assistant_token") == "") and get_setting_with_default("openhab_address") != "" and get_setting_with_default("openhab_token") != "":
         # OpenHAB connection configured but not Home Assistant. Skip selecting source:

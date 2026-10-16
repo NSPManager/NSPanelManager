@@ -15,7 +15,6 @@ import web.home_assistant_api
 import web.openhab_api
 from web.settings_helper import (
     get_nspanel_setting_with_default,
-    get_setting_with_default,
     set_setting_value,
 )
 
@@ -88,42 +87,6 @@ def test_openhab(request):
 ##########################
 ## MQTTManager section ###
 ##########################
-
-# Keys that are not allowed to be pulled though the REST API beacuse of security concerns.
-banned_setting_keys = [
-    "MQTT_SERVER",
-    "MQTT_PORT",
-    "MQTT_USERNAME",
-    "MQTT_PASSWORD",
-    "HOME_ASSISTANT_ADDRESS",
-    "HOME_ASSISTANT_TOKEN",
-    "OPENHAB_ADDRESS",
-    "OPENHAB_TOKEN",
-    "OPENHAB_TOKEN",
-]
-
-
-def mqttmanager_get_setting(request, setting_key):
-    if setting_key.upper() in banned_setting_keys:
-        return JsonResponse({"status": "error"}, status=403)  # Return error forbidden
-
-    try:
-        settings = {}
-        if request.method == "GET":
-            settings[setting_key] = get_setting_with_default(setting_key)
-        else:
-            return JsonResponse({"status": "error"}, status=405)
-
-        return JsonResponse(
-            {
-                "status": "ok",
-                "settings": settings,
-            }
-        )
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error"}, status=500)
 
 
 @csrf_exempt

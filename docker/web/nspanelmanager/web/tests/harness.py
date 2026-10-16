@@ -14,6 +14,8 @@ Every test should inherit from NSPMTestCase. It gives you:
     self.openhab_items -- the item list returned by the (faked) OpenHAB API.
   * assertLoadableByManager(obj) -- checks a saved Entity/Scene has the shape MQTTManager
     parses when it reads the database, e.g. entity_data["controller"] is a known string.
+  * snapshot(obj) / assertOnlyChanged(obj, before, {...}) -- checks an edit changed the
+    named fields (entity_data keys as "entity_data.<key>") and nothing else.
   * self.client -- a Django test client that returns 500 responses instead of raising,
     so tests can assert that bad input is rejected the same way a browser would see it.
   * Builders for common fixtures (make_room, make_light, make_scene, ...) and put_json /
@@ -25,6 +27,7 @@ import sys
 from typing import ClassVar
 from unittest import mock
 
+from django.db import connection
 from django.test import Client, TestCase
 
 import web.apps
@@ -160,11 +163,39 @@ class NSPMTestCase(TestCase):
             if obj.scene_type != "nspm_scene":
                 self.assertTrue(obj.backend_name, "Home Assistant/OpenHAB scenes need a backend_name to activate")
         else:
+            # The ORM decodes the column for us, so check the stored text itself: that is what
+            # MQTTManager parses. A string that was JSON-encoded twice also fails here.
+            with connection.cursor() as cursor:
+                cursor.execute(f"SELECT entity_data FROM {Entity._meta.db_table} WHERE id = %s", [obj.id])
+                (raw,) = cursor.fetchone()
+            try:
+                stored = json.loads(raw)
+            except (TypeError, ValueError):
+                self.fail(f"entity_data is not valid JSON: {raw!r}")
+            self.assertIsInstance(stored, dict, f"entity_data must be a JSON object, got {raw!r}")
             controller = obj.entity_data.get("controller")
             self.assertIsInstance(controller, str, f"entity_data['controller'] must be a string, got {controller!r}")
             self.assertIn(controller, self.MANAGER_CONTROLLERS[obj.entity_type])
         self.assertIsNotNone(obj.entities_page_id)
         self.assertLess(obj.room_view_position, obj.entities_page.page_type, "Entity is placed in a slot outside its page")
+
+    def snapshot(self, obj):
+        """Every stored field of obj, with entity_data flattened to "entity_data.<key>"."""
+        obj.refresh_from_db()
+        fields = {}
+        for field in obj._meta.concrete_fields:
+            value = getattr(obj, field.attname)
+            if field.attname == "entity_data":
+                fields.update({f"entity_data.{key}": item for key, item in value.items()})
+            else:
+                fields[field.attname] = value
+        return fields
+
+    def assertOnlyChanged(self, obj, before, expected):
+        """obj now differs from the snapshot before by exactly the fields in expected."""
+        after = self.snapshot(obj)
+        changed = {key: after.get(key, "<missing>") for key in before.keys() | after.keys() if before.get(key, "<missing>") != after.get(key, "<missing>")}
+        self.assertEqual(changed, expected, "The edit changed fields other than the ones it was meant to")
 
     def assertRejected(self, response):
         """The request was refused, however the view chose to signal it."""

@@ -9,9 +9,16 @@ on:
     branches:
       - "main"
       - "devel"
+      - "beta"
     paths:
       - "docker/web/**"
       - ".github/workflows/django-tests.yml"
+
+# Fork pull requests already get a read-only token and no repository secrets; this keeps
+# same-repo runs read-only too. Don't switch to pull_request_target or add a workflow_run
+# follow-up without reviewing what code it checks out: those run with secrets.
+permissions:
+  contents: read
 
 jobs:
   test:
