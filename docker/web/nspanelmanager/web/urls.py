@@ -1,4 +1,5 @@
 from django.urls import path
+from drf_spectacular.views import SpectacularAPIView
 
 from . import api, htmx, rest, views
 
@@ -69,12 +70,13 @@ urlpatterns = [
     path("rest/global/entities_pages", rest.global_entities_pages, name="rest_global_entities_pages"),
     path("rest/entities_pages/order", rest.room_entities_pages_order, name="rest_room_entities_pages_order"),
     # Room URLs
-    path("rest/rooms/<int:room_id>", rest.room_delete, name="rest_room_delete"),
+    path("rest/rooms/<int:room_id>", rest.RoomView.as_view(), name="rest_room_delete"),
     path("rest/rooms/<int:room_id>/entities", rest.room_entities, name="rest_room_entities"),
     path("rest/rooms/<int:room_id>/entities/order", rest.put_room_entities_order, name="rest_put_room_entities_order"),
     path("rest/rooms/<int:room_id>/entities_pages", rest.room_entities_pages, name="rest_room_entities_pages"),
     path("rest/entities_pages/<int:page_id>", rest.room_entities_page, name="rest_room_entities_page"),
-    path("rest/rooms", rest.rooms, name="rest_rooms_create"),
+    path("rest/rooms", rest.RoomsView.as_view(), name="rest_rooms_create"),
+    path("rest/schema", SpectacularAPIView.as_view(), name="rest_schema"),
     # Settings URLs
     path("rest/settings", rest.settings, name="rest_settings"),
     # Scene URLs
@@ -112,8 +114,6 @@ urlpatterns = [
     path("htmx/partial/edit_light_entity_in_room/<int:light_id>", htmx.partial_entity_edit_light_entity, name="htmx_partial_edit_light_entity"),
     path("htmx/partial/edit_scene_entity/<int:scene_id>", htmx.partial_entity_edit_scene_entity, name="htmx_partial_edit_scene_entity"),
     path("htmx/partial/remove_entity_from_page_slot/<int:page_id>/<int:slot_id>", htmx.partial_remove_entity_from_page_slot, name="htmx_partial_remove_entity_from_page_slot"),
-    path("htmx/partial/edit_entities_page/<int:page_id>", htmx.partial_edit_entities_page, name="htmx_partial_edit_entities_page"),
-    path("htmx/partial/edit_entities_page/<int:page_id>/save/<int:page_type>", htmx.partial_save_edit_entities_page, name="htmx_partial_save_edit_entities_page"),
     path("htmx/partial/move_entity", htmx.partial_move_entity, name="htmx_partial_move_entity"),
     path("htmx/partial/reorder_entity_pages", htmx.partial_move_entities_pages, name="htmx_partial_move_entities_pages"),
     path("htmx/partial/delete_entities_page/<int:page_id>", htmx.partial_delete_entities_page, name="htmx_partial_delete_entities_page"),

@@ -105,6 +105,7 @@ def nspanel_delete(request, nspanel_id):
         if request.method == "DELETE":
             nspanel = NSPanel.objects.get(id=nspanel_id)
             nspanel.delete()
+            send_mqttmanager_reload_command()
             response = HttpResponse("", status=200)
             response["HX-Redirect"] = "/"
             return response
@@ -267,6 +268,7 @@ def relay_group_save(request):
             rg = RelayGroup()
         rg.friendly_name = request.POST["name"]
         rg.save()
+        send_mqttmanager_reload_command()
 
         response = HttpResponse()
         response["HX-Refresh"] = "true"
@@ -278,6 +280,7 @@ def relay_group_delete(request, relay_group_id):
     if request.method == "DELETE":
         rg = RelayGroup.objects.get(id=relay_group_id)
         rg.delete()
+        send_mqttmanager_reload_command()
 
         response = HttpResponse()
         response["HX-Refresh"] = "true"
@@ -528,32 +531,6 @@ def partial_remove_entity_from_page_slot(request, page_id, slot_id):
     if page.room:
         room_id = page.room.id
 
-    entities_pages = NSPanelRoomEntitiesPages()
-    return entities_pages.get(
-        request=request,
-        view="edit_room",
-        room_id=room_id,
-        is_scenes_pages=page.is_scenes_page,
-        is_global_scenes_page=(page.room is None),
-    )
-
-
-def partial_edit_entities_page(request, page_id):
-    data = {
-        "page_id": page_id,
-    }
-    return render(request, "partial/edit_entities_page.html", data)
-
-
-def partial_save_edit_entities_page(request, page_id, page_type):
-    page = RoomEntitiesPage.objects.get(id=page_id)
-    page.page_type = page_type
-    page.save()
-
-    room_id = 0
-    if page.room:
-        room_id = page.room.id
-    send_mqttmanager_reload_command()
     entities_pages = NSPanelRoomEntitiesPages()
     return entities_pages.get(
         request=request,
