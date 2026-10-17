@@ -8,6 +8,8 @@ file(GLOB NSPM_TEST_SOURCES CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/*_test
 
 add_executable(nspm_mqttmanager_tests main.cpp ${NSPM_TEST_SOURCES})
 target_include_directories(nspm_mqttmanager_tests PRIVATE ${CMAKE_INCLUDE_SRC_DIRECTORY} ${CMAKE_CURRENT_SOURCE_DIR})
+# Recorded data some tests load at runtime (see fixtures/).
+target_compile_definitions(nspm_mqttmanager_tests PRIVATE NSPM_TEST_FIXTURES_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fixtures")
 
 # Libraries containing inline tests. They are static libraries, and the linker only pulls in
 # object files something references, so they are linked whole to make sure every inline test
