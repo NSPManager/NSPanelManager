@@ -2628,7 +2628,7 @@ const ProtobufCEnumDescriptor nspanel_mqttmanager_command__media_player_command_
   nspanel_mqttmanager_command__media_player_command__playback_action__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__media_player_command__field_descriptors[8] =
+static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__media_player_command__field_descriptors[10] =
 {
   {
     "media_player_id",
@@ -2726,6 +2726,30 @@ static const ProtobufCFieldDescriptor nspanel_mqttmanager_command__media_player_
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "select_player_source",
+    9,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__MediaPlayerCommand, select_player_source),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "select_source_player_source",
+    10,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelMQTTManagerCommand__MediaPlayerCommand, select_source_player_source),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_mqttmanager_command__media_player_command__field_indices_by_name[] = {
   6,   /* field[6] = has_muted */
@@ -2734,13 +2758,15 @@ static const unsigned nspanel_mqttmanager_command__media_player_command__field_i
   0,   /* field[0] = media_player_id */
   7,   /* field[7] = muted */
   1,   /* field[1] = playback_action */
+  8,   /* field[8] = select_player_source */
+  9,   /* field[9] = select_source_player_source */
   5,   /* field[5] = source_volume */
   3,   /* field[3] = volume */
 };
 static const ProtobufCIntRange nspanel_mqttmanager_command__media_player_command__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 8 }
+  { 0, 10 }
 };
 const ProtobufCMessageDescriptor nspanel_mqttmanager_command__media_player_command__descriptor =
 {
@@ -2750,7 +2776,7 @@ const ProtobufCMessageDescriptor nspanel_mqttmanager_command__media_player_comma
   "NSPanelMQTTManagerCommand__MediaPlayerCommand",
   "",
   sizeof(NSPanelMQTTManagerCommand__MediaPlayerCommand),
-  8,
+  10,
   nspanel_mqttmanager_command__media_player_command__field_descriptors,
   nspanel_mqttmanager_command__media_player_command__field_indices_by_name,
   1,  nspanel_mqttmanager_command__media_player_command__number_ranges,

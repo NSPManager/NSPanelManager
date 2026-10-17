@@ -84,6 +84,21 @@ message NSPanelEntityState {
 
     // How much one volume up/down press changes the volume and source volume, in 1-100%.
     int32 volume_step = 17;
+
+    message SourceSelection {
+      repeated string sources = 1;
+      // Empty if unknown. Not every player reports its current source, and it
+      // is not always one of the listed sources.
+      string current_source = 2;
+      bool can_select = 3;
+    }
+
+    // Sources (inputs) of this player.
+    SourceSelection player_sources = 18;
+    // Sources of the source player feeding this player, if it has one (see
+    // source_volume). Unset when there is no source player. Changes completely
+    // when the player switches to another source.
+    SourceSelection source_player_sources = 19;
   }
 
   oneof entity {

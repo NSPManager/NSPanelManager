@@ -461,10 +461,15 @@ struct  NSPanelMQTTManagerCommand__MediaPlayerCommand
   int32_t source_volume;
   protobuf_c_boolean has_muted;
   protobuf_c_boolean muted;
+  /*
+   * Name of a source to select, as sent in the state's source lists. Empty means no change.
+   */
+  char *select_player_source;
+  char *select_source_player_source;
 };
 #define NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__media_player_command__descriptor) \
-    , 0, NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION__NONE, 0, 0, 0, 0, 0, 0 }
+    , 0, NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION__NONE, 0, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string }
 
 
 typedef enum {
