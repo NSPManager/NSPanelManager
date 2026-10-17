@@ -173,13 +173,14 @@ TEST_F(HomeAssistantMediaPlayerTest, seeking_publishes_the_new_position) {
 
 TEST(HomeAssistantTimestamp, parses_home_assistant_timestamps) {
   EXPECT_EQ(HomeAssistantMediaPlayer::parse_timestamp("2026-10-17T01:59:45.666287+00:00"), 1792202385);
-  EXPECT_EQ(HomeAssistantMediaPlayer::parse_timestamp("2026-10-17T01:59:45Z"), 1792202385);
+  EXPECT_EQ(HomeAssistantMediaPlayer::parse_timestamp("2026-10-17T01:59:45+00:00"), 1792202385);
+  EXPECT_EQ(HomeAssistantMediaPlayer::parse_timestamp("2026-10-17T01:59:45.999999+00:00"), 1792202385);
   EXPECT_EQ(HomeAssistantMediaPlayer::parse_timestamp("2026-10-16T18:59:45-07:00"), 1792202385);
   EXPECT_EQ(HomeAssistantMediaPlayer::parse_timestamp("2026-10-17T07:29:45+05:30"), 1792202385);
 }
 
 TEST(HomeAssistantTimestamp, rejects_invalid_timestamps) {
-  for (const char *timestamp : {"", "unknown", "2026-10-17", "2026-10-17T01:59:45", "2026-13-17T01:59:45Z", "2026-10-17T01:59:45+0000", "2026-10-17T01:59:45Z trailing"}) {
+  for (const char *timestamp : {"", "unknown", "2026-10-17", "2026-10-17T01:59:45", "2026-13-17T01:59:45+00:00", "2026-10-17T01:59:45+0000", "2026-10-17T01:59:45Z trailing"}) {
     SCOPED_TRACE(timestamp);
     EXPECT_FALSE(HomeAssistantMediaPlayer::parse_timestamp(timestamp).has_value());
   }

@@ -8,19 +8,18 @@
 #include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/bind.hpp>
-#include <cctype>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
-#include <cstdio>
-#include <ctime>
+#include <date/date.h>
 #include <home_assistant_manager/home_assistant_manager.hpp>
 #include <list>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
+#include <sstream>
 #include <string>
-#include <string_view>
 #include <web_helper/WebHelper.hpp>
 
 HomeAssistantMediaPlayer::HomeAssistantMediaPlayer(uint32_t media_player_id) : MediaPlayerEntity(media_player_id) {
@@ -284,39 +283,14 @@ void HomeAssistantMediaPlayer::_update_media_position(const nlohmann::json &attr
 }
 
 std::optional<int64_t> HomeAssistantMediaPlayer::parse_timestamp(const std::string &timestamp) {
-  // ISO 8601 as Home Assistant writes it: "YYYY-MM-DDTHH:MM:SS", optional fraction, then "Z" or "+HH:MM"/"-HH:MM".
-  std::tm time = {};
-  int consumed = 0;
-  if (std::sscanf(timestamp.c_str(), "%4d-%2d-%2dT%2d:%2d:%2d%n", &time.tm_year, &time.tm_mon, &time.tm_mday, &time.tm_hour, &time.tm_min, &time.tm_sec, &consumed) != 6) {
+  // ISO 8601 as Home Assistant writes it: "YYYY-MM-DDTHH:MM:SS", optional fraction, then "+HH:MM"/"-HH:MM".
+  date::sys_time<std::chrono::microseconds> time_point;
+  std::istringstream stream(timestamp);
+  stream >> date::parse("%FT%T%Ez", time_point);
+  if (stream.fail() || stream.peek() != std::char_traits<char>::eof()) {
     return std::nullopt;
   }
-  if (time.tm_mon < 1 || time.tm_mon > 12 || time.tm_mday < 1 || time.tm_mday > 31 || time.tm_hour > 23 || time.tm_min > 59 || time.tm_sec > 60) {
-    return std::nullopt;
-  }
-  time.tm_year -= 1900;
-  time.tm_mon -= 1;
-
-  size_t position = consumed;
-  if (position < timestamp.size() && timestamp[position] == '.') {
-    position++;
-    while (position < timestamp.size() && std::isdigit(static_cast<unsigned char>(timestamp[position]))) {
-      position++;
-    }
-  }
-
-  int64_t offset_seconds = 0;
-  std::string_view zone = std::string_view(timestamp).substr(position);
-  if (zone == "Z") {
-    offset_seconds = 0;
-  } else if (zone.size() == 6 && (zone[0] == '+' || zone[0] == '-') && zone[3] == ':' && std::isdigit(static_cast<unsigned char>(zone[1])) && std::isdigit(static_cast<unsigned char>(zone[2])) && std::isdigit(static_cast<unsigned char>(zone[4])) && std::isdigit(static_cast<unsigned char>(zone[5]))) {
-    int offset_hours = (zone[1] - '0') * 10 + (zone[2] - '0');
-    int offset_minutes = (zone[4] - '0') * 10 + (zone[5] - '0');
-    offset_seconds = (offset_hours * 3600 + offset_minutes * 60) * (zone[0] == '-' ? -1 : 1);
-  } else {
-    return std::nullopt;
-  }
-
-  return static_cast<int64_t>(timegm(&time)) - offset_seconds;
+  return std::chrono::floor<std::chrono::seconds>(time_point).time_since_epoch().count();
 }
 
 void HomeAssistantMediaPlayer::play() {
