@@ -117,6 +117,74 @@ TEST_F(HomeAssistantMediaPlayerTest, removed_entity_becomes_unknown) {
   EXPECT_EQ(state->state(), NSPanelEntityState_MediaPlayer_PlaybackState_UNKNOWN);
 }
 
+TEST_F(HomeAssistantMediaPlayerTest, publishes_media_position_and_duration) {
+  receive_state("playing", {{"media_duration", 314.5}, {"media_position", 42.4}, {"media_position_updated_at", "2026-10-17T01:59:45.666287+00:00"}});
+
+  auto state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  ASSERT_TRUE(state->has_media_position());
+  EXPECT_EQ(state->media_position(), 42);
+  EXPECT_EQ(state->media_position_updated_at(), 1792202385);
+  EXPECT_EQ(state->media_duration(), 315);
+}
+
+TEST_F(HomeAssistantMediaPlayerTest, live_stream_has_a_position_but_no_duration) {
+  receive_state("playing", {{"media_position", 7}, {"media_position_updated_at", "2026-10-17T01:59:45+00:00"}});
+
+  auto state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_TRUE(state->has_media_position());
+  EXPECT_EQ(state->media_position(), 7);
+  EXPECT_EQ(state->media_duration(), 0);
+}
+
+TEST_F(HomeAssistantMediaPlayerTest, media_position_without_a_time_is_not_published) {
+  receive_state("playing", {{"media_duration", 200}, {"media_position", 10}});
+
+  auto state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_FALSE(state->has_media_position());
+  EXPECT_EQ(state->media_position(), 0);
+  EXPECT_EQ(state->media_position_updated_at(), 0);
+  EXPECT_EQ(state->media_duration(), 200);
+}
+
+TEST_F(HomeAssistantMediaPlayerTest, media_position_is_cleared_when_playback_stops) {
+  receive_state("playing", {{"media_duration", 200}, {"media_position", 10}, {"media_position_updated_at", "2026-10-17T01:59:45+00:00"}});
+  receive_state("idle", nlohmann::json::object());
+
+  auto state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_FALSE(state->has_media_position());
+  EXPECT_EQ(state->media_duration(), 0);
+}
+
+TEST_F(HomeAssistantMediaPlayerTest, seeking_publishes_the_new_position) {
+  receive_state("playing", {{"media_duration", 200}, {"media_position", 10}, {"media_position_updated_at", "2026-10-17T01:59:45+00:00"}});
+  last_published_state();
+
+  receive_state("playing", {{"media_duration", 200}, {"media_position", 120}, {"media_position_updated_at", "2026-10-17T02:00:05+00:00"}});
+
+  auto state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_EQ(state->media_position(), 120);
+  EXPECT_EQ(state->media_position_updated_at(), 1792202405);
+}
+
+TEST(HomeAssistantTimestamp, parses_home_assistant_timestamps) {
+  EXPECT_EQ(HomeAssistantMediaPlayer::parse_timestamp("2026-10-17T01:59:45.666287+00:00"), 1792202385);
+  EXPECT_EQ(HomeAssistantMediaPlayer::parse_timestamp("2026-10-17T01:59:45Z"), 1792202385);
+  EXPECT_EQ(HomeAssistantMediaPlayer::parse_timestamp("2026-10-16T18:59:45-07:00"), 1792202385);
+  EXPECT_EQ(HomeAssistantMediaPlayer::parse_timestamp("2026-10-17T07:29:45+05:30"), 1792202385);
+}
+
+TEST(HomeAssistantTimestamp, rejects_invalid_timestamps) {
+  for (const char *timestamp : {"", "unknown", "2026-10-17", "2026-10-17T01:59:45", "2026-13-17T01:59:45Z", "2026-10-17T01:59:45+0000", "2026-10-17T01:59:45Z trailing"}) {
+    SCOPED_TRACE(timestamp);
+    EXPECT_FALSE(HomeAssistantMediaPlayer::parse_timestamp(timestamp).has_value());
+  }
+}
+
 TEST_F(HomeAssistantMediaPlayerTest, panel_playback_commands_call_home_assistant) {
   const std::pair<NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction, std::string> cases[] = {
       {NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_PLAY, "media_play"},

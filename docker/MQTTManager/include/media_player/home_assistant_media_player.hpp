@@ -26,6 +26,12 @@ public:
   void select_player_source(const std::string &source);
   void select_source_player_source(const std::string &source);
 
+  /**
+   * Parse a timestamp from Home Assistant, for example "2026-10-17T01:59:45.666287+00:00".
+   * @return Unix time in seconds, or nothing if the timestamp could not be parsed.
+   */
+  static std::optional<int64_t> parse_timestamp(const std::string &timestamp);
+
 protected:
   /**
    * Download album art from Home Assistant. The source is the "entity_picture" attribute from Home Assistant,
@@ -60,6 +66,11 @@ private:
    * Call a "media_player" domain service in Home Assistant.
    */
   void _call_service(const std::string &service, nlohmann::json service_data = nlohmann::json::object());
+
+  /**
+   * Update the playback position and duration from the attributes of the media player in Home Assistant.
+   */
+  void _update_media_position(const nlohmann::json &attributes);
 
   std::string _home_assistant_name;
 

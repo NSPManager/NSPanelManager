@@ -8,8 +8,11 @@
 #include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/bind.hpp>
+#include <cctype>
 #include <cmath>
 #include <cstdint>
+#include <cstdio>
+#include <ctime>
 #include <home_assistant_manager/home_assistant_manager.hpp>
 #include <list>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
@@ -17,6 +20,7 @@
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <string_view>
 #include <web_helper/WebHelper.hpp>
 
 HomeAssistantMediaPlayer::HomeAssistantMediaPlayer(uint32_t media_player_id) : MediaPlayerEntity(media_player_id) {
@@ -218,6 +222,7 @@ void HomeAssistantMediaPlayer::home_assistant_event_callback(nlohmann::json data
       this->_can_mute = supported_features & HomeAssistantMediaPlayer::feature_volume_mute;
       this->_set_player_sources(HomeAssistantSourcePlayer::sources_from_attributes(attributes));
     }
+    this->_update_media_position(attributes);
 
     std::shared_ptr<HomeAssistantSourceVolumeStrategy> strategy;
     {
@@ -249,6 +254,69 @@ void HomeAssistantMediaPlayer::_call_service(const std::string &service, nlohman
     command["service_data"] = service_data;
   }
   HomeAssistantManager::send_json(command);
+}
+
+void HomeAssistantMediaPlayer::_update_media_position(const nlohmann::json &attributes) {
+  // Home Assistant only has a position for media that is playing or paused. The position is
+  // only meaningful together with the time it was taken at, so both are needed.
+  std::optional<int64_t> updated_at;
+  if (attributes.contains("media_position_updated_at") && attributes["media_position_updated_at"].is_string()) {
+    updated_at = HomeAssistantMediaPlayer::parse_timestamp(attributes["media_position_updated_at"].get<std::string>());
+    if (!updated_at.has_value()) {
+      SPDLOG_WARN("Could not parse media_position_updated_at '{}' for HA media player {}::{}.", attributes["media_position_updated_at"].get<std::string>(), this->_id, this->_name);
+    }
+  }
+  if (updated_at.has_value() && attributes.contains("media_position") && attributes["media_position"].is_number()) {
+    this->_has_media_position = true;
+    this->_media_position = std::lround(std::max(attributes["media_position"].get<double>(), 0.0));
+    this->_media_position_updated_at = updated_at.value();
+  } else {
+    this->_has_media_position = false;
+    this->_media_position = 0;
+    this->_media_position_updated_at = 0;
+  }
+
+  if (attributes.contains("media_duration") && attributes["media_duration"].is_number()) {
+    this->_media_duration = std::lround(std::max(attributes["media_duration"].get<double>(), 0.0));
+  } else {
+    this->_media_duration = 0;
+  }
+}
+
+std::optional<int64_t> HomeAssistantMediaPlayer::parse_timestamp(const std::string &timestamp) {
+  // ISO 8601 as Home Assistant writes it: "YYYY-MM-DDTHH:MM:SS", optional fraction, then "Z" or "+HH:MM"/"-HH:MM".
+  std::tm time = {};
+  int consumed = 0;
+  if (std::sscanf(timestamp.c_str(), "%4d-%2d-%2dT%2d:%2d:%2d%n", &time.tm_year, &time.tm_mon, &time.tm_mday, &time.tm_hour, &time.tm_min, &time.tm_sec, &consumed) != 6) {
+    return std::nullopt;
+  }
+  if (time.tm_mon < 1 || time.tm_mon > 12 || time.tm_mday < 1 || time.tm_mday > 31 || time.tm_hour > 23 || time.tm_min > 59 || time.tm_sec > 60) {
+    return std::nullopt;
+  }
+  time.tm_year -= 1900;
+  time.tm_mon -= 1;
+
+  size_t position = consumed;
+  if (position < timestamp.size() && timestamp[position] == '.') {
+    position++;
+    while (position < timestamp.size() && std::isdigit(static_cast<unsigned char>(timestamp[position]))) {
+      position++;
+    }
+  }
+
+  int64_t offset_seconds = 0;
+  std::string_view zone = std::string_view(timestamp).substr(position);
+  if (zone == "Z") {
+    offset_seconds = 0;
+  } else if (zone.size() == 6 && (zone[0] == '+' || zone[0] == '-') && zone[3] == ':' && std::isdigit(static_cast<unsigned char>(zone[1])) && std::isdigit(static_cast<unsigned char>(zone[2])) && std::isdigit(static_cast<unsigned char>(zone[4])) && std::isdigit(static_cast<unsigned char>(zone[5]))) {
+    int offset_hours = (zone[1] - '0') * 10 + (zone[2] - '0');
+    int offset_minutes = (zone[4] - '0') * 10 + (zone[5] - '0');
+    offset_seconds = (offset_hours * 3600 + offset_minutes * 60) * (zone[0] == '-' ? -1 : 1);
+  } else {
+    return std::nullopt;
+  }
+
+  return static_cast<int64_t>(timegm(&time)) - offset_seconds;
 }
 
 void HomeAssistantMediaPlayer::play() {
