@@ -89,6 +89,10 @@ message NSPanelConfig {
     string rtttl = 2; // Melody in RTTTL format, ex. "touch:d=32,o=6,b=190:g6,16p,32c7"
   }
   repeated Sound sounds = 45;
+
+  // POSIX TZ rule for the manager's timezone, ex. "CET-1CEST,M3.5.0,M10.5.0/3", for setenv("TZ", ...) and tzset().
+  // Empty if the manager could not work it out, in which case show the time from the manager's status/time topic.
+  string tz_posix = 46;
 }
 
 enum NSPanelWarningLevel {
