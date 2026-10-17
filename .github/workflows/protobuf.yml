@@ -1,0 +1,71 @@
+name: "Protobuf"
+
+# The code generated from docker/protobuf/*.proto is committed. Check that it matches the .proto
+# files, and that protoc and both protobuf runtimes are on the same release: the generated C++
+# refuses to compile, and the generated Python refuses to import, against a different version.
+
+on:
+  pull_request:
+    paths:
+      - "docker/protobuf/**"
+      - "docker/MQTTManager/include/protobuf/**"
+      - "docker/MQTTManager/conanfile.py"
+      - "docker/web/nspanelmanager/web/protobuf/**"
+      - "docker/web/requirements.txt"
+      - "protobuf_firmware/**"
+      - ".github/workflows/protobuf.yml"
+  push:
+    branches:
+      - "main"
+      - "devel"
+    paths:
+      - "docker/protobuf/**"
+      - "docker/MQTTManager/include/protobuf/**"
+      - "docker/MQTTManager/conanfile.py"
+      - "docker/web/nspanelmanager/web/protobuf/**"
+      - "docker/web/requirements.txt"
+      - "protobuf_firmware/**"
+      - ".github/workflows/protobuf.yml"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check protobuf versions match
+        run: |
+          protoc_version=$(sed -nE 's/^REMOTE_FILE="protoc-([0-9.]+)-.*/\1/p' docker/protobuf/install_protobuf.sh)
+          conan_version=$(sed -nE 's/.*"protobuf\/([0-9.]+)".*/\1/p' docker/MQTTManager/conanfile.py)
+          python_version=$(sed -nE 's/^protobuf==([0-9.]+).*/\1/p' docker/web/requirements.txt)
+          echo "protoc $protoc_version, Conan protobuf $conan_version, Python protobuf $python_version"
+          # protoc 27.0 is the protoc of the 5.27.0 C++ and Python runtimes.
+          if [ -z "$protoc_version" ] || [ "5.$protoc_version" != "$conan_version" ] || [ "$conan_version" != "$python_version" ]; then
+            echo "::error::protoc ($protoc_version in install_protobuf.sh), Conan protobuf ($conan_version in conanfile.py) and Python protobuf ($python_version in requirements.txt) must be the same release"
+            exit 1
+          fi
+
+      - name: Install protoc and protoc-gen-c
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends protobuf-c-compiler
+          cd docker/protobuf && sudo bash install_protobuf.sh
+          protoc --version
+
+      - name: Regenerate
+        working-directory: docker/protobuf
+        env:
+          DEST_DIR_MQTTMANAGER: ${{ github.workspace }}/docker/MQTTManager/include/protobuf/
+          DEST_DIR_DJANGO: ${{ github.workspace }}/docker/web/nspanelmanager/web/protobuf/
+          DEST_DIR_FIRMWARE: ${{ github.workspace }}/protobuf_firmware/
+        # -e: compile_all.sh carries on past a failed protoc, which would leave the old files in place.
+        run: bash -e compile_all.sh
+
+      - name: Check generated code is up to date
+        run: |
+          git add --intent-to-add --all
+          if ! git diff --exit-code --stat; then
+            git diff
+            echo "::error::Generated protobuf code is out of date. Run docker/protobuf/compile_all.sh and commit the result."
+            exit 1
+          fi

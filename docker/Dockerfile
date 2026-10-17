@@ -1,12 +1,15 @@
 FROM --platform=$BUILDPLATFORM node:20-alpine AS ui-builder
 ARG BUILDTIME
+# Commit of NSPanelManager-Web-UI to build. Pinned so that a given commit of this repo always builds
+# the same UI; bump it to ship UI changes. Pass --build-arg WEB_UI_REF=main to build the latest.
+ARG WEB_UI_REF=6f3eae63296e1875314641aa9f79eed54ae1408e
 WORKDIR /ui-app
 
 # Install git to clone your frontend repository
 RUN apk add --no-cache git
 
 # Clone the UI repo
-RUN echo "Building UI at $BUILDTIME" && git clone https://github.com/NSPManager/NSPanelManager-Web-UI.git . # Use the echo to force a rebuild of this step.
+RUN echo "Building UI at $BUILDTIME" && git clone https://github.com/NSPManager/NSPanelManager-Web-UI.git . && git checkout --detach "$WEB_UI_REF" # Use the echo to force a rebuild of this step.
 
 # Install dependencies and build
 RUN npm install
@@ -29,7 +32,11 @@ COPY MQTTManager/ /MQTTManager/
 
 # Only build MQTTManager during Docker build if is is not a devel mode.
 RUN if [ "$IS_DEVEL" != "yes" ]; then bash /build_scripts/install_build_tools.sh "${IS_DEVEL}"; fi
-RUN if [ -z "$no_mqttmanager_build" ]; then /bin/bash /MQTTManager/compile_mqttmanager.sh --target-platform "$TARGETPLATFORM" --strip; else echo "Not building MQTTManager."; fi
+# The Conan package cache (core.cache:storage_path in install_build_tools.sh) is a BuildKit cache
+# mount, so rebuilds reuse the dependencies instead of compiling them from source again, and CI can
+# save it between runs. Only /MQTTManager/build is copied out of this stage.
+RUN --mount=type=cache,id=nspm-conan,target=/MQTTManager/conan_cache,sharing=locked \
+    if [ -z "$no_mqttmanager_build" ]; then /bin/bash /MQTTManager/compile_mqttmanager.sh --target-platform "$TARGETPLATFORM" --strip; else echo "Not building MQTTManager."; fi
 
 FROM python:3.12.5-bookworm
 ARG no_mqttmanager_build

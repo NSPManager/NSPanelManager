@@ -547,7 +547,7 @@ const ProtobufCEnumDescriptor nspanel_entity_state__media_player__playback_state
   nspanel_entity_state__media_player__playback_state__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_entity_state__media_player__field_descriptors[16] =
+static const ProtobufCFieldDescriptor nspanel_entity_state__media_player__field_descriptors[17] =
 {
   {
     "media_player_id",
@@ -741,6 +741,18 @@ static const ProtobufCFieldDescriptor nspanel_entity_state__media_player__field_
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "volume_step",
+    17,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__MediaPlayer, volume_step),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_entity_state__media_player__field_indices_by_name[] = {
   15,   /* field[15] = album_art_url */
@@ -759,11 +771,12 @@ static const unsigned nspanel_entity_state__media_player__field_indices_by_name[
   8,   /* field[8] = source_volume */
   2,   /* field[2] = state */
   5,   /* field[5] = volume */
+  16,   /* field[16] = volume_step */
 };
 static const ProtobufCIntRange nspanel_entity_state__media_player__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 16 }
+  { 0, 17 }
 };
 const ProtobufCMessageDescriptor nspanel_entity_state__media_player__descriptor =
 {
@@ -773,7 +786,7 @@ const ProtobufCMessageDescriptor nspanel_entity_state__media_player__descriptor 
   "NSPanelEntityState__MediaPlayer",
   "",
   sizeof(NSPanelEntityState__MediaPlayer),
-  16,
+  17,
   nspanel_entity_state__media_player__field_descriptors,
   nspanel_entity_state__media_player__field_indices_by_name,
   1,  nspanel_entity_state__media_player__number_ranges,

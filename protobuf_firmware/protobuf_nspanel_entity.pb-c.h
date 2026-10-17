@@ -138,10 +138,14 @@ struct  NSPanelEntityState__MediaPlayer
    * the panel can compare it with the last URL to tell when to fetch again.
    */
   char *album_art_url;
+  /*
+   * How much one volume up/down press changes the volume and source volume, in 1-100%.
+   */
+  int32_t volume_step;
 };
 #define NSPANEL_ENTITY_STATE__MEDIA_PLAYER__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_entity_state__media_player__descriptor) \
-    , 0, (char *)protobuf_c_empty_string, NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__UNKNOWN, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string }
+    , 0, (char *)protobuf_c_empty_string, NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__UNKNOWN, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, 0 }
 
 
 typedef enum {

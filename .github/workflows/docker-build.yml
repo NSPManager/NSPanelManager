@@ -1,0 +1,85 @@
+name: "Docker build"
+
+# Builds the release image without pushing it, so a broken Dockerfile, dependency or cross-compile
+# shows up on the pull request instead of when a release is published. Pull requests and pushes build
+# amd64 and aarch64; the weekly run and manual runs also build the 32-bit platforms.
+
+on:
+  pull_request:
+    paths:
+      - "docker/**"
+      - ".github/workflows/docker-build.yml"
+  push:
+    branches:
+      - "main"
+      - "devel"
+    paths:
+      - "docker/**"
+      - ".github/workflows/docker-build.yml"
+  schedule:
+    - cron: "0 4 * * 1"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build ${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    # Building the Conan dependencies from source takes about an hour when the cache is cold.
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        # Same architectures as release.yml and docker/config.yaml.
+        arch: ${{ fromJSON((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && '["amd64", "aarch64", "armv7", "armhf", "i386"]' || '["amd64", "aarch64"]') }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Map architecture to Docker platform
+        id: platform
+        run: |
+          case "${{ matrix.arch }}" in
+            amd64) echo "platform=linux/amd64" >> "$GITHUB_OUTPUT" ;;
+            aarch64) echo "platform=linux/arm64" >> "$GITHUB_OUTPUT" ;;
+            armv7) echo "platform=linux/arm/v7" >> "$GITHUB_OUTPUT" ;;
+            armhf) echo "platform=linux/arm/v6" >> "$GITHUB_OUTPUT" ;;
+            i386) echo "platform=linux/386" >> "$GITHUB_OUTPUT" ;;
+            *) echo "Unknown architecture ${{ matrix.arch }}"; exit 1 ;;
+          esac
+
+      # MQTTManager is cross-compiled on the runner's platform, but the final stage runs the
+      # target platform's apt-get and pip, which needs emulation.
+      - uses: docker/setup-qemu-action@v3
+
+      - uses: docker/setup-buildx-action@v3
+        id: buildx
+
+      - name: Cache Conan packages
+        id: conan-cache
+        uses: actions/cache@v4
+        with:
+          path: conan-cache
+          key: docker-conan-${{ matrix.arch }}-${{ hashFiles('docker/MQTTManager/conanfile.py', 'docker/build_scripts/install_build_tools.sh') }}
+          restore-keys: docker-conan-${{ matrix.arch }}-
+
+      # Moves the cached directory into the Dockerfile's Conan cache mount before the build,
+      # and back out afterwards so actions/cache can save it.
+      - name: Restore Conan cache mount
+        uses: reproducible-containers/buildkit-cache-dance@v3
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          cache-map: |
+            {
+              "conan-cache": {
+                "target": "/MQTTManager/conan_cache",
+                "id": "nspm-conan",
+                "sharing": "locked"
+              }
+            }
+          skip-extraction: ${{ steps.conan-cache.outputs.cache-hit }}
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: docker
+          platforms: ${{ steps.platform.outputs.platform }}
+          push: false
