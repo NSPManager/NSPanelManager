@@ -617,7 +617,7 @@ const ProtobufCEnumDescriptor nspanel_entity_state__media_player__playback_state
   nspanel_entity_state__media_player__playback_state__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_entity_state__media_player__field_descriptors[19] =
+static const ProtobufCFieldDescriptor nspanel_entity_state__media_player__field_descriptors[23] =
 {
   {
     "media_player_id",
@@ -847,6 +847,54 @@ static const ProtobufCFieldDescriptor nspanel_entity_state__media_player__field_
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "has_media_position",
+    20,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__MediaPlayer, has_media_position),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "media_position",
+    21,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__MediaPlayer, media_position),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "media_position_updated_at",
+    22,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT64,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__MediaPlayer, media_position_updated_at),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "media_duration",
+    23,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__MediaPlayer, media_duration),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_entity_state__media_player__field_indices_by_name[] = {
   15,   /* field[15] = album_art_url */
@@ -856,10 +904,14 @@ static const unsigned nspanel_entity_state__media_player__field_indices_by_name[
   9,   /* field[9] = can_play */
   12,   /* field[12] = can_previous_track */
   13,   /* field[13] = can_set_volume */
+  19,   /* field[19] = has_media_position */
   7,   /* field[7] = has_source_volume */
   6,   /* field[6] = is_muted */
   4,   /* field[4] = media_artist */
+  22,   /* field[22] = media_duration */
   0,   /* field[0] = media_player_id */
+  20,   /* field[20] = media_position */
+  21,   /* field[21] = media_position_updated_at */
   3,   /* field[3] = media_title */
   1,   /* field[1] = name */
   17,   /* field[17] = player_sources */
@@ -872,7 +924,7 @@ static const unsigned nspanel_entity_state__media_player__field_indices_by_name[
 static const ProtobufCIntRange nspanel_entity_state__media_player__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 19 }
+  { 0, 23 }
 };
 const ProtobufCMessageDescriptor nspanel_entity_state__media_player__descriptor =
 {
@@ -882,7 +934,7 @@ const ProtobufCMessageDescriptor nspanel_entity_state__media_player__descriptor 
   "NSPanelEntityState__MediaPlayer",
   "",
   sizeof(NSPanelEntityState__MediaPlayer),
-  19,
+  23,
   nspanel_entity_state__media_player__field_descriptors,
   nspanel_entity_state__media_player__field_indices_by_name,
   1,  nspanel_entity_state__media_player__number_ranges,

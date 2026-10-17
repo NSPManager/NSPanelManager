@@ -170,10 +170,31 @@ struct  NSPanelEntityState__MediaPlayer
    * when the player switches to another source.
    */
   NSPanelEntityState__MediaPlayer__SourceSelection *source_player_sources;
+  /*
+   * Playback position of the current media. Only valid if has_media_position is set.
+   * The controller only reports the position when playback starts, stops or seeks,
+   * not continuously. While playing, the current position is
+   * media_position + (now - media_position_updated_at). As the state is retained,
+   * a panel may receive it long after it was sent, so it must not count from when
+   * the state arrived.
+   */
+  protobuf_c_boolean has_media_position;
+  /*
+   * In seconds, at media_position_updated_at
+   */
+  int32_t media_position;
+  /*
+   * Unix time in seconds
+   */
+  int64_t media_position_updated_at;
+  /*
+   * In seconds, 0 if unknown (for example a live stream)
+   */
+  int32_t media_duration;
 };
 #define NSPANEL_ENTITY_STATE__MEDIA_PLAYER__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_entity_state__media_player__descriptor) \
-    , 0, (char *)protobuf_c_empty_string, NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__UNKNOWN, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, 0, NULL, NULL }
+    , 0, (char *)protobuf_c_empty_string, NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__UNKNOWN, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, 0, NULL, NULL, 0, 0, 0, 0 }
 
 
 typedef enum {
