@@ -110,9 +110,8 @@ public:
   int id;
 };
 
-// Adds a Room row and loads it into the EntityManager. Rooms are never removed again: each
-// Room starts a detached status thread that keeps using the Room, so destroying one is not
-// safe. Call it with a name no other test uses.
+// Adds a Room row and loads it into the EntityManager. The row is not removed again. Call it with
+// a name no other test uses.
 inline int create_room(const std::string &friendly_name) {
   database_manager::Room room;
   room.friendly_name = friendly_name;
