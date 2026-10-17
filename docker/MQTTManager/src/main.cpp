@@ -1,6 +1,7 @@
 #include "command_manager/command_manager.hpp"
 #include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
+#include "manager_clock/manager_clock.hpp"
 #include "openhab_manager/openhab_manager.hpp"
 #include "spdlog/sinks/ansicolor_sink.h"
 #include "spdlog/sinks/rotating_file_sink.h"
@@ -86,6 +87,7 @@ void publish_time_and_date() {
     }
 
     MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/date", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)), date_buffer, true);
+    ManagerClock::publish_epoch();
 
     // Sleep until next minute
     auto t_now = std::chrono::system_clock::now();
@@ -215,6 +217,7 @@ int main(int argc, char *argv[]) {
   EntityManager::init();
 
   SPDLOG_INFO("Entities loaded, connect to MQTT and start listening for commands.");
+  ManagerClock::init(); // Send the time to NSPanels each time MQTT connects
   MQTT_Manager::init(); // Initialize MQTT manager to handle everything to do with MQTT
   CommandManager::init();
 

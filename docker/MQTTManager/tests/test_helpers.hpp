@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <fmt/format.h>
 #include <database_manager/database_manager.hpp>
 #include <entity_manager/entity_manager.hpp>
 #include <gtest/gtest.h>
@@ -219,6 +220,41 @@ inline std::shared_ptr<spdlog::sinks::dist_sink_mt> log_capture_sink() {
   static std::shared_ptr<spdlog::sinks::dist_sink_mt> sink = std::make_shared<spdlog::sinks::dist_sink_mt>();
   return sink;
 }
+
+// The topic the manager sends the current time on.
+inline std::string epoch_topic() {
+  return fmt::format("nspanel/mqttmanager_{}/status/epoch", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS));
+}
+
+// The messages sent to the MQTT server on a topic since the last call (messages on other topics are
+// dropped). Only recorded while connected, see ScopedBrokerConnected.
+inline std::vector<MQTT_Manager::TestPublishedMessage> mqtt_sent_to(const std::string &topic) {
+  std::vector<MQTT_Manager::TestPublishedMessage> messages;
+  for (auto &message : MQTT_Manager::test_take_sent_messages()) {
+    if (message.topic == topic) {
+      messages.push_back(message);
+    }
+  }
+  return messages;
+}
+
+// Connected to the MQTT server, and caught up on what was buffered, while it is in scope. What would
+// be sent is recorded instead, see mqtt_sent_to(). Starts with nothing recorded as sent.
+class ScopedBrokerConnected {
+public:
+  ScopedBrokerConnected() {
+    MQTT_Manager::test_set_broker_connected(true);
+    MQTT_Manager::test_send_buffered_messages();
+    MQTT_Manager::test_take_sent_messages();
+  }
+
+  ~ScopedBrokerConnected() {
+    MQTT_Manager::test_set_broker_connected(false);
+  }
+
+  ScopedBrokerConnected(const ScopedBrokerConnected &) = delete;
+  ScopedBrokerConnected &operator=(const ScopedBrokerConnected &) = delete;
+};
 
 // Records the errors (or, given a lower level, also the less severe messages) logged while it is in scope.
 class ScopedErrorLog {

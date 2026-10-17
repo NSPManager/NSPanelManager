@@ -295,6 +295,8 @@ void MQTT_Manager::_reconnect_mqtt_client() {
   } catch (std::exception &e) {
     SPDLOG_ERROR("Caught exception trying to subscribe to topics: {}", boost::diagnostic_information(e, true));
   }
+
+  MQTT_Manager::_connected_callbacks();
 }
 
 void MQTT_Manager::_process_mqtt_messages() {
@@ -356,24 +358,62 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
         }
       }
 
-      // Replicate messages into the websocket STOMP topics.
-      // Convert payload to base64 as to be able to send it over the websocket.
-      std::size_t encoded_size = (payload.size() + 2) / 3 * 4;
-      std::vector<char> encoded_buffer(encoded_size);
-      // Encode the string
-      std::size_t written = boost::beast::detail::base64::encode(
-          encoded_buffer.data(),
-          payload.data(),
-          payload.size());
-      encoded_buffer.resize(written);
-      WebsocketServer::set_stomp_topic_retained(fmt::format("mqtt/{}", topic), retain);
-      WebsocketServer::update_stomp_topic_value(fmt::format("mqtt/{}", topic), std::string(encoded_buffer.begin(), encoded_buffer.end()));
+      MQTT_Manager::_mirror_to_stomp(topic, payload, retain);
     } else {
       MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
     }
   } else {
     MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
   }
+}
+
+bool MQTT_Manager::publish_if_connected(const std::string &topic, std::function<std::optional<std::string>()> make_payload) {
+  if (topic.empty()) {
+    SPDLOG_ERROR("Tried to publish to empty topic.");
+    return false;
+  }
+
+  std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
+  // Also dropped while still sending what was buffered after reconnecting: the connected callbacks
+  // run once that is done.
+  if (!MQTT_Manager::is_connected()) {
+    SPDLOG_DEBUG("Not connected to MQTT, will not send message to '{}'.", topic);
+    return false;
+  }
+
+  // Create the payload only now that the lock is held, so it is current when it is sent.
+  std::optional<std::string> payload = make_payload();
+  if (!payload.has_value()) {
+    return false;
+  }
+
+  try {
+    SPDLOG_TRACE("Publising '{}' -> '{}'", topic, payload.value());
+    MQTT_Manager::_send(mqtt::make_message(topic.c_str(), payload->c_str(), payload->size(), 0, false));
+  } catch (std::exception &ex) {
+    SPDLOG_WARN("Caught exception while trying to publish '{}' -> '{}'. Will not retry.", topic, payload.value());
+    return false;
+  }
+  MQTT_Manager::_mirror_to_stomp(topic, payload.value(), false);
+  return true;
+}
+
+void MQTT_Manager::attach_connected_callback(std::function<void()> callback) {
+  MQTT_Manager::_connected_callbacks.connect(callback);
+}
+
+void MQTT_Manager::_mirror_to_stomp(const std::string &topic, const std::string &payload, bool retain) {
+  // Convert payload to base64 as to be able to send it over the websocket.
+  std::size_t encoded_size = (payload.size() + 2) / 3 * 4;
+  std::vector<char> encoded_buffer(encoded_size);
+  // Encode the string
+  std::size_t written = boost::beast::detail::base64::encode(
+      encoded_buffer.data(),
+      payload.data(),
+      payload.size());
+  encoded_buffer.resize(written);
+  WebsocketServer::set_stomp_topic_retained(fmt::format("mqtt/{}", topic), retain);
+  WebsocketServer::update_stomp_topic_value(fmt::format("mqtt/{}", topic), std::string(encoded_buffer.begin(), encoded_buffer.end()));
 }
 
 void MQTT_Manager::publish_protobuf(const std::string &topic, google::protobuf::Message &payload, bool retain) {
