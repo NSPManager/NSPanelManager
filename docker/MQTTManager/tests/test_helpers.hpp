@@ -11,6 +11,7 @@
 #include <nlohmann/json.hpp>
 #include <openhab_manager/openhab_manager.hpp>
 #include <optional>
+#include <spdlog/sinks/dist_sink.h>
 #include <spdlog/sinks/ringbuffer_sink.h>
 #include <spdlog/spdlog.h>
 #include <string>
@@ -211,18 +212,26 @@ inline std::vector<MQTT_Manager::TestPublishedMessage> mqtt_published_to(const s
   return messages;
 }
 
+// The sink that ScopedErrorLog captures through. main() adds it to the default logger once, before any
+// test runs. A logger's own sink list must not change while other threads log through it, and Room
+// threads log for the rest of the run, so captures are added to and removed from this dist_sink
+// instead, which locks its list.
+inline std::shared_ptr<spdlog::sinks::dist_sink_mt> log_capture_sink() {
+  static std::shared_ptr<spdlog::sinks::dist_sink_mt> sink = std::make_shared<spdlog::sinks::dist_sink_mt>();
+  return sink;
+}
+
 // Records the errors (or, given a lower level, also the less severe messages) logged while it is in scope.
 class ScopedErrorLog {
 public:
   explicit ScopedErrorLog(spdlog::level::level_enum level = spdlog::level::err) : _sink(std::make_shared<spdlog::sinks::ringbuffer_sink_mt>(1000)) {
     _sink->set_level(level);
     _sink->set_pattern("%v");
-    spdlog::default_logger()->sinks().push_back(_sink);
+    log_capture_sink()->add_sink(_sink);
   }
 
   ~ScopedErrorLog() {
-    auto &sinks = spdlog::default_logger()->sinks();
-    sinks.erase(std::remove(sinks.begin(), sinks.end(), _sink), sinks.end());
+    log_capture_sink()->remove_sink(_sink);
   }
 
   ScopedErrorLog(const ScopedErrorLog &) = delete;
