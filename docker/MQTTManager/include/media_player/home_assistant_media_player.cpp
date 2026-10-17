@@ -8,14 +8,17 @@
 #include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/bind.hpp>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <date/date.h>
 #include <home_assistant_manager/home_assistant_manager.hpp>
 #include <list>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
+#include <sstream>
 #include <string>
 #include <web_helper/WebHelper.hpp>
 
@@ -218,6 +221,7 @@ void HomeAssistantMediaPlayer::home_assistant_event_callback(nlohmann::json data
       this->_can_mute = supported_features & HomeAssistantMediaPlayer::feature_volume_mute;
       this->_set_player_sources(HomeAssistantSourcePlayer::sources_from_attributes(attributes));
     }
+    this->_update_media_position(attributes);
 
     std::shared_ptr<HomeAssistantSourceVolumeStrategy> strategy;
     {
@@ -249,6 +253,44 @@ void HomeAssistantMediaPlayer::_call_service(const std::string &service, nlohman
     command["service_data"] = service_data;
   }
   HomeAssistantManager::send_json(command);
+}
+
+void HomeAssistantMediaPlayer::_update_media_position(const nlohmann::json &attributes) {
+  // Home Assistant only has a position for media that is playing or paused. The position is
+  // only meaningful together with the time it was taken at, so both are needed.
+  std::optional<int64_t> updated_at;
+  if (attributes.contains("media_position_updated_at") && attributes["media_position_updated_at"].is_string()) {
+    updated_at = HomeAssistantMediaPlayer::parse_timestamp(attributes["media_position_updated_at"].get<std::string>());
+    if (!updated_at.has_value()) {
+      SPDLOG_WARN("Could not parse media_position_updated_at '{}' for HA media player {}::{}.", attributes["media_position_updated_at"].get<std::string>(), this->_id, this->_name);
+    }
+  }
+  if (updated_at.has_value() && attributes.contains("media_position") && attributes["media_position"].is_number()) {
+    this->_has_media_position = true;
+    this->_media_position = std::lround(std::max(attributes["media_position"].get<double>(), 0.0));
+    this->_media_position_updated_at = updated_at.value();
+  } else {
+    this->_has_media_position = false;
+    this->_media_position = 0;
+    this->_media_position_updated_at = 0;
+  }
+
+  if (attributes.contains("media_duration") && attributes["media_duration"].is_number()) {
+    this->_media_duration = std::lround(std::max(attributes["media_duration"].get<double>(), 0.0));
+  } else {
+    this->_media_duration = 0;
+  }
+}
+
+std::optional<int64_t> HomeAssistantMediaPlayer::parse_timestamp(const std::string &timestamp) {
+  // ISO 8601 as Home Assistant writes it: "YYYY-MM-DDTHH:MM:SS", optional fraction, then "+HH:MM"/"-HH:MM".
+  date::sys_time<std::chrono::microseconds> time_point;
+  std::istringstream stream(timestamp);
+  stream >> date::parse("%FT%T%Ez", time_point);
+  if (stream.fail() || stream.peek() != std::char_traits<char>::eof()) {
+    return std::nullopt;
+  }
+  return std::chrono::floor<std::chrono::seconds>(time_point).time_since_epoch().count();
 }
 
 void HomeAssistantMediaPlayer::play() {

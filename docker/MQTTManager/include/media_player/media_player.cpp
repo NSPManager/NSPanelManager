@@ -94,6 +94,12 @@ void MediaPlayerEntity::send_state_update_to_nspanel() {
   media_player_state->set_can_mute(this->_can_mute);
   media_player_state->set_album_art_url(this->_get_album_art_url());
   media_player_state->set_volume_step(this->_volume_step);
+  media_player_state->set_has_media_position(this->_has_media_position);
+  if (this->_has_media_position) {
+    media_player_state->set_media_position(this->_media_position);
+    media_player_state->set_media_position_updated_at(this->_media_position_updated_at);
+  }
+  media_player_state->set_media_duration(this->_media_duration);
   {
     std::lock_guard<std::mutex> lock_guard(this->_sources_mutex);
     MediaPlayerEntity::_fill_source_selection(media_player_state->mutable_player_sources(), this->_player_sources);
