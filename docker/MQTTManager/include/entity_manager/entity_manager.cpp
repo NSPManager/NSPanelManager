@@ -34,7 +34,6 @@
 #include <database_manager/database_manager.hpp>
 #include <entity_manager/entity_manager.hpp>
 #include <expected>
-#include <iterator>
 #include <memory>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <mutex>
@@ -121,18 +120,14 @@ void EntityManager::load_rooms() {
   auto room_ids = database_manager::database.select(&database_manager::Room::id, sqlite_orm::from<database_manager::Room>());
   SPDLOG_INFO("Loading {} rooms.", room_ids.size());
 
-  // Remove room if it does no longer exist. The removed rooms are destroyed after _rooms_mutex is
-  // released, as destroying a room waits for its status update thread to stop.
-  std::vector<std::shared_ptr<Room>> removed_rooms;
+  // Remove room if it does no longer exist
   {
     std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
-    auto removed = std::stable_partition(EntityManager::_rooms.begin(), EntityManager::_rooms.end(), [&room_ids](auto room) {
-      return std::find_if(room_ids.begin(), room_ids.end(), [&room](auto id) { return id == room->get_id(); }) != room_ids.end();
-    });
-    removed_rooms.assign(std::make_move_iterator(removed), std::make_move_iterator(EntityManager::_rooms.end()));
-    EntityManager::_rooms.erase(removed, EntityManager::_rooms.end());
+    EntityManager::_rooms.erase(std::remove_if(EntityManager::_rooms.begin(), EntityManager::_rooms.end(), [&room_ids](auto room) {
+                                  return std::find_if(room_ids.begin(), room_ids.end(), [&room](auto id) { return id == room->get_id(); }) == room_ids.end();
+                                }),
+                                EntityManager::_rooms.end());
   }
-  removed_rooms.clear();
 
   // Cause existing room to reload config or add a new room if it does not exist.
   for (auto &room_id : room_ids) {
