@@ -389,7 +389,7 @@ bool MQTT_Manager::publish_if_connected(const std::string &topic, std::function<
 
   try {
     SPDLOG_TRACE("Publising '{}' -> '{}'", topic, payload.value());
-    MQTT_Manager::_send(mqtt::make_message(topic.c_str(), payload->c_str(), payload->size(), 0, false));
+    MQTT_Manager::_send(mqtt::make_message(topic.c_str(), payload->c_str(), payload->size(), 2, false));
   } catch (std::exception &ex) {
     SPDLOG_WARN("Caught exception while trying to publish '{}' -> '{}'. Will not retry.", topic, payload.value());
     return false;

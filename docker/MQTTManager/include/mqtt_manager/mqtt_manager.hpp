@@ -112,9 +112,10 @@ public:
   static void publish_protobuf(const std::string &topic, google::protobuf::Message &payload, bool retain);
 
   /**
-   * Will send a non-retained MQTT message, but only if connected right now. The message is never
-   * buffered for later or retried, so it suits payloads that are only valid at the moment they are
-   * sent, such as the current time.
+   * Will send a non-retained MQTT message with QoS 2, but only if connected right now. The message is
+   * never buffered while disconnected or retried on failure, so it suits payloads that are only valid at
+   * the moment they are sent, such as the current time. (The MQTT client itself may still resend it
+   * after reconnecting if the connection dropped before the server acknowledged it.)
    * @param topic: The MQTT topic to send payload to.
    * @param make_payload: Called with the MQTT client locked, immediately before sending. Must not call
    *                      back into MQTT_Manager. Return std::nullopt to send nothing.
