@@ -537,22 +537,27 @@ std::expected<std::string, bool> MqttManagerConfig::get_us_horizontal_mirrored_t
 }
 
 std::string MqttManagerConfig::read_posix_tz_rule(const std::string &tzif_path) {
-  std::ifstream file(tzif_path, std::ios::in | std::ios::binary);
-  if (!file) {
-    return "";
-  }
-  std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+  try {
+    std::ifstream file(tzif_path, std::ios::in | std::ios::binary);
+    if (!file) {
+      return "";
+    }
+    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
-  // Version 2 and later files end with the rule between two newlines (RFC 8536, section 3.3).
-  // Version 1 files have a zero version byte and no rule.
-  if (content.size() < 5 || content.compare(0, 4, "TZif") != 0 || content[4] < '2' || content.back() != '\n') {
+    // Version 2 and later files end with the rule between two newlines (RFC 8536, section 3.3).
+    // Version 1 files have a zero version byte and no rule.
+    if (content.size() < 5 || content.compare(0, 4, "TZif") != 0 || content[4] < '2' || content.back() != '\n') {
+      return "";
+    }
+    size_t rule_start = content.rfind('\n', content.size() - 2);
+    if (rule_start == std::string::npos) {
+      return "";
+    }
+    return content.substr(rule_start + 1, content.size() - rule_start - 2);
+  } catch (std::exception &ex) {
+    SPDLOG_WARN("Caught exception while reading POSIX TZ rule from '{}': {}", tzif_path, ex.what());
     return "";
   }
-  size_t rule_start = content.rfind('\n', content.size() - 2);
-  if (rule_start == std::string::npos) {
-    return "";
-  }
-  return content.substr(rule_start + 1, content.size() - rule_start - 2);
 }
 
 // TESTING
