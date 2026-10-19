@@ -486,6 +486,95 @@ TEST_F(NSPanelTest, panel_buzzer_settings_override_the_global_sounds) {
   EXPECT_EQ(config->sounds(1).rtttl(), "panel_saved:d=8,o=5,b=120:e");
 }
 
+TEST_F(NSPanelTest, muting_the_buzzer_sends_no_sounds_until_unmuted) {
+  OnExit reset{[] {
+    MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::BUZZER_SOUND_TOUCH, "");
+  }};
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::BUZZER_SOUND_TOUCH, "touch:d=32,o=6,b=190:g6");
+  load_panel();
+  last_published_config();
+
+  panel->mqtt_callback("nspanel/" + PANEL_MAC + "/buzzer_mute_cmd", "1");
+
+  auto messages = MQTT_Manager::test_take_published_messages();
+  auto state = std::find_if(messages.begin(), messages.end(), [](auto &message) { return message.topic == "nspanel/" + PANEL_MAC + "/buzzer_mute_state"; });
+  ASSERT_NE(state, messages.end());
+  EXPECT_EQ(state->payload, "1");
+  EXPECT_TRUE(state->retain);
+  auto config = std::find_if(messages.begin(), messages.end(), [](auto &message) { return message.topic == "nspanel/" + PANEL_MAC + "/config"; });
+  ASSERT_NE(config, messages.end());
+  NSPanelConfig muted_config;
+  ASSERT_TRUE(muted_config.ParseFromString(config->payload));
+  EXPECT_EQ(muted_config.sounds_size(), 0);
+
+  panel->mqtt_callback("nspanel/" + PANEL_MAC + "/buzzer_mute_cmd", "0");
+
+  auto unmuted_config = last_published_config();
+  ASSERT_TRUE(unmuted_config.has_value());
+  ASSERT_EQ(unmuted_config->sounds_size(), 1);
+  EXPECT_EQ(unmuted_config->sounds(0).rtttl(), "touch:d=32,o=6,b=190:g6");
+}
+
+TEST_F(NSPanelTest, buzzer_mute_is_kept_across_config_reloads) {
+  OnExit reset{[] {
+    MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::BUZZER_SOUND_TOUCH, "");
+  }};
+  MqttManagerConfig::set_setting_value(MQTT_MANAGER_SETTING::BUZZER_SOUND_TOUCH, "touch:d=32,o=6,b=190:g6");
+  load_panel();
+  panel->mqtt_callback("nspanel/" + PANEL_MAC + "/buzzer_mute_cmd", "1");
+  last_published_config();
+
+  panel->reload_config();
+
+  auto config = last_published_config();
+  ASSERT_TRUE(config.has_value());
+  EXPECT_EQ(config->sounds_size(), 0);
+}
+
+TEST_F(NSPanelTest, unchanged_buzzer_mute_does_not_resend_the_config) {
+  load_panel();
+  panel->mqtt_callback("nspanel/" + PANEL_MAC + "/buzzer_mute_cmd", "1");
+  last_published_config();
+
+  // The broker replays the retained command on every resubscribe.
+  panel->mqtt_callback("nspanel/" + PANEL_MAC + "/buzzer_mute_cmd", "1");
+
+  EXPECT_FALSE(last_published_config().has_value());
+}
+
+TEST_F(NSPanelTest, unknown_buzzer_mute_command_is_ignored) {
+  load_panel();
+  last_published_config();
+  ScopedErrorLog log;
+
+  panel->mqtt_callback("nspanel/" + PANEL_MAC + "/buzzer_mute_cmd", "ON");
+
+  EXPECT_FALSE(last_published_config().has_value());
+  auto errors = log.errors();
+  EXPECT_TRUE(std::any_of(errors.begin(), errors.end(), [](auto &error) { return error.find("buzzer mute") != std::string::npos; }));
+}
+
+TEST_F(NSPanelTest, sonoff_panel_registers_a_retained_buzzer_mute_switch) {
+  load_panel();
+
+  auto messages = nspm_test::mqtt_published_to("homeassistant/switch/nspanelmanager/c0_49_ef_00_01_01_buzzer_mute/config");
+  ASSERT_FALSE(messages.empty());
+  auto discovery = nlohmann::json::parse(messages.back().payload);
+  EXPECT_EQ(discovery["command_topic"], "nspanel/" + PANEL_MAC + "/buzzer_mute_cmd");
+  EXPECT_EQ(discovery["state_topic"], "nspanel/" + PANEL_MAC + "/buzzer_mute_state");
+  EXPECT_EQ(discovery["retain"], true);
+}
+
+TEST_F(NSPanelTest, custom_panel_does_not_register_a_buzzer_mute_switch) {
+  update_row([](auto &settings) {
+    settings.model = "custom";
+  });
+
+  load_panel();
+
+  EXPECT_TRUE(nspm_test::mqtt_published_to("homeassistant/switch/nspanelmanager/c0_49_ef_00_01_01_buzzer_mute/config").empty());
+}
+
 TEST_F(NSPanelTest, reload_config_sends_changed_settings) {
   load_panel();
   last_published_config();

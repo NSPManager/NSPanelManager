@@ -2,6 +2,7 @@
 #define MQTT_MANAGER_NSPANEL
 #include "protobuf_nspanel.pb.h"
 #include "websocket_server/websocket_server.hpp"
+#include <atomic>
 #include <command_manager/command_manager.hpp>
 #include <cstdint>
 #include <database_manager/database_manager.hpp>
@@ -236,6 +237,12 @@ private:
   std::string _mqtt_relay2_state_topic;
   // Wether or not relay2 is on
   bool _relay2_state = false;
+  // The topic Home Assistant sends the buzzer mute command to
+  std::string _mqtt_buzzer_mute_command_topic;
+  // The topic where the buzzer mute state is published
+  std::string _mqtt_buzzer_mute_state_topic;
+  // Wether or not the buzzer is muted. While muted, no buzzer sounds are sent in the config.
+  std::atomic<bool> _buzzer_muted = false;
   // The topic to capture logs from MQTT
   std::string _mqtt_log_topic;
   // The topic to capture status (online/offline) from MQTT
@@ -268,6 +275,7 @@ private:
   std::string _mqtt_number_screen_brightness_topic;
   std::string _mqtt_number_screensaver_brightness_topic;
   std::string _mqtt_select_screensaver_topic;
+  std::string _mqtt_switch_buzzer_mute_topic;
 
   // Topic where to send the NSPanelHomePageStatus protobuf state updates
   std::string _mqtt_topic_home_page_status;
