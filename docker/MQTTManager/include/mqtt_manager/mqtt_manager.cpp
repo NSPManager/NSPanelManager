@@ -119,11 +119,58 @@ void MQTT_Manager::reload_config() {
 }
 
 bool MQTT_Manager::is_connected() {
+  return MQTT_Manager::_caught_up && MQTT_Manager::_broker_connected();
+}
+
+bool MQTT_Manager::_broker_connected() {
+#if defined(TEST_MODE) && TEST_MODE == 1
+  if (MQTT_Manager::_test_broker_connected) {
+    return true;
+  }
+#endif
   if (MQTT_Manager::_mqtt_client != nullptr) {
     return MQTT_Manager::_mqtt_client->is_connected();
   } else {
     return false;
   }
+}
+
+void MQTT_Manager::_send(mqtt::const_message_ptr msg) {
+#if defined(TEST_MODE) && TEST_MODE == 1
+  if (MQTT_Manager::_test_broker_connected) {
+    std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_test_published_messages_mutex);
+    MQTT_Manager::_test_sent_messages.push_back({msg->get_topic(), msg->get_payload_str(), msg->is_retained()});
+    return;
+  }
+#endif
+  MQTT_Manager::_mqtt_client->publish(msg);
+}
+
+void MQTT_Manager::_send_buffered_messages() {
+  std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
+  try {
+    auto it = MQTT_Manager::_mqtt_messages_buffer.cbegin();
+    while (it != MQTT_Manager::_mqtt_messages_buffer.cend()) {
+      MQTT_Manager::_send(*it);
+      MQTT_Manager::_mqtt_messages_buffer.erase(it++);
+    }
+
+    // Then the latest value of every retained topic, as the server may have restarted and lost them.
+    // Sent last so that each topic ends on its newest value, whatever was buffered for it.
+    std::unordered_map<std::string, std::string> retained_messages;
+    {
+      std::lock_guard<std::mutex> retain_buffer_guard(MQTT_Manager::_mqtt_retain_buffer_mutex);
+      retained_messages = MQTT_Manager::_mqtt_retain_buffer;
+    }
+    for (const auto &[topic, payload] : retained_messages) {
+      MQTT_Manager::_send(mqtt::make_message(topic, payload, 0, true));
+    }
+  } catch (std::exception &e) {
+    SPDLOG_ERROR("Caught exception when trying to publish message: {}", boost::diagnostic_information(e, true));
+  }
+  // Even if a send failed: buffering everything from now on would be worse, and losing the
+  // connection again starts over.
+  MQTT_Manager::_caught_up = true;
 }
 
 void MQTT_Manager::_reconnect_mqtt_client() {
@@ -163,6 +210,8 @@ void MQTT_Manager::_reconnect_mqtt_client() {
   }
 
   MQTT_Manager::_stop_consuming = true;
+  // Buffer everything published from here until the buffered messages have been sent after connecting.
+  MQTT_Manager::_caught_up = false;
   while (true) {
     try {
       std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_client_mutex);
@@ -217,16 +266,9 @@ void MQTT_Manager::_reconnect_mqtt_client() {
   MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/status", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)),
                         "online", true);
 
-  // Loop over retained MQTT messages and send them again to the MQTT broker as it may have restarted and lost retained messages.
-  // Publish from a copy, as publish() writes to the buffer.
-  std::unordered_map<std::string, std::string> retained_messages;
-  {
-    std::lock_guard<std::mutex> retain_buffer_guard(MQTT_Manager::_mqtt_retain_buffer_mutex);
-    retained_messages = MQTT_Manager::_mqtt_retain_buffer;
-  }
-  for (auto it = retained_messages.cbegin(); it != retained_messages.cend(); it++) {
-    MQTT_Manager::publish(it->first, it->second, true);
-  }
+  // Before subscribing, which takes a while: until this is done everything published is buffered
+  // behind what was buffered while disconnected.
+  MQTT_Manager::_send_buffered_messages();
 
   try {
     SPDLOG_DEBUG("Subscribing to registered MQTT topics.");
@@ -252,18 +294,6 @@ void MQTT_Manager::_reconnect_mqtt_client() {
     }
   } catch (std::exception &e) {
     SPDLOG_ERROR("Caught exception trying to subscribe to topics: {}", boost::diagnostic_information(e, true));
-  }
-
-  // Send buffered messages if any
-  try {
-    std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
-    auto it = MQTT_Manager::_mqtt_messages_buffer.cbegin();
-    while (it != MQTT_Manager::_mqtt_messages_buffer.cend()) {
-      MQTT_Manager::_mqtt_client->publish((*it));
-      MQTT_Manager::_mqtt_messages_buffer.erase(it++);
-    }
-  } catch (std::exception &e) {
-    SPDLOG_ERROR("Caught exception when trying to publish message: {}", boost::diagnostic_information(e, true));
   }
 }
 
@@ -318,7 +348,7 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
       SPDLOG_TRACE("Publising '{}' -> '{}'", topic, payload);
       while (MQTT_Manager::is_connected()) {
         try {
-          MQTT_Manager::_mqtt_client->publish(msg);
+          MQTT_Manager::_send(msg);
           break;
         } catch (std::exception &ex) {
           SPDLOG_WARN("Caught exception while trying to publish '{}' -> '{}'. Retrying...", topic, payload);
@@ -370,8 +400,9 @@ void MQTT_Manager::clear_retain(const std::string &topic) {
   WebsocketServer::set_stomp_topic_retained(fmt::format("mqtt/{}", topic), false);
   if (topic.size() > 0) {
     mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), "", 0, 0, true);
-    if (MQTT_Manager::_mqtt_client != nullptr && MQTT_Manager::_mqtt_client->is_connected()) {
-      MQTT_Manager::_mqtt_client->publish(msg);
+    // Through the same gate as publish(), so that the clear cannot overtake a buffered value for the topic.
+    if (MQTT_Manager::_mqtt_client != nullptr && MQTT_Manager::is_connected()) {
+      MQTT_Manager::_send(msg);
     } else {
       MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
     }

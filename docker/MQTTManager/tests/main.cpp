@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include "test_helpers.hpp"
 #include <cxxabi.h>
 #include <database_manager/database_manager.hpp>
 #include <execinfo.h>
@@ -57,6 +58,8 @@ int main(int argc, char **argv) {
 
   ::testing::InitGoogleTest(&argc, argv);
   spdlog::set_level(spdlog::level::warn); // Keep test output readable; raise when debugging.
+  // Before anything starts a thread that logs, see nspm_test::log_capture_sink().
+  spdlog::default_logger()->sinks().push_back(nspm_test::log_capture_sink());
   database_manager::init();
   int result = RUN_ALL_TESTS();
 

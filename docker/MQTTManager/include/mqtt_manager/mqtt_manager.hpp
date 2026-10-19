@@ -37,6 +37,11 @@ public:
    */
   static void reload_config();
 
+  /*
+   * Whether messages are sent to the MQTT server as they are published. False from losing the
+   * connection until, after reconnecting, the messages buffered meanwhile have been sent: until then
+   * new messages are buffered behind them, so that nothing overtakes an older message.
+   */
   static bool is_connected();
 
   template <typename CALLBACK_BIND>
@@ -129,12 +134,35 @@ public:
     std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
     return MQTT_Manager::_mqtt_callbacks.count(topic) > 0 ? MQTT_Manager::_mqtt_callbacks.at(topic).num_slots() : 0;
   }
+
+  // While set, behave as if connected to the MQTT server, but record what would have been sent to it
+  // rather than sending it. Clearing it behaves as losing the connection.
+  static void test_set_broker_connected(bool connected) {
+    MQTT_Manager::_test_broker_connected = connected;
+    if (!connected) {
+      MQTT_Manager::_caught_up = false;
+    }
+  }
+
+  // Send what was buffered while disconnected, as after reconnecting.
+  static void test_send_buffered_messages() {
+    MQTT_Manager::_send_buffered_messages();
+  }
+
+  // Everything sent to the MQTT server since the last call, in order. Only recorded while
+  // test_set_broker_connected(true).
+  static std::vector<TestPublishedMessage> test_take_sent_messages() {
+    std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_test_published_messages_mutex);
+    return std::exchange(MQTT_Manager::_test_sent_messages, {});
+  }
 #endif
 
 private:
 #if defined(TEST_MODE) && TEST_MODE == 1
   static inline std::mutex _test_published_messages_mutex;
   static inline std::vector<TestPublishedMessage> _test_published_messages;
+  static inline std::vector<TestPublishedMessage> _test_sent_messages;
+  static inline std::atomic<bool> _test_broker_connected = false;
 #endif
   static inline boost::lockfree::spsc_queue<MQTTMessage, boost::lockfree::capacity<256>> _mqtt_message_queue;
   static inline std::thread _process_messages_thread;
@@ -146,6 +174,22 @@ private:
   static inline std::mutex _mqtt_retain_buffer_mutex;
 
   static void _reconnect_mqtt_client();
+
+  // Whether the MQTT client is connected to the server, regardless of _caught_up.
+  static bool _broker_connected();
+
+  // Set once the messages buffered while disconnected have been sent, see is_connected().
+  static inline std::atomic<bool> _caught_up = false;
+
+  /**
+   * Send the messages buffered while disconnected, in the order they were published, then the latest
+   * value of every retained topic in case the server restarted and lost them, and mark the client as
+   * caught up. Holds the client lock throughout, so nothing published meanwhile can overtake them.
+   */
+  static void _send_buffered_messages();
+
+  // Hand a message to the MQTT client. Called with _mqtt_client_mutex held.
+  static void _send(mqtt::const_message_ptr msg);
 
   static inline boost::ptr_map<std::string, boost::signals2::signal<void(std::string, std::string)>> _mqtt_callbacks;
   static inline std::unordered_map<std::string, int> _subscribed_topics;
