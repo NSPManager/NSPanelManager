@@ -5389,6 +5389,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     kSoundsFieldNumber = 45,
     kNameFieldNumber = 1,
     kInsideTemperatureSensorMqttTopicFieldNumber = 40,
+    kTzPosixFieldNumber = 46,
     kDefaultRoomFieldNumber = 2,
     kDefaultPageFieldNumber = 3,
     kScreensaverActivationTimeoutFieldNumber = 4,
@@ -5538,6 +5539,22 @@ class NSPanelConfig final : public ::google::protobuf::Message
   inline PROTOBUF_ALWAYS_INLINE void _internal_set_inside_temperature_sensor_mqtt_topic(
       const std::string& value);
   std::string* _internal_mutable_inside_temperature_sensor_mqtt_topic();
+
+  public:
+  // string tz_posix = 46;
+  void clear_tz_posix() ;
+  const std::string& tz_posix() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_tz_posix(Arg_&& arg, Args_... args);
+  std::string* mutable_tz_posix();
+  PROTOBUF_NODISCARD std::string* release_tz_posix();
+  void set_allocated_tz_posix(std::string* value);
+
+  private:
+  const std::string& _internal_tz_posix() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_tz_posix(
+      const std::string& value);
+  std::string* _internal_mutable_tz_posix();
 
   public:
   // int32 default_room = 2;
@@ -5845,8 +5862,8 @@ class NSPanelConfig final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 37, 2,
-      94, 7>
+      5, 38, 2,
+      102, 7>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -5876,6 +5893,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     ::google::protobuf::RepeatedPtrField< ::NSPanelConfig_Sound > sounds_;
     ::google::protobuf::internal::ArenaStringPtr name_;
     ::google::protobuf::internal::ArenaStringPtr inside_temperature_sensor_mqtt_topic_;
+    ::google::protobuf::internal::ArenaStringPtr tz_posix_;
     ::int32_t default_room_;
     int default_page_;
     ::int32_t screensaver_activation_timeout_;
@@ -7112,6 +7130,56 @@ inline ::google::protobuf::RepeatedPtrField<::NSPanelConfig_Sound>*
 NSPanelConfig::_internal_mutable_sounds() {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return &_impl_.sounds_;
+}
+
+// string tz_posix = 46;
+inline void NSPanelConfig::clear_tz_posix() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.tz_posix_.ClearToEmpty();
+}
+inline const std::string& NSPanelConfig::tz_posix() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.tz_posix)
+  return _internal_tz_posix();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelConfig::set_tz_posix(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.tz_posix_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelConfig.tz_posix)
+}
+inline std::string* NSPanelConfig::mutable_tz_posix() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_tz_posix();
+  // @@protoc_insertion_point(field_mutable:NSPanelConfig.tz_posix)
+  return _s;
+}
+inline const std::string& NSPanelConfig::_internal_tz_posix() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.tz_posix_.Get();
+}
+inline void NSPanelConfig::_internal_set_tz_posix(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.tz_posix_.Set(value, GetArena());
+}
+inline std::string* NSPanelConfig::_internal_mutable_tz_posix() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.tz_posix_.Mutable( GetArena());
+}
+inline std::string* NSPanelConfig::release_tz_posix() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelConfig.tz_posix)
+  return _impl_.tz_posix_.Release();
+}
+inline void NSPanelConfig::set_allocated_tz_posix(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.tz_posix_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.tz_posix_.IsDefault()) {
+          _impl_.tz_posix_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.tz_posix)
 }
 
 // -------------------------------------------------------------------

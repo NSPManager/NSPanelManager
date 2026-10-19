@@ -17,6 +17,7 @@
 #include <exception>
 #include <fmt/core.h>
 #include <fstream>
+#include <iterator>
 #include <mutex>
 #include <nlohmann/detail/conversions/to_json.hpp>
 #include <nlohmann/detail/exceptions.hpp>
@@ -42,6 +43,12 @@ void MqttManagerConfig::load() {
   boost::algorithm::trim(timezone_str);
   MqttManagerConfig::timezone = timezone_str;
   SPDLOG_INFO("Read timezone {} from /etc/timezone.", timezone_str);
+  MqttManagerConfig::timezone_posix_rule = MqttManagerConfig::read_posix_tz_rule(fmt::format("/usr/share/zoneinfo/{}", timezone_str));
+  if (MqttManagerConfig::timezone_posix_rule.empty()) {
+    SPDLOG_WARN("Could not read a POSIX TZ rule for timezone {}. NSPanels will show the time sent by the manager.", timezone_str);
+  } else {
+    SPDLOG_INFO("Using POSIX TZ rule {} for timezone {}.", MqttManagerConfig::timezone_posix_rule, timezone_str);
+  }
 
   SPDLOG_DEBUG("Clearing config values cache.");
   MqttManagerConfig::_settings_values_cache.clear();
@@ -527,6 +534,30 @@ std::expected<std::string, bool> MqttManagerConfig::get_us_horizontal_mirrored_t
     return std::unexpected(false);
   }
   return MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft4;
+}
+
+std::string MqttManagerConfig::read_posix_tz_rule(const std::string &tzif_path) {
+  try {
+    std::ifstream file(tzif_path, std::ios::in | std::ios::binary);
+    if (!file) {
+      return "";
+    }
+    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+
+    // Version 2 and later files end with the rule between two newlines (RFC 8536, section 3.3).
+    // Version 1 files have a zero version byte and no rule.
+    if (content.size() < 5 || content.compare(0, 4, "TZif") != 0 || content[4] < '2' || content.back() != '\n') {
+      return "";
+    }
+    size_t rule_start = content.rfind('\n', content.size() - 2);
+    if (rule_start == std::string::npos) {
+      return "";
+    }
+    return content.substr(rule_start + 1, content.size() - rule_start - 2);
+  } catch (std::exception &ex) {
+    SPDLOG_WARN("Caught exception while reading POSIX TZ rule from '{}': {}", tzif_path, ex.what());
+    return "";
+  }
 }
 
 // TESTING

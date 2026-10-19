@@ -88,6 +88,15 @@ public:
   static void populate_default_and_clean();
 
   static inline std::string timezone;
+  // POSIX TZ rule for timezone, read from its tzdata file. Empty if it could not be read.
+  static inline std::string timezone_posix_rule;
+
+  /**
+   * Read the POSIX TZ rule from the end of a tzdata (TZif) file, ex. "CET-1CEST,M3.5.0,M10.5.0/3".
+   * @param tzif_path: Path of the file, ex. /usr/share/zoneinfo/Europe/Stockholm.
+   * @return The rule, or empty if the file is missing, not version 2 or later, or has no rule.
+   */
+  static std::string read_posix_tz_rule(const std::string &tzif_path);
 
   template <typename T>
   static T get_setting_with_default(MQTT_MANAGER_SETTING key);

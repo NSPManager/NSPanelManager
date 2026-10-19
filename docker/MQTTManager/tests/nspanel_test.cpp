@@ -206,6 +206,30 @@ TEST_F(NSPanelTest, panel_settings_are_sent_in_the_config) {
   EXPECT_FALSE(config->show_screensaver_outside_temperature());
 }
 
+TEST_F(NSPanelTest, timezone_rule_is_sent_in_the_config) {
+  std::string previous_rule = MqttManagerConfig::timezone_posix_rule;
+  OnExit restore_rule{[&] { MqttManagerConfig::timezone_posix_rule = previous_rule; }};
+  MqttManagerConfig::timezone_posix_rule = "CET-1CEST,M3.5.0,M10.5.0/3";
+
+  load_panel();
+
+  auto config = last_published_config();
+  ASSERT_TRUE(config.has_value());
+  EXPECT_EQ(config->tz_posix(), "CET-1CEST,M3.5.0,M10.5.0/3");
+}
+
+TEST_F(NSPanelTest, unknown_timezone_rule_is_sent_empty) {
+  std::string previous_rule = MqttManagerConfig::timezone_posix_rule;
+  OnExit restore_rule{[&] { MqttManagerConfig::timezone_posix_rule = previous_rule; }};
+  MqttManagerConfig::timezone_posix_rule = "";
+
+  load_panel();
+
+  auto config = last_published_config();
+  ASSERT_TRUE(config.has_value());
+  EXPECT_EQ(config->tz_posix(), "");
+}
+
 TEST_F(NSPanelTest, temperature_calibration_is_sent_in_tenths_of_a_degree) {
   set_panel_setting("temperature_calibration", "-1.5"); // Django stores str(float(...)).
 
