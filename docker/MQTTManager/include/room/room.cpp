@@ -36,14 +36,26 @@ Room::Room(uint32_t room_id) {
   this->_send_status_updates = true;
   CommandManager::attach_callback(boost::bind(&Room::command_callback, this, _1));
 
-  if (!this->_update_room_state_thread.joinable()) {
-    SPDLOG_INFO("No thread to handle room status updates for room {}::{} starting...", this->_id, this->_name);
-    this->_update_room_state_thread = std::thread(&Room::_update_room_state, this);
-    this->_update_room_state_thread.detach();
-  }
+  SPDLOG_INFO("No thread to handle room status updates for room {}::{} starting...", this->_id, this->_name);
+  // Through a lambda: std::jthread only passes its stop_token to a callable that takes it first.
+  this->_update_room_state_thread = std::jthread([this](std::stop_token stop_token) {
+    this->_update_room_state(stop_token);
+  });
 }
 
 Room::~Room() {
+  // Stop the status update thread first, while everything it uses still exists. Stopping wakes it
+  // from either of its waits, so this only waits for an update already being sent.
+  this->_update_room_state_thread.request_stop();
+  if (this->_update_room_state_thread.get_id() == std::this_thread::get_id()) {
+    // Nothing on the thread holds a reference to its own Room, so this should not happen. Joining
+    // would throw, so leave the thread to finish by itself.
+    SPDLOG_ERROR("Room {}::{} destroyed from its own status update thread, cannot wait for the thread to stop.", this->_id, this->_name);
+    this->_update_room_state_thread.detach();
+  } else if (this->_update_room_state_thread.joinable()) {
+    this->_update_room_state_thread.join();
+  }
+
   CommandManager::detach_callback(boost::bind(&Room::command_callback, this, _1));
   MQTT_Manager::clear_retain(this->_mqtt_state_topic); // Clear old state topic.
   SPDLOG_INFO("Room {}::{} destroyed.", this->_id, this->_name);
@@ -280,6 +292,7 @@ void Room::page_changed_callback(RoomEntitiesPage *page) {
     {
       std::lock_guard<std::mutex> mutex_guard(this->_status_update_mutex);
       this->_room_status_updated = false;
+      this->_room_update_count++;
     }
     SPDLOG_DEBUG("Sending notify of state update in room {}::{}", this->_id, this->_name);
     this->_room_update_condition_variable.notify_all();
@@ -360,20 +373,32 @@ void Room::command_callback(NSPanelMQTTManagerCommand &command) {
   }
 }
 
-void Room::_update_room_state() {
+void Room::_update_room_state(std::stop_token stop_token) {
   SPDLOG_INFO("Started thread to handle room status updates for room {}::{}", this->_id, this->_name);
   std::unique_lock<std::mutex> lock(this->_status_update_mutex);
   for (;;) {
     // Wait for notification that a room has been updated
-    this->_room_update_condition_variable.wait(lock, [this]() {
+    this->_room_update_condition_variable.wait(lock, stop_token, [this]() {
       return !this->_room_status_updated;
     });
+    if (stop_token.stop_requested()) {
+      return;
+    }
 
     // Wait until changes has settled as when a user changes light states in "All rooms" mode a burst of changes will occur from all rooms.
     uint32_t backoff_time = MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::ROOM_STATUS_BACKOFF_TIME);
-    while (this->_room_update_condition_variable.wait_for(lock, std::chrono::milliseconds(backoff_time)) == std::cv_status::no_timeout) {
-      // If we woke up via notify, we just loop and wait again.
-      // This is where the "debounce" happens.
+    for (;;) {
+      uint64_t seen_update_count = this->_room_update_count;
+      bool changed = this->_room_update_condition_variable.wait_for(lock, stop_token, std::chrono::milliseconds(backoff_time), [this, seen_update_count]() {
+        return this->_room_update_count != seen_update_count;
+      });
+      if (stop_token.stop_requested()) {
+        return;
+      }
+      if (!changed) {
+        break; // A whole backoff time without changes.
+      }
+      // Another change arrived, wait a whole backoff time again. This is where the "debounce" happens.
     }
     SPDLOG_DEBUG("Room status backoff time reaced, sending update for room {}::{}.", this->_id, this->_name);
     this->_room_status_updated = true;

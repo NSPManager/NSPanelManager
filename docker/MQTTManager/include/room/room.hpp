@@ -4,13 +4,17 @@
 #include "entity/entity.hpp"
 #include "protobuf_nspanel.pb.h"
 #include "room/room_entities_page.hpp"
+#include <atomic>
 #include <chrono>
+#include <condition_variable>
 #include <expected>
 #include <memory>
 #include <mutex>
 #include <nlohmann/json_fwd.hpp>
 #include <protobuf/protobuf_general.pb.h>
+#include <stop_token>
 #include <string>
+#include <thread>
 #include <vector>
 
 class Room {
@@ -131,13 +135,17 @@ public:
 private:
   /*
    * Run this in seperate thread to send room state updates with a backoff time to wait for changes to settle in order to minimise flickering.
+   * Returns once stop_token is stopped, which the destructor does before anything the thread uses is torn down.
    */
-  void _update_room_state();
+  void _update_room_state(std::stop_token stop_token);
 
-  std::thread _update_room_state_thread;
+  std::jthread _update_room_state_thread;
   std::mutex _status_update_mutex;
-  std::condition_variable _room_update_condition_variable;
+  std::condition_variable_any _room_update_condition_variable;
   std::atomic<bool> _room_status_updated = false;
+  // Counts change notifications, so that the backoff can tell a new change from the backoff time
+  // running out. Guarded by _status_update_mutex.
+  uint64_t _room_update_count = 0;
 
   /*
    * Create a protobuf room state object and send out to _mqtt_state_topic.
