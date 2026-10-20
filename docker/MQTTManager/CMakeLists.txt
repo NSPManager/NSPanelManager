@@ -89,6 +89,11 @@ set_target_properties(MQTTManager_OpenhabManager PROPERTIES PUBLIC_HEADER ${CMAK
 target_include_directories(MQTTManager_OpenhabManager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(MQTTManager_OpenhabManager Boost::stacktrace_backtrace spdlog::spdlog nlohmann_json::nlohmann_json ixwebsocket::ixwebsocket Boost::boost MQTTManager_Config MQTTManager_WebsocketServer gtest::gtest)
 
+add_library(MQTTManager_ManagerClock STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/manager_clock/manager_clock.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/manager_clock/manager_clock.hpp)
+set_target_properties(MQTTManager_ManagerClock PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/manager_clock/manager_clock.hpp)
+target_include_directories(MQTTManager_ManagerClock PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
+target_link_libraries(MQTTManager_ManagerClock MQTT_Manager MQTTManager_Config spdlog::spdlog gtest::gtest)
+
 add_library(MQTTManager_Weather STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather_icons.hpp)
 set_target_properties(MQTTManager_Weather PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/weather/weather.hpp)
 target_include_directories(MQTTManager_Weather PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
@@ -122,7 +127,7 @@ target_link_libraries(MQTTManager_Switch MQTTManager_HomeAssistantManager spdlog
 add_library(MQTTManager_NSPanel STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.hpp)
 set_target_properties(MQTTManager_NSPanel PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.hpp)
 target_include_directories(MQTTManager_NSPanel PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_NSPanel spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager MQTTManager_Room MQTTManager_WebsocketServer tz::tz Boost::boost MQTTManager_Config Protobuf_MQTTManager MQTTManager_DatabaseManager gtest::gtest)
+target_link_libraries(MQTTManager_NSPanel spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager MQTTManager_ManagerClock MQTTManager_Room MQTTManager_WebsocketServer tz::tz Boost::boost MQTTManager_Config Protobuf_MQTTManager MQTTManager_DatabaseManager gtest::gtest)
 
 add_library(MQTTManager_Scene STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/nspm_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/nspm_scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/home_assistant_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/home_assistant_scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/openhab_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/openhab_scene.cpp)
 # set_target_properties(MQTTManager_Scene PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/scene/scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scene/nspm_scene.hpp)
@@ -155,7 +160,7 @@ target_link_libraries(MQTTManager_NextionImageServer ixwebsocket::ixwebsocket sp
 
 add_executable(${PROJECT_NAME} src/main.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(${PROJECT_NAME} MQTT_Manager MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager MQTTManager_NextionImageServer MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_CommandManager gtest::gtest)
+target_link_libraries(${PROJECT_NAME} MQTT_Manager MQTTManager_ManagerClock MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager MQTTManager_NextionImageServer MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_CommandManager gtest::gtest)
 
 if(NSPM_BUILD_TESTS)
     enable_testing()

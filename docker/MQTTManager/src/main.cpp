@@ -1,6 +1,7 @@
 #include "command_manager/command_manager.hpp"
 #include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
+#include "manager_clock/manager_clock.hpp"
 #include "openhab_manager/openhab_manager.hpp"
 #include "spdlog/sinks/ansicolor_sink.h"
 #include "spdlog/sinks/rotating_file_sink.h"
@@ -49,64 +50,6 @@ void sigusr1_handler(int signal) {
 
     MQTT_Manager::publish("nspanel/config/reload", "1");
     SPDLOG_INFO("Reload signal processing completed.");
-  }
-}
-
-void publish_time_and_date() {
-  // Set timezone
-  setenv("TZ", MqttManagerConfig::timezone.c_str(), 1);
-  tzset();
-
-  // Timezone loaded, proceed to update MQTT
-  for (;;) {
-    char time_buffer[20];
-    char ampm_buffer[20];
-    std::string time_str;
-    char date_buffer[100];
-    std::string date_str;
-
-    std::time_t time = std::time({});
-    std::strftime(date_buffer, 100, MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::DATE_FORMAT).c_str(), std::localtime(&time));
-    date_str = date_buffer;
-
-    if (!MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::CLOCK_US_STYLE)) [[likely]] {
-      std::strftime(time_buffer, 20, "%H:%M", std::localtime(&time));
-      time_str = time_buffer;
-    } else {
-      std::strftime(time_buffer, 20, "%I:%M", std::localtime(&time));
-      std::strftime(ampm_buffer, 20, "%p", std::localtime(&time));
-      time_str = time_buffer;
-    }
-
-    MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/time", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)), time_buffer, true);
-    if (!MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::CLOCK_US_STYLE)) [[likely]] {
-      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)), "", true);
-    } else {
-      MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/ampm", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)), ampm_buffer, true);
-    }
-
-    MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/date", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)), date_buffer, true);
-
-    // Sleep until next minute
-    auto t_now = std::chrono::system_clock::now();
-    auto t_now_c = std::chrono::system_clock::to_time_t(t_now);
-    std::tm next_minute_tm = *std::localtime(&t_now_c);
-    next_minute_tm.tm_sec = 1; // Always wait to minute change over and not the exact same second
-
-    next_minute_tm.tm_min++;
-    if (next_minute_tm.tm_min >= 60) { // We went over to next hour
-      next_minute_tm.tm_min = 0;
-      next_minute_tm.tm_hour++;
-      if (next_minute_tm.tm_hour >= 24) { // We went over to next day
-        next_minute_tm.tm_hour = 0;
-        next_minute_tm.tm_mday++;
-        // mktime (called below) normalises month/year overflow and handles
-        // varying month lengths and leap years, so no manual rollover needed.
-      }
-    }
-
-    auto t_next_minute = std::chrono::system_clock::from_time_t(std::mktime(&next_minute_tm));
-    std::this_thread::sleep_until(t_next_minute);
   }
 }
 
@@ -197,7 +140,6 @@ int main(int argc, char *argv[]) {
   std::thread openhab_manager_thread;
   std::thread websocket_server_thread;
   std::thread nextion_image_server_thread;
-  std::thread time_and_date_thread;
 
   SPDLOG_INFO("Starting Websocket Server on port 8002.");
   websocket_server_thread = std::thread(WebsocketServer::start);
@@ -207,7 +149,7 @@ int main(int argc, char *argv[]) {
 
   SPDLOG_INFO("Config loaded. Starting components.");
 
-  time_and_date_thread = std::thread(publish_time_and_date);
+  ManagerClock::start(); // Send the time and date to NSPanels every minute and each time MQTT connects
   home_assistant_manager_thread = std::thread(HomeAssistantManager::connect);
   openhab_manager_thread = std::thread(OpenhabManager::connect);
 

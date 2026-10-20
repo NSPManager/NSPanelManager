@@ -30,7 +30,7 @@ target_link_options(nspm_mqttmanager_tests PRIVATE -rdynamic)
 target_link_libraries(nspm_mqttmanager_tests PRIVATE
     ${NSPM_LIBRARIES_WITH_INLINE_TESTS}
     MQTTManager_DatabaseManager MQTTManager_Entity
-    MQTT_Manager MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager
+    MQTT_Manager MQTTManager_ManagerClock MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager
     MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_CommandManager
     MQTTManager_Switch MQTTManager_Button MQTTManager_Thermostat MQTTManager_MediaPlayer MQTTManager_NSPanel
     ixwebsocket::ixwebsocket gtest::gtest

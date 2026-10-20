@@ -1,6 +1,7 @@
 #include "nspanel.hpp"
 #include "database_manager/database_manager.hpp"
 #include "entity_manager/entity_manager.hpp"
+#include "manager_clock/manager_clock.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_nspanel.pb.h"
@@ -649,6 +650,8 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       if (state.compare("online") == 0) {
         this->_state = MQTT_MANAGER_NSPANEL_STATE::ONLINE;
         SPDLOG_DEBUG("NSPanel {}::{} became ONLINE.", this->_id, this->_name);
+        // A panel that has just started or reconnected has no clock until it is told the time.
+        ManagerClock::publish_epoch();
       } else if (state.compare("offline") == 0) {
         this->_state = MQTT_MANAGER_NSPANEL_STATE::OFFLINE;
         SPDLOG_DEBUG("NSPanel {}::{} became OFFLINE.", this->_id, this->_name);

@@ -699,6 +699,26 @@ TEST_F(NSPanelTest, commands_go_to_the_mac_and_legacy_name_topics) {
   EXPECT_EQ(panel->get_state(), MQTT_MANAGER_NSPANEL_STATE::WAITING);
 }
 
+TEST_F(NSPanelTest, panel_coming_online_is_sent_the_time) {
+  load_panel();
+  nspm_test::ScopedBrokerConnected connected;
+
+  panel->mqtt_callback("nspanel/" + PANEL_MAC + "/status", R"({"state": "online"})");
+
+  auto messages = nspm_test::mqtt_sent_to(nspm_test::epoch_topic());
+  ASSERT_EQ(messages.size(), 1);
+  EXPECT_FALSE(messages[0].retain);
+}
+
+TEST_F(NSPanelTest, panel_going_offline_is_not_sent_the_time) {
+  load_panel();
+  nspm_test::ScopedBrokerConnected connected;
+
+  panel->mqtt_callback("nspanel/" + PANEL_MAC + "/status", R"({"state": "offline"})");
+
+  EXPECT_TRUE(nspm_test::mqtt_sent_to(nspm_test::epoch_topic()).empty());
+}
+
 TEST_F(NSPanelTest, mqtt_payload_button_publishes_the_configured_message) {
   update_row([](auto &settings) {
     settings.button2_mode = MQTT_PAYLOAD;
