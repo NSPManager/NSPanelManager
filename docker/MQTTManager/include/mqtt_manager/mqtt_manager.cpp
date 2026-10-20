@@ -374,16 +374,19 @@ bool MQTT_Manager::publish_if_connected(const std::string &topic, std::function<
   }
 
   std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
+  // Create the payload only now that the lock is held, so it is current when it is sent.
+  std::optional<std::string> payload = make_payload();
+  if (!payload.has_value()) {
+    return false;
+  }
+
+  // STOMP mirrors every message, whether or not MQTT is connected.
+  MQTT_Manager::_mirror_to_stomp(topic, payload.value(), false);
+
   // Also dropped while still sending what was buffered after reconnecting: the connected callbacks
   // run once that is done.
   if (!MQTT_Manager::is_connected()) {
     SPDLOG_DEBUG("Not connected to MQTT, will not send message to '{}'.", topic);
-    return false;
-  }
-
-  // Create the payload only now that the lock is held, so it is current when it is sent.
-  std::optional<std::string> payload = make_payload();
-  if (!payload.has_value()) {
     return false;
   }
 
@@ -394,7 +397,6 @@ bool MQTT_Manager::publish_if_connected(const std::string &topic, std::function<
     SPDLOG_WARN("Caught exception while trying to publish '{}' -> '{}'. Will not retry.", topic, payload.value());
     return false;
   }
-  MQTT_Manager::_mirror_to_stomp(topic, payload.value(), false);
   return true;
 }
 
@@ -403,6 +405,13 @@ void MQTT_Manager::attach_connected_callback(std::function<void()> callback) {
 }
 
 void MQTT_Manager::_mirror_to_stomp(const std::string &topic, const std::string &payload, bool retain) {
+#if defined(TEST_MODE) && TEST_MODE == 1
+  {
+    std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_test_published_messages_mutex);
+    MQTT_Manager::_test_mirrored_messages.push_back({topic, payload, retain});
+  }
+#endif
+
   // Convert payload to base64 as to be able to send it over the websocket.
   std::size_t encoded_size = (payload.size() + 2) / 3 * 4;
   std::vector<char> encoded_buffer(encoded_size);

@@ -72,6 +72,16 @@ TEST(ManagerClockTest, publish_epoch_does_not_buffer_the_time_while_disconnected
   EXPECT_EQ(MQTT_Manager::test_buffered_message_count(), buffered);
 }
 
+TEST(ManagerClockTest, publish_epoch_mirrors_the_time_to_stomp_while_disconnected) {
+  nspm_test::stomp_mirrored_to(nspm_test::epoch_topic());
+
+  ManagerClock::publish_epoch();
+
+  auto mirrored = nspm_test::stomp_mirrored_to(nspm_test::epoch_topic());
+  ASSERT_EQ(mirrored.size(), 1);
+  EXPECT_FALSE(mirrored[0].retain);
+}
+
 // ManagerClock::init() attaches for the rest of the test run, so this is the only test calling it.
 TEST(ManagerClockTest, time_is_sent_when_mqtt_connects) {
   ManagerClock::init();

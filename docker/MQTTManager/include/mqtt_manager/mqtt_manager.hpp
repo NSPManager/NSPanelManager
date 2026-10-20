@@ -116,10 +116,11 @@ public:
    * never buffered while disconnected or retried on failure, so it suits payloads that are only valid at
    * the moment they are sent, such as the current time. (The MQTT client itself may still resend it
    * after reconnecting if the connection dropped before the server acknowledged it.)
+   * The message is mirrored to STOMP whether or not MQTT is connected.
    * @param topic: The MQTT topic to send payload to.
    * @param make_payload: Called with the MQTT client locked, immediately before sending. Must not call
    *                      back into MQTT_Manager. Return std::nullopt to send nothing.
-   * @return true if the message was sent.
+   * @return true if the message was sent over MQTT.
    */
   static bool publish_if_connected(const std::string &topic, std::function<std::optional<std::string>()> make_payload);
 
@@ -186,6 +187,13 @@ public:
     std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_test_published_messages_mutex);
     return std::exchange(MQTT_Manager::_test_sent_messages, {});
   }
+
+  // Everything mirrored to STOMP since the last call, in order, with the MQTT topic (without the
+  // "mqtt/" prefix) and the payload before base64 encoding.
+  static std::vector<TestPublishedMessage> test_take_mirrored_messages() {
+    std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_test_published_messages_mutex);
+    return std::exchange(MQTT_Manager::_test_mirrored_messages, {});
+  }
 #endif
 
 private:
@@ -193,6 +201,7 @@ private:
   static inline std::mutex _test_published_messages_mutex;
   static inline std::vector<TestPublishedMessage> _test_published_messages;
   static inline std::vector<TestPublishedMessage> _test_sent_messages;
+  static inline std::vector<TestPublishedMessage> _test_mirrored_messages;
   static inline std::atomic<bool> _test_broker_connected = false;
 #endif
   static inline boost::lockfree::spsc_queue<MQTTMessage, boost::lockfree::capacity<256>> _mqtt_message_queue;

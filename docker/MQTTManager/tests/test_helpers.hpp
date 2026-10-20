@@ -238,6 +238,18 @@ inline std::vector<MQTT_Manager::TestPublishedMessage> mqtt_sent_to(const std::s
   return messages;
 }
 
+// The messages mirrored to STOMP for an MQTT topic since the last call (messages for other topics are
+// dropped). Recorded whether or not connected.
+inline std::vector<MQTT_Manager::TestPublishedMessage> stomp_mirrored_to(const std::string &topic) {
+  std::vector<MQTT_Manager::TestPublishedMessage> messages;
+  for (auto &message : MQTT_Manager::test_take_mirrored_messages()) {
+    if (message.topic == topic) {
+      messages.push_back(message);
+    }
+  }
+  return messages;
+}
+
 // Connected to the MQTT server, and caught up on what was buffered, while it is in scope. What would
 // be sent is recorded instead, see mqtt_sent_to(). Starts with nothing recorded as sent.
 class ScopedBrokerConnected {
