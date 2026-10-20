@@ -6,6 +6,8 @@ set -euo pipefail
 regions=("$@")
 [ ${#regions[@]} -gt 0 ] || regions=(eu us)
 
+export PYTHONDONTWRITEBYTECODE=1
+
 # GIMP only finds functions registered with script-fu-register in its scripts folder.
 export HOME=/tmp/home
 # The profile is new every run; GIMP saves its built-in data here on quit and complains if
@@ -38,7 +40,12 @@ for region in "${regions[@]}"; do
     echo "    $region tft$t: GIMP wrote $written of $expected, $numbered dithered into all_numbered"
     [ "$written" -eq "$expected" ] && [ "$numbered" -eq "$expected" ] || status=1
   done
+  gimp_last=$(find pictures_tft1/all_numbered -maxdepth 1 -name '*.bmp' -newer "$marker" -printf '%f\n' |
+    sed 's/\..*//' | sort -n | tail -1)
   rm -f "$marker"
+
+  # Progress bar pictures are cut from the backgrounds GIMP just rendered, so they come after.
+  python3 /work/bar_pictures.py "$region" --numbered-after "$gimp_last" | sed 's/^/    /' || status=1
 done
 
 if [ "$status" -ne 0 ]; then

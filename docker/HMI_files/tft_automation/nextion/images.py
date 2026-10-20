@@ -11,6 +11,11 @@ def read(source):
         return np.asarray(im.convert('RGB'))
 
 
+def write_bmp(path, pixels):
+    # 72 dpi keeps the header the generated pictures have always had.
+    Image.fromarray(np.asarray(pixels, dtype=np.uint8)).save(path, 'BMP', dpi=(72, 72))
+
+
 def rgb565(pixels):
     """The panel's RGB565, little-endian, truncating each channel as the Editor does."""
     p = pixels.astype(np.uint16)

@@ -9,6 +9,7 @@ FROM ubuntu:24.04
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends gimp imagemagick xvfb xauth \
+       python3 python3-numpy python3-pil \
     && rm -rf /var/lib/apt/lists/*
 
 COPY gimp /usr/local/bin/gimp
