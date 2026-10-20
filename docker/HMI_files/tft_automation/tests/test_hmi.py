@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 import hmi_tool
-from nextion import hmi, region
+from nextion import hmi, region, tft
 
 PROJECTS = {name: region.hmi(region.path(name)) for name in ('us', 'eu')}
 
@@ -57,6 +57,15 @@ class ParseTest(unittest.TestCase):
                            'need two different pages of one length for this to test anything')
         for length, ks in constants.items():
             self.assertEqual(len(ks), 1, f'length {length}')
+
+    def test_pictures_are_the_records_the_editor_compiled(self):
+        # The HMI holds one theme's pictures, so one theme's TFT holds the same records.
+        for name in PROJECTS:
+            compiled = []
+            for theme in region.THEMES:
+                with open(region.tft(region.path(name), theme), 'rb') as f:
+                    compiled.append(tft.records(f.read()))
+            self.assertIn(load(name).pictures(), compiled, name)
 
     def test_restamping_an_unchanged_page_is_a_no_op(self):
         for page in load('us').pages.values():
