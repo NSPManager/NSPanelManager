@@ -345,6 +345,7 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
 
   std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
   mqtt::message_ptr msg = mqtt::make_message(topic.c_str(), payload.c_str(), payload.size(), 0, retain);
+  MQTT_Manager::_mirror_to_stomp(topic, payload, retain);
   if (MQTT_Manager::_mqtt_client != nullptr) {
     if (MQTT_Manager::is_connected()) {
       SPDLOG_TRACE("Publising '{}' -> '{}'", topic, payload);
@@ -357,8 +358,6 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
           std::this_thread::sleep_for(std::chrono::seconds(1));
         }
       }
-
-      MQTT_Manager::_mirror_to_stomp(topic, payload, retain);
     } else {
       MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
     }
