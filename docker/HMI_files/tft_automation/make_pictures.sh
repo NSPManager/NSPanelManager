@@ -1,6 +1,6 @@
 #!/bin/bash
-# Render the panel pictures (stages 1 and 2: GIMP, then dither and renumber) in Docker,
-# with no X server needed.
+# Render the panel pictures (stages 1 and 2: GIMP, then dither and renumber, then the progress
+# bar pictures listed in each region's progress_bars.txt) in Docker, with no X server needed.
 #
 #   ./make_pictures.sh            # eu and us
 #   ./make_pictures.sh us         # one region
