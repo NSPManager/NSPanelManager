@@ -46,6 +46,8 @@ for region in "${regions[@]}"; do
 
   # Progress bar pictures are cut from the backgrounds GIMP just rendered, so they come after.
   python3 /work/bar_pictures.py "$region" --numbered-after "$gimp_last" | sed 's/^/    /' || status=1
+  # The AHK script imports all_numbered/ in order, so a gap would shift every later picture ID.
+  python3 /work/check_build.py --pictures "$region" | sed 's/^/    /' || status=1
 done
 
 if [ "$status" -ne 0 ]; then

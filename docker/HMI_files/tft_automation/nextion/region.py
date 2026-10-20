@@ -36,6 +36,21 @@ def numbered(region_dir, theme):
             for f in os.listdir(folder) if f.endswith(('.bmp', '.png'))}
 
 
+def numbering_problems(region_dir):
+    """The Editor numbers pictures by import order, so each theme's IDs must run 0..N with no
+    gaps, the same N in every theme."""
+    problems = []
+    counts = set()
+    for theme in THEMES:
+        ids = sorted(numbered(region_dir, theme))
+        if ids != list(range(len(ids))):
+            problems.append(f'pictures_tft{theme}/all_numbered/ has gaps; IDs must run 0..N')
+        counts.add(len(ids))
+    if len(counts) > 1:
+        problems.append(f'the themes have different numbers of pictures: {sorted(counts)}')
+    return problems
+
+
 def progress_bars(region_dir):
     """[(page, [(object, (r, g, b))...])] from progress_bars.txt, if there is one. Each line is
     PAGE OBJECT=#RRGGBB..., and every bar must name its fill colour."""

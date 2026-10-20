@@ -142,6 +142,21 @@ class Project:
             raise KeyError(f'no page {name} (pages: {", ".join(sorted(self.pages))})')
         return self.pages[name]
 
+    def pictures(self):
+        """The picture records in ID order, each exactly as a compiled TFT stores it (record
+        header and data, compressed or not). main.HMI lists the project's resources in order;
+        pictures are the .i blocks, each a header followed by the record."""
+        live = {e.name: e for e in self.entries if not e.stale}
+        main = self.block(live['main.HMI'])
+        count = struct.unpack_from('<I', main, 28)[0]
+        names = [main[96 + 16 * i + 8:96 + 16 * i + 16].split(b'\0')[0].decode('latin1') for i in range(count)]
+        records = []
+        for name in names:
+            if name.endswith('.i'):
+                block = self.block(live[name])
+                records.append(block[struct.unpack_from('<I', block, 8)[0]:])
+        return records
+
     def block(self, entry):
         return self.data[entry.offset:entry.offset + entry.size]
 

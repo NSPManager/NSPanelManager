@@ -69,6 +69,11 @@ def pictures(tft):
     return found
 
 
+def records(tft):
+    """Each picture's record (header and data) in ID order, as an HMI stores it too."""
+    return [tft[p.start:p.start + p.size] for p in pictures(tft)]
+
+
 def raw_record(rgb565):
     return bytes(RECORD_HEADER) + rgb565
 
