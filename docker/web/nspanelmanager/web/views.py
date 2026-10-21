@@ -155,20 +155,6 @@ def save_new_room(request):
     return redirect("edit_room", room_id=new_room.id)
 
 
-def delete_room(request, room_id: int):
-    num_rooms = Room.objects.all().count()
-    if num_rooms > 1:
-        room = Room.objects.filter(id=room_id).first()
-        if num_rooms >= 2:
-            nspanels = NSPanel.objects.filter(room=room)
-            new_room = Room.objects.all().exclude(id=room.id).first()
-            nspanels.update(room=new_room)
-        room.delete()
-
-        send_mqttmanager_reload_command()
-    return redirect("rooms")
-
-
 def update_room_form(request, room_id: int):
     room = Room.objects.filter(id=room_id).first()
     room.friendly_name = request.POST["friendly_name"]

@@ -93,7 +93,7 @@ class PanelLifecycleTests(NSPMTestCase):
     def test_deleting_a_room_keeps_its_panels(self):
         other = self.make_room("Lounge")
 
-        self.client.get(reverse("delete_room", kwargs={"room_id": self.room.id}))
+        self.client.delete(reverse("rest_room_delete", kwargs={"room_id": self.room.id}))
 
         self.panel.refresh_from_db()
         self.assertEqual(self.panel.room, other)

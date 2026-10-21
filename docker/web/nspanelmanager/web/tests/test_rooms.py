@@ -42,32 +42,6 @@ class RoomUITests(NSPMTestCase):
         self.assertEqual(room.room_temp_sensor, "sensor.galley_temp")
         self.assertManagerReloaded(times=1)
 
-    def test_delete_room_cascades_and_rehomes_panels(self):
-        kitchen = self.make_room("Kitchen")
-        lounge = self.make_room("Lounge")
-        panel = self.make_panel(kitchen)
-        self.make_light(kitchen)
-        self.make_scene(kitchen)
-
-        self.client.get(reverse("delete_room", kwargs={"room_id": kitchen.id}))
-
-        self.assertFalse(Room.objects.filter(id=kitchen.id).exists())
-        self.assertFalse(Entity.objects.exists())
-        self.assertFalse(Scene.objects.exists())
-        self.assertFalse(RoomEntitiesPage.objects.filter(room_id=kitchen.id).exists())
-        # The panel is not deleted with its room; it moves to another room.
-        panel.refresh_from_db()
-        self.assertEqual(panel.room, lounge)
-        self.assertManagerReloaded(times=1)
-
-    def test_last_room_cannot_be_deleted(self):
-        room = self.make_room("Only room")
-
-        self.client.get(reverse("delete_room", kwargs={"room_id": room.id}))
-
-        self.assertTrue(Room.objects.filter(id=room.id).exists())
-        self.assertManagerNotReloaded()
-
     def test_reorder_rooms(self):
         a, b, c = self.make_room("A"), self.make_room("B"), self.make_room("C")
 
@@ -196,15 +170,23 @@ class RoomRESTTests(NSPMTestCase):
 
         self.assertManagerReloaded(times=1)
 
-    def test_delete_room_rehomes_panels(self):
-        office = self.make_room("Office")
+    def test_delete_room_cascades_and_rehomes_panels(self):
+        kitchen = self.make_room("Kitchen")
         lounge = self.make_room("Lounge")
-        panel = self.make_panel(office)
+        panel = self.make_panel(kitchen)
+        self.make_light(kitchen)
+        self.make_scene(kitchen)
 
-        self.client.delete(reverse("rest_room_delete", kwargs={"room_id": office.id}))
+        self.client.delete(reverse("rest_room_delete", kwargs={"room_id": kitchen.id}))
 
+        self.assertFalse(Room.objects.filter(id=kitchen.id).exists())
+        self.assertFalse(Entity.objects.exists())
+        self.assertFalse(Scene.objects.exists())
+        self.assertFalse(RoomEntitiesPage.objects.filter(room_id=kitchen.id).exists())
+        # The panel is not deleted with its room; it moves to another room.
         panel.refresh_from_db()
         self.assertEqual(panel.room, lounge)
+        self.assertManagerReloaded(times=1)
 
     def test_created_room_has_entity_pages(self):
         response = self.post_json(reverse("rest_rooms_create"), {"name": "Office"})

@@ -515,7 +515,7 @@ def room_delete(request, room_id):
     if request.method == "DELETE":
         try:
             room = Room.objects.get(id=room_id)
-            # Panels are not deleted with their room. As in the UI's delete_room view, move them to another room.
+            # Panels are not deleted with their room; move them to another room.
             new_room = Room.objects.exclude(id=room.id).first()
             if new_room:
                 NSPanel.objects.filter(room=room).update(room=new_room)
