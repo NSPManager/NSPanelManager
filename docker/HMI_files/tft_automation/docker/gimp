@@ -1,0 +1,8 @@
+#!/bin/bash
+# Stands in for `gimp` inside the picture container, so create_pictures_{eu,us}.sh run unchanged.
+# gimp-console is GIMP built without GTK and needs no display. With NSPM_GIMP_XVFB=1 it runs
+# under a virtual X server instead, as a fallback.
+if [ "${NSPM_GIMP_XVFB:-0}" = 1 ]; then
+  exec xvfb-run -a gimp-console-2.10 "$@"
+fi
+exec gimp-console-2.10 "$@"
