@@ -519,6 +519,9 @@ def room_delete(request, room_id):
             new_room = Room.objects.exclude(id=room.id).first()
             if new_room:
                 NSPanel.objects.filter(room=room).update(room=new_room)
+            elif NSPanel.objects.filter(room=room).exists():
+                # Panels must belong to a room, so the last room can only be deleted once it has no panels.
+                return JsonResponse({"status": "error", "message": "The last room cannot be deleted while panels are assigned to it."}, status=400)
             room.delete()
             send_mqttmanager_reload_command()
             return JsonResponse({"status": "ok", "room_id": room_id}, status=200)

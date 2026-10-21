@@ -3,7 +3,7 @@ from unittest import expectedFailure
 
 from django.urls import reverse
 
-from web.models import Entity, Room, RoomEntitiesPage, Scene
+from web.models import Entity, NSPanel, Room, RoomEntitiesPage, Scene
 
 from .harness import NSPMTestCase
 
@@ -118,6 +118,26 @@ class RoomRESTTests(NSPMTestCase):
         self.assertEqual(response.json(), {"status": "ok", "room_id": room.id})
         self.assertFalse(Room.objects.exists())
         self.assertFalse(Entity.objects.exists())
+
+    def test_delete_last_room_without_panels(self):
+        room = self.make_room("Office")
+
+        response = self.client.delete(reverse("rest_room_delete", kwargs={"room_id": room.id}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(Room.objects.exists())
+        self.assertManagerReloaded(times=1)
+
+    def test_delete_last_room_with_panels_is_rejected(self):
+        room = self.make_room("Office")
+        panel = self.make_panel(room)
+
+        response = self.client.delete(reverse("rest_room_delete", kwargs={"room_id": room.id}))
+
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue(Room.objects.filter(id=room.id).exists())
+        self.assertTrue(NSPanel.objects.filter(id=panel.id).exists())
+        self.assertManagerNotReloaded()
 
     def test_delete_unknown_room_is_rejected(self):
         room = self.make_room("Office")
