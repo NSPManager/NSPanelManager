@@ -21,6 +21,7 @@ typedef struct NSPanelEntityState__Thermostat NSPanelEntityState__Thermostat;
 typedef struct NSPanelEntityState__Thermostat__ThermostatOption NSPanelEntityState__Thermostat__ThermostatOption;
 typedef struct NSPanelEntityState__Thermostat__ThermostatOption__ThermostatOptionValue NSPanelEntityState__Thermostat__ThermostatOption__ThermostatOptionValue;
 typedef struct NSPanelEntityState__MediaPlayer NSPanelEntityState__MediaPlayer;
+typedef struct NSPanelEntityState__MediaPlayer__SourceSelection NSPanelEntityState__MediaPlayer__SourceSelection;
 
 
 /* --- enums --- */
@@ -104,6 +105,23 @@ struct  NSPanelEntityState__Thermostat
     , 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0,NULL }
 
 
+struct  NSPanelEntityState__MediaPlayer__SourceSelection
+{
+  ProtobufCMessage base;
+  size_t n_sources;
+  char **sources;
+  /*
+   * Empty if unknown. Not every player reports its current source, and it
+   * is not always one of the listed sources.
+   */
+  char *current_source;
+  protobuf_c_boolean can_select;
+};
+#define NSPANEL_ENTITY_STATE__MEDIA_PLAYER__SOURCE_SELECTION__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_entity_state__media_player__source_selection__descriptor) \
+    , 0,NULL, (char *)protobuf_c_empty_string, 0 }
+
+
 struct  NSPanelEntityState__MediaPlayer
 {
   ProtobufCMessage base;
@@ -138,10 +156,45 @@ struct  NSPanelEntityState__MediaPlayer
    * the panel can compare it with the last URL to tell when to fetch again.
    */
   char *album_art_url;
+  /*
+   * How much one volume up/down press changes the volume and source volume, in 1-100%.
+   */
+  int32_t volume_step;
+  /*
+   * Sources (inputs) of this player.
+   */
+  NSPanelEntityState__MediaPlayer__SourceSelection *player_sources;
+  /*
+   * Sources of the source player feeding this player, if it has one (see
+   * source_volume). Unset when there is no source player. Changes completely
+   * when the player switches to another source.
+   */
+  NSPanelEntityState__MediaPlayer__SourceSelection *source_player_sources;
+  /*
+   * Playback position of the current media. Only valid if has_media_position is set.
+   * The controller only reports the position when playback starts, stops or seeks,
+   * not continuously. While playing, the current position is
+   * media_position + (now - media_position_updated_at). As the state is retained,
+   * a panel may receive it long after it was sent, so it must not count from when
+   * the state arrived.
+   */
+  protobuf_c_boolean has_media_position;
+  /*
+   * In seconds, at media_position_updated_at
+   */
+  int32_t media_position;
+  /*
+   * Unix time in seconds
+   */
+  int64_t media_position_updated_at;
+  /*
+   * In seconds, 0 if unknown (for example a live stream)
+   */
+  int32_t media_duration;
 };
 #define NSPANEL_ENTITY_STATE__MEDIA_PLAYER__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_entity_state__media_player__descriptor) \
-    , 0, (char *)protobuf_c_empty_string, NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__UNKNOWN, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string }
+    , 0, (char *)protobuf_c_empty_string, NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__UNKNOWN, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, 0, NULL, NULL, 0, 0, 0, 0 }
 
 
 typedef enum {
@@ -179,6 +232,9 @@ void   nspanel_entity_state__thermostat__thermostat_option__init
 /* NSPanelEntityState__Thermostat methods */
 void   nspanel_entity_state__thermostat__init
                      (NSPanelEntityState__Thermostat         *message);
+/* NSPanelEntityState__MediaPlayer__SourceSelection methods */
+void   nspanel_entity_state__media_player__source_selection__init
+                     (NSPanelEntityState__MediaPlayer__SourceSelection         *message);
 /* NSPanelEntityState__MediaPlayer methods */
 void   nspanel_entity_state__media_player__init
                      (NSPanelEntityState__MediaPlayer         *message);
@@ -215,6 +271,9 @@ typedef void (*NSPanelEntityState__Thermostat__ThermostatOption_Closure)
 typedef void (*NSPanelEntityState__Thermostat_Closure)
                  (const NSPanelEntityState__Thermostat *message,
                   void *closure_data);
+typedef void (*NSPanelEntityState__MediaPlayer__SourceSelection_Closure)
+                 (const NSPanelEntityState__MediaPlayer__SourceSelection *message,
+                  void *closure_data);
 typedef void (*NSPanelEntityState__MediaPlayer_Closure)
                  (const NSPanelEntityState__MediaPlayer *message,
                   void *closure_data);
@@ -234,6 +293,7 @@ extern const ProtobufCMessageDescriptor nspanel_entity_state__thermostat__descri
 extern const ProtobufCMessageDescriptor nspanel_entity_state__thermostat__thermostat_option__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_entity_state__thermostat__thermostat_option__thermostat_option_value__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_entity_state__media_player__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_entity_state__media_player__source_selection__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_entity_state__media_player__playback_state__descriptor;
 
 PROTOBUF_C__END_DECLS
