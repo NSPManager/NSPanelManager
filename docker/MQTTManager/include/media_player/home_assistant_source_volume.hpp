@@ -1,6 +1,8 @@
 #ifndef MQTT_MANAGER_HOME_ASSISTANT_SOURCE_VOLUME_HPP
 #define MQTT_MANAGER_HOME_ASSISTANT_SOURCE_VOLUME_HPP
 
+#include "media_player/home_assistant_source_player.hpp"
+#include "media_player/media_player.hpp"
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -13,6 +15,7 @@
  * Some setups (for example multi-room audio matrices) have a separate volume for the source
  * feeding a media player. How that source and its volume are exposed in Home Assistant differs
  * between integrations, a strategy selected per media player decides how to handle it.
+ * The strategy also gives access to the sources of the source player.
  */
 class HomeAssistantSourceVolumeStrategy {
 public:
@@ -35,24 +38,22 @@ public:
   virtual void set_source_volume(uint8_t volume) = 0;
 
   /**
+   * Get the sources of the source player currently feeding the media player, or nothing if there is no source player.
+   */
+  virtual std::optional<MediaPlayerSources> get_source_player_sources() = 0;
+
+  /**
+   * Select a source of the source player currently feeding the media player.
+   */
+  virtual void select_source_player_source(const std::string &source) = 0;
+
+  /**
    * Create the strategy selected for the media player.
    * @param media_player_id: ID of the media player, used for logging.
    * @param entity_data: The media player's entity_data from the DB.
-   * @param on_change: Called when the source volume changes without the media player itself changing.
+   * @param on_change: Called when the source volume or sources change without the media player itself changing.
    */
   static std::unique_ptr<HomeAssistantSourceVolumeStrategy> create(uint32_t media_player_id, const nlohmann::json &entity_data, std::function<void()> on_change);
-
-protected:
-  /**
-   * Convert a Home Assistant volume level (0.0-1.0) to 0-100%.
-   * Home Assistant always reports volume_level as 0.0-1.0, whatever the device uses. 0-100 is only used towards the NSPanel.
-   */
-  static std::optional<uint8_t> _volume_from_json(const nlohmann::json &volume_level);
-
-  /**
-   * Set the volume of the given Home Assistant media player.
-   */
-  static void _send_volume_set(const std::string &entity_id, uint8_t volume);
 };
 
 /**
@@ -63,6 +64,8 @@ public:
   void update_from_player_attributes(const nlohmann::json &attributes);
   std::optional<uint8_t> get_source_volume();
   void set_source_volume(uint8_t volume);
+  std::optional<MediaPlayerSources> get_source_player_sources();
+  void select_source_player_source(const std::string &source);
 };
 
 /**
@@ -71,17 +74,18 @@ public:
  */
 class PlayerAttributesSourceVolumeStrategy : public HomeAssistantSourceVolumeStrategy {
 public:
-  PlayerAttributesSourceVolumeStrategy(std::string source_entity_attribute, std::string source_volume_attribute);
+  PlayerAttributesSourceVolumeStrategy(std::string source_entity_attribute, std::string source_volume_attribute, std::function<void()> on_change);
   void update_from_player_attributes(const nlohmann::json &attributes);
   std::optional<uint8_t> get_source_volume();
   void set_source_volume(uint8_t volume);
+  std::optional<MediaPlayerSources> get_source_player_sources();
+  void select_source_player_source(const std::string &source);
 
 private:
-  std::string _source_entity_attribute;
   std::string _source_volume_attribute;
+  HomeAssistantSourcePlayer _source_player;
 
   std::mutex _mutex;
-  std::string _source_entity_id;
   std::optional<uint8_t> _source_volume;
 };
 
@@ -92,19 +96,14 @@ private:
 class SourceEntitySourceVolumeStrategy : public HomeAssistantSourceVolumeStrategy {
 public:
   SourceEntitySourceVolumeStrategy(std::string source_entity_attribute, std::function<void()> on_change);
-  ~SourceEntitySourceVolumeStrategy();
   void update_from_player_attributes(const nlohmann::json &attributes);
   std::optional<uint8_t> get_source_volume();
   void set_source_volume(uint8_t volume);
-  void home_assistant_event_callback(nlohmann::json event_data);
+  std::optional<MediaPlayerSources> get_source_player_sources();
+  void select_source_player_source(const std::string &source);
 
 private:
-  std::string _source_entity_attribute;
-  std::function<void()> _on_change;
-
-  std::mutex _mutex;
-  std::string _source_entity_id;
-  std::optional<uint8_t> _source_volume;
+  HomeAssistantSourcePlayer _source_player;
 };
 
 #endif // !MQTT_MANAGER_HOME_ASSISTANT_SOURCE_VOLUME_HPP

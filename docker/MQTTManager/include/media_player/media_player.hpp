@@ -10,6 +10,18 @@
 #include <protobuf_nspanel_entity.pb.h>
 #include <string>
 #include <string_view>
+#include <vector>
+
+/**
+ * Sources a media player (or the source player feeding it) can select, as reported by the controller.
+ */
+struct MediaPlayerSources {
+  std::vector<std::string> sources;
+  std::string current_source; // Empty if unknown.
+  bool can_select = false;
+
+  bool operator==(const MediaPlayerSources &other) const = default;
+};
 
 class MediaPlayerEntity : public MqttManagerEntity {
 public:
@@ -78,6 +90,23 @@ public:
   virtual void set_muted(bool muted) = 0;
 
   /**
+   * Select a source (input) of the media player.
+   * @param source: Name of the source as reported by the controller.
+   */
+  virtual void select_player_source(const std::string &source) = 0;
+
+  /**
+   * Select a source of the source player currently feeding the media player.
+   * @param source: Name of the source as reported by the controller.
+   */
+  virtual void select_source_player_source(const std::string &source) = 0;
+
+  // Limits on the source lists sent to the NSPanel, which can only receive 4 KB in one MQTT message.
+  // The NSPanel pages through longer lists than it can show at once.
+  static constexpr size_t max_sources = 32;
+  static constexpr size_t max_source_name_length = 64; // In bytes
+
+  /**
    * Get the current album art as the original image data (for example a JPEG) from the controller.
    * The image is downloaded on first request and cached until the album art changes. The same pointer is
    * returned for as long as the album art stays the same, so it can be used to tell when the art has changed.
@@ -114,6 +143,17 @@ protected:
    */
   virtual bool _download_album_art(const std::string &source, std::string &image_data) = 0;
 
+  /**
+   * Set the sources of the media player. They are sent with the next state update.
+   */
+  void _set_player_sources(MediaPlayerSources sources);
+
+  /**
+   * Set the sources of the source player feeding the media player, or nothing if there is no source player.
+   * They are sent with the next state update.
+   */
+  void _set_source_player_sources(std::optional<MediaPlayerSources> sources);
+
   uint32_t _id;
   std::string _name;
   uint16_t _room_id;
@@ -144,6 +184,32 @@ private:
    * Get the URL the NSPanel should fetch album art from, or an empty string if there is none.
    */
   std::string _get_album_art_url();
+
+  /**
+   * Shorten a source name to what is sent to the NSPanel, without splitting a UTF-8 character.
+   */
+  static std::string _limit_source_name(const std::string &name);
+
+  /**
+   * Fill in a source list for the NSPanel, limited to max_sources entries of max_source_name_length bytes.
+   */
+  static void _fill_source_selection(NSPanelEntityState_MediaPlayer_SourceSelection *selection, const MediaPlayerSources &sources);
+
+  /**
+   * Find the source a name sent by the NSPanel refers to. The NSPanel only knows the limited names.
+   * @return The source as reported by the controller, or nothing if the source can not be selected.
+   */
+  std::optional<std::string> _find_source(const std::optional<MediaPlayerSources> &sources, const std::string &name, std::string_view description);
+
+  /**
+   * Log a warning if sources will be cut short when sent to the NSPanel.
+   */
+  void _warn_if_sources_limited(const MediaPlayerSources &sources, std::string_view description);
+
+  // Guards the source lists. They are updated by the controller and read when the NSPanel selects a source.
+  std::mutex _sources_mutex;
+  MediaPlayerSources _player_sources;
+  std::optional<MediaPlayerSources> _source_player_sources;
 
   // Guards _album_art_source. Only held briefly, never while downloading.
   std::mutex _album_art_source_mutex;
