@@ -13,7 +13,6 @@ urlpatterns = [
     path("settings", views.settings_page, name="settings"),
     path("save_settings", views.save_settings, name="save_settings"),
     path("save_new_room", views.save_new_room, name="save_new_room"),
-    path("rooms/<int:room_id>/delete", views.delete_room, name="delete_room"),
     path("save_new_firmware", views.save_new_firmware, name="save_new_firmware"),
     path("save_new_data_file", views.save_new_data_file, name="save_new_data_file"),
     path("save_new_merged_flash", views.save_new_merged_flash, name="save_new_merged_flash"),

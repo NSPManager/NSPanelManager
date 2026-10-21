@@ -1,4 +1,4 @@
-import { t as create } from "./react-prBK1Gtt.js";
+import { t as create } from "./react-DDYtTUne.js";
 //#region src/stores/SettingsStore.ts
 function getCookie(name) {
 	let cookieValue = "";
