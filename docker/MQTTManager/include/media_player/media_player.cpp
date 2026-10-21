@@ -94,6 +94,19 @@ void MediaPlayerEntity::send_state_update_to_nspanel() {
   media_player_state->set_can_mute(this->_can_mute);
   media_player_state->set_album_art_url(this->_get_album_art_url());
   media_player_state->set_volume_step(this->_volume_step);
+  media_player_state->set_has_media_position(this->_has_media_position);
+  if (this->_has_media_position) {
+    media_player_state->set_media_position(this->_media_position);
+    media_player_state->set_media_position_updated_at(this->_media_position_updated_at);
+  }
+  media_player_state->set_media_duration(this->_media_duration);
+  {
+    std::lock_guard<std::mutex> lock_guard(this->_sources_mutex);
+    MediaPlayerEntity::_fill_source_selection(media_player_state->mutable_player_sources(), this->_player_sources);
+    if (this->_source_player_sources.has_value()) {
+      MediaPlayerEntity::_fill_source_selection(media_player_state->mutable_source_player_sources(), this->_source_player_sources.value());
+    }
+  }
 
   google::protobuf::util::MessageDifferencer differencer;
   if (!differencer.Compare(this->_last_media_player_state, state)) {
@@ -128,7 +141,7 @@ void MediaPlayerEntity::command_callback(NSPanelMQTTManagerCommand &command) {
     this->previous_track();
     break;
   case NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_NONE:
-    // The command only changes volume or mute.
+    // The command only changes volume, mute or source.
     break;
   default:
     SPDLOG_WARN("Received unknown playback action {} for media player {}::{}.", static_cast<int>(media_player_command.playback_action()), this->_id, this->_name);
@@ -145,6 +158,97 @@ void MediaPlayerEntity::command_callback(NSPanelMQTTManagerCommand &command) {
 
   if (media_player_command.has_muted()) {
     this->set_muted(media_player_command.muted());
+  }
+
+  if (!media_player_command.select_player_source().empty()) {
+    std::optional<std::string> source;
+    {
+      std::lock_guard<std::mutex> lock_guard(this->_sources_mutex);
+      source = this->_find_source(this->_player_sources, media_player_command.select_player_source(), "source");
+    }
+    if (source.has_value()) {
+      this->select_player_source(source.value());
+    }
+  }
+
+  if (!media_player_command.select_source_player_source().empty()) {
+    std::optional<std::string> source;
+    {
+      std::lock_guard<std::mutex> lock_guard(this->_sources_mutex);
+      source = this->_find_source(this->_source_player_sources, media_player_command.select_source_player_source(), "source player source");
+    }
+    if (source.has_value()) {
+      this->select_source_player_source(source.value());
+    }
+  }
+}
+
+void MediaPlayerEntity::_set_player_sources(MediaPlayerSources sources) {
+  std::lock_guard<std::mutex> lock_guard(this->_sources_mutex);
+  if (this->_player_sources != sources) {
+    this->_warn_if_sources_limited(sources, "sources");
+    this->_player_sources = std::move(sources);
+  }
+}
+
+void MediaPlayerEntity::_set_source_player_sources(std::optional<MediaPlayerSources> sources) {
+  std::lock_guard<std::mutex> lock_guard(this->_sources_mutex);
+  if (this->_source_player_sources != sources) {
+    if (sources.has_value()) {
+      this->_warn_if_sources_limited(sources.value(), "source player sources");
+    }
+    this->_source_player_sources = std::move(sources);
+  }
+}
+
+std::string MediaPlayerEntity::_limit_source_name(const std::string &name) {
+  if (name.size() <= MediaPlayerEntity::max_source_name_length) {
+    return name;
+  }
+  // Step back from the cut while it would land on a UTF-8 continuation byte (10xxxxxx).
+  size_t length = MediaPlayerEntity::max_source_name_length;
+  while (length > 0 && (static_cast<unsigned char>(name[length]) & 0xC0) == 0x80) {
+    length--;
+  }
+  return name.substr(0, length);
+}
+
+void MediaPlayerEntity::_fill_source_selection(NSPanelEntityState_MediaPlayer_SourceSelection *selection, const MediaPlayerSources &sources) {
+  for (size_t i = 0; i < sources.sources.size() && i < MediaPlayerEntity::max_sources; i++) {
+    selection->add_sources(MediaPlayerEntity::_limit_source_name(sources.sources[i]));
+  }
+  selection->set_current_source(MediaPlayerEntity::_limit_source_name(sources.current_source));
+  selection->set_can_select(sources.can_select);
+}
+
+std::optional<std::string> MediaPlayerEntity::_find_source(const std::optional<MediaPlayerSources> &sources, const std::string &name, std::string_view description) {
+  if (!sources.has_value()) {
+    SPDLOG_WARN("Received command to select {} '{}' for media player {}::{} but it has no source player.", description, name, this->_id, this->_name);
+    return std::nullopt;
+  }
+  if (!sources->can_select) {
+    SPDLOG_WARN("Received command to select {} '{}' for media player {}::{} but it can not select one.", description, name, this->_id, this->_name);
+    return std::nullopt;
+  }
+  // Only the sources sent to the NSPanel can be selected, compare with their names as sent.
+  for (size_t i = 0; i < sources->sources.size() && i < MediaPlayerEntity::max_sources; i++) {
+    if (MediaPlayerEntity::_limit_source_name(sources->sources[i]).compare(name) == 0) {
+      return sources->sources[i];
+    }
+  }
+  SPDLOG_WARN("Received command to select {} '{}' for media player {}::{} but it is not one of its current sources.", description, name, this->_id, this->_name);
+  return std::nullopt;
+}
+
+void MediaPlayerEntity::_warn_if_sources_limited(const MediaPlayerSources &sources, std::string_view description) {
+  if (sources.sources.size() > MediaPlayerEntity::max_sources) {
+    SPDLOG_WARN("Media player {}::{} has {} {}, only the first {} will be sent to the NSPanel.", this->_id, this->_name, sources.sources.size(), description, MediaPlayerEntity::max_sources);
+  }
+  for (size_t i = 0; i < sources.sources.size() && i < MediaPlayerEntity::max_sources; i++) {
+    if (sources.sources[i].size() > MediaPlayerEntity::max_source_name_length) {
+      SPDLOG_WARN("Media player {}::{} has {} with names longer than {} bytes, they will be shortened on the NSPanel.", this->_id, this->_name, description, MediaPlayerEntity::max_source_name_length);
+      break;
+    }
   }
 }
 

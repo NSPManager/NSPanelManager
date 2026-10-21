@@ -1,0 +1,125 @@
+{
+  "_about": "Media player states recorded from a real Home Assistant on 2026-10-17, as returned by get_states. Personal names and the album art proxy token were replaced; everything else is as recorded.",
+  "matrix_zone": {
+    "entity_id": "media_player.acmax24_office",
+    "state": "playing",
+    "attributes": {
+      "source_list": ["Movie Theatre", "Gym TV", "Upstairs Matrix", "Downstairs Matrix", "Disconnected", "Kitchen TV", "Alexa 1"],
+      "volume_level": 0.45,
+      "is_volume_muted": true,
+      "media_duration": 314,
+      "media_position": 0,
+      "media_position_updated_at": "2026-10-17T01:59:45.666287+00:00",
+      "media_title": "Afire Love",
+      "media_artist": "Ed Sheeran",
+      "media_album_name": "x (10th Anniversary Edition)",
+      "source": "Upstairs Matrix",
+      "active_source_entity_id": "media_player.upstairs_matrix",
+      "source_volume_level": 0.28,
+      "entity_picture": "/api/media_player_proxy/media_player.upstairs_matrix?token=REDACTED&cache=02163151f24c04dc",
+      "icon": "mdi:speaker-off",
+      "friendly_name": "Office",
+      "supported_features": 19517
+    }
+  },
+  "matrix_source_player": {
+    "entity_id": "media_player.upstairs_matrix",
+    "state": "playing",
+    "attributes": {
+      "source_list": ["Line-in", "Bringing It All Back Home", "Brothers In Arms", "Christmas", "Continuum", "Eye In the Sky", "Pat’s Station", "Mmm Mmm Mmm Mmm", "Peaches!", "Pomplamoose & Similar Artists Station", "Scary Goldings: Live (feat. John Scofield)", "True (Bonus Edition)", "Vertigo", "Workout playlist", "Year of the Cat", "ST Music"],
+      "group_members": ["media_player.upstairs_matrix"],
+      "volume_level": 0.28,
+      "is_volume_muted": false,
+      "media_content_id": "x-sonosprog-http:song%3a1747957556.mp4?sid=204&flags=8232&sn=2",
+      "media_content_type": "music",
+      "media_duration": 314,
+      "media_position": 0,
+      "media_position_updated_at": "2026-10-17T01:59:45.666287+00:00",
+      "media_title": "Afire Love",
+      "media_artist": "Ed Sheeran",
+      "media_album_name": "x (10th Anniversary Edition)",
+      "media_channel": "Pat’s Station",
+      "shuffle": false,
+      "repeat": "off",
+      "queue_position": 4,
+      "queue_size": 7,
+      "device_class": "speaker",
+      "entity_picture": "/api/media_player_proxy/media_player.upstairs_matrix?token=REDACTED&cache=02163151f24c04dc",
+      "friendly_name": "Upstairs Matrix",
+      "supported_features": 8321599
+    }
+  },
+  "matrix_controller": {
+    "entity_id": "media_player.acmax24_avpro_edge_ac_max_24",
+    "state": "unknown",
+    "attributes": {
+      "source_list": ["Movie Theatre", "Gym TV", "Upstairs Matrix", "Downstairs Matrix", "Disconnected", "Kitchen TV", "Alexa 1"],
+      "icon": "mdi:speaker",
+      "friendly_name": "AVPro Edge AC-MAX-24",
+      "supported_features": 2048
+    }
+  },
+  "apple_tv_off": {
+    "entity_id": "media_player.living_room_2",
+    "state": "off",
+    "attributes": {
+      "source_list": ["Apple Events", "App Store", "Arcade", "CLASH?", "Computers", "Disney+", "ESPN", "F1 TV", "Fitness", "FOX Sports", "Fubo", "Gold", "HBO Max", "HomeCam", "Hulu", "Mini Motorways", "Music", "NBC Sports", "Netflix", "Paramount+", "Peacock", "Photos", "Plex", "Pluto TV", "Podcasts", "Prime Video", "Protect", "Retrocade", "Search", "Settings", "Showtime", "Sky News", "Steam Link", "SYFY", "TED", "The Lost City", "TV", "Vimeo", "VLC", "YouTube", "YouTube TV"],
+      "friendly_name": "Movie Room Apple TV",
+      "supported_features": 450487
+    }
+  },
+  "av_receiver_off": {
+    "entity_id": "media_player.rx_v685_cd9c27",
+    "state": "off",
+    "attributes": {
+      "source_list": ["Napster", "SiriusXM", "Pandora", "Spotify", "Qobuz", "TIDAL", "Deezer", "Amazon Music", "Alexa", "AirPlay", "MusicCast Link", "SERVER", "NET RADIO", "Bluetooth", "USB", "TUNER", "Blu Ray", "Nintendo Switch", "Apple TV", "XBOX", "XBOX 360", "AV1", "TV", "AUDIO1", "AUDIO2", "AUDIO3", "AUDIO4", "AUDIO5", "PHONO", "AUX"],
+      "sound_mode_list": ["munich", "vienna", "chamber", "cellar_club", "roxy_theatre", "bottom_line", "sports", "action_game", "roleplaying_game", "music_video", "standard", "spectacle", "sci-fi", "adventure", "drama", "mono_movie", "2ch_stereo", "7ch_stereo", "surr_decoder", "straight"],
+      "group_members": ["media_player.rx_v685_cd9c27"],
+      "icon": "mdi:speaker",
+      "friendly_name": "Yamaha AV Receiver",
+      "supported_features": 888716
+    }
+  },
+  "music_assistant_receiver": {
+    "entity_id": "media_player.denon_avr_x3800h_3",
+    "state": "idle",
+    "attributes": {
+      "source_list": ["Local Music", "Playlists", "History", "Favorites", "HDMI 1", "Apple TV", "Blu-ray", "Music Assistant Queue"],
+      "group_members": [],
+      "volume_level": 0.55,
+      "is_volume_muted": false,
+      "media_content_type": "music",
+      "app_id": "music_assistant",
+      "source": "Music Assistant Queue",
+      "shuffle": false,
+      "repeat": "off",
+      "entity_picture_local": null,
+      "mass_player_type": "player",
+      "active_queue": "-946166078",
+      "device_class": "speaker",
+      "icon": "mdi:speaker",
+      "friendly_name": "Denon AVR-X3800H",
+      "supported_features": 8322623
+    }
+  },
+  "music_assistant_speaker": {
+    "entity_id": "media_player.kitchen_2",
+    "state": "idle",
+    "attributes": {
+      "group_members": [],
+      "volume_level": 0.2,
+      "media_content_type": "music",
+      "app_id": "music_assistant",
+      "source": "Music Assistant Queue",
+      "shuffle": false,
+      "repeat": "off",
+      "entity_picture_local": null,
+      "mass_player_type": "player",
+      "active_queue": "apa2f08fae56c3",
+      "device_class": "speaker",
+      "icon": "mdi:speaker",
+      "friendly_name": "Kitchen",
+      "supported_features": 8320575
+    }
+  }
+}

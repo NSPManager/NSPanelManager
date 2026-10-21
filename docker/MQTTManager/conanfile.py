@@ -15,6 +15,7 @@ class CompressorRecipe(ConanFile):
         self.requires("nlohmann_json/3.12.0")
         self.requires("ixwebsocket/11.4.5")
         self.requires("tz/2023c")
+        self.requires("date/3.0.5")  # Header-only, for parsing Home Assistant timestamps
         # self.requires("inja/3.4.0")
         self.requires("boost/1.84.0")
         self.requires("protobuf/5.27.0")
@@ -27,6 +28,7 @@ class CompressorRecipe(ConanFile):
         self.options["boost"].without_stacktrace = False
         self.options["boost"].with_stacktrace_backtrace = True
         self.options["sqlite_orm"].SQLITE_ORM_ENABLE_CXX_17 = True
+        self.options["date"].header_only = True
 
     def layout(self):
         cmake_layout(self)
