@@ -1,0 +1,78 @@
+name: "TFT build"
+
+on:
+  pull_request:
+    paths:
+      - "docker/HMI_files/**"
+      - ".github/workflows/tft-build.yml"
+  push:
+    branches:
+      - "main"
+      - "devel"
+      - "beta"
+    paths:
+      - "docker/HMI_files/**"
+      - ".github/workflows/tft-build.yml"
+  workflow_dispatch:
+
+# Fork pull requests already get a read-only token and no repository secrets; this keeps
+# same-repo runs read-only too.
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: docker/HMI_files/tft_automation
+
+jobs:
+  check:
+    name: Check the committed HMIs, pictures and TFTs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install numpy and Pillow
+        run: python -m pip install -r requirements.txt
+
+      - name: Unit tests
+        run: python -m unittest discover -v -s tests -t .
+
+      # Fails if a TFT wasn't compiled from its HMI, or isn't what make_tfts.sh builds, or a
+      # progress bar's pictures don't match the bar in the HMI.
+      - name: Check the committed build
+        run: python check_build.py
+
+  render:
+    name: Render the pictures and rebuild the TFTs
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install numpy and Pillow
+        run: python -m pip install -r requirements.txt
+
+      - name: Render the pictures
+        run: ./make_pictures.sh
+
+      # Fails if GIMP's output differs from the committed pictures, for example after changing
+      # an .xcf or .scm without committing the pictures, or if the TFTs don't follow from them.
+      - name: Compare with the committed pictures and TFTs
+        run: python check_build.py --rendered
+
+      - name: Upload the render log
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pictures-run-log
+          path: docker/HMI_files/tft_automation/last_pictures_run.log
+          if-no-files-found: ignore
