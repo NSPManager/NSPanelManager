@@ -1,0 +1,60 @@
+name: "Protobuf"
+
+# The code generated from docker/protobuf/*.proto is committed. Check that it matches the .proto
+# files, and that protoc and both protobuf runtimes are on the same release: the generated C++
+# refuses to compile, and the generated Python refuses to import, against a different version.
+
+on:
+  pull_request:
+    paths:
+      - "docker/protobuf/**"
+      - "docker/MQTTManager/include/protobuf/**"
+      - "docker/MQTTManager/conanfile.py"
+      - "docker/web/nspanelmanager/web/protobuf/**"
+      - "docker/web/requirements.txt"
+      - "protobuf_firmware/**"
+      - ".github/workflows/protobuf.yml"
+  push:
+    branches:
+      - "main"
+      - "devel"
+      - "beta"
+    paths:
+      - "docker/protobuf/**"
+      - "docker/MQTTManager/include/protobuf/**"
+      - "docker/MQTTManager/conanfile.py"
+      - "docker/web/nspanelmanager/web/protobuf/**"
+      - "docker/web/requirements.txt"
+      - "protobuf_firmware/**"
+      - ".github/workflows/protobuf.yml"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check protobuf versions match
+        run: |
+          protoc_version=$(sed -nE 's/^REMOTE_FILE="protoc-([0-9.]+)-.*/\1/p' docker/protobuf/install_protobuf.sh)
+          conan_version=$(sed -nE 's/.*"protobuf\/([0-9.]+)".*/\1/p' docker/MQTTManager/conanfile.py)
+          python_version=$(sed -nE 's/^protobuf==([0-9.]+).*/\1/p' docker/web/requirements.txt)
+          echo "protoc $protoc_version, Conan protobuf $conan_version, Python protobuf $python_version"
+          # protoc 27.0 is the protoc of the 5.27.0 C++ and Python runtimes.
+          if [ -z "$protoc_version" ] || [ "5.$protoc_version" != "$conan_version" ] || [ "$conan_version" != "$python_version" ]; then
+            echo "::error::protoc ($protoc_version in install_protobuf.sh), Conan protobuf ($conan_version in conanfile.py) and Python protobuf ($python_version in requirements.txt) must be the same release"
+            exit 1
+          fi
+
+      # The same script contributors run, so a failure here is fixed by running it locally.
+      - name: Regenerate
+        run: bash docker/protobuf/regenerate.sh
+
+      - name: Check generated code is up to date
+        run: |
+          git add --intent-to-add --all
+          if ! git diff --exit-code --stat; then
+            git diff
+            echo "::error::Generated protobuf code is out of date. Run docker/protobuf/regenerate.sh (needs only Docker) and commit the result."
+            exit 1
+          fi

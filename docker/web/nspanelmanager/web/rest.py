@@ -679,7 +679,7 @@ def scenes_post(request):
             scene.lightstate_set.all().delete()  # Remove all old states
             # TODO: Convert light states to JSON fields in DB.
             for light_state in data["light_states"]:
-                light = Light.objects.filter(id=light_state["light_id"]).first()
+                light = Entity.objects.filter(id=light_state["light_id"], entity_type=Entity.EntityType.LIGHT).first()
                 if light:
                     new_state = LightState()
                     new_state.light = light
