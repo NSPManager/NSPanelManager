@@ -15,6 +15,7 @@ const MultiStep_AddEditEntity_Step2 = ({
     switch: ["home_assistant", "openhab"],
     button: ["home_assistant", "nspm"],
     thermostat: ["home_assistant", "openhab"],
+    media_player: ["home_assistant"],
     scene: ["home_assistant", "openhab", "nspm"],
   };
 

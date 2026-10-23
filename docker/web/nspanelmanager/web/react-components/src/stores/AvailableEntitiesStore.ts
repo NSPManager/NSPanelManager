@@ -51,6 +51,8 @@ function getOptionsFromItems(items: any[]): IOptionType[] {
       mdi_icon = "mdi-palette";
     } else if (item.item_id.startsWith("script")) {
       mdi_icon = "mdi-code-json";
+    } else if (item.item_id.startsWith("media_player")) {
+      mdi_icon = "mdi-speaker";
     }
 
     options.push({
