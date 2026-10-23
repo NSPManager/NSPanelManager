@@ -287,6 +287,170 @@ class ThermostatTests(EntityRESTCommonTests, EntityRESTTestCase):
         self.assertCreatesNothing(self.save(self.payload(step_size="lots")))
 
 
+class MediaPlayerTests(EntityRESTCommonTests, EntityRESTTestCase):
+    url = "rest_entities_media_players"
+
+    def payload(self, slot=0, **overrides):
+        # Only the required fields, so test_every_required_field_is_enforced covers exactly those.
+        return {
+            **placement(self.page, slot),
+            "controller": "home_assistant",
+            "friendly_name": "Kitchen speakers",
+            "home_assistant_name": "media_player.kitchen_zone",
+        } | overrides
+
+    def form_payload(self, **overrides):
+        """Everything the React media player form sends."""
+        return (
+            self.payload()
+            | {
+                "id": None,
+                "type": "entity",
+                "entity_type": "media_player",
+                "volume_step": 5,
+                "source_volume_strategy": "none",
+                "source_entity_attribute": "",
+                "source_volume_attribute": "",
+            }
+            | overrides
+        )
+
+    def test_add_standalone_media_player(self):
+        self.assertEqual(self.save(self.payload()).status_code, 200)
+
+        media_player = Entity.objects.get()
+        self.assertEqual(media_player.entity_type, Entity.EntityType.MEDIA_PLAYER)
+        self.assertEqual(
+            media_player.entity_data,
+            {
+                "controller": "home_assistant",
+                "home_assistant_name": "media_player.kitchen_zone",
+                "source_volume_strategy": "none",
+                "source_entity_attribute": "",
+                "source_volume_attribute": "",
+                "volume_step": 5,
+            },
+        )
+        self.assertLoadableByManager(media_player)
+        self.assertManagerReloaded(times=1)
+
+    def test_add_with_the_payload_the_form_sends(self):
+        self.assertEqual(self.save(self.form_payload(volume_step=10)).status_code, 200)
+
+        media_player = Entity.objects.get()
+        self.assertEqual(media_player.friendly_name, "Kitchen speakers")
+        self.assertEqual(media_player.entity_data["volume_step"], 10)
+        self.assertLoadableByManager(media_player)
+
+    def test_add_room_player_that_says_which_player_feeds_it(self):
+        response = self.save(self.form_payload(source_volume_strategy="source_entity", source_entity_attribute="source_entity_id"))
+
+        self.assertEqual(response.status_code, 200)
+        entity_data = Entity.objects.get().entity_data
+        self.assertEqual(entity_data["source_volume_strategy"], "source_entity")
+        self.assertEqual(entity_data["source_entity_attribute"], "source_entity_id")
+
+    def test_add_room_player_that_reports_the_source_player_and_its_volume(self):
+        response = self.save(self.form_payload(source_volume_strategy="player_attributes", source_entity_attribute="source_entity_id", source_volume_attribute="source_volume"))
+
+        self.assertEqual(response.status_code, 200)
+        entity_data = Entity.objects.get().entity_data
+        self.assertEqual(entity_data["source_volume_strategy"], "player_attributes")
+        self.assertEqual(entity_data["source_entity_attribute"], "source_entity_id")
+        self.assertEqual(entity_data["source_volume_attribute"], "source_volume")
+
+    def test_source_attributes_are_trimmed(self):
+        self.save(self.form_payload(source_volume_strategy="player_attributes", source_entity_attribute=" source_entity_id ", source_volume_attribute="\tsource_volume\n"))
+
+        entity_data = Entity.objects.get().entity_data
+        self.assertEqual(entity_data["source_entity_attribute"], "source_entity_id")
+        self.assertEqual(entity_data["source_volume_attribute"], "source_volume")
+
+    def test_multi_room_setup_without_its_attributes_is_rejected(self):
+        cases = {
+            "source_entity without a source player attribute": {"source_volume_strategy": "source_entity"},
+            "source_entity with a blank source player attribute": {"source_volume_strategy": "source_entity", "source_entity_attribute": "   "},
+            "player_attributes without a source player attribute": {"source_volume_strategy": "player_attributes", "source_volume_attribute": "source_volume"},
+            "player_attributes without a source volume attribute": {"source_volume_strategy": "player_attributes", "source_entity_attribute": "source_entity_id"},
+        }
+        for case, overrides in cases.items():
+            with self.subTest(case):
+                self.assertEqual(self.save(self.form_payload(**overrides)).status_code, 400)
+        self.assertFalse(Entity.objects.exists())
+        self.assertManagerNotReloaded()
+
+    def test_unknown_source_volume_strategy_is_rejected(self):
+        self.assertCreatesNothing(self.save(self.form_payload(source_volume_strategy="matrix", source_entity_attribute="source_entity_id")))
+
+    def test_non_string_source_settings_are_rejected(self):
+        for field in ("source_volume_strategy", "source_entity_attribute", "source_volume_attribute"):
+            with self.subTest(field=field):
+                self.assertEqual(self.save(self.form_payload(**{field: 1})).status_code, 400)
+        self.assertFalse(Entity.objects.exists())
+
+    def test_volume_step_must_be_a_whole_percentage(self):
+        for volume_step in (0, 101, -5, 2.5, "5", True, None):
+            with self.subTest(volume_step=volume_step):
+                response = self.save(self.form_payload(volume_step=volume_step))
+                if volume_step is None:
+                    # null means "not given" and falls back to the default, like leaving it out.
+                    self.assertEqual(response.status_code, 200)
+                    Entity.objects.all().delete()
+                else:
+                    self.assertEqual(response.status_code, 400)
+        self.assertFalse(Entity.objects.exists())
+
+    def test_volume_step_limits_are_accepted(self):
+        for slot, volume_step in enumerate((1, 100)):
+            with self.subTest(volume_step=volume_step):
+                self.assertEqual(self.save(self.form_payload(volume_step=volume_step) | placement(self.page, slot)).status_code, 200)
+        self.assertEqual(sorted(e.entity_data["volume_step"] for e in Entity.objects.all()), [1, 100])
+
+    def test_edit_without_volume_step_keeps_it(self):
+        self.save(self.form_payload(volume_step=20))
+        media_player = Entity.objects.get()
+
+        self.assertEqual(self.save(self.payload(id=media_player.id, friendly_name="Renamed")).status_code, 200)
+
+        media_player.refresh_from_db()
+        self.assertEqual(media_player.entity_data["volume_step"], 20)
+
+    def test_switching_to_standalone_drops_the_source_settings(self):
+        # The form clears attributes the selected setup doesn't use, the API stores what it gets.
+        self.save(self.form_payload(source_volume_strategy="player_attributes", source_entity_attribute="source_entity_id", source_volume_attribute="source_volume"))
+        media_player = Entity.objects.get()
+
+        self.save(self.form_payload(id=media_player.id))
+
+        media_player.refresh_from_db()
+        self.assertEqual(media_player.entity_data["source_volume_strategy"], "none")
+        self.assertEqual(media_player.entity_data["source_entity_attribute"], "")
+        self.assertEqual(media_player.entity_data["source_volume_attribute"], "")
+
+    def test_only_home_assistant_is_supported(self):
+        for controller in ("openhab", "nspm"):
+            with self.subTest(controller=controller):
+                self.assertEqual(self.save(self.payload(controller=controller)).status_code, 400)
+        self.assertFalse(Entity.objects.exists())
+
+    def test_editing_another_entity_type_is_rejected(self):
+        switch = Entity.objects.create(entity_type=Entity.EntityType.SWITCH, friendly_name="Fan", room=self.room, entities_page=self.page, room_view_position=1, entity_data={"controller": "home_assistant", "home_assistant_name": "switch.fan"})
+
+        response = self.save(self.payload(id=switch.id, slot=1))
+
+        self.assertEqual(response.status_code, 409)
+        switch.refresh_from_db()
+        self.assertEqual(switch.entity_type, Entity.EntityType.SWITCH)
+        self.assertManagerNotReloaded()
+
+    def test_page_that_is_not_an_entities_page_of_the_room_is_rejected(self):
+        other_room = self.make_room("Lounge")
+        for page in (self.scenes_page(self.room), self.entities_page(other_room)):
+            with self.subTest(page=page.id):
+                self.assertEqual(self.save(self.payload() | {"entities_page_id": page.id}).status_code, 400)
+        self.assertFalse(Entity.objects.exists())
+
+
 class SceneTests(EntityRESTCommonTests, EntityRESTTestCase):
     url = "rest_entities_scenes"
     model = Scene

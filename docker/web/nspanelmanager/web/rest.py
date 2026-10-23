@@ -1163,7 +1163,7 @@ def entities_media_players(request):
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=405)
 
 
 def put_media_player_entity(request):

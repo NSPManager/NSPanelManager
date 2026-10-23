@@ -152,6 +152,7 @@ class NSPMTestCase(TestCase):
         Entity.EntityType.SWITCH: {"home_assistant", "openhab"},
         Entity.EntityType.BUTTON: {"home_assistant", "nspm"},
         Entity.EntityType.THERMOSTAT: {"home_assistant", "openhab"},
+        Entity.EntityType.MEDIA_PLAYER: {"home_assistant"},
     }
     MANAGER_SCENE_TYPES: ClassVar = {"home_assistant", "openhab", "nspm_scene"}
 
