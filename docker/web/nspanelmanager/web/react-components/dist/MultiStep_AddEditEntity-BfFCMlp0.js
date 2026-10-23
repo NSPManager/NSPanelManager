@@ -1,10 +1,10 @@
-import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-BELnHkx2.js";
-import { t as create } from "./react-prBK1Gtt.js";
-import { t as useSettingsStore } from "./SettingsStore-CHxKdt7f.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-doppudd5.js";
-import { n as Notify } from "./NSPanelToastContainer-CSal8dJj.js";
-import { t as motion } from "./proxy-B1Ceffil.js";
-import { t as AnimatePresence } from "./AnimatePresence-DTHwshb8.js";
+import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-DJzR3g3Q.js";
+import { t as create } from "./react-BvJmZ7rj.js";
+import { t as useSettingsStore } from "./SettingsStore-DuDj5JzQ.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-z47lTFt8.js";
+import { n as Notify } from "./NSPanelToastContainer-Cw-F-8Z1.js";
+import { t as motion } from "./proxy-1upSaelY.js";
+import { t as AnimatePresence } from "./AnimatePresence-COtqkp7u.js";
 //#region src/stores/EntitiesPagesStore.ts
 function getCookie$1(name) {
 	let cookieValue = "";
@@ -105,6 +105,7 @@ var MultiStep_AddEditEntity_Step1 = ({ handleButtonSelectEvent, next_step }) => 
 	const [switchHovered, setSwitchHovered] = (0, import_react.useState)(false);
 	const [buttonHovered, setButtonHovered] = (0, import_react.useState)(false);
 	const [thermostatHovered, setThermostatHovered] = (0, import_react.useState)(false);
+	const [mediaPlayerHovered, setMediaPlayerHovered] = (0, import_react.useState)(false);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "grid grid-cols-3 gap-4 w-full",
 		children: [
@@ -183,6 +184,25 @@ var MultiStep_AddEditEntity_Step1 = ({ handleButtonSelectEvent, next_step }) => 
 						children: "Thermostat / climate"
 					})
 				})]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				onMouseEnter: () => setMediaPlayerHovered(true),
+				onMouseLeave: () => setMediaPlayerHovered(false),
+				className: "group bg-base-100 rounded-box border border-neutral border-dashed p-6 cursor-pointer hover:bg-yellow-500/10",
+				onClick: () => {
+					handleButtonSelectEvent("entity_type", "media_player")();
+					next_step();
+				},
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "flex justify-center items-center",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mdi ${mediaPlayerHovered ? "mdi-play-circle" : "mdi-speaker"} text-3xl text-neutral-content/50 group-hover:text-yellow-500` })
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "flex justify-center items-center",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-base-content/50 group-hover:text-base-content text-center",
+						children: "Media player"
+					})
+				})]
 			})
 		]
 	}) });
@@ -195,6 +215,7 @@ var MultiStep_AddEditEntity_Step2 = ({ handleButtonSelectEvent, entity_type, nex
 		switch: ["home_assistant", "openhab"],
 		button: ["home_assistant", "nspm"],
 		thermostat: ["home_assistant", "openhab"],
+		media_player: ["home_assistant"],
 		scene: [
 			"home_assistant",
 			"openhab",
@@ -7664,6 +7685,7 @@ function getOptionsFromItems(items) {
 		else if (item.item_id.startsWith("climate")) mdi_icon = "mdi-thermostat";
 		else if (item.item_id.startsWith("scene")) mdi_icon = "mdi-palette";
 		else if (item.item_id.startsWith("script")) mdi_icon = "mdi-code-json";
+		else if (item.item_id.startsWith("media_player")) mdi_icon = "mdi-speaker";
 		options.push({
 			value: item.item_id,
 			label: item.label,
@@ -7720,7 +7742,7 @@ var useAvailableEntitiesStore = create((set) => ({
 }));
 //#endregion
 //#region src/components/MultiStep_AddEditEntity/entity_types/step3_edit_light.tsx
-var schema$4 = object({
+var schema$5 = object({
 	id: number().nullable(),
 	type: string(),
 	entity_type: string(),
@@ -7739,7 +7761,7 @@ var schema$4 = object({
 	openhab_item_dimmer: string().optional(),
 	openhab_item_rgb: string().optional()
 });
-var CustomOption$4 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
+var CustomOption$5 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
 	if (isDisabled) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		...innerProps,
@@ -7747,10 +7769,10 @@ var CustomOption$4 = ({ innerProps, isDisabled, isFocused, isSelected, children,
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mdi ${data.icon} me-2` }), children]
 	});
 };
-var select_components$4 = { Option: CustomOption$4 };
+var select_components$5 = { Option: CustomOption$5 };
 var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_id, room_view_position, id, onComplete }) => {
 	const { handleSubmit, register, reset, getValues, setValue, formState: { isValid } } = useForm({
-		resolver: u(schema$4),
+		resolver: u(schema$5),
 		defaultValues: {
 			id: id ?? null,
 			controller,
@@ -7885,7 +7907,7 @@ var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_
 							shouldDirty: true
 						}),
 						unstyled: true,
-						components: select_components$4,
+						components: select_components$5,
 						value: useAvailableEntitiesStore.getState().home_assistant_options.find((option) => option.value === getValues("home_assistant_name")),
 						styles: {
 							input: (base) => ({
@@ -8057,7 +8079,7 @@ var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_
 						}),
 						value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_item_dimmer")),
 						unstyled: true,
-						components: select_components$4,
+						components: select_components$5,
 						styles: {
 							input: (base) => ({
 								...base,
@@ -8087,7 +8109,7 @@ var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_
 							});
 						},
 						value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_item_color_temp")),
-						components: select_components$4,
+						components: select_components$5,
 						unstyled: true,
 						styles: {
 							input: (base) => ({
@@ -8116,7 +8138,7 @@ var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_
 							shouldDirty: true
 						}),
 						value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_item_rgb")),
-						components: select_components$4,
+						components: select_components$5,
 						unstyled: true,
 						styles: {
 							input: (base) => ({
@@ -8149,7 +8171,7 @@ var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_
 };
 //#endregion
 //#region src/components/MultiStep_AddEditEntity/entity_types/step3_edit_switch.tsx
-var schema$3 = object({
+var schema$4 = object({
 	id: number().nullable(),
 	type: string(),
 	entity_type: string(),
@@ -8161,7 +8183,7 @@ var schema$3 = object({
 	home_assistant_name: string().optional(),
 	openhab_item_switch: string().optional()
 });
-var CustomOption$3 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
+var CustomOption$4 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
 	if (isDisabled) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		...innerProps,
@@ -8169,10 +8191,10 @@ var CustomOption$3 = ({ innerProps, isDisabled, isFocused, isSelected, children,
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mdi ${data.icon} me-2` }), children]
 	});
 };
-var select_components$3 = { Option: CustomOption$3 };
+var select_components$4 = { Option: CustomOption$4 };
 var MultiStep_AddEditEntity_Step3_Switch = ({ controller, room_id, entities_page_id, room_view_position, id, onComplete }) => {
 	const { handleSubmit, register, reset, getValues, setValue, formState: { isValid } } = useForm({
-		resolver: u(schema$3),
+		resolver: u(schema$4),
 		defaultValues: {
 			id: id ?? null,
 			controller,
@@ -8299,7 +8321,7 @@ var MultiStep_AddEditEntity_Step3_Switch = ({ controller, room_id, entities_page
 							setValue("home_assistant_name", newValue ? newValue.value : "");
 						},
 						unstyled: true,
-						components: select_components$3,
+						components: select_components$4,
 						value: useAvailableEntitiesStore.getState().home_assistant_options.find((option) => option.value === getValues("home_assistant_name")),
 						styles: {
 							input: (base) => ({
@@ -8326,7 +8348,7 @@ var MultiStep_AddEditEntity_Step3_Switch = ({ controller, room_id, entities_page
 						onChange: (newValue) => setValue("openhab_item_switch", newValue ? newValue.value : ""),
 						value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_item_switch")),
 						unstyled: true,
-						components: select_components$3,
+						components: select_components$4,
 						styles: {
 							input: (base) => ({
 								...base,
@@ -8359,7 +8381,7 @@ var MultiStep_AddEditEntity_Step3_Switch = ({ controller, room_id, entities_page
 };
 //#endregion
 //#region src/components/MultiStep_AddEditEntity/entity_types/step3_edit_button.tsx
-var schema$2 = object({
+var schema$3 = object({
 	id: number().nullable(),
 	type: string(),
 	entity_type: string(),
@@ -8372,7 +8394,7 @@ var schema$2 = object({
 	mqtt_topic: string().optional(),
 	mqtt_payload: string().optional()
 });
-var CustomOption$2 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
+var CustomOption$3 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
 	if (isDisabled) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		...innerProps,
@@ -8380,10 +8402,10 @@ var CustomOption$2 = ({ innerProps, isDisabled, isFocused, isSelected, children,
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mdi ${data.icon} me-2` }), children]
 	});
 };
-var select_components$2 = { Option: CustomOption$2 };
+var select_components$3 = { Option: CustomOption$3 };
 var MultiStep_AddEditEntity_Step3_Button = ({ controller, room_id, entities_page_id, room_view_position, id, onComplete }) => {
 	const { handleSubmit, register, reset, getValues, setValue, formState: { isValid } } = useForm({
-		resolver: u(schema$2),
+		resolver: u(schema$3),
 		defaultValues: {
 			id: null,
 			controller,
@@ -8511,7 +8533,7 @@ var MultiStep_AddEditEntity_Step3_Button = ({ controller, room_id, entities_page
 							setValue("home_assistant_name", newValue ? newValue.value : "");
 						},
 						unstyled: true,
-						components: select_components$2,
+						components: select_components$3,
 						value: useAvailableEntitiesStore.getState().home_assistant_options.find((option) => option.value === getValues("home_assistant_name")),
 						styles: {
 							input: (base) => ({
@@ -8580,7 +8602,7 @@ var MultiStep_AddEditEntity_Step3_Button = ({ controller, room_id, entities_page
 };
 //#endregion
 //#region src/components/MultiStep_AddEditEntity/entity_types/step3_edit_thermostat.tsx
-var schema$1 = object({
+var schema$2 = object({
 	id: number().nullable(),
 	type: string(),
 	entity_type: string(),
@@ -8625,7 +8647,7 @@ var schema$1 = object({
 		value: string().min(1)
 	})).optional()
 });
-var CustomOption$1 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
+var CustomOption$2 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
 	if (isDisabled) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		...innerProps,
@@ -8633,7 +8655,7 @@ var CustomOption$1 = ({ innerProps, isDisabled, isFocused, isSelected, children,
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mdi ${data.icon} me-2` }), children]
 	});
 };
-var select_components$1 = { Option: CustomOption$1 };
+var select_components$2 = { Option: CustomOption$2 };
 var IconSelector = ({ value, onChange }) => {
 	const climateIcons = [
 		{
@@ -8790,7 +8812,7 @@ var IconSelector = ({ value, onChange }) => {
 };
 var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_page_id, room_view_position, id, onComplete }) => {
 	const { control, handleSubmit, register, reset, getValues, setValue, formState: { isValid }, watch } = useForm({
-		resolver: u(schema$1),
+		resolver: u(schema$2),
 		defaultValues: {
 			id: id ?? null,
 			controller,
@@ -9048,7 +9070,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 								});
 							},
 							unstyled: true,
-							components: select_components$1,
+							components: select_components$2,
 							value: useAvailableEntitiesStore.getState().home_assistant_options.find((option) => option.value === getValues("home_assistant_name")),
 							styles: {
 								input: (base) => ({
@@ -9093,7 +9115,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 									onChange: (newValue) => setValue("openhab_temperature_item", newValue ? newValue.value : ""),
 									value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_temperature_item")),
 									unstyled: true,
-									components: select_components$1,
+									components: select_components$2,
 									styles: {
 										input: (base) => ({
 											...base,
@@ -9122,7 +9144,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 									onChange: (newValue) => setValue("openhab_current_temperature_item", newValue ? newValue.value : ""),
 									value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_current_temperature_item")),
 									unstyled: true,
-									components: select_components$1,
+									components: select_components$2,
 									styles: {
 										input: (base) => ({
 											...base,
@@ -9202,7 +9224,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 									onChange: (newValue) => setValue("openhab_fan_mode_item", newValue ? newValue.value : ""),
 									value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_fan_mode_item")),
 									unstyled: true,
-									components: select_components$1,
+									components: select_components$2,
 									styles: {
 										input: (base) => ({
 											...base,
@@ -9300,7 +9322,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 									onChange: (newValue) => setValue("openhab_hvac_mode_item", newValue ? newValue.value : ""),
 									value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_hvac_mode_item")),
 									unstyled: true,
-									components: select_components$1,
+									components: select_components$2,
 									styles: {
 										input: (base) => ({
 											...base,
@@ -9398,7 +9420,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 									onChange: (newValue) => setValue("openhab_preset_mode_item", newValue ? newValue.value : ""),
 									value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_preset_mode_item")),
 									unstyled: true,
-									components: select_components$1,
+									components: select_components$2,
 									styles: {
 										input: (base) => ({
 											...base,
@@ -9496,7 +9518,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 									onChange: (newValue) => setValue("openhab_swing_mode_item", newValue ? newValue.value : ""),
 									value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_swing_mode_item")),
 									unstyled: true,
-									components: select_components$1,
+									components: select_components$2,
 									styles: {
 										input: (base) => ({
 											...base,
@@ -9598,7 +9620,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 									onChange: (newValue) => setValue("openhab_swingh_mode_item", newValue ? newValue.value : ""),
 									value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_swingh_mode_item")),
 									unstyled: true,
-									components: select_components$1,
+									components: select_components$2,
 									styles: {
 										input: (base) => ({
 											...base,
@@ -9694,7 +9716,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 };
 //#endregion
 //#region src/components/MultiStep_AddEditEntity/entity_types/step3_edit_scene.tsx
-var schema = object({
+var schema$1 = object({
 	id: number().nullable(),
 	type: string(),
 	controller: string(),
@@ -9705,7 +9727,7 @@ var schema = object({
 	friendly_name: string().min(1),
 	backend_name: string().optional()
 });
-var CustomOption = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
+var CustomOption$1 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
 	if (isDisabled) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		...innerProps,
@@ -9713,10 +9735,10 @@ var CustomOption = ({ innerProps, isDisabled, isFocused, isSelected, children, d
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mdi ${data.icon} me-2` }), children]
 	});
 };
-var select_components = { Option: CustomOption };
+var select_components$1 = { Option: CustomOption$1 };
 var MultiStep_AddEditEntity_Step3_Scene = ({ controller, room_id, entities_page_id, room_view_position, id, onComplete }) => {
 	const { handleSubmit, register, reset, getValues, setValue, formState: { isValid } } = useForm({
-		resolver: u(schema),
+		resolver: u(schema$1),
 		defaultValues: {
 			id: id ?? null,
 			type: "scene",
@@ -9841,7 +9863,7 @@ var MultiStep_AddEditEntity_Step3_Scene = ({ controller, room_id, entities_page_
 							setValue("backend_name", newValue ? newValue.value : "");
 						},
 						unstyled: true,
-						components: select_components,
+						components: select_components$1,
 						value: useAvailableEntitiesStore.getState().home_assistant_options.find((option) => option.value === getValues("backend_name")),
 						styles: {
 							input: (base) => ({
@@ -9868,7 +9890,7 @@ var MultiStep_AddEditEntity_Step3_Scene = ({ controller, room_id, entities_page_
 						onChange: (newValue) => setValue("backend_name", newValue ? newValue.value : ""),
 						value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("backend_name")),
 						unstyled: true,
-						components: select_components,
+						components: select_components$1,
 						styles: {
 							input: (base) => ({
 								...base,
@@ -9885,6 +9907,424 @@ var MultiStep_AddEditEntity_Step3_Scene = ({ controller, room_id, entities_page_
 							})
 						}
 					})] })
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "flex mt-4 justify-end items-center",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					type: "submit",
+					className: "btn btn-info",
+					disabled: !isValid,
+					children: "Save"
+				})
+			})
+		]
+	});
+};
+//#endregion
+//#region src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.tsx
+var schema = object({
+	id: number().nullable(),
+	type: string(),
+	entity_type: string(),
+	room_id: number(),
+	entities_page_id: number(),
+	room_view_position: number(),
+	friendly_name: string().min(1),
+	controller: string(),
+	home_assistant_name: string().min(1),
+	volume_step: number().int().min(1).max(100),
+	source_volume_strategy: _enum([
+		"none",
+		"player_attributes",
+		"source_entity"
+	]),
+	source_entity_attribute: string(),
+	source_volume_attribute: string()
+}).superRefine((data, ctx) => {
+	if (data.source_volume_strategy != "none" && data.source_entity_attribute.trim() == "") ctx.addIssue({
+		code: "custom",
+		path: ["source_entity_attribute"],
+		message: "Required for this multi-room setup"
+	});
+	if (data.source_volume_strategy == "player_attributes" && data.source_volume_attribute.trim() == "") ctx.addIssue({
+		code: "custom",
+		path: ["source_volume_attribute"],
+		message: "Required for this multi-room setup"
+	});
+});
+var CustomOption = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
+	if (isDisabled) return null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		...innerProps,
+		className: `p-1 ${isSelected ? "bg-primary/20 rounded-sm" : ""} ${isFocused ? "bg-primary/20 rounded-sm" : ""}`,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mdi ${data.icon} me-2` }), children]
+	});
+};
+var select_components = { Option: CustomOption };
+var multi_room_strategies = [{
+	value: "source_entity",
+	label: "The room player says which player feeds it",
+	description: "An attribute on the room player holds the entity ID of the source player currently feeding it. The panel follows that player and uses its own volume and sources, even when the source changes."
+}, {
+	value: "player_attributes",
+	label: "The room player reports the source player and its volume",
+	description: "Attributes on the room player hold both the entity ID of the source player and the source volume. Use this when the integration reports the source volume on the room player itself."
+}];
+var MultiStep_AddEditEntity_Step3_MediaPlayer = ({ controller, room_id, entities_page_id, room_view_position, id, onComplete }) => {
+	const defaultValues = {
+		id: id ?? null,
+		controller,
+		type: "entity",
+		entity_type: "media_player",
+		friendly_name: "",
+		room_id,
+		entities_page_id,
+		room_view_position,
+		home_assistant_name: "",
+		volume_step: 5,
+		source_volume_strategy: "none",
+		source_entity_attribute: "",
+		source_volume_attribute: ""
+	};
+	const { handleSubmit, register, reset, setValue, watch, formState: { isValid, errors } } = useForm({
+		resolver: u(schema),
+		mode: "onChange",
+		defaultValues
+	});
+	const home_assistant_name = watch("home_assistant_name");
+	const source_volume_strategy = watch("source_volume_strategy");
+	const [multiRoom, setMultiRoom] = (0, import_react.useState)(false);
+	const selectMultiRoom = (multi_room) => {
+		setMultiRoom(multi_room);
+		setValue("source_volume_strategy", multi_room ? "source_entity" : "none", { shouldValidate: true });
+	};
+	function getCookie(name) {
+		let cookieValue = "";
+		if (document.cookie && document.cookie !== "") {
+			const cookies = document.cookie.split(";");
+			for (let i = 0; i < cookies.length; i++) {
+				const cookie = cookies[i].trim();
+				if (cookie.substring(0, name.length + 1) === name + "=") {
+					cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+					break;
+				}
+			}
+		}
+		return cookieValue;
+	}
+	(0, import_react.useEffect)(() => {
+		if (id != null) {
+			const entityData = useEntitiesPagesStore.getState().entities.find((entity) => entity.id == id);
+			const values = {
+				...defaultValues,
+				...entityData
+			};
+			reset(values);
+			setMultiRoom(values.source_volume_strategy != "none");
+		}
+	}, [id, useEntitiesPagesStore.getState().entities]);
+	function saveEntity(data) {
+		if (data.source_volume_strategy == "none") data = {
+			...data,
+			source_entity_attribute: "",
+			source_volume_attribute: ""
+		};
+		else if (data.source_volume_strategy == "source_entity") data = {
+			...data,
+			source_volume_attribute: ""
+		};
+		fetch("/rest/entities/media_players", {
+			credentials: "same-origin",
+			method: "PUT",
+			mode: "same-origin",
+			headers: {
+				"Content-Type": "application/json",
+				"X-CSRFToken": getCookie("csrftoken")
+			},
+			body: JSON.stringify(data)
+		}).then(async (response) => {
+			const data = await response.json();
+			if (!response.ok) {
+				const error = data && data.message || response.status;
+				return Promise.reject(error);
+			}
+			onComplete?.();
+		}).catch((error) => {
+			Notify({
+				message: `Error saving entity. Error: ${error}`,
+				level: "error",
+				duration: 1e4
+			});
+		});
+	}
+	const selected_entity = useAvailableEntitiesStore.getState().home_assistant_entities.find((entity) => entity.item_id == home_assistant_name);
+	const attribute_names = Object.keys(selected_entity?.item?.attributes ?? {}).sort();
+	const classNames = {
+		control: (state) => `${state.isFocused ? "border" : "border-0"} border-accent p-2.5 text-sm rounded-box bg-base-300 rounded-md`,
+		menu: () => "bg-base-300 p-2.5 rounded-box",
+		option: (state) => `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`
+	};
+	const text_input_class = "outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5";
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+		onSubmit: handleSubmit(saveEntity),
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				type: "hidden",
+				...register("id")
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				type: "hidden",
+				...register("controller")
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				type: "hidden",
+				...register("type")
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				type: "hidden",
+				...register("entity_type")
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				type: "hidden",
+				...register("room_id")
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				type: "hidden",
+				...register("entities_page_id")
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				type: "hidden",
+				...register("room_view_position")
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "alert alert-warning mb-4",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mdi mdi-alert text-xl" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "font-bold",
+					children: "BETA:"
+				}), " Media players are a beta feature. Not all of the changes they require have been merged into the NSPanel firmware yet, so they may not show up or work correctly on your panels."] })]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "w-full",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "flex justify-center mb-4 duration-500 transition-transform ease-linear",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "w-full",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+								htmlFor: "add_new_media_player_name",
+								className: "block mb-2 text-sm font-medium",
+								children: "Name"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "flex flex-row-reverse",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									className: text_input_class,
+									type: "text",
+									id: "add_new_media_player_name",
+									...register("friendly_name"),
+									required: true
+								})
+							})]
+						})
+					}),
+					controller == "home_assistant" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mb-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "block mb-2 text-sm font-medium",
+							children: "Home Assistant entity"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StateManagedSelect$1, {
+							options: useAvailableEntitiesStore.getState().home_assistant_options.filter((option) => option.value.startsWith("media_player.")),
+							classNames,
+							onChange: (newValue) => {
+								setValue("home_assistant_name", newValue ? newValue.value : "", { shouldValidate: true });
+							},
+							unstyled: true,
+							components: select_components,
+							value: useAvailableEntitiesStore.getState().home_assistant_options.find((option) => option.value === home_assistant_name) ?? null,
+							styles: {
+								input: (base) => ({
+									...base,
+									"input:focus": { boxShadow: "none" }
+								}),
+								multiValueLabel: (base) => ({
+									...base,
+									whiteSpace: "normal",
+									overflow: "visible"
+								}),
+								control: (base) => ({
+									...base,
+									transition: "none"
+								})
+							}
+						})]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mb-4",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+								htmlFor: "add_new_media_player_volume_step",
+								className: "block mb-2 text-sm font-medium",
+								children: "Volume step (%)"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								type: "number",
+								id: "add_new_media_player_volume_step",
+								className: text_input_class,
+								step: "1",
+								min: "1",
+								max: "100",
+								...register("volume_step", { valueAsNumber: true })
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "block mt-1 text-xs text-base-content/50",
+								children: "How much one volume up/down press on the panel changes the volume."
+							}),
+							errors.volume_step && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "block mt-1 text-xs text-error",
+								children: "Must be a whole number between 1 and 100."
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mt-4 border border-primary rounded-box p-4 pt-2",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "text-lg",
+								children: "Setup"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "mt-2 w-full text-sm font-medium border border-neutral rounded-lg bg-base-300",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center ps-3 w-full",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+										type: "radio",
+										id: "media_player_setup_standalone",
+										name: "media_player_setup",
+										checked: !multiRoom,
+										onChange: () => selectMultiRoom(false),
+										className: "w-4 h-4 radio radio-accent"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+										htmlFor: "media_player_setup_standalone",
+										className: "w-full py-3 ms-2 text-sm font-medium cursor-pointer",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "block text-sm font-medium",
+											children: "Standalone device"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "block text-xs text-base-content/50",
+											children: "The panel controls this media player's own volume and sources."
+										})]
+									})]
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "flex items-center ps-3 w-full",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+										type: "radio",
+										id: "media_player_setup_multi_room",
+										name: "media_player_setup",
+										checked: multiRoom,
+										onChange: () => selectMultiRoom(true),
+										className: "w-4 h-4 radio radio-accent"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+										htmlFor: "media_player_setup_multi_room",
+										className: "w-full py-3 ms-2 text-sm font-medium cursor-pointer",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "block text-sm font-medium",
+											children: "Part of a multi-room audio setup"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "block text-xs text-base-content/50",
+											children: "Another media player, the source player, feeds this room, for example through an audio matrix. The panel can also control the source player's volume and select between its sources."
+										})]
+									})]
+								})]
+							}),
+							multiRoom && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+									className: "block mt-4 mb-2 text-sm font-medium",
+									children: "How does Home Assistant tell which source player feeds this room?"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "w-full text-sm font-medium border border-neutral rounded-lg bg-base-300",
+									children: multi_room_strategies.map((strategy) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+										className: "flex items-center ps-3 w-full",
+										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+											type: "radio",
+											id: `media_player_source_volume_${strategy.value}`,
+											value: strategy.value,
+											...register("source_volume_strategy"),
+											className: "w-4 h-4 radio radio-accent"
+										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+											htmlFor: `media_player_source_volume_${strategy.value}`,
+											className: "w-full py-3 ms-2 text-sm font-medium cursor-pointer",
+											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "block text-sm font-medium",
+												children: strategy.label
+											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+												className: "block text-xs text-base-content/50",
+												children: strategy.description
+											})]
+										})]
+									}, strategy.value))
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("datalist", {
+									id: "media_player_attribute_names",
+									children: attribute_names.map((attribute) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: attribute }, attribute))
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "mt-4",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+											htmlFor: "add_new_media_player_source_entity_attribute",
+											className: "block mb-2 text-sm font-medium",
+											children: "Source player attribute"
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+											type: "text",
+											id: "add_new_media_player_source_entity_attribute",
+											className: text_input_class,
+											list: "media_player_attribute_names",
+											...register("source_entity_attribute")
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+											className: "block mt-1 text-xs text-base-content/50",
+											children: [
+												"Name of the attribute on the room player holding the entity ID of the source player, for example ",
+												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "source_entity_id" }),
+												"."
+											]
+										}),
+										errors.source_entity_attribute && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "block mt-1 text-xs text-error",
+											children: errors.source_entity_attribute.message
+										})
+									]
+								}),
+								source_volume_strategy == "player_attributes" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+									className: "mt-4",
+									children: [
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+											htmlFor: "add_new_media_player_source_volume_attribute",
+											className: "block mb-2 text-sm font-medium",
+											children: "Source volume attribute"
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+											type: "text",
+											id: "add_new_media_player_source_volume_attribute",
+											className: text_input_class,
+											list: "media_player_attribute_names",
+											...register("source_volume_attribute")
+										}),
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "block mt-1 text-xs text-base-content/50",
+											children: "Name of the attribute on the room player holding the source volume, from 0.0 to 1.0. Volume changes are sent to the source player."
+										}),
+										errors.source_volume_attribute && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+											className: "block mt-1 text-xs text-error",
+											children: errors.source_volume_attribute.message
+										})
+									]
+								})
+							] })
+						]
+					})
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -10096,6 +10536,14 @@ var MultiStep_AddOrEditEntity = ({ room_id, entities_page_id, room_view_position
 									onComplete
 								});
 								case "thermostat": return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MultiStep_AddEditEntity_Step3_Thermostat, {
+									controller: String(formData.controller),
+									room_id,
+									id,
+									entities_page_id,
+									room_view_position,
+									onComplete
+								});
+								case "media_player": return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MultiStep_AddEditEntity_Step3_MediaPlayer, {
 									controller: String(formData.controller),
 									room_id,
 									id,

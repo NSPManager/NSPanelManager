@@ -6,6 +6,7 @@ const MultiStep_AddEditEntity_Step1 = ({ handleButtonSelectEvent, next_step }: {
   const [switchHovered, setSwitchHovered] = useState(false);
   const [buttonHovered, setButtonHovered] = useState(false);
   const [thermostatHovered, setThermostatHovered] = useState(false);
+  const [mediaPlayerHovered, setMediaPlayerHovered] = useState(false);
 
   return (
     <div>
@@ -78,6 +79,22 @@ const MultiStep_AddEditEntity_Step1 = ({ handleButtonSelectEvent, next_step }: {
           </div>
           <div className="flex justify-center items-center">
             <span className="text-base-content/50 group-hover:text-base-content text-center">Thermostat / climate</span>
+          </div>
+        </div>
+        <div
+          onMouseEnter={() => setMediaPlayerHovered(true)}
+          onMouseLeave={() => setMediaPlayerHovered(false)}
+          className="group bg-base-100 rounded-box border border-neutral border-dashed p-6 cursor-pointer hover:bg-yellow-500/10"
+          onClick={() => {
+            handleButtonSelectEvent("entity_type", "media_player")();
+            next_step();
+          }}
+        >
+          <div className="flex justify-center items-center">
+            <span className={`mdi ${mediaPlayerHovered ? "mdi-play-circle" : "mdi-speaker"} text-3xl text-neutral-content/50 group-hover:text-yellow-500`}></span>
+          </div>
+          <div className="flex justify-center items-center">
+            <span className="text-base-content/50 group-hover:text-base-content text-center">Media player</span>
           </div>
         </div>
       </div>
