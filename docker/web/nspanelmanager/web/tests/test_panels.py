@@ -233,6 +233,20 @@ class PanelSettingsFormTests(NSPMTestCase):
         self.assertRejected(self.save(temperature_calibration="warm"))
         self.assertManagerNotReloaded()
 
+    def test_issue_336_negative_calibration_with_blank_temperature_limits(self):
+        # Issue #336: this form used to store blank thermostat limits, which crashed MQTTManager.
+        self.save(temperature_calibration="-3.4")
+
+        self.assertEqual(self.panel_setting("temperature_calibration"), "-3.4")
+        for name in ("button1_relay_lower_temperature", "button1_relay_upper_temperature", "button2_relay_lower_temperature", "button2_relay_upper_temperature"):
+            with self.subTest(name=name):
+                self.assertIsNone(self.panel_setting(name))
+
+    def test_issue_336_comma_decimal_calibration_is_rejected(self):
+        self.assertRejected(self.save(temperature_calibration="-3,4"))
+        self.assertIsNone(self.panel_setting("temperature_calibration"))
+        self.assertManagerNotReloaded()
+
     def test_unknown_room_is_rejected(self):
         self.assertRejected(self.save(room_id=999))
         self.panel.refresh_from_db()

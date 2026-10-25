@@ -342,6 +342,44 @@ TEST_F(NSPanelTest, invalid_temperature_limit_is_sent_as_zero) {
   }
 }
 
+// Issue #336: saving the settings page stored blank temperature limits, and std::stoi("") then took the manager
+// down while sending the config. Databases saved before d8220f68 still hold those blank rows.
+TEST_F(NSPanelTest, blank_temperature_limits_do_not_stop_the_config_being_sent) {
+  update_row([](auto &settings) {
+    settings.button1_mode = THERMOSTAT_HEATING;
+    settings.button2_mode = THERMOSTAT_COOLING;
+  });
+  set_panel_setting("temperature_calibration", "-3.4");
+  set_panel_setting("button1_relay_lower_temperature", "");
+  set_panel_setting("button1_relay_upper_temperature", "");
+  set_panel_setting("button2_relay_lower_temperature", "");
+  set_panel_setting("button2_relay_upper_temperature", "");
+
+  load_panel();
+
+  auto config = last_published_config();
+  ASSERT_TRUE(config.has_value());
+  EXPECT_EQ(config->temperature_calibration(), -34);
+  EXPECT_EQ(config->button1_lower_temperature(), 0);
+  EXPECT_EQ(config->button1_upper_temperature(), 0);
+  EXPECT_EQ(config->button2_lower_temperature(), 0);
+  EXPECT_EQ(config->button2_upper_temperature(), 0);
+}
+
+TEST_F(NSPanelTest, blank_temperature_limits_are_ignored_outside_thermostat_modes) {
+  set_panel_setting("temperature_calibration", "-3.4");
+  set_panel_setting("button1_relay_lower_temperature", "");
+  set_panel_setting("button1_relay_upper_temperature", "");
+  set_panel_setting("button2_relay_lower_temperature", "");
+  set_panel_setting("button2_relay_upper_temperature", "");
+
+  load_panel();
+
+  auto config = last_published_config();
+  ASSERT_TRUE(config.has_value());
+  EXPECT_EQ(config->temperature_calibration(), -34);
+}
+
 TEST_F(NSPanelTest, out_of_range_temperature_limit_is_sent_as_zero) {
   update_row([](auto &settings) {
     settings.button1_mode = THERMOSTAT_HEATING;
