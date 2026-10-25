@@ -41,8 +41,10 @@ void OpenhabScene::activate(std::expected<int32_t, EntityManager::EntityError> t
 
   std::string openhab_trigger_scene_url = fmt::format("{}/rest/rules/{}/runnow", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::OPENHAB_ADDRESS), this->_entity_id);
   std::string openhab_token = MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::OPENHAB_TOKEN);
+  // The header list only holds pointers, so the formatted header must outlive the request.
+  std::string authorization_header = fmt::format("Authorization: Bearer {}", openhab_token);
   std::list<const char *> headers = {
-      fmt::format("Authorization: Bearer {}", openhab_token).c_str(),
+      authorization_header.c_str(),
       "Content-type: application/json"};
   std::string response_data;
   std::string post_data = "";

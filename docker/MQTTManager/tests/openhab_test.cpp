@@ -143,10 +143,9 @@ TEST_F(OpenhabSceneTest, activating_runs_the_rule) {
   EXPECT_TRUE(OpenhabManager::test_take_sent_messages().empty());
 }
 
-// KNOWN BUG: OpenhabScene::activate() builds the Authorization header with
-// fmt::format(...).c_str() on a temporary, so the header list holds a dangling pointer and the
-// header sent is whatever that memory holds by then. Remove DISABLED_ when fixing.
-TEST_F(OpenhabSceneTest, DISABLED_activating_sends_the_token) {
+// activate() used to build the Authorization header with fmt::format(...).c_str() on a temporary, so
+// the header list held a dangling pointer and sent whatever that memory held by then.
+TEST_F(OpenhabSceneTest, activating_sends_the_token) {
   server.respond("/rest/rules/movie_rule/runnow", "");
   ScopedScene row("openhab", "Movie time", "movie_rule", std::nullopt);
   OpenhabScene scene(row.id);
