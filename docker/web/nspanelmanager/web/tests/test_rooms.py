@@ -77,6 +77,17 @@ class RoomUITests(NSPMTestCase):
         self.assertEqual(list(Room.objects.order_by("displayOrder").values_list("friendly_name", flat=True)), ["C", "A", "B"])
         self.assertManagerReloaded(times=1)
 
+    def test_reorder_rooms_when_a_room_has_a_panel(self):
+        # Issue #337: the re-rendered room list shows each panel's status badge, which used to 500.
+        a, b = self.make_room("A"), self.make_room("B")
+        self.make_panel(a, accepted=True)
+
+        response = self.client.post(reverse("htmx_partial_reorder_rooms"), {"htmx_form_save_rooms_order_field": json.dumps({"rooms": [b.id, a.id]})})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(Room.objects.order_by("displayOrder").values_list("friendly_name", flat=True)), ["B", "A"])
+        self.assertManagerReloaded(times=1)
+
     def test_reorder_rooms_with_missing_or_empty_payload_is_rejected(self):
         self.make_room("A")
         for payload in ({}, {"htmx_form_save_rooms_order_field": json.dumps({})}, {"htmx_form_save_rooms_order_field": json.dumps({"rooms": []})}):
