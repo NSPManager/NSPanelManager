@@ -351,3 +351,22 @@ TEST_F(OpenhabThermostatTest, reads_preset_and_swing_items_saved_by_the_older_se
   EXPECT_EQ(commands[1].first, "Old_Swing");
   EXPECT_EQ(commands[2].first, "Old_SwingH");
 }
+
+// The callbacks read the item from the topic before checking it had one. OpenhabManager already drops such topics, so
+// this only guards the callbacks themselves.
+TEST_F(OpenhabThermostatTest, callbacks_ignore_a_topic_without_an_item) {
+  create_thermostat();
+  float temperature_before = thermostat->get_temperature();
+  auto event = nlohmann::json::parse(item_state_changed("HP_Target", "Decimal", "25"));
+  event["topic"] = "openhab/items";
+
+  thermostat->openhab_target_temperature_event_callback(event);
+  thermostat->openhab_current_temperature_event_callback(event);
+  thermostat->openhab_fan_mode_event_callback(event);
+  thermostat->openhab_mode_event_callback(event);
+  thermostat->openhab_preset_event_callback(event);
+  thermostat->openhab_swing_event_callback(event);
+  thermostat->openhab_swingh_event_callback(event);
+
+  EXPECT_FLOAT_EQ(thermostat->get_temperature(), temperature_before);
+}

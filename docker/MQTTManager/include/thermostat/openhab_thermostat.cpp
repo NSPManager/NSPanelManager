@@ -241,12 +241,11 @@ void OpenhabThermostat::openhab_target_temperature_event_callback(nlohmann::json
     std::string topic = data["topic"];
     std::vector<std::string> topic_parts;
     boost::split(topic_parts, topic, boost::is_any_of("/"));
-    std::string topic_item = topic_parts[2];
-
     if (topic_parts.size() < 3) {
       SPDLOG_ERROR("Received ItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
       return;
     }
+    std::string topic_item = topic_parts[2];
 
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
     if (topic_item.compare(this->_openhab_target_temperature_item) == 0) {
@@ -313,12 +312,11 @@ void OpenhabThermostat::openhab_current_temperature_event_callback(nlohmann::jso
     std::string topic = data["topic"];
     std::vector<std::string> topic_parts;
     boost::split(topic_parts, topic, boost::is_any_of("/"));
-    std::string topic_item = topic_parts[2];
-
     if (topic_parts.size() < 3) {
       SPDLOG_ERROR("Received ItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
       return;
     }
+    std::string topic_item = topic_parts[2];
 
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
     if (topic_item.compare(this->_openhab_current_temperature_item) == 0) {
@@ -387,12 +385,11 @@ void OpenhabThermostat::openhab_fan_mode_event_callback(nlohmann::json data) {
     std::string topic = data["topic"];
     std::vector<std::string> topic_parts;
     boost::split(topic_parts, topic, boost::is_any_of("/"));
-    std::string topic_item = topic_parts[2];
-
     if (topic_parts.size() < 3) {
       SPDLOG_ERROR("Received ItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
       return;
     }
+    std::string topic_item = topic_parts[2];
 
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
     if (topic_item.compare(this->_openhab_fan_mode_item) == 0) {
@@ -464,12 +461,11 @@ void OpenhabThermostat::openhab_mode_event_callback(nlohmann::json data) {
     std::string topic = data["topic"];
     std::vector<std::string> topic_parts;
     boost::split(topic_parts, topic, boost::is_any_of("/"));
-    std::string topic_item = topic_parts[2];
-
     if (topic_parts.size() < 3) {
       SPDLOG_ERROR("Received ItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
       return;
     }
+    std::string topic_item = topic_parts[2];
 
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
     if (topic_item.compare(this->_openhab_mode_item) == 0) {
@@ -541,12 +537,11 @@ void OpenhabThermostat::openhab_preset_event_callback(nlohmann::json data) {
     std::string topic = data["topic"];
     std::vector<std::string> topic_parts;
     boost::split(topic_parts, topic, boost::is_any_of("/"));
-    std::string topic_item = topic_parts[2];
-
     if (topic_parts.size() < 3) {
       SPDLOG_ERROR("Received ItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
       return;
     }
+    std::string topic_item = topic_parts[2];
 
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
     if (topic_item.compare(this->_openhab_preset_item) == 0) {
@@ -618,12 +613,11 @@ void OpenhabThermostat::openhab_swing_event_callback(nlohmann::json data) {
     std::string topic = data["topic"];
     std::vector<std::string> topic_parts;
     boost::split(topic_parts, topic, boost::is_any_of("/"));
-    std::string topic_item = topic_parts[2];
-
     if (topic_parts.size() < 3) {
       SPDLOG_ERROR("Received ItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
       return;
     }
+    std::string topic_item = topic_parts[2];
 
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
     if (topic_item.compare(this->_openhab_swing_item) == 0) {
@@ -695,12 +689,11 @@ void OpenhabThermostat::openhab_swingh_event_callback(nlohmann::json data) {
     std::string topic = data["topic"];
     std::vector<std::string> topic_parts;
     boost::split(topic_parts, topic, boost::is_any_of("/"));
-    std::string topic_item = topic_parts[2];
-
     if (topic_parts.size() < 3) {
       SPDLOG_ERROR("Received ItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
       return;
     }
+    std::string topic_item = topic_parts[2];
 
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
     if (topic_item.compare(this->_openhab_swingh_item) == 0) {
