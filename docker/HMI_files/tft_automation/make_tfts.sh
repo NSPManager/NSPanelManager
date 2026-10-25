@@ -8,8 +8,8 @@
 cd "$(dirname "$0")" || exit 1
 regions=("$@")
 [ ${#regions[@]} -gt 0 ] || regions=(eu us)
-python3 -c 'import numpy, PIL' 2>/dev/null ||
-  { echo "make_tfts.sh needs numpy and Pillow: python3 -m pip install -r requirements.txt"; exit 1; }
+python3 -c 'import numpy, PIL, nextion_tools' 2>/dev/null ||
+  { echo "make_tfts.sh needs nextion-tools, numpy and Pillow: python3 -m pip install -r requirements.txt"; exit 1; }
 status=0
 for region in "${regions[@]}"; do
   echo "--> $region"

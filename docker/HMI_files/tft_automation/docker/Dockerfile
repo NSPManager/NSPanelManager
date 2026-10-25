@@ -9,7 +9,12 @@ FROM ubuntu:24.04
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends gimp imagemagick xvfb xauth \
-       python3 python3-numpy python3-pil \
+       python3 python3-numpy python3-pil python3-pip git ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+
+# bar_pictures.py and check_build.py read the HMI with nextion-tools: make_pictures.sh passes the
+# version pinned in requirements.txt. numpy and Pillow come from Ubuntu above.
+ARG NEXTION_TOOLS
+RUN test -n "$NEXTION_TOOLS" && python3 -m pip install --no-cache-dir --break-system-packages --no-deps "$NEXTION_TOOLS"
 
 COPY gimp /usr/local/bin/gimp

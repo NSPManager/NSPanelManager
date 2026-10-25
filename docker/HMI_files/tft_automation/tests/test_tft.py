@@ -1,5 +1,4 @@
-"""Tests for nextion.crc, nextion.tft and nextion.themes against the TFTs the Editor compiled for
-each theme."""
+"""nextion_tools.tft and tft_build.themes against the TFTs the Editor compiled for each theme."""
 import os
 import shutil
 import struct
@@ -7,7 +6,8 @@ import tempfile
 import unittest
 
 import build_tfts
-from nextion import crc, images, region, tft, themes
+from nextion_tools import images, tft
+from tft_build import region, themes
 
 REGIONS = {name: region.path(name) for name in ('eu', 'us')}
 
@@ -23,15 +23,6 @@ def built(name):
 def read(name, theme):
     with open(region.tft(REGIONS[name], theme), 'rb') as f:
         return f.read()
-
-
-class CrcTest(unittest.TestCase):
-    def test_is_the_standard_crc32_mpeg2(self):
-        # The catalogued check value: CRC-32/MPEG-2 of b'123456789'.
-        self.assertEqual(crc.crc32_mpeg2(b'123456789'), 0x0376E6E7)
-
-    def test_widens_each_byte_to_a_big_endian_word(self):
-        self.assertEqual(crc.widen(b'\x01\xff'), b'\0\0\0\x01\0\0\0\xff')
 
 
 class ChecksumTest(unittest.TestCase):

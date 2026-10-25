@@ -4,17 +4,18 @@
   build_tfts.py REGION [--template TFT] [--themes 1,2,3,4]
 
 Writes REGION/output_tftN/gui.tft for each theme: the template with the theme's pictures from
-REGION/pictures_tftN/all_numbered swapped in (see nextion/themes.py). By default the template is
+REGION/pictures_tftN/all_numbered swapped in (see tft_build/themes.py). By default the template is
 REGION/output_tft1/gui.tft, which the Editor compiles from the HMI whenever the HMI changes.
 
-Layouts made from this region's TFTs at another orientation (see ROTATED in nextion/themes.py)
+Layouts made from this region's TFTs at another orientation (see ROTATED in tft_build/themes.py)
 are written too: building eu also writes us_horizontal_mirrored.
 """
 import argparse
 import os
 import sys
 
-from nextion import region, tft, themes
+from nextion_tools import tft
+from tft_build import region, themes
 
 
 def main(argv=None):

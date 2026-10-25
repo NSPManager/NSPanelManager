@@ -5,13 +5,14 @@
   bar_pictures.py REGION --out DIR
 
 With --numbered-after, writes each theme's pictures into REGION/pictures_tftN/all_numbered/
-beside GIMP's, which end at picture N; with --out, into DIR/tftN/ instead. See nextion/bars.py.
+beside GIMP's, which end at picture N; with --out, into DIR/tftN/ instead. See tft_build/bars.py.
 A page not yet in the HMI is skipped with a note.
 """
 import argparse
 import sys
 
-from nextion import bars, hmi, region
+from nextion_tools import hmi
+from tft_build import bars, region
 
 
 def main(argv=None):
@@ -23,10 +24,10 @@ def main(argv=None):
                        help="write into each theme's pictures_tftN/all_numbered/, whose GIMP pictures end at N")
     args = parser.parse_args(argv)
     region_dir = region.path(args.region)
-    project = hmi.Project(region.hmi(region_dir))
+    project = hmi.Project.load(region.hmi(region_dir))
     try:
         for page, listed in region.progress_bars(region_dir):
-            if page not in project.pages:
+            if project.find_page(page) is None:
                 print(f'gui.HMI has no page {page} yet; skipping its progress bars')
                 continue
             bars.make(project, region_dir, page, listed, args.out, args.numbered_after)

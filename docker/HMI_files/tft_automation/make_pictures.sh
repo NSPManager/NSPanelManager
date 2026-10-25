@@ -20,7 +20,8 @@ if [ "${1:-}" = --xvfb ]; then
 fi
 
 {
-  docker build -q -t "$IMAGE" docker &&
+  docker build -q -t "$IMAGE" \
+    --build-arg NEXTION_TOOLS="$(grep -o '^nextion-tools[^ ]*' requirements.txt)" docker &&
     docker run --rm \
       --user "${SUDO_UID:-$(id -u)}:${SUDO_GID:-$(id -g)}" \
       -e NSPM_GIMP_XVFB="$XVFB" \

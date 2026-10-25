@@ -5,14 +5,16 @@ For each bar, reads x, y, w, h, bpic and ppic from the HMI, and for each theme m
         all_numbered/, so the empty part of the bar matches what is around it pixel for pixel.
   ppic  a solid fill in the bar's colour from progress_bars.txt, the same in every theme: the
         Editor compresses flat pictures, and the themes may differ only in pictures it stores raw
-        (see nextion/themes.py).
+        (see tft_build/themes.py).
 The picture sizes always match the bar, which the Editor requires.
 """
 import os
 
 import numpy as np
 
-from . import images, region
+from nextion_tools import images
+
+from . import region
 
 def bars(project, page_name, objects):
     """[(object, x, y, w, h, bpic, ppic)] for the named progress bars."""
@@ -23,14 +25,14 @@ def bars(project, page_name, objects):
         missing = [a for a in ('x', 'y', 'w', 'h', 'bpic', 'ppic') if a not in comp.attrs]
         if missing:
             raise ValueError(f'{page_name}.{obj} has no {", ".join(missing)}; is it a progress bar?')
-        found.append((obj, *(comp.get(page.block, a) for a in ('x', 'y', 'w', 'h', 'bpic', 'ppic'))))
+        found.append((obj, *(comp.get(a) for a in ('x', 'y', 'w', 'h', 'bpic', 'ppic'))))
     return found
 
 
 def pictures(project, region_dir, page_name, listed):
     """{theme: {picture ID: pixels}} for the bars listed as [(object, fill colour)]."""
     page = project.page(page_name)
-    background = page.component(page_name).get(page.block, 'pic')
+    background = page.component(page_name).get('pic')
     fills = dict(listed)
     found = bars(project, page_name, [obj for obj, _ in listed])
     made = {}

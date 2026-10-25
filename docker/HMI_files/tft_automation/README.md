@@ -80,8 +80,8 @@ is skipped with a note.
 ## make_tfts.sh
 
 Builds each theme's TFT from the template in `output_tft1/gui.tft`, without the Editor. Runs on
-the host, no Docker or sudo needed, but with numpy and Pillow
-(`python3 -m pip install -r requirements.txt`). The themes differ only in pictures, so
+the host, no Docker or sudo needed, but with [nextion-tools](https://github.com/jamesmulcahy/nextion-tools),
+numpy and Pillow (`python3 -m pip install -r requirements.txt`). The themes differ only in pictures, so
 `build_tfts.py` puts each theme's pictures from `all_numbered/` into the template's picture slots
 and recomputes the TFT's checksums. Each picture keeps its slot size, so nothing else in the file moves.
 
@@ -105,10 +105,18 @@ compress a picture, which this stores raw; both work on a panel.
 Reads and edits Nextion `.HMI` files, for checking a layout or nudging it without the Editor:
 
 ```
-./hmi_tool.py pages FILE
+./hmi_tool.py pages FILE                          # with each page's ID
 ./hmi_tool.py show FILE PAGE [--attrs type,x,y,w,h]
+./hmi_tool.py events FILE PAGE [OBJECT]           # event code (touch, timer, page load)
+./hmi_tool.py fonts FILE [--out DIR]              # with --out: each .zi, a PNG per glyph, metrics
+./hmi_tool.py dump FILE                           # everything above as JSON
 ./hmi_tool.py set IN OUT PAGE.OBJECT.ATTR=VALUE...
 ```
+
+IDs are what the display uses on the wire. A page's ID (`page N`, and the page byte of a touch
+event) and a font's index (a component's `font` attribute) are both positions in `main.HMI`'s
+resource list, not the numbers in the block names (`1.pa`, `3.zi`). A component's ID is its `id`
+attribute, which is also its position on the page, and the page itself is component 0.
 
 `set` changes numeric attributes only (position, size, picture IDs, flags). It keeps `endx` and
 `endy` in step with `x`/`y`/`w`/`h`, writes a new file, and checks it. The Editor has opened such
@@ -119,7 +127,7 @@ Text, code, names and pictures still need the Editor.
 ## Tests and checks
 
 ```
-python3 -m unittest discover -s tests -t .   # the nextion package, against the committed files
+python3 -m unittest discover -s tests -t .   # the build, against the committed files
 ./check_build.py                             # the committed HMIs, pictures and TFTs agree
 ./check_build.py --rendered                  # after make_pictures.sh: the rendering matches git
 ```
@@ -138,17 +146,28 @@ compressed or not. It cannot see changes to pages or code that leave the picture
 
 ## Code
 
-The scripts here are thin command lines over the `nextion/` package:
+The scripts here are thin command lines over two packages. The Nextion file formats are
+[nextion-tools](https://github.com/jamesmulcahy/nextion-tools) (`nextion_tools`, pinned in
+`requirements.txt`), which has its own tests and format notes:
 
 | Module | What it holds |
 | --- | --- |
-| `crc` | the CRC behind TFT checksums and HMI page stamps (CRC-32/MPEG-2 over widened bytes) |
-| `hmi` | reading `.HMI` projects, and editing numeric attributes |
-| `tft` | a `.tft`'s picture table, picture swaps, display orientation, and checksums |
-| `images` | reading and writing pictures, and RGB565 (numpy and Pillow) |
+| `nextion_tools.crc` | the CRC behind TFT checksums and HMI page stamps (CRC-32/MPEG-2 over widened bytes) |
+| `nextion_tools.hmi` | reading `.HMI` projects (pages, components, event code, page and font IDs), and editing numeric attributes |
+| `nextion_tools.fonts` | decoding `.zi` fonts to per-glyph coverage |
+| `nextion_tools.tft` | a `.tft`'s picture table, picture swaps, display orientation, and checksums |
+| `nextion_tools.images` | reading and writing pictures, and RGB565 (numpy and Pillow) |
+
+What is particular to this project's build is `tft_build/`:
+
+| Module | What it holds |
+| --- | --- |
 | `region` | where a region's HMI, pictures, TFTs and `progress_bars.txt` live |
 | `bars` | progress bar pictures |
 | `themes` | building every theme's TFT from the template; each region's orientation, and the layouts made by turning another region's TFTs |
+
+The tests here check this project's files: the ids, fonts and code the firmware relies on, and
+that the committed TFTs are what the build makes.
 
 `.github/workflows/tft-build.yml` runs the tests and `check_build.py` on every change under
 `docker/HMI_files/`. A second job then renders everything with `make_pictures.sh` and runs
@@ -161,7 +180,7 @@ other landscape mounting, it serves the `eu` TFTs as they are.) This is the EU l
 other way: the same TFT with display orientation 90 instead of 270. The
 orientation is one byte in the TFT's first header, so `make_tfts.sh eu` writes these from the EU
 TFTs, changing only that byte and the checksums. There is no HMI to compile; `ROTATED` in
-`nextion/themes.py` lists such layouts.
+`tft_build/themes.py` lists such layouts.
 
 Upstream compiled these in the Editor, and those TFTs differ from the EU ones in exactly that byte
 and its checksums; `tests/test_tft.py` checks that.

@@ -25,13 +25,14 @@ import sys
 
 import numpy as np
 
-from nextion import bars, hmi, images, region, tft, themes
+from nextion_tools import hmi, images, tft
+from tft_build import bars, region, themes
 
 
 def check_pictures(region_dir, project):
     problems = region.numbering_problems(region_dir)
     for page, objects in region.progress_bars(region_dir):
-        if page not in project.pages:
+        if project.find_page(page) is None:
             continue
         for theme, made in bars.pictures(project, region_dir, page, objects).items():
             committed = region.numbered(region_dir, theme)
@@ -119,7 +120,7 @@ def main(argv=None):
     failed = False
     for name in args.regions:
         region_dir = region.path(name)
-        project = hmi.Project(region.hmi(region_dir))
+        project = hmi.Project.load(region.hmi(region_dir))
         problems = check_pictures(region_dir, project)
         held = []
         if not args.pictures:

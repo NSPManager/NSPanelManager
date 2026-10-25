@@ -10,7 +10,9 @@ into the template; ORIENTATIONS holds what each region's TFTs must have. Layouts
 region's TFTs at another orientation are not compiled at all: ROTATED makes them from that
 region's TFTs, changing only the orientation byte.
 """
-from . import images, region, tft
+from nextion_tools import images, tft
+
+from . import region
 
 ORIENTATIONS = {'eu': 270, 'us': 180}
 # The manager's "US Horizontal (Mirrored)": the EU layout turned the other way. (For "US

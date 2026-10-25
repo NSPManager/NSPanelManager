@@ -1,4 +1,4 @@
-"""Tests for nextion.bars and nextion.images, using upstream's own slider (items12.slider_save)."""
+"""Tests for tft_build.bars, using upstream's own slider (items12.slider_save)."""
 import os
 import shutil
 import tempfile
@@ -6,7 +6,8 @@ import unittest
 
 import numpy as np
 
-from nextion import bars, images, region
+from nextion_tools import images
+from tft_build import bars, region
 from tests.test_hmi import load
 
 REGION = region.path('us')
@@ -16,7 +17,7 @@ class BarPicturesTest(unittest.TestCase):
     def test_pictures_fit_the_bar_and_the_track_is_the_background(self):
         project = load('us')
         page = project.page('items12')
-        background = page.component('items12').get(page.block, 'pic')
+        background = page.component('items12').get('pic')
         (_, x, y, w, h, bpic, ppic), = bars.bars(project, 'items12', ['slider_save'])
         with tempfile.TemporaryDirectory() as out:
             bars.make(project, REGION, 'items12', [('slider_save', (1, 2, 3))], out)
@@ -30,7 +31,7 @@ class BarPicturesTest(unittest.TestCase):
     def test_numbered_writes_beside_the_theme_pictures_and_never_over_its_sources(self):
         project = load('us')
         page = project.page('items12')
-        background = page.component('items12').get(page.block, 'pic')
+        background = page.component('items12').get('pic')
         with tempfile.TemporaryDirectory() as out:
             for theme in region.THEMES:
                 numbered = region.numbered_dir(out, theme)
@@ -76,26 +77,13 @@ class BarPicturesTest(unittest.TestCase):
             region_dir = region.path(name)
             project = load(name)
             for page, listed in region.progress_bars(region_dir):
-                if page not in project.pages:
+                if project.find_page(page) is None:
                     continue
                 with tempfile.TemporaryDirectory() as out:
                     for theme, path in bars.make(project, region_dir, page, listed, out):
                         committed = os.path.join(region.numbered_dir(region_dir, theme), os.path.basename(path))
                         with open(path, 'rb') as a, open(committed, 'rb') as b:
                             self.assertEqual(a.read(), b.read(), committed)
-
-
-class ImagesTest(unittest.TestCase):
-    def test_bmp_round_trip(self):
-        pixels = np.array([[(i, j, i ^ j) for i in range(5)] for j in range(3)], dtype=np.uint8)  # odd width pads rows
-        with tempfile.TemporaryDirectory() as out:
-            path = os.path.join(out, 'x.bmp')
-            images.write_bmp(path, pixels)
-            np.testing.assert_array_equal(images.read(path), pixels)
-
-    def test_rgb565_truncates_each_channel(self):
-        pixels = np.array([[(0xFF, 0x00, 0x00), (0x07, 0xFF, 0x07), (0x08, 0x04, 0xF8)]], dtype=np.uint8)
-        self.assertEqual(images.rgb565(pixels), bytes([0x00, 0xF8, 0xE0, 0x07, 0x3F, 0x08]))
 
 
 if __name__ == '__main__':
