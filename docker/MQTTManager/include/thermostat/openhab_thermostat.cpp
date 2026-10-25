@@ -40,6 +40,7 @@ OpenhabThermostat::OpenhabThermostat(uint32_t thermostat_id) : ThermostatEntity(
 
 OpenhabThermostat::~OpenhabThermostat() {
   OpenhabManager::detach_event_observer(this->_openhab_target_temperature_item, boost::bind(&OpenhabThermostat::openhab_target_temperature_event_callback, this, _1));
+  OpenhabManager::detach_event_observer(this->_openhab_current_temperature_item, boost::bind(&OpenhabThermostat::openhab_current_temperature_event_callback, this, _1));
   OpenhabManager::detach_event_observer(this->_openhab_fan_mode_item, boost::bind(&OpenhabThermostat::openhab_fan_mode_event_callback, this, _1));
   OpenhabManager::detach_event_observer(this->_openhab_mode_item, boost::bind(&OpenhabThermostat::openhab_mode_event_callback, this, _1));
   OpenhabManager::detach_event_observer(this->_openhab_preset_item, boost::bind(&OpenhabThermostat::openhab_preset_event_callback, this, _1));
@@ -116,6 +117,9 @@ void OpenhabThermostat::reload_config() {
 
   // Attach new event observers
   OpenhabManager::attach_event_observer(this->_openhab_target_temperature_item, boost::bind(&OpenhabThermostat::openhab_target_temperature_event_callback, this, _1));
+  if (this->_use_current_temperature) {
+    OpenhabManager::attach_event_observer(this->_openhab_current_temperature_item, boost::bind(&OpenhabThermostat::openhab_current_temperature_event_callback, this, _1));
+  }
   OpenhabManager::attach_event_observer(this->_openhab_fan_mode_item, boost::bind(&OpenhabThermostat::openhab_fan_mode_event_callback, this, _1));
   OpenhabManager::attach_event_observer(this->_openhab_mode_item, boost::bind(&OpenhabThermostat::openhab_mode_event_callback, this, _1));
   OpenhabManager::attach_event_observer(this->_openhab_preset_item, boost::bind(&OpenhabThermostat::openhab_preset_event_callback, this, _1));
@@ -311,7 +315,7 @@ void OpenhabThermostat::openhab_current_temperature_event_callback(nlohmann::jso
     }
 
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
-    if (topic_item.compare(this->_openhab_target_temperature_item) == 0) {
+    if (topic_item.compare(this->_openhab_current_temperature_item) == 0) {
       // We only care about the first event from Openhab, ignore the rest but still indicate that event was handled so the manager stops looping over all entities.
       if (CurrentTimeMilliseconds() >= this->_last_target_temperature_change + 1000) {
         SPDLOG_DEBUG("Thermostat {}::{}, payload: {}", this->_id, this->_name, payload.dump());
@@ -332,8 +336,9 @@ void OpenhabThermostat::openhab_current_temperature_event_callback(nlohmann::jso
           }
         }
         SPDLOG_DEBUG("Thermostat {}::{} got new temperature sensor value {}, current temperature: {}.", this->_id, this->_name, current_temperature, this->_current_temperature_sensor);
-        if (current_temperature != this->_current_temperature_sensor) {
+        if (current_temperature != this->_current_temperature_sensor || !this->_current_temperature_sensor_available) {
           this->_current_temperature_sensor = current_temperature;
+          this->_current_temperature_sensor_available = true;
           this->send_state_update_to_nspanel();
           this->_signal_entity_changed();
         }
@@ -341,7 +346,7 @@ void OpenhabThermostat::openhab_current_temperature_event_callback(nlohmann::jso
     }
   } else if (std::string(data["type"]).compare("ItemStateFetched") == 0) {
     SPDLOG_TRACE("OpenHAB thermostat {}::{} Got initial data from OpenHAB via custom ItemStateFetched event.", this->_id, this->_name);
-    if (this->_openhab_target_temperature_item.compare(data["payload"]["name"]) == 0) {
+    if (this->_openhab_current_temperature_item.compare(data["payload"]["name"]) == 0) {
       nlohmann::json payload = data["payload"];
       if (payload["state"].is_null()) { // Got state but state is NULL, ignore.
         return;
@@ -351,7 +356,7 @@ void OpenhabThermostat::openhab_current_temperature_event_callback(nlohmann::jso
         return;
       }
 
-      std::string payload_string = payload["value"].get<std::string>();
+      std::string payload_string = payload["state"].get<std::string>();
       float current_temperature = 0;
       if (!payload_string.empty()) {
         auto [ptr, ec] = std::from_chars(payload_string.data(), payload_string.data() + payload_string.size(), current_temperature);
@@ -360,9 +365,9 @@ void OpenhabThermostat::openhab_current_temperature_event_callback(nlohmann::jso
         }
       }
       SPDLOG_DEBUG("Thermostat {}::{} got new temperature {}, current temperature: {}.", this->_id, this->_name, current_temperature, this->_current_temperature_sensor);
-      if (current_temperature != this->_current_temperature_sensor) {
+      if (current_temperature != this->_current_temperature_sensor || !this->_current_temperature_sensor_available) {
         this->_current_temperature_sensor = current_temperature;
-        this->_last_target_temperature_change = CurrentTimeMilliseconds();
+        this->_current_temperature_sensor_available = true;
         this->send_state_update_to_nspanel();
         this->_signal_entity_changed();
       }

@@ -308,15 +308,25 @@ TEST_F(OpenhabThermostatTest, DISABLED_fetches_the_initial_preset_and_swing_over
   EXPECT_EQ(thermostat->get_swing_horizontal_mode().value, "on");
 }
 
-// KNOWN BUG: the current temperature item is never observed (reload_config detaches it but
-// never attaches it), and its callback compares events against the target temperature item
-// and never marks the reading available. The panels never show the thermostat's own reading.
-// Remove DISABLED_ when fixing.
-TEST_F(OpenhabThermostatTest, DISABLED_publishes_the_current_temperature_from_openhab) {
+// #386: the current temperature item was never observed, its callback compared events against the target temperature
+// item, and the reading was never marked available, so the panels showed 0.0°.
+TEST_F(OpenhabThermostatTest, publishes_the_current_temperature_from_openhab) {
   create_thermostat();
   last_published_state();
 
   OpenhabManager::test_process_websocket_message(item_state_changed("HP_Current", "Decimal", "19.5"));
+
+  auto state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_TRUE(state->has_current_temperature());
+  EXPECT_FLOAT_EQ(state->current_temperature(), 19.5);
+}
+
+// #386: the current temperature is also fetched over REST when the thermostat loads. That fetch read the wrong field.
+TEST_F(OpenhabThermostatTest, fetches_the_initial_current_temperature_over_rest) {
+  server.respond("/rest/items/HP_Current", rest_item("HP_Current", "Number", "19.5"));
+
+  create_thermostat();
 
   auto state = last_published_state();
   ASSERT_TRUE(state.has_value());
