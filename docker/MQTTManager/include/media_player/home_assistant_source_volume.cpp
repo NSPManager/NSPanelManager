@@ -1,8 +1,5 @@
 #include "media_player/home_assistant_source_volume.hpp"
-#include <algorithm>
-#include <boost/bind.hpp>
-#include <cmath>
-#include <home_assistant_manager/home_assistant_manager.hpp>
+#include "media_player/home_assistant_source_player.hpp"
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
@@ -29,7 +26,7 @@ std::unique_ptr<HomeAssistantSourceVolumeStrategy> HomeAssistantSourceVolumeStra
     if (source_entity_attribute.empty() || source_volume_attribute.empty()) {
       SPDLOG_ERROR("Media player {}: source volume strategy 'player_attributes' requires both a source entity attribute and a source volume attribute. Source volume will not be available.", media_player_id);
     } else {
-      return std::make_unique<PlayerAttributesSourceVolumeStrategy>(source_entity_attribute, source_volume_attribute);
+      return std::make_unique<PlayerAttributesSourceVolumeStrategy>(source_entity_attribute, source_volume_attribute, on_change);
     }
   } else if (strategy.compare("source_entity") == 0) {
     if (source_entity_attribute.empty()) {
@@ -41,23 +38,6 @@ std::unique_ptr<HomeAssistantSourceVolumeStrategy> HomeAssistantSourceVolumeStra
     SPDLOG_ERROR("Media player {}: unknown source volume strategy '{}'. Source volume will not be available.", media_player_id, strategy);
   }
   return std::make_unique<NoSourceVolumeStrategy>();
-}
-
-std::optional<uint8_t> HomeAssistantSourceVolumeStrategy::_volume_from_json(const nlohmann::json &volume_level) {
-  if (!volume_level.is_number()) {
-    return std::nullopt;
-  }
-  return std::lround(std::clamp(volume_level.get<double>(), 0.0, 1.0) * 100);
-}
-
-void HomeAssistantSourceVolumeStrategy::_send_volume_set(const std::string &entity_id, uint8_t volume) {
-  nlohmann::json command = {
-      {"type", "call_service"},
-      {"domain", "media_player"},
-      {"target", {{"entity_id", entity_id}}},
-      {"service", "volume_set"},
-      {"service_data", {{"volume_level", volume / 100.0}}}};
-  HomeAssistantManager::send_json(command);
 }
 
 // No source volume
@@ -73,24 +53,28 @@ void NoSourceVolumeStrategy::set_source_volume([[maybe_unused]] uint8_t volume) 
   SPDLOG_WARN("Received command to set source volume but no source volume strategy is configured.");
 }
 
+std::optional<MediaPlayerSources> NoSourceVolumeStrategy::get_source_player_sources() {
+  return std::nullopt;
+}
+
+void NoSourceVolumeStrategy::select_source_player_source([[maybe_unused]] const std::string &source) {
+  SPDLOG_WARN("Received command to select a source player source but no source volume strategy is configured.");
+}
+
 // Player attributes
 
-PlayerAttributesSourceVolumeStrategy::PlayerAttributesSourceVolumeStrategy(std::string source_entity_attribute, std::string source_volume_attribute) {
-  this->_source_entity_attribute = source_entity_attribute;
+PlayerAttributesSourceVolumeStrategy::PlayerAttributesSourceVolumeStrategy(std::string source_entity_attribute, std::string source_volume_attribute, std::function<void()> on_change) : _source_player(source_entity_attribute, on_change) {
   this->_source_volume_attribute = source_volume_attribute;
 }
 
 void PlayerAttributesSourceVolumeStrategy::update_from_player_attributes(const nlohmann::json &attributes) {
-  std::lock_guard<std::mutex> lock_guard(this->_mutex);
-  this->_source_entity_id.clear();
-  this->_source_volume.reset();
+  this->_source_player.update_from_player_attributes(attributes);
 
-  if (attributes.contains(this->_source_entity_attribute) && attributes[this->_source_entity_attribute].is_string()) {
-    this->_source_entity_id = attributes[this->_source_entity_attribute];
-  }
+  std::lock_guard<std::mutex> lock_guard(this->_mutex);
+  this->_source_volume.reset();
   // Only report a source volume if we also know where to send volume changes.
-  if (!this->_source_entity_id.empty() && attributes.contains(this->_source_volume_attribute)) {
-    this->_source_volume = HomeAssistantSourceVolumeStrategy::_volume_from_json(attributes[this->_source_volume_attribute]);
+  if (!this->_source_player.get_entity_id().empty() && attributes.contains(this->_source_volume_attribute)) {
+    this->_source_volume = HomeAssistantSourcePlayer::volume_from_json(attributes[this->_source_volume_attribute]);
   }
 }
 
@@ -100,110 +84,38 @@ std::optional<uint8_t> PlayerAttributesSourceVolumeStrategy::get_source_volume()
 }
 
 void PlayerAttributesSourceVolumeStrategy::set_source_volume(uint8_t volume) {
-  std::string source_entity_id;
-  {
-    std::lock_guard<std::mutex> lock_guard(this->_mutex);
-    source_entity_id = this->_source_entity_id;
-  }
-  if (source_entity_id.empty()) {
-    SPDLOG_WARN("Received command to set source volume but the media player does not report a source entity.");
-    return;
-  }
-  HomeAssistantSourceVolumeStrategy::_send_volume_set(source_entity_id, volume);
+  this->_source_player.set_volume(volume);
+}
+
+std::optional<MediaPlayerSources> PlayerAttributesSourceVolumeStrategy::get_source_player_sources() {
+  return this->_source_player.get_sources();
+}
+
+void PlayerAttributesSourceVolumeStrategy::select_source_player_source(const std::string &source) {
+  this->_source_player.select_source(source);
 }
 
 // Source entity
 
-SourceEntitySourceVolumeStrategy::SourceEntitySourceVolumeStrategy(std::string source_entity_attribute, std::function<void()> on_change) {
-  this->_source_entity_attribute = source_entity_attribute;
-  this->_on_change = on_change;
-}
-
-SourceEntitySourceVolumeStrategy::~SourceEntitySourceVolumeStrategy() {
-  std::lock_guard<std::mutex> lock_guard(this->_mutex);
-  if (!this->_source_entity_id.empty()) {
-    HomeAssistantManager::detach_event_observer(this->_source_entity_id, boost::bind(&SourceEntitySourceVolumeStrategy::home_assistant_event_callback, this, _1));
-  }
+SourceEntitySourceVolumeStrategy::SourceEntitySourceVolumeStrategy(std::string source_entity_attribute, std::function<void()> on_change) : _source_player(source_entity_attribute, on_change) {
 }
 
 void SourceEntitySourceVolumeStrategy::update_from_player_attributes(const nlohmann::json &attributes) {
-  std::string new_source_entity_id;
-  if (attributes.contains(this->_source_entity_attribute) && attributes[this->_source_entity_attribute].is_string()) {
-    new_source_entity_id = attributes[this->_source_entity_attribute];
-  }
-
-  std::string old_source_entity_id;
-  {
-    std::lock_guard<std::mutex> lock_guard(this->_mutex);
-    if (new_source_entity_id.compare(this->_source_entity_id) == 0) {
-      return;
-    }
-    old_source_entity_id = this->_source_entity_id;
-    this->_source_entity_id = new_source_entity_id;
-    this->_source_volume.reset();
-  }
-
-  SPDLOG_DEBUG("Media player source changed from '{}' to '{}'.", old_source_entity_id, new_source_entity_id);
-  if (!old_source_entity_id.empty()) {
-    HomeAssistantManager::detach_event_observer(old_source_entity_id, boost::bind(&SourceEntitySourceVolumeStrategy::home_assistant_event_callback, this, _1));
-  }
-  if (!new_source_entity_id.empty()) {
-    // Attaching an observer requests all states from Home Assistant, the current source volume will arrive through the event callback.
-    HomeAssistantManager::attach_event_observer(new_source_entity_id, boost::bind(&SourceEntitySourceVolumeStrategy::home_assistant_event_callback, this, _1));
-  }
+  this->_source_player.update_from_player_attributes(attributes);
 }
 
 std::optional<uint8_t> SourceEntitySourceVolumeStrategy::get_source_volume() {
-  std::lock_guard<std::mutex> lock_guard(this->_mutex);
-  return this->_source_volume;
+  return this->_source_player.get_volume();
 }
 
 void SourceEntitySourceVolumeStrategy::set_source_volume(uint8_t volume) {
-  std::string source_entity_id;
-  {
-    std::lock_guard<std::mutex> lock_guard(this->_mutex);
-    source_entity_id = this->_source_entity_id;
-  }
-  if (source_entity_id.empty()) {
-    SPDLOG_WARN("Received command to set source volume but the media player does not report a source entity.");
-    return;
-  }
-  HomeAssistantSourceVolumeStrategy::_send_volume_set(source_entity_id, volume);
+  this->_source_player.set_volume(volume);
 }
 
-void SourceEntitySourceVolumeStrategy::home_assistant_event_callback(nlohmann::json event_data) {
-  try {
-    if (!event_data.contains("event") || !event_data["event"].contains("data")) {
-      return;
-    }
-    nlohmann::json data = event_data["event"]["data"];
-    if (!data.contains("entity_id") || !data["entity_id"].is_string()) {
-      return;
-    }
+std::optional<MediaPlayerSources> SourceEntitySourceVolumeStrategy::get_source_player_sources() {
+  return this->_source_player.get_sources();
+}
 
-    bool changed = false;
-    {
-      std::lock_guard<std::mutex> lock_guard(this->_mutex);
-      if (data["entity_id"].get<std::string>().compare(this->_source_entity_id) != 0) {
-        return; // Event for a previous source.
-      }
-
-      std::optional<uint8_t> new_volume = this->_source_volume;
-      if (!data.contains("new_state") || data["new_state"].is_null()) {
-        new_volume.reset();
-      } else if (data["new_state"].contains("attributes") && data["new_state"]["attributes"].contains("volume_level")) {
-        new_volume = HomeAssistantSourceVolumeStrategy::_volume_from_json(data["new_state"]["attributes"]["volume_level"]);
-      }
-      // Home Assistant does not report volume while a media player is off, keep the last known value in that case.
-
-      changed = new_volume != this->_source_volume;
-      this->_source_volume = new_volume;
-    }
-
-    if (changed && this->_on_change) {
-      this->_on_change();
-    }
-  } catch (std::exception &e) {
-    SPDLOG_ERROR("Caught exception during processing of media player source event. Error: {}", e.what());
-  }
+void SourceEntitySourceVolumeStrategy::select_source_player_source(const std::string &source) {
+  this->_source_player.select_source(source);
 }
