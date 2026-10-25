@@ -10,6 +10,7 @@ import Select, { type OptionProps } from "react-select";
 import { type IOptionType } from "../../stores/AvailableEntitiesStore";
 import { useAvailableEntitiesStore } from "../../stores/AvailableEntitiesStore";
 import { Notify } from "../NSPanelToastContainer";
+import { api, type RoomUpdateRequest } from "../../api/client";
 
 export default function RoomPage({ room_id }: { room_id: number }) {
   const { status: stompStatus } = useStompStore();
@@ -20,7 +21,7 @@ export default function RoomPage({ room_id }: { room_id: number }) {
   const room = rooms[room_id];
   const [hasLoadedValues, setHasLoadedValues] = useState(false);
 
-  const { control, register, getValues, setValue, reset, handleSubmit } = useForm({
+  const { control, register, getValues, setValue, reset, handleSubmit } = useForm<RoomUpdateRequest>({
     defaultValues: {
       id: room?.id,
       friendly_name: room?.friendly_name,
@@ -31,44 +32,16 @@ export default function RoomPage({ room_id }: { room_id: number }) {
   void useWatch({ control, name: "room_temp_sensor" });
   const current_friendly_name = useWatch({ control, name: "friendly_name" });
 
-  function getCookie(name: string) {
-    let cookieValue = "";
-    if (document.cookie && document.cookie !== "") {
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === name + "=") {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
+  const onSubmit = (data: RoomUpdateRequest) => {
+    api
+      .PUT("/rest/rooms", { body: data })
+      .then(({ error, response }) => {
+        if (error) {
+          return Promise.reject(error.message || response.status);
         }
-      }
-    }
-    return cookieValue;
-  }
-
-  const onSubmit = (data: any) => {
-    // PUT request using fetch with error handling
-    fetch("/rest/rooms", {
-      credentials: "same-origin",
-      method: "PUT",
-      mode: "same-origin",
-      headers: { "Content-Type": "application/json", "X-CSRFToken": getCookie("csrftoken") },
-      body: JSON.stringify(data),
-    })
-      .then(async (response) => {
-        const data = await response.json();
-
-        // check for error response
-        if (!response.ok) {
-          // get error message from body or default to response status
-          const error = (data && data.message) || response.status;
-          return Promise.reject(error);
-        }
-
         Notify({ message: `Saved room setting successfully.`, level: "success", duration: 5000 });
       })
       .catch((error) => {
-        // setErrorMessage(error);
         Notify({ message: `Error saving entity. Error: ${error}`, level: "error", duration: 10000 });
       });
   };

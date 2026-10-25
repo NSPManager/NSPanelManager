@@ -15,6 +15,10 @@ from .settings import *
 
 MEDIA_ROOT = os.path.join(DATA_DIR, "media")
 
+# A test request body with a field the serializer doesn't know has drifted from the API: fail it with a 400
+# instead of only logging a warning as production does.
+REST_REJECT_UNKNOWN_FIELDS = True
+
 # Hashing speed is irrelevant for tests.
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 

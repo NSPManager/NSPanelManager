@@ -1,14 +1,9 @@
 import { create } from "zustand";
 import { useStompStore } from "./StompStore";
 import { Notify } from "../components/NSPanelToastContainer";
+import { api, type Room } from "../api/client";
 
-export interface IRoomData {
-  id: number;
-  friendly_name: string;
-  display_order: number;
-  room_temp_provider: string;
-  room_temp_sensor: string;
-}
+export type IRoomData = Room;
 
 interface INSPanelInfoData {
   id: number;
@@ -98,9 +93,12 @@ export const useEntityStatesStore = create<IEntityStatesStore>((set) => ({
     });
 
     console.debug("Loading rooms...");
-    fetch("/rest/rooms")
-      .then((response) => response.json())
-      .then((data) => {
+    api
+      .GET("/rest/rooms")
+      .then(({ data, error }) => {
+        if (error) {
+          return Promise.reject(error.message);
+        }
         console.debug("Got rooms data.");
         for (const room of data.rooms) {
           set({ rooms: { ...useEntityStatesStore.getState().rooms, [room.id]: room } });

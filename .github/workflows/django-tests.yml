@@ -51,3 +51,29 @@ jobs:
           detailed_summary: true
           include_passed: true
           require_tests: true
+
+  # test_openapi.py checks openapi.yaml against the DRF views; this checks the UI's generated
+  # TypeScript types against openapi.yaml. Together they catch a contract change committed
+  # without running docker/web/generate_api.sh.
+  api-types:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docker/web/nspanelmanager/web/react-components
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20" # Matches the node:20 image in docker/Dockerfile
+
+      - name: Regenerate TypeScript types from openapi.yaml
+        run: npm run generate:api-types
+
+      - name: Check the committed types are up to date
+        run: |
+          if [ -n "$(git status --porcelain -- src/api/schema.d.ts)" ]; then
+            git diff -- src/api/schema.d.ts
+            echo "::error file=docker/web/nspanelmanager/web/react-components/src/api/schema.d.ts::src/api/schema.d.ts is out of date with docker/web/openapi.yaml. Run docker/web/generate_api.sh and commit the result."
+            exit 1
+          fi
