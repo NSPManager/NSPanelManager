@@ -1,5 +1,4 @@
 import json
-from unittest import expectedFailure
 
 from django.urls import reverse
 
@@ -155,11 +154,8 @@ class RoomRESTTests(NSPMTestCase):
         self.assertEqual((room.friendly_name, room.room_temp_provider, room.room_temp_sensor), ("Study", "home_assistant", "sensor.study"))
         self.assertManagerReloaded(times=1)
 
-    @expectedFailure
     def test_update_room_display_order(self):
-        # KNOWN BUG: room_put checks for "displayOrder" but reads data["display_order"], so
-        # sending display_order (the key GET /rest/rooms returns) is silently ignored and
-        # sending displayOrder raises KeyError and returns 500.
+        # display_order is the key GET /rest/rooms returns. room_put used to check for "displayOrder" instead, so it was ignored.
         room = self.make_room("Office")
 
         response = self.put_json(reverse("rest_rooms_create"), {"id": room.id, "display_order": 7})
