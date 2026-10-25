@@ -285,7 +285,7 @@ void OpenhabThermostat::openhab_target_temperature_event_callback(nlohmann::json
         return;
       }
 
-      float target_temperature = std::round(atof(std::string(payload["state"]).c_str()));
+      float target_temperature = std::round(atof(std::string(payload["state"]).c_str()) * 10) / 10; // Round to 1 decimal
 
       SPDLOG_DEBUG("Thermostat {}::{} got new temperature {}, current temperature: {}.", this->_id, this->_name, target_temperature, this->_current_temperature);
       if (target_temperature != this->_current_temperature) {

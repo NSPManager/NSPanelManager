@@ -264,10 +264,8 @@ TEST_F(OpenhabThermostatTest, fetches_the_initial_mode_over_rest) {
   EXPECT_EQ(thermostat->get_mode().value, "heat");
 }
 
-// KNOWN BUG: the initial target temperature fetched over REST is rounded to a whole degree
-// (std::round without the * 10 / 10 used for websocket events), so 21.5 shows as 22.
-// Remove DISABLED_ when fixing.
-TEST_F(OpenhabThermostatTest, DISABLED_fetches_the_initial_target_temperature_over_rest) {
+// #386: the initial target temperature fetched over REST was rounded to a whole degree, so 21.5 showed as 22.
+TEST_F(OpenhabThermostatTest, fetches_the_initial_target_temperature_over_rest) {
   server.respond("/rest/items/HP_Target", rest_item("HP_Target", "Number", "21.5"));
 
   create_thermostat();
