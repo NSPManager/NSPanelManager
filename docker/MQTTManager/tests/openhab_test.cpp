@@ -273,11 +273,9 @@ TEST_F(OpenhabThermostatTest, fetches_the_initial_target_temperature_over_rest) 
   EXPECT_FLOAT_EQ(thermostat->get_temperature(), 21.5);
 }
 
-// KNOWN BUG: OpenhabThermostat reads openhab_preset_item, openhab_swing_item and
-// openhab_swingh_item, but Django stores openhab_preset_mode_item, openhab_swing_mode_item and
-// openhab_swingh_mode_item. Presets and swing modes are commanded on "openhab/items//command"
-// and never follow OpenHAB. Remove DISABLED_ when fixing.
-TEST_F(OpenhabThermostatTest, DISABLED_set_preset_and_swing_command_their_items) {
+// The React UI stores openhab_preset_mode_item, openhab_swing_mode_item and openhab_swingh_mode_item, but only the
+// names the older settings form used were read, so presets and swing modes were commanded on "openhab/items//command".
+TEST_F(OpenhabThermostatTest, set_preset_and_swing_command_their_items) {
   create_thermostat();
 
   thermostat->set_preset("away");
@@ -291,10 +289,9 @@ TEST_F(OpenhabThermostatTest, DISABLED_set_preset_and_swing_command_their_items)
   EXPECT_EQ(commands[2].first, "HP_SwingH");
 }
 
-// KNOWN BUG: see DISABLED_set_preset_and_swing_command_their_items. Once the item names are
-// read, the initial preset fetched over REST is also compared with the current HVAC mode
-// instead of the current preset, and the horizontal swing fetch checks the vertical swing item.
-TEST_F(OpenhabThermostatTest, DISABLED_fetches_the_initial_preset_and_swing_over_rest) {
+// The initial preset fetched over REST was also compared with the current HVAC mode instead of the current preset,
+// and the horizontal swing fetch checked the vertical swing item's name.
+TEST_F(OpenhabThermostatTest, fetches_the_initial_preset_and_swing_over_rest) {
   server.respond("/rest/items/HP_Preset", rest_item("HP_Preset", "String", "away"));
   server.respond("/rest/items/HP_Swing", rest_item("HP_Swing", "String", "on"));
   server.respond("/rest/items/HP_SwingH", rest_item("HP_SwingH", "String", "on"));
@@ -330,4 +327,27 @@ TEST_F(OpenhabThermostatTest, fetches_the_initial_current_temperature_over_rest)
   ASSERT_TRUE(state.has_value());
   EXPECT_TRUE(state->has_current_temperature());
   EXPECT_FLOAT_EQ(state->current_temperature(), 19.5);
+}
+
+// Thermostats saved by the older settings form have the original item names, without "_mode".
+TEST_F(OpenhabThermostatTest, reads_preset_and_swing_items_saved_by_the_older_settings_form) {
+  auto data = django_openhab_thermostat_data();
+  for (const std::string kind : {"preset", "swing", "swingh"}) {
+    data.erase("openhab_" + kind + "_mode_item");
+  }
+  data["openhab_preset_item"] = "Old_Preset";
+  data["openhab_swing_item"] = "Old_Swing";
+  data["openhab_swingh_item"] = "Old_SwingH";
+  row = std::make_unique<ScopedEntity>("thermostat", "Heat pump", data, 2, 8, 1);
+  thermostat = std::make_unique<OpenhabThermostat>(row->id);
+
+  thermostat->set_preset("away");
+  thermostat->set_swing_mode("on");
+  thermostat->set_swing_horizontal_mode("on");
+
+  auto commands = item_commands();
+  ASSERT_EQ(commands.size(), 3);
+  EXPECT_EQ(commands[0].first, "Old_Preset");
+  EXPECT_EQ(commands[1].first, "Old_Swing");
+  EXPECT_EQ(commands[2].first, "Old_SwingH");
 }

@@ -95,22 +95,28 @@ void OpenhabThermostat::reload_config() {
     SPDLOG_WARN("No openhab_hvac_mode_item name defined for Thermostat {}::{}", this->_id, this->_name);
   }
 
-  if (entity_data.contains("openhab_preset_item")) {
+  if (entity_data.contains("openhab_preset_mode_item") && !std::string(entity_data["openhab_preset_mode_item"]).empty()) {
+    this->_openhab_preset_item = entity_data["openhab_preset_mode_item"];
+  } else if (entity_data.contains("openhab_preset_item")) { // Thermostats saved by the older settings form.
     this->_openhab_preset_item = entity_data["openhab_preset_item"];
   } else {
-    SPDLOG_WARN("No openhab_preset_item name defined for Thermostat {}::{}", this->_id, this->_name);
+    SPDLOG_WARN("No openhab_preset_mode_item name defined for Thermostat {}::{}", this->_id, this->_name);
   }
 
-  if (entity_data.contains("openhab_swing_item")) {
+  if (entity_data.contains("openhab_swing_mode_item") && !std::string(entity_data["openhab_swing_mode_item"]).empty()) {
+    this->_openhab_swing_item = entity_data["openhab_swing_mode_item"];
+  } else if (entity_data.contains("openhab_swing_item")) { // Thermostats saved by the older settings form.
     this->_openhab_swing_item = entity_data["openhab_swing_item"];
   } else {
-    SPDLOG_WARN("No openhab_swing_item name defined for Thermostat {}::{}", this->_id, this->_name);
+    SPDLOG_WARN("No openhab_swing_mode_item name defined for Thermostat {}::{}", this->_id, this->_name);
   }
 
-  if (entity_data.contains("openhab_swingh_item")) {
+  if (entity_data.contains("openhab_swingh_mode_item") && !std::string(entity_data["openhab_swingh_mode_item"]).empty()) {
+    this->_openhab_swingh_item = entity_data["openhab_swingh_mode_item"];
+  } else if (entity_data.contains("openhab_swingh_item")) { // Thermostats saved by the older settings form.
     this->_openhab_swingh_item = entity_data["openhab_swingh_item"];
   } else {
-    SPDLOG_WARN("No openhab_swingh_item name defined for Thermostat {}::{}", this->_id, this->_name);
+    SPDLOG_WARN("No openhab_swingh_mode_item name defined for Thermostat {}::{}", this->_id, this->_name);
   }
 
   SPDLOG_DEBUG("Thermostat {}::{} Attaching openhab target temp item: {}", this->_id, this->_name, this->_openhab_target_temperature_item);
@@ -586,8 +592,8 @@ void OpenhabThermostat::openhab_preset_event_callback(nlohmann::json data) {
       }
 
       std::string mode = std::string(payload["state"]);
-      SPDLOG_DEBUG("Thermostat {}::{} got new mode {}, current mode: {}.", this->_id, this->_name, mode, this->_current_mode.value);
-      if (this->_current_mode.value.compare(mode) != 0) {
+      SPDLOG_DEBUG("Thermostat {}::{} got new preset {}, current preset: {}.", this->_id, this->_name, mode, this->_current_preset.value);
+      if (this->_current_preset.value.compare(mode) != 0) {
         auto new_preset = std::find_if(this->_supported_presets.begin(), this->_supported_presets.end(), [&](const ThermostatOptionHolder &option) {
           return option.value.compare(mode) == 0;
         });
@@ -729,7 +735,7 @@ void OpenhabThermostat::openhab_swingh_event_callback(nlohmann::json data) {
     }
   } else if (std::string(data["type"]).compare("ItemStateFetched") == 0) {
     SPDLOG_TRACE("OpenHAB thermostat {}::{} Got initial data from OpenHAB via custom ItemStateFetched event.", this->_id, this->_name);
-    if (data.contains("payload") && data.at("payload").contains("name") && this->_openhab_swing_item.compare(data["payload"]["name"]) == 0) {
+    if (data.contains("payload") && data.at("payload").contains("name") && this->_openhab_swingh_item.compare(data["payload"]["name"]) == 0) {
       nlohmann::json payload = data["payload"];
       if (payload["state"].is_null()) { // Got state but state is NULL, ignore.
         return;
