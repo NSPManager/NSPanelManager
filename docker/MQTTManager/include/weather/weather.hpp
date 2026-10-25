@@ -5,6 +5,7 @@
 #include <thread>
 #include <vector>
 #ifndef MQTT_MANAGER_WEATHER
+#define MQTT_MANAGER_WEATHER
 
 class MQTTManagerWeather {
 public:
