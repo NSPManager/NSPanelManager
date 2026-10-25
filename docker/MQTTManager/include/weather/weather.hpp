@@ -33,6 +33,14 @@ public:
    */
   static void send_state_update();
 
+#if defined(TEST_MODE) && TEST_MODE == 1
+  // Process an Open-Meteo response as if it had just been fetched, and send the result even if it is unchanged.
+  static void test_process_weather_data(std::string data) {
+    MQTTManagerWeather::_last_weather_update.clear();
+    MQTTManagerWeather::_process_weather_data(data);
+  }
+#endif
+
 private:
   static inline std::thread _instance;
 
