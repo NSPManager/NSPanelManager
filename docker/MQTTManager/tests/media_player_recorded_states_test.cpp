@@ -137,6 +137,10 @@ TEST_F(RecordedMediaPlayerTest, matrix_zone_publishes_its_inputs_and_the_source_
   EXPECT_TRUE(state->is_muted());
   ASSERT_TRUE(state->has_source_volume());
   EXPECT_EQ(state->source_volume(), 28);
+  ASSERT_TRUE(state->has_media_position());
+  EXPECT_EQ(state->media_position(), 0);
+  EXPECT_EQ(state->media_position_updated_at(), 1792202385);
+  EXPECT_EQ(state->media_duration(), 314);
 
   // The zone's inputs are the matrix inputs, one of which is the source player.
   EXPECT_EQ(sources_of(state->player_sources()), recorded_sources("matrix_zone"));
@@ -202,6 +206,8 @@ TEST_F(RecordedMediaPlayerTest, receiver_that_is_off_offers_its_inputs_without_a
   auto state = last_published_state();
   ASSERT_TRUE(state.has_value());
   EXPECT_EQ(state->state(), NSPanelEntityState_MediaPlayer_PlaybackState_OFF);
+  EXPECT_FALSE(state->has_media_position());
+  EXPECT_EQ(state->media_duration(), 0);
   EXPECT_EQ(sources_of(state->player_sources()), recorded_sources("av_receiver_off"));
   EXPECT_EQ(state->player_sources().current_source(), "");
   EXPECT_TRUE(state->player_sources().can_select());
