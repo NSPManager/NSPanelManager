@@ -1,6 +1,7 @@
 #include "fake_http_server.hpp"
 #include "test_helpers.hpp"
 #include <gtest/gtest.h>
+#include <set>
 #include <protobuf_nspanel_entity.pb.h>
 #include <scenes/openhab_scene.hpp>
 #include <switch/openhab_switch.hpp>
@@ -281,11 +282,13 @@ TEST_F(OpenhabThermostatTest, set_preset_and_swing_command_their_items) {
   thermostat->set_swing_mode("on");
   thermostat->set_swing_horizontal_mode("on");
 
-  auto commands = item_commands();
-  ASSERT_EQ(commands.size(), 3);
-  EXPECT_EQ(commands[0].first, "HP_Preset");
-  EXPECT_EQ(commands[1].first, "HP_Swing");
-  EXPECT_EQ(commands[2].first, "HP_SwingH");
+  // Without optimistic mode each call also re-sends the earlier changes OpenHAB hasn't confirmed yet, so check which
+  // items were commanded rather than how often.
+  std::set<std::string> items;
+  for (const auto &command : item_commands()) {
+    items.insert(command.first);
+  }
+  EXPECT_EQ(items, (std::set<std::string>{"HP_Preset", "HP_Swing", "HP_SwingH"}));
 }
 
 // The initial preset fetched over REST was also compared with the current HVAC mode instead of the current preset,
@@ -344,11 +347,13 @@ TEST_F(OpenhabThermostatTest, reads_preset_and_swing_items_saved_by_the_older_se
   thermostat->set_swing_mode("on");
   thermostat->set_swing_horizontal_mode("on");
 
-  auto commands = item_commands();
-  ASSERT_EQ(commands.size(), 3);
-  EXPECT_EQ(commands[0].first, "Old_Preset");
-  EXPECT_EQ(commands[1].first, "Old_Swing");
-  EXPECT_EQ(commands[2].first, "Old_SwingH");
+  // Without optimistic mode each call also re-sends the earlier changes OpenHAB hasn't confirmed yet, so check which
+  // items were commanded rather than how often.
+  std::set<std::string> items;
+  for (const auto &command : item_commands()) {
+    items.insert(command.first);
+  }
+  EXPECT_EQ(items, (std::set<std::string>{"Old_Preset", "Old_Swing", "Old_SwingH"}));
 }
 
 // The callbacks read the item from the topic before checking it had one. OpenhabManager already drops such topics, so
