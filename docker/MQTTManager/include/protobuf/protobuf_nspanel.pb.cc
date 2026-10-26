@@ -336,6 +336,30 @@ struct NSPanelMQTTManagerCommand_FirstPageTurnLightOffDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelMQTTManagerCommand_FirstPageTurnLightOffDefaultTypeInternal _NSPanelMQTTManagerCommand_FirstPageTurnLightOff_default_instance_;
 
+inline constexpr NSPanelMQTTManagerCommand_CoverCommand::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : cover_id_{0},
+        action_{static_cast< ::NSPanelMQTTManagerCommand_CoverCommand_Action >(0)},
+        position_{0},
+        has_position_{false},
+        has_tilt_position_{false},
+        tilt_position_{0},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_CoverCommand::NSPanelMQTTManagerCommand_CoverCommand(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct NSPanelMQTTManagerCommand_CoverCommandDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_CoverCommandDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~NSPanelMQTTManagerCommand_CoverCommandDefaultTypeInternal() {}
+  union {
+    NSPanelMQTTManagerCommand_CoverCommand _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelMQTTManagerCommand_CoverCommandDefaultTypeInternal _NSPanelMQTTManagerCommand_CoverCommand_default_instance_;
+
 inline constexpr NSPanelMQTTManagerCommand_ButtonPressed::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : button_id_{0},
@@ -592,7 +616,7 @@ struct NSPanelConfigDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelConfigDefaultTypeInternal _NSPanelConfig_default_instance_;
-static const ::_pb::EnumDescriptor* file_level_enum_descriptors_protobuf_5fnspanel_2eproto[9];
+static const ::_pb::EnumDescriptor* file_level_enum_descriptors_protobuf_5fnspanel_2eproto[10];
 static constexpr const ::_pb::ServiceDescriptor**
     file_level_service_descriptors_protobuf_5fnspanel_2eproto = nullptr;
 const ::uint32_t
@@ -888,6 +912,20 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.select_player_source_),
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_MediaPlayerCommand, _impl_.select_source_player_source_),
         ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_CoverCommand, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_CoverCommand, _impl_.cover_id_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_CoverCommand, _impl_.action_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_CoverCommand, _impl_.has_position_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_CoverCommand, _impl_.position_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_CoverCommand, _impl_.has_tilt_position_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand_CoverCommand, _impl_.tilt_position_),
+        ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand, _internal_metadata_),
         ~0u,  // no _extensions_
         PROTOBUF_FIELD_OFFSET(::NSPanelMQTTManagerCommand, _impl_._oneof_case_[0]),
@@ -895,6 +933,7 @@ const ::uint32_t
         ~0u,  // no _inlined_string_donated_
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
+        ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
@@ -929,7 +968,8 @@ static const ::_pbi::MigrationSchema
         {250, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand)},
         {260, -1, -1, sizeof(::NSPanelMQTTManagerCommand_ThermostatCommand)},
         {271, -1, -1, sizeof(::NSPanelMQTTManagerCommand_MediaPlayerCommand)},
-        {289, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
+        {289, -1, -1, sizeof(::NSPanelMQTTManagerCommand_CoverCommand)},
+        {303, -1, -1, sizeof(::NSPanelMQTTManagerCommand)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelConfig_RoomInfo_default_instance_._instance,
@@ -951,6 +991,7 @@ static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelMQTTManagerCommand_ThermostatTemperatureCommand_default_instance_._instance,
     &::_NSPanelMQTTManagerCommand_ThermostatCommand_default_instance_._instance,
     &::_NSPanelMQTTManagerCommand_MediaPlayerCommand_default_instance_._instance,
+    &::_NSPanelMQTTManagerCommand_CoverCommand_default_instance_._instance,
     &::_NSPanelMQTTManagerCommand_default_instance_._instance,
 };
 const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
@@ -1016,111 +1057,121 @@ const char descriptor_table_protodef_protobuf_5fnspanel_2eproto[] ABSL_ATTRIBUTE
     "pressure\030\016 \001(\010\022\020\n\010pressure\030\017 \001(\002\"o\n\005stat"
     "e\022\n\n\006ONLINE\020\000\022\013\n\007OFFLINE\020\001\022\020\n\014UPDATING_T"
     "FT\020\002\022\025\n\021UPDATING_FIRMWARE\020\003\022\025\n\021UPDATING_"
-    "LITTLEFS\020\004\022\r\n\tREBOOTING\020\005\"\246\004\n\027NSPanelRoo"
+    "LITTLEFS\020\004\022\r\n\tREBOOTING\020\005\"\275\004\n\027NSPanelRoo"
     "mEntitiesPage\022\n\n\002id\030\001 \001(\005\022\021\n\tpage_type\030\002"
     " \001(\005\022\023\n\013header_text\030\003 \001(\t\0225\n\010entities\030\004 "
     "\003(\0132#.NSPanelRoomEntitiesPage.EntitySlot"
-    "\032\237\003\n\nEntitySlot\022\032\n\022room_view_position\030\001 "
+    "\032\266\003\n\nEntitySlot\022\032\n\022room_view_position\030\001 "
     "\001(\005\022\014\n\004name\030\002 \001(\t\022\014\n\004icon\030\003 \001(\t\022\013\n\003pco\030\004"
     " \001(\005\022\014\n\004pco2\030\005 \001(\005\022\026\n\016can_save_scene\030\006 \001"
     "(\010\022\030\n\020mqtt_state_topic\030\007 \001(\t\022<\n\004type\030\010 \001"
     "(\0162..NSPanelRoomEntitiesPage.EntitySlot."
-    "EntityType\022\n\n\002id\030\t \001(\005\"\301\001\n\nEntityType\022\033\n"
+    "EntityType\022\n\n\002id\030\t \001(\005\"\330\001\n\nEntityType\022\033\n"
     "\027ENTITY_TYPE_UNSPECIFIED\020\000\022\025\n\021ENTITY_TYP"
     "E_LIGHT\020\001\022\026\n\022ENTITY_TYPE_SWITCH\020\002\022\026\n\022ENT"
     "ITY_TYPE_BUTTON\020\003\022\032\n\026ENTITY_TYPE_THERMOS"
     "TAT\020\004\022\025\n\021ENTITY_TYPE_SCENE\020\005\022\034\n\030ENTITY_T"
-    "YPE_MEDIA_PLAYER\020\006\"\226\003\n\021NSPanelRoomStatus"
-    "\022\n\n\002id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\031\n\021average_di"
-    "m_level\030\003 \001(\005\022 \n\030ceiling_lights_dim_leve"
-    "l\030\004 \001(\005\022\036\n\026table_lights_dim_level\030\005 \001(\005\022"
-    "!\n\031average_color_temperature\030\006 \001(\005\022.\n&ce"
-    "iling_lights_color_temperature_value\030\007 \001"
-    "(\005\022,\n$table_lights_color_temperature_val"
-    "ue\030\010 \001(\005\022\032\n\022num_ceiling_lights\030\t \001(\005\022\030\n\020"
-    "num_table_lights\030\n \001(\005\022\035\n\025num_ceiling_li"
-    "ghts_on\030\013 \001(\005\022\033\n\023num_table_lights_on\030\014 \001"
-    "(\005\022\027\n\017entity_page_ids\030\r \003(\005\"\277\003\n\024NSPanelW"
-    "eatherUpdate\022:\n\016forecast_items\030\001 \003(\0132\".N"
-    "SPanelWeatherUpdate.ForecastItem\022\034\n\024curr"
-    "ent_weather_icon\030\002 \001(\t\022\"\n\032current_temper"
-    "ature_string\030\003 \001(\t\022\"\n\032current_maxmin_tem"
-    "perature\030\004 \001(\t\022\033\n\023current_wind_string\030\005 "
-    "\001(\t\022\026\n\016sunrise_string\030\006 \001(\t\022\025\n\rsunset_st"
-    "ring\030\007 \001(\t\022$\n\034current_precipitation_stri"
-    "ng\030\010 \001(\t\032\222\001\n\014ForecastItem\022\024\n\014weather_ico"
-    "n\030\001 \001(\t\022\034\n\024precipitation_string\030\002 \001(\t\022!\n"
-    "\031temperature_maxmin_string\030\003 \001(\t\022\023\n\013wind"
-    "_string\030\004 \001(\t\022\026\n\016display_string\030\005 \001(\t\"\375\020"
-    "\n\031NSPanelMQTTManagerCommand\022M\n\022first_pag"
-    "e_turn_on\030\001 \001(\0132/.NSPanelMQTTManagerComm"
-    "and.FirstPageTurnLightOnH\000\022O\n\023first_page"
-    "_turn_off\030\002 \001(\01320.NSPanelMQTTManagerComm"
-    "and.FirstPageTurnLightOffH\000\022@\n\rlight_com"
-    "mand\030\003 \001(\0132\'.NSPanelMQTTManagerCommand.L"
-    "ightCommandH\000\022c\n toggle_entity_from_enti"
-    "ties_page\030\004 \001(\01327.NSPanelMQTTManagerComm"
-    "and.ToggleEntityFromEntitiesPageH\000\022I\n\022sa"
-    "ve_scene_command\030\005 \001(\0132+.NSPanelMQTTMana"
-    "gerCommand.SaveSceneCommandH\000\022B\n\016button_"
-    "pressed\030\006 \001(\0132(.NSPanelMQTTManagerComman"
-    "d.ButtonPressedH\000\022a\n\036thermostat_temperat"
-    "ure_command\030\007 \001(\01327.NSPanelMQTTManagerCo"
-    "mmand.ThermostatTemperatureCommandH\000\022J\n\022"
-    "thermostat_command\030\010 \001(\0132,.NSPanelMQTTMa"
-    "nagerCommand.ThermostatCommandH\000\022M\n\024medi"
-    "a_player_command\030\t \001(\0132-.NSPanelMQTTMana"
-    "gerCommand.MediaPlayerCommandH\000\022\022\n\nnspan"
-    "el_id\030d \001(\005\032\372\001\n\024FirstPageTurnLightOn\022E\n\r"
-    "affect_lights\030\001 \001(\0162..NSPanelMQTTManager"
-    "Command.AffectLightsOptions\022\037\n\027brightnes"
-    "s_slider_value\030\002 \001(\005\022\033\n\023kelvin_slider_va"
-    "lue\030\003 \001(\005\022\025\n\rselected_room\030\004 \001(\005\022\016\n\006glob"
-    "al\030\005 \001(\010\022\034\n\024has_brightness_value\030\006 \001(\010\022\030"
-    "\n\020has_kelvin_value\030\007 \001(\010\032n\n\025FirstPageTur"
-    "nLightOff\022E\n\raffect_lights\030\001 \001(\0162..NSPan"
-    "elMQTTManagerCommand.AffectLightsOptions"
-    "\022\016\n\006global\030\002 \001(\010\032\321\001\n\014LightCommand\022\021\n\tlig"
-    "ht_ids\030\001 \003(\005\022\026\n\016has_brightness\030\002 \001(\010\022\022\n\n"
-    "brightness\030\003 \001(\005\022\035\n\025has_color_temperatur"
-    "e\030\004 \001(\010\022\031\n\021color_temperature\030\005 \001(\005\022\017\n\007ha"
-    "s_hue\030\006 \001(\010\022\013\n\003hue\030\007 \001(\005\022\026\n\016has_saturati"
-    "on\030\010 \001(\010\022\022\n\nsaturation\030\t \001(\005\032K\n\034ToggleEn"
-    "tityFromEntitiesPage\022\026\n\016entity_page_id\030\001"
-    " \001(\005\022\023\n\013entity_slot\030\002 \001(\005\032\?\n\020SaveSceneCo"
-    "mmand\022\026\n\016entity_page_id\030\001 \001(\005\022\023\n\013entity_"
-    "slot\030\002 \001(\005\032\"\n\rButtonPressed\022\021\n\tbutton_id"
-    "\030\002 \001(\005\032J\n\034ThermostatTemperatureCommand\022\025"
-    "\n\rthermostat_id\030\001 \001(\005\022\023\n\013temperature\030\002 \001"
-    "(\002\032M\n\021ThermostatCommand\022\025\n\rthermostat_id"
-    "\030\001 \001(\005\022\016\n\006option\030\002 \001(\t\022\021\n\tnew_value\030\003 \001("
-    "\t\032\224\003\n\022MediaPlayerCommand\022\027\n\017media_player"
-    "_id\030\001 \001(\005\022U\n\017playback_action\030\002 \001(\0162<.NSP"
-    "anelMQTTManagerCommand.MediaPlayerComman"
-    "d.PlaybackAction\022\022\n\nhas_volume\030\003 \001(\010\022\016\n\006"
-    "volume\030\004 \001(\005\022\031\n\021has_source_volume\030\005 \001(\010\022"
-    "\025\n\rsource_volume\030\006 \001(\005\022\021\n\thas_muted\030\007 \001("
-    "\010\022\r\n\005muted\030\010 \001(\010\022\034\n\024select_player_source"
-    "\030\t \001(\t\022#\n\033select_source_player_source\030\n "
-    "\001(\t\"S\n\016PlaybackAction\022\010\n\004NONE\020\000\022\010\n\004PLAY\020"
-    "\001\022\t\n\005PAUSE\020\002\022\016\n\nNEXT_TRACK\020\003\022\022\n\016PREVIOUS"
-    "_TRACK\020\004\"D\n\023AffectLightsOptions\022\007\n\003ALL\020\000"
-    "\022\020\n\014TABLE_LIGHTS\020\001\022\022\n\016CEILING_LIGHTS\020\002B\r"
-    "\n\013CommandData*[\n\023NSPanelWarningLevel\022\014\n\010"
-    "CRITICAL\020\000\022\t\n\005ERROR\020\001\022\013\n\007WARNING\020\002\022\010\n\004IN"
-    "FO\020\003\022\t\n\005DEBUG\020\004\022\t\n\005TRACE\020\005b\006proto3"
+    "YPE_MEDIA_PLAYER\020\006\022\025\n\021ENTITY_TYPE_COVER\020"
+    "\007\"\226\003\n\021NSPanelRoomStatus\022\n\n\002id\030\001 \001(\005\022\014\n\004n"
+    "ame\030\002 \001(\t\022\031\n\021average_dim_level\030\003 \001(\005\022 \n\030"
+    "ceiling_lights_dim_level\030\004 \001(\005\022\036\n\026table_"
+    "lights_dim_level\030\005 \001(\005\022!\n\031average_color_"
+    "temperature\030\006 \001(\005\022.\n&ceiling_lights_colo"
+    "r_temperature_value\030\007 \001(\005\022,\n$table_light"
+    "s_color_temperature_value\030\010 \001(\005\022\032\n\022num_c"
+    "eiling_lights\030\t \001(\005\022\030\n\020num_table_lights\030"
+    "\n \001(\005\022\035\n\025num_ceiling_lights_on\030\013 \001(\005\022\033\n\023"
+    "num_table_lights_on\030\014 \001(\005\022\027\n\017entity_page"
+    "_ids\030\r \003(\005\"\277\003\n\024NSPanelWeatherUpdate\022:\n\016f"
+    "orecast_items\030\001 \003(\0132\".NSPanelWeatherUpda"
+    "te.ForecastItem\022\034\n\024current_weather_icon\030"
+    "\002 \001(\t\022\"\n\032current_temperature_string\030\003 \001("
+    "\t\022\"\n\032current_maxmin_temperature\030\004 \001(\t\022\033\n"
+    "\023current_wind_string\030\005 \001(\t\022\026\n\016sunrise_st"
+    "ring\030\006 \001(\t\022\025\n\rsunset_string\030\007 \001(\t\022$\n\034cur"
+    "rent_precipitation_string\030\010 \001(\t\032\222\001\n\014Fore"
+    "castItem\022\024\n\014weather_icon\030\001 \001(\t\022\034\n\024precip"
+    "itation_string\030\002 \001(\t\022!\n\031temperature_maxm"
+    "in_string\030\003 \001(\t\022\023\n\013wind_string\030\004 \001(\t\022\026\n\016"
+    "display_string\030\005 \001(\t\"\335\023\n\031NSPanelMQTTMana"
+    "gerCommand\022M\n\022first_page_turn_on\030\001 \001(\0132/"
+    ".NSPanelMQTTManagerCommand.FirstPageTurn"
+    "LightOnH\000\022O\n\023first_page_turn_off\030\002 \001(\01320"
+    ".NSPanelMQTTManagerCommand.FirstPageTurn"
+    "LightOffH\000\022@\n\rlight_command\030\003 \001(\0132\'.NSPa"
+    "nelMQTTManagerCommand.LightCommandH\000\022c\n "
+    "toggle_entity_from_entities_page\030\004 \001(\01327"
+    ".NSPanelMQTTManagerCommand.ToggleEntityF"
+    "romEntitiesPageH\000\022I\n\022save_scene_command\030"
+    "\005 \001(\0132+.NSPanelMQTTManagerCommand.SaveSc"
+    "eneCommandH\000\022B\n\016button_pressed\030\006 \001(\0132(.N"
+    "SPanelMQTTManagerCommand.ButtonPressedH\000"
+    "\022a\n\036thermostat_temperature_command\030\007 \001(\013"
+    "27.NSPanelMQTTManagerCommand.ThermostatT"
+    "emperatureCommandH\000\022J\n\022thermostat_comman"
+    "d\030\010 \001(\0132,.NSPanelMQTTManagerCommand.Ther"
+    "mostatCommandH\000\022M\n\024media_player_command\030"
+    "\t \001(\0132-.NSPanelMQTTManagerCommand.MediaP"
+    "layerCommandH\000\022@\n\rcover_command\030\n \001(\0132\'."
+    "NSPanelMQTTManagerCommand.CoverCommandH\000"
+    "\022\022\n\nnspanel_id\030d \001(\005\032\372\001\n\024FirstPageTurnLi"
+    "ghtOn\022E\n\raffect_lights\030\001 \001(\0162..NSPanelMQ"
+    "TTManagerCommand.AffectLightsOptions\022\037\n\027"
+    "brightness_slider_value\030\002 \001(\005\022\033\n\023kelvin_"
+    "slider_value\030\003 \001(\005\022\025\n\rselected_room\030\004 \001("
+    "\005\022\016\n\006global\030\005 \001(\010\022\034\n\024has_brightness_valu"
+    "e\030\006 \001(\010\022\030\n\020has_kelvin_value\030\007 \001(\010\032n\n\025Fir"
+    "stPageTurnLightOff\022E\n\raffect_lights\030\001 \001("
+    "\0162..NSPanelMQTTManagerCommand.AffectLigh"
+    "tsOptions\022\016\n\006global\030\002 \001(\010\032\321\001\n\014LightComma"
+    "nd\022\021\n\tlight_ids\030\001 \003(\005\022\026\n\016has_brightness\030"
+    "\002 \001(\010\022\022\n\nbrightness\030\003 \001(\005\022\035\n\025has_color_t"
+    "emperature\030\004 \001(\010\022\031\n\021color_temperature\030\005 "
+    "\001(\005\022\017\n\007has_hue\030\006 \001(\010\022\013\n\003hue\030\007 \001(\005\022\026\n\016has"
+    "_saturation\030\010 \001(\010\022\022\n\nsaturation\030\t \001(\005\032K\n"
+    "\034ToggleEntityFromEntitiesPage\022\026\n\016entity_"
+    "page_id\030\001 \001(\005\022\023\n\013entity_slot\030\002 \001(\005\032\?\n\020Sa"
+    "veSceneCommand\022\026\n\016entity_page_id\030\001 \001(\005\022\023"
+    "\n\013entity_slot\030\002 \001(\005\032\"\n\rButtonPressed\022\021\n\t"
+    "button_id\030\002 \001(\005\032J\n\034ThermostatTemperature"
+    "Command\022\025\n\rthermostat_id\030\001 \001(\005\022\023\n\013temper"
+    "ature\030\002 \001(\002\032M\n\021ThermostatCommand\022\025\n\rther"
+    "mostat_id\030\001 \001(\005\022\016\n\006option\030\002 \001(\t\022\021\n\tnew_v"
+    "alue\030\003 \001(\t\032\224\003\n\022MediaPlayerCommand\022\027\n\017med"
+    "ia_player_id\030\001 \001(\005\022U\n\017playback_action\030\002 "
+    "\001(\0162<.NSPanelMQTTManagerCommand.MediaPla"
+    "yerCommand.PlaybackAction\022\022\n\nhas_volume\030"
+    "\003 \001(\010\022\016\n\006volume\030\004 \001(\005\022\031\n\021has_source_volu"
+    "me\030\005 \001(\010\022\025\n\rsource_volume\030\006 \001(\005\022\021\n\thas_m"
+    "uted\030\007 \001(\010\022\r\n\005muted\030\010 \001(\010\022\034\n\024select_play"
+    "er_source\030\t \001(\t\022#\n\033select_source_player_"
+    "source\030\n \001(\t\"S\n\016PlaybackAction\022\010\n\004NONE\020\000"
+    "\022\010\n\004PLAY\020\001\022\t\n\005PAUSE\020\002\022\016\n\nNEXT_TRACK\020\003\022\022\n"
+    "\016PREVIOUS_TRACK\020\004\032\233\002\n\014CoverCommand\022\020\n\010co"
+    "ver_id\030\001 \001(\005\022>\n\006action\030\002 \001(\0162..NSPanelMQ"
+    "TTManagerCommand.CoverCommand.Action\022\024\n\014"
+    "has_position\030\003 \001(\010\022\020\n\010position\030\004 \001(\005\022\031\n\021"
+    "has_tilt_position\030\005 \001(\010\022\025\n\rtilt_position"
+    "\030\006 \001(\005\"_\n\006Action\022\010\n\004NONE\020\000\022\010\n\004OPEN\020\001\022\t\n\005"
+    "CLOSE\020\002\022\010\n\004STOP\020\003\022\r\n\tOPEN_TILT\020\004\022\016\n\nCLOS"
+    "E_TILT\020\005\022\r\n\tSTOP_TILT\020\006\"D\n\023AffectLightsO"
+    "ptions\022\007\n\003ALL\020\000\022\020\n\014TABLE_LIGHTS\020\001\022\022\n\016CEI"
+    "LING_LIGHTS\020\002B\r\n\013CommandData*[\n\023NSPanelW"
+    "arningLevel\022\014\n\010CRITICAL\020\000\022\t\n\005ERROR\020\001\022\013\n\007"
+    "WARNING\020\002\022\010\n\004INFO\020\003\022\t\n\005DEBUG\020\004\022\t\n\005TRACE\020"
+    "\005b\006proto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_2eproto = {
     false,
     false,
-    6154,
+    6529,
     descriptor_table_protodef_protobuf_5fnspanel_2eproto,
     "protobuf_nspanel.proto",
     &descriptor_table_protobuf_5fnspanel_2eproto_once,
     nullptr,
     0,
-    20,
+    21,
     schemas,
     file_default_instances,
     TableStruct_protobuf_5fnspanel_2eproto::offsets,
@@ -1244,9 +1295,9 @@ const ::google::protobuf::EnumDescriptor* NSPanelRoomEntitiesPage_EntitySlot_Ent
   return file_level_enum_descriptors_protobuf_5fnspanel_2eproto[5];
 }
 PROTOBUF_CONSTINIT const uint32_t NSPanelRoomEntitiesPage_EntitySlot_EntityType_internal_data_[] = {
-    458752u, 0u, };
+    524288u, 0u, };
 bool NSPanelRoomEntitiesPage_EntitySlot_EntityType_IsValid(int value) {
-  return 0 <= value && value <= 6;
+  return 0 <= value && value <= 7;
 }
 #if (__cplusplus < 201703) && \
   (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
@@ -1258,6 +1309,7 @@ constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_
 constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot::ENTITY_TYPE_THERMOSTAT;
 constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot::ENTITY_TYPE_SCENE;
 constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot::ENTITY_TYPE_MEDIA_PLAYER;
+constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot::ENTITY_TYPE_COVER;
 constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot::EntityType_MIN;
 constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot::EntityType_MAX;
 constexpr int NSPanelRoomEntitiesPage_EntitySlot::EntityType_ARRAYSIZE;
@@ -1287,9 +1339,34 @@ constexpr int NSPanelMQTTManagerCommand_MediaPlayerCommand::PlaybackAction_ARRAY
 
 #endif  // (__cplusplus < 201703) &&
         // (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
-const ::google::protobuf::EnumDescriptor* NSPanelMQTTManagerCommand_AffectLightsOptions_descriptor() {
+const ::google::protobuf::EnumDescriptor* NSPanelMQTTManagerCommand_CoverCommand_Action_descriptor() {
   ::google::protobuf::internal::AssignDescriptors(&descriptor_table_protobuf_5fnspanel_2eproto);
   return file_level_enum_descriptors_protobuf_5fnspanel_2eproto[7];
+}
+PROTOBUF_CONSTINIT const uint32_t NSPanelMQTTManagerCommand_CoverCommand_Action_internal_data_[] = {
+    458752u, 0u, };
+bool NSPanelMQTTManagerCommand_CoverCommand_Action_IsValid(int value) {
+  return 0 <= value && value <= 6;
+}
+#if (__cplusplus < 201703) && \
+  (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
+
+constexpr NSPanelMQTTManagerCommand_CoverCommand_Action NSPanelMQTTManagerCommand_CoverCommand::NONE;
+constexpr NSPanelMQTTManagerCommand_CoverCommand_Action NSPanelMQTTManagerCommand_CoverCommand::OPEN;
+constexpr NSPanelMQTTManagerCommand_CoverCommand_Action NSPanelMQTTManagerCommand_CoverCommand::CLOSE;
+constexpr NSPanelMQTTManagerCommand_CoverCommand_Action NSPanelMQTTManagerCommand_CoverCommand::STOP;
+constexpr NSPanelMQTTManagerCommand_CoverCommand_Action NSPanelMQTTManagerCommand_CoverCommand::OPEN_TILT;
+constexpr NSPanelMQTTManagerCommand_CoverCommand_Action NSPanelMQTTManagerCommand_CoverCommand::CLOSE_TILT;
+constexpr NSPanelMQTTManagerCommand_CoverCommand_Action NSPanelMQTTManagerCommand_CoverCommand::STOP_TILT;
+constexpr NSPanelMQTTManagerCommand_CoverCommand_Action NSPanelMQTTManagerCommand_CoverCommand::Action_MIN;
+constexpr NSPanelMQTTManagerCommand_CoverCommand_Action NSPanelMQTTManagerCommand_CoverCommand::Action_MAX;
+constexpr int NSPanelMQTTManagerCommand_CoverCommand::Action_ARRAYSIZE;
+
+#endif  // (__cplusplus < 201703) &&
+        // (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
+const ::google::protobuf::EnumDescriptor* NSPanelMQTTManagerCommand_AffectLightsOptions_descriptor() {
+  ::google::protobuf::internal::AssignDescriptors(&descriptor_table_protobuf_5fnspanel_2eproto);
+  return file_level_enum_descriptors_protobuf_5fnspanel_2eproto[8];
 }
 PROTOBUF_CONSTINIT const uint32_t NSPanelMQTTManagerCommand_AffectLightsOptions_internal_data_[] = {
     196608u, 0u, };
@@ -1310,7 +1387,7 @@ constexpr int NSPanelMQTTManagerCommand::AffectLightsOptions_ARRAYSIZE;
         // (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
 const ::google::protobuf::EnumDescriptor* NSPanelWarningLevel_descriptor() {
   ::google::protobuf::internal::AssignDescriptors(&descriptor_table_protobuf_5fnspanel_2eproto);
-  return file_level_enum_descriptors_protobuf_5fnspanel_2eproto[8];
+  return file_level_enum_descriptors_protobuf_5fnspanel_2eproto[9];
 }
 PROTOBUF_CONSTINIT const uint32_t NSPanelWarningLevel_internal_data_[] = {
     393216u, 0u, };
@@ -7974,6 +8051,301 @@ void NSPanelMQTTManagerCommand_MediaPlayerCommand::InternalSwap(NSPanelMQTTManag
 }
 // ===================================================================
 
+class NSPanelMQTTManagerCommand_CoverCommand::_Internal {
+ public:
+};
+
+NSPanelMQTTManagerCommand_CoverCommand::NSPanelMQTTManagerCommand_CoverCommand(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:NSPanelMQTTManagerCommand.CoverCommand)
+}
+NSPanelMQTTManagerCommand_CoverCommand::NSPanelMQTTManagerCommand_CoverCommand(
+    ::google::protobuf::Arena* arena, const NSPanelMQTTManagerCommand_CoverCommand& from)
+    : NSPanelMQTTManagerCommand_CoverCommand(arena) {
+  MergeFrom(from);
+}
+inline PROTOBUF_NDEBUG_INLINE NSPanelMQTTManagerCommand_CoverCommand::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0} {}
+
+inline void NSPanelMQTTManagerCommand_CoverCommand::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, cover_id_),
+           0,
+           offsetof(Impl_, tilt_position_) -
+               offsetof(Impl_, cover_id_) +
+               sizeof(Impl_::tilt_position_));
+}
+NSPanelMQTTManagerCommand_CoverCommand::~NSPanelMQTTManagerCommand_CoverCommand() {
+  // @@protoc_insertion_point(destructor:NSPanelMQTTManagerCommand.CoverCommand)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void NSPanelMQTTManagerCommand_CoverCommand::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+NSPanelMQTTManagerCommand_CoverCommand::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_CoverCommand, _impl_._cached_size_),
+              false,
+          },
+          &NSPanelMQTTManagerCommand_CoverCommand::MergeImpl,
+          &NSPanelMQTTManagerCommand_CoverCommand::kDescriptorMethods,
+          &descriptor_table_protobuf_5fnspanel_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<3, 6, 0, 0, 2> NSPanelMQTTManagerCommand_CoverCommand::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    6, 56,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967232,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    6,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    &_NSPanelMQTTManagerCommand_CoverCommand_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_CoverCommand>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    {::_pbi::TcParser::MiniParse, {}},
+    // int32 cover_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_CoverCommand, _impl_.cover_id_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_CoverCommand, _impl_.cover_id_)}},
+    // .NSPanelMQTTManagerCommand.CoverCommand.Action action = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_CoverCommand, _impl_.action_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_CoverCommand, _impl_.action_)}},
+    // bool has_position = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelMQTTManagerCommand_CoverCommand, _impl_.has_position_), 63>(),
+     {24, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_CoverCommand, _impl_.has_position_)}},
+    // int32 position = 4;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_CoverCommand, _impl_.position_), 63>(),
+     {32, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_CoverCommand, _impl_.position_)}},
+    // bool has_tilt_position = 5;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelMQTTManagerCommand_CoverCommand, _impl_.has_tilt_position_), 63>(),
+     {40, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_CoverCommand, _impl_.has_tilt_position_)}},
+    // int32 tilt_position = 6;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelMQTTManagerCommand_CoverCommand, _impl_.tilt_position_), 63>(),
+     {48, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_CoverCommand, _impl_.tilt_position_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 cover_id = 1;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_CoverCommand, _impl_.cover_id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // .NSPanelMQTTManagerCommand.CoverCommand.Action action = 2;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_CoverCommand, _impl_.action_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
+    // bool has_position = 3;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_CoverCommand, _impl_.has_position_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // int32 position = 4;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_CoverCommand, _impl_.position_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // bool has_tilt_position = 5;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_CoverCommand, _impl_.has_tilt_position_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // int32 tilt_position = 6;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_CoverCommand, _impl_.tilt_position_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+
+PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand_CoverCommand::Clear() {
+// @@protoc_insertion_point(message_clear_start:NSPanelMQTTManagerCommand.CoverCommand)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::memset(&_impl_.cover_id_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.tilt_position_) -
+      reinterpret_cast<char*>(&_impl_.cover_id_)) + sizeof(_impl_.tilt_position_));
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* NSPanelMQTTManagerCommand_CoverCommand::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:NSPanelMQTTManagerCommand.CoverCommand)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // int32 cover_id = 1;
+  if (this->_internal_cover_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<1>(
+            stream, this->_internal_cover_id(), target);
+  }
+
+  // .NSPanelMQTTManagerCommand.CoverCommand.Action action = 2;
+  if (this->_internal_action() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+        2, this->_internal_action(), target);
+  }
+
+  // bool has_position = 3;
+  if (this->_internal_has_position() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        3, this->_internal_has_position(), target);
+  }
+
+  // int32 position = 4;
+  if (this->_internal_position() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<4>(
+            stream, this->_internal_position(), target);
+  }
+
+  // bool has_tilt_position = 5;
+  if (this->_internal_has_tilt_position() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        5, this->_internal_has_tilt_position(), target);
+  }
+
+  // int32 tilt_position = 6;
+  if (this->_internal_tilt_position() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<6>(
+            stream, this->_internal_tilt_position(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:NSPanelMQTTManagerCommand.CoverCommand)
+  return target;
+}
+
+::size_t NSPanelMQTTManagerCommand_CoverCommand::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:NSPanelMQTTManagerCommand.CoverCommand)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // int32 cover_id = 1;
+  if (this->_internal_cover_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_cover_id());
+  }
+
+  // .NSPanelMQTTManagerCommand.CoverCommand.Action action = 2;
+  if (this->_internal_action() != 0) {
+    total_size += 1 +
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_action());
+  }
+
+  // int32 position = 4;
+  if (this->_internal_position() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_position());
+  }
+
+  // bool has_position = 3;
+  if (this->_internal_has_position() != 0) {
+    total_size += 2;
+  }
+
+  // bool has_tilt_position = 5;
+  if (this->_internal_has_tilt_position() != 0) {
+    total_size += 2;
+  }
+
+  // int32 tilt_position = 6;
+  if (this->_internal_tilt_position() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_tilt_position());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void NSPanelMQTTManagerCommand_CoverCommand::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<NSPanelMQTTManagerCommand_CoverCommand*>(&to_msg);
+  auto& from = static_cast<const NSPanelMQTTManagerCommand_CoverCommand&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:NSPanelMQTTManagerCommand.CoverCommand)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_cover_id() != 0) {
+    _this->_impl_.cover_id_ = from._impl_.cover_id_;
+  }
+  if (from._internal_action() != 0) {
+    _this->_impl_.action_ = from._impl_.action_;
+  }
+  if (from._internal_position() != 0) {
+    _this->_impl_.position_ = from._impl_.position_;
+  }
+  if (from._internal_has_position() != 0) {
+    _this->_impl_.has_position_ = from._impl_.has_position_;
+  }
+  if (from._internal_has_tilt_position() != 0) {
+    _this->_impl_.has_tilt_position_ = from._impl_.has_tilt_position_;
+  }
+  if (from._internal_tilt_position() != 0) {
+    _this->_impl_.tilt_position_ = from._impl_.tilt_position_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void NSPanelMQTTManagerCommand_CoverCommand::CopyFrom(const NSPanelMQTTManagerCommand_CoverCommand& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:NSPanelMQTTManagerCommand.CoverCommand)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void NSPanelMQTTManagerCommand_CoverCommand::InternalSwap(NSPanelMQTTManagerCommand_CoverCommand* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_CoverCommand, _impl_.tilt_position_)
+      + sizeof(NSPanelMQTTManagerCommand_CoverCommand::_impl_.tilt_position_)
+      - PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand_CoverCommand, _impl_.cover_id_)>(
+          reinterpret_cast<char*>(&_impl_.cover_id_),
+          reinterpret_cast<char*>(&other->_impl_.cover_id_));
+}
+
+::google::protobuf::Metadata NSPanelMQTTManagerCommand_CoverCommand::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
 class NSPanelMQTTManagerCommand::_Internal {
  public:
   static constexpr ::int32_t kOneofCaseOffset =
@@ -8097,6 +8469,19 @@ void NSPanelMQTTManagerCommand::set_allocated_media_player_command(::NSPanelMQTT
   }
   // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.media_player_command)
 }
+void NSPanelMQTTManagerCommand::set_allocated_cover_command(::NSPanelMQTTManagerCommand_CoverCommand* cover_command) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  clear_CommandData();
+  if (cover_command) {
+    ::google::protobuf::Arena* submessage_arena = cover_command->GetArena();
+    if (message_arena != submessage_arena) {
+      cover_command = ::google::protobuf::internal::GetOwnedMessage(message_arena, cover_command, submessage_arena);
+    }
+    set_has_cover_command();
+    _impl_.CommandData_.cover_command_ = cover_command;
+  }
+  // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.cover_command)
+}
 NSPanelMQTTManagerCommand::NSPanelMQTTManagerCommand(::google::protobuf::Arena* arena)
     : ::google::protobuf::Message(arena) {
   SharedCtor(arena);
@@ -8148,6 +8533,9 @@ NSPanelMQTTManagerCommand::NSPanelMQTTManagerCommand(
         break;
       case kMediaPlayerCommand:
         _impl_.CommandData_.media_player_command_ = ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_MediaPlayerCommand>(arena, *from._impl_.CommandData_.media_player_command_);
+        break;
+      case kCoverCommand:
+        _impl_.CommandData_.cover_command_ = ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_CoverCommand>(arena, *from._impl_.CommandData_.cover_command_);
         break;
   }
 
@@ -8253,6 +8641,14 @@ void NSPanelMQTTManagerCommand::clear_CommandData() {
       }
       break;
     }
+    case kCoverCommand: {
+      if (GetArena() == nullptr) {
+        delete _impl_.CommandData_.cover_command_;
+      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.cover_command_);
+      }
+      break;
+    }
     case COMMANDDATA_NOT_SET: {
       break;
     }
@@ -8282,16 +8678,16 @@ NSPanelMQTTManagerCommand::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 10, 9, 0, 7> NSPanelMQTTManagerCommand::_table_ = {
+const ::_pbi::TcParseTable<0, 11, 10, 0, 7> NSPanelMQTTManagerCommand::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
     100, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294966784,  // skipmap
+    4294966272,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    10,  // num_field_entries
-    9,  // num_aux_entries
+    11,  // num_field_entries
+    10,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_NSPanelMQTTManagerCommand_default_instance_._instance,
     nullptr,  // post_loop_handler
@@ -8305,7 +8701,7 @@ const ::_pbi::TcParseTable<0, 10, 9, 0, 7> NSPanelMQTTManagerCommand::_table_ = 
      {1696, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.nspanel_id_)}},
   }}, {{
     100, 0, 1,
-    65534, 9,
+    65534, 10,
     65535, 65535
   }}, {{
     // .NSPanelMQTTManagerCommand.FirstPageTurnLightOn first_page_turn_on = 1;
@@ -8335,6 +8731,9 @@ const ::_pbi::TcParseTable<0, 10, 9, 0, 7> NSPanelMQTTManagerCommand::_table_ = 
     // .NSPanelMQTTManagerCommand.MediaPlayerCommand media_player_command = 9;
     {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.media_player_command_), _Internal::kOneofCaseOffset + 0, 8,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .NSPanelMQTTManagerCommand.CoverCommand cover_command = 10;
+    {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.CommandData_.cover_command_), _Internal::kOneofCaseOffset + 0, 9,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
     // int32 nspanel_id = 100;
     {PROTOBUF_FIELD_OFFSET(NSPanelMQTTManagerCommand, _impl_.nspanel_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
@@ -8348,6 +8747,7 @@ const ::_pbi::TcParseTable<0, 10, 9, 0, 7> NSPanelMQTTManagerCommand::_table_ = 
     {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand>()},
     {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_ThermostatCommand>()},
     {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_MediaPlayerCommand>()},
+    {::_pbi::TcParser::GetTable<::NSPanelMQTTManagerCommand_CoverCommand>()},
   }}, {{
   }},
 };
@@ -8415,6 +8815,11 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand::Clear() {
     case kMediaPlayerCommand: {
       target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
           9, *_impl_.CommandData_.media_player_command_, _impl_.CommandData_.media_player_command_->GetCachedSize(), target, stream);
+      break;
+    }
+    case kCoverCommand: {
+      target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+          10, *_impl_.CommandData_.cover_command_, _impl_.CommandData_.cover_command_->GetCachedSize(), target, stream);
       break;
     }
     default:
@@ -8503,6 +8908,12 @@ PROTOBUF_NOINLINE void NSPanelMQTTManagerCommand::Clear() {
     case kMediaPlayerCommand: {
       total_size +=
           1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.CommandData_.media_player_command_);
+      break;
+    }
+    // .NSPanelMQTTManagerCommand.CoverCommand cover_command = 10;
+    case kCoverCommand: {
+      total_size +=
+          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.CommandData_.cover_command_);
       break;
     }
     case COMMANDDATA_NOT_SET: {
@@ -8614,6 +9025,15 @@ void NSPanelMQTTManagerCommand::MergeImpl(::google::protobuf::MessageLite& to_ms
               ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_MediaPlayerCommand>(arena, *from._impl_.CommandData_.media_player_command_);
         } else {
           _this->_impl_.CommandData_.media_player_command_->MergeFrom(from._internal_media_player_command());
+        }
+        break;
+      }
+      case kCoverCommand: {
+        if (oneof_needs_init) {
+          _this->_impl_.CommandData_.cover_command_ =
+              ::google::protobuf::Message::CopyConstruct<::NSPanelMQTTManagerCommand_CoverCommand>(arena, *from._impl_.CommandData_.cover_command_);
+        } else {
+          _this->_impl_.CommandData_.cover_command_->MergeFrom(from._internal_cover_command());
         }
         break;
       }

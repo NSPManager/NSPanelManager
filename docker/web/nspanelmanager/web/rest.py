@@ -751,6 +751,8 @@ ENTITY_CONTROLLERS = {
     Entity.EntityType.SWITCH: ("home_assistant", "openhab"),
     Entity.EntityType.BUTTON: ("home_assistant", "nspm"),
     Entity.EntityType.THERMOSTAT: ("home_assistant", "openhab"),
+    Entity.EntityType.MEDIA_PLAYER: ("home_assistant",),
+    Entity.EntityType.COVER: ("home_assistant", "openhab"),
 }
 
 # The scene types MQTTManager's EntityManager loads. It ignores scenes of any other type.
@@ -1263,6 +1265,114 @@ def put_media_player_entity(request):
         new_media_player.room_view_position = room_view_position
         new_media_player.entity_data = entity_data
         new_media_player.save()
+        send_mqttmanager_reload_command()
+
+        return JsonResponse({"status": "ok"}, status=200)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+####################
+# Covers section   #
+####################
+
+
+def entities_covers(request):
+    try:
+        if request.method == "PUT":
+            return put_cover_entity(request)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=405)
+
+
+def put_cover_entity(request):
+    try:
+        required_fields = [
+            "room_id",
+            "entities_page_id",
+            "room_view_position",
+            "controller",
+            "friendly_name",
+            "home_assistant_name",
+            "openhab_item",
+        ]
+
+        data = json.loads(request.body)
+        for field in required_fields:
+            if field not in data:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+
+        for field in ("controller", "friendly_name", "home_assistant_name", "openhab_item"):
+            if not isinstance(data[field], str):
+                return JsonResponse({"status": "error", "message": f"{field} must be a string."}, status=400)
+
+        controller_error = get_controller_error(Entity.EntityType.COVER, data["controller"])
+        if controller_error:
+            return JsonResponse({"status": "error", "message": controller_error}, status=400)
+
+        home_assistant_name = data["home_assistant_name"].strip()
+        openhab_item = data["openhab_item"].strip()
+        if data["controller"] == "home_assistant":
+            if not home_assistant_name:
+                return JsonResponse({"status": "error", "message": "home_assistant_name is required for a Home Assistant cover."}, status=400)
+            if not home_assistant_name.startswith("cover."):
+                return JsonResponse({"status": "error", "message": "home_assistant_name must be a cover.* entity."}, status=400)
+        else:
+            if not openhab_item:
+                return JsonResponse({"status": "error", "message": "openhab_item is required for an OpenHAB cover."}, status=400)
+
+        try:
+            room_id = int(data["room_id"])
+            entities_page_id = int(data["entities_page_id"])
+            room_view_position = int(data["room_view_position"])
+            cover_id = int(data["id"]) if data.get("id") else None
+        except (TypeError, ValueError):
+            return JsonResponse({"status": "error", "message": "room_id, entities_page_id, room_view_position and id must be integers."}, status=400)
+
+        if cover_id is not None:
+            new_cover = Entity.objects.filter(id=cover_id).first()
+            if new_cover is None:
+                return JsonResponse({"status": "error", "message": f"No entity with id {cover_id}."}, status=404)
+            if new_cover.entity_type != Entity.EntityType.COVER:
+                return JsonResponse({"status": "error", "message": f"Entity {cover_id} is a {new_cover.entity_type}, not a cover."}, status=409)
+        else:
+            new_cover = Entity()
+            new_cover.entity_type = Entity.EntityType.COVER
+
+        room = Room.objects.filter(id=room_id).first()
+        if room is None:
+            return JsonResponse({"status": "error", "message": f"No room with id {room_id}."}, status=404)
+
+        entities_page = RoomEntitiesPage.objects.filter(id=entities_page_id).first()
+        if entities_page is None:
+            return JsonResponse({"status": "error", "message": f"No entities page with id {entities_page_id}."}, status=404)
+        if entities_page.room_id != room.id:
+            return JsonResponse({"status": "error", "message": f"Entities page {entities_page_id} belongs to another room."}, status=400)
+        if entities_page.is_scenes_page:
+            return JsonResponse({"status": "error", "message": "Covers cannot be placed on a scenes page."}, status=400)
+
+        placement_error = get_placement_error(new_cover, room, entities_page, room_view_position)
+        if placement_error:
+            return JsonResponse({"status": "error", "message": placement_error}, status=400)
+        if Scene.objects.filter(entities_page=entities_page, room_view_position=room_view_position).exists():
+            return JsonResponse({"status": "error", "message": "That position on the page is already taken by a scene."}, status=400)
+
+        entity_data = {
+            "controller": data["controller"],
+            "home_assistant_name": home_assistant_name,
+            "openhab_item": openhab_item,
+        }
+        new_cover.friendly_name = data["friendly_name"].strip()
+        if not new_cover.friendly_name:
+            return JsonResponse({"status": "error", "message": "friendly_name must not be empty."}, status=400)
+        new_cover.room = room
+        new_cover.entities_page = entities_page
+        new_cover.room_view_position = room_view_position
+        new_cover.entity_data = entity_data
+        new_cover.save()
         send_mqttmanager_reload_command()
 
         return JsonResponse({"status": "ok"}, status=200)

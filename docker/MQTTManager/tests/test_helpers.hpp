@@ -180,6 +180,15 @@ inline nlohmann::json django_media_player_data(const std::string &home_assistant
   };
 }
 
+// entity_data for a cover exactly as web/rest.py put_cover_entity() stores it.
+inline nlohmann::json django_cover_data(const std::string &controller, const std::string &home_assistant_name, const std::string &openhab_item = "") {
+  return {
+      {"controller", controller},
+      {"home_assistant_name", home_assistant_name},
+      {"openhab_item", openhab_item},
+  };
+}
+
 // A Home Assistant state_changed event as it arrives over the websocket.
 inline nlohmann::json home_assistant_state_changed(const std::string &entity_id, const std::string &state, const nlohmann::json &attributes = nlohmann::json::object()) {
   return {

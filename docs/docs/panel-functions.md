@@ -104,3 +104,14 @@ To control a device individually press the device name.
 
 All the capabilities of the chosen light will be shown on this page. If the light is RGB capable there will be an icon 
 in the top right corner to toggle between Color Temperature mode and Color mode.
+
+### Cover page
+
+When a cover is configured on an entities page, opening its name shows the cover controls. The page shows the current
+state and, where the cover supports it, a position slider and open, stop and close buttons. Covers that only support
+open and close do not show a position slider.
+
+Covers are a beta feature: the cover page needs panel firmware and TFTs that include it. If those are not installed yet,
+the cover slot can still appear on the entities page, but opening it will not show the controls. Blinds and shutters can
+still be opened and closed with the entities-page icon as a fallback; garage doors, gates and doors require the dedicated
+cover page.

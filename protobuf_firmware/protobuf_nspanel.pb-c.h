@@ -17,6 +17,7 @@ PROTOBUF_C__BEGIN_DECLS
 
 typedef struct NSPanelConfig NSPanelConfig;
 typedef struct NSPanelConfig__RoomInfo NSPanelConfig__RoomInfo;
+typedef struct NSPanelConfig__Sound NSPanelConfig__Sound;
 typedef struct NSPanelWarning NSPanelWarning;
 typedef struct NSPanelStatusReport NSPanelStatusReport;
 typedef struct NSPanelRoomEntitiesPage NSPanelRoomEntitiesPage;
@@ -34,6 +35,7 @@ typedef struct NSPanelMQTTManagerCommand__ButtonPressed NSPanelMQTTManagerComman
 typedef struct NSPanelMQTTManagerCommand__ThermostatTemperatureCommand NSPanelMQTTManagerCommand__ThermostatTemperatureCommand;
 typedef struct NSPanelMQTTManagerCommand__ThermostatCommand NSPanelMQTTManagerCommand__ThermostatCommand;
 typedef struct NSPanelMQTTManagerCommand__MediaPlayerCommand NSPanelMQTTManagerCommand__MediaPlayerCommand;
+typedef struct NSPanelMQTTManagerCommand__CoverCommand NSPanelMQTTManagerCommand__CoverCommand;
 
 
 /* --- enums --- */
@@ -67,6 +69,25 @@ typedef enum _NSPanelConfig__NSPanelButtonMode {
   NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__THERMOSTAT_COOL = 4
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_CONFIG__NSPANEL_BUTTON_MODE)
 } NSPanelConfig__NSPanelButtonMode;
+/*
+ * Sounds played by the panel buzzer, one entry per event. An event without an entry, or with an empty rtttl, is silent.
+ * Panels ignore events they do not know about.
+ */
+typedef enum _NSPanelConfig__NSPanelSoundEvent {
+  /*
+   * The screen was touched
+   */
+  NSPANEL_CONFIG__NSPANEL_SOUND_EVENT__TOUCH = 0,
+  /*
+   * A scene was triggered from the panel. Played instead of the TOUCH sound for that touch.
+   */
+  NSPANEL_CONFIG__NSPANEL_SOUND_EVENT__SCENE_ACTIVATED = 1,
+  /*
+   * A scene was saved from the panel
+   */
+  NSPANEL_CONFIG__NSPANEL_SOUND_EVENT__SCENE_SAVED = 2
+    PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_CONFIG__NSPANEL_SOUND_EVENT)
+} NSPanelConfig__NSPanelSoundEvent;
 typedef enum _NSPanelStatusReport__State {
   NSPANEL_STATUS_REPORT__STATE__ONLINE = 0,
   NSPANEL_STATUS_REPORT__STATE__OFFLINE = 1,
@@ -83,7 +104,8 @@ typedef enum _NSPanelRoomEntitiesPage__EntitySlot__EntityType {
   NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_BUTTON = 3,
   NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_THERMOSTAT = 4,
   NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_SCENE = 5,
-  NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_MEDIA_PLAYER = 6
+  NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_MEDIA_PLAYER = 6,
+  NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE__ENTITY_TYPE_COVER = 7
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_ROOM_ENTITIES_PAGE__ENTITY_SLOT__ENTITY_TYPE)
 } NSPanelRoomEntitiesPage__EntitySlot__EntityType;
 typedef enum _NSPanelMQTTManagerCommand__MediaPlayerCommand__PlaybackAction {
@@ -94,6 +116,16 @@ typedef enum _NSPanelMQTTManagerCommand__MediaPlayerCommand__PlaybackAction {
   NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION__PREVIOUS_TRACK = 4
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION)
 } NSPanelMQTTManagerCommand__MediaPlayerCommand__PlaybackAction;
+typedef enum _NSPanelMQTTManagerCommand__CoverCommand__Action {
+  NSPANEL_MQTTMANAGER_COMMAND__COVER_COMMAND__ACTION__NONE = 0,
+  NSPANEL_MQTTMANAGER_COMMAND__COVER_COMMAND__ACTION__OPEN = 1,
+  NSPANEL_MQTTMANAGER_COMMAND__COVER_COMMAND__ACTION__CLOSE = 2,
+  NSPANEL_MQTTMANAGER_COMMAND__COVER_COMMAND__ACTION__STOP = 3,
+  NSPANEL_MQTTMANAGER_COMMAND__COVER_COMMAND__ACTION__OPEN_TILT = 4,
+  NSPANEL_MQTTMANAGER_COMMAND__COVER_COMMAND__ACTION__CLOSE_TILT = 5,
+  NSPANEL_MQTTMANAGER_COMMAND__COVER_COMMAND__ACTION__STOP_TILT = 6
+    PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_MQTTMANAGER_COMMAND__COVER_COMMAND__ACTION)
+} NSPanelMQTTManagerCommand__CoverCommand__Action;
 typedef enum _NSPanelMQTTManagerCommand__AffectLightsOptions {
   NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__ALL = 0,
   NSPANEL_MQTTMANAGER_COMMAND__AFFECT_LIGHTS_OPTIONS__TABLE_LIGHTS = 1,
@@ -124,6 +156,20 @@ struct  NSPanelConfig__RoomInfo
 #define NSPANEL_CONFIG__ROOM_INFO__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__room_info__descriptor) \
     , 0, 0,NULL, 0,NULL }
+
+
+struct  NSPanelConfig__Sound
+{
+  ProtobufCMessage base;
+  NSPanelConfig__NSPanelSoundEvent event;
+  /*
+   * Melody in RTTTL format, ex. "touch:d=32,o=6,b=190:g6,16p,32c7"
+   */
+  char *rtttl;
+};
+#define NSPANEL_CONFIG__SOUND__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__sound__descriptor) \
+    , NSPANEL_CONFIG__NSPANEL_SOUND_EVENT__TOUCH, (char *)protobuf_c_empty_string }
 
 
 struct  NSPanelConfig
@@ -190,10 +236,17 @@ struct  NSPanelConfig
    * At what temperature should relay2 turn off (heating) or on (cooling) when in thermostat mode.
    */
   int32_t button2_upper_temperature;
+  size_t n_sounds;
+  NSPanelConfig__Sound **sounds;
+  /*
+   * POSIX TZ rule for the manager's timezone, ex. "CET-1CEST,M3.5.0,M10.5.0/3", for setenv("TZ", ...) and tzset().
+   * Empty if the manager could not work it out, in which case show the time from the manager's status/time topic.
+   */
+  char *tz_posix;
 };
 #define NSPANEL_CONFIG__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__descriptor) \
-    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, 0,NULL, 0, 0, 0, 0,NULL, 0,NULL, 0, 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0 }
+    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, 0,NULL, 0, 0, 0, 0,NULL, 0,NULL, 0, 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0,NULL, (char *)protobuf_c_empty_string }
 
 
 struct  NSPanelWarning
@@ -472,6 +525,27 @@ struct  NSPanelMQTTManagerCommand__MediaPlayerCommand
     , 0, NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION__NONE, 0, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string }
 
 
+struct  NSPanelMQTTManagerCommand__CoverCommand
+{
+  ProtobufCMessage base;
+  int32_t cover_id;
+  NSPanelMQTTManagerCommand__CoverCommand__Action action;
+  protobuf_c_boolean has_position;
+  /*
+   * 0 = closed, 100 = open
+   */
+  int32_t position;
+  protobuf_c_boolean has_tilt_position;
+  /*
+   * 0-100
+   */
+  int32_t tilt_position;
+};
+#define NSPANEL_MQTTMANAGER_COMMAND__COVER_COMMAND__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__cover_command__descriptor) \
+    , 0, NSPANEL_MQTTMANAGER_COMMAND__COVER_COMMAND__ACTION__NONE, 0, 0, 0, 0 }
+
+
 typedef enum {
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__NOT_SET = 0,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_FIRST_PAGE_TURN_ON = 1,
@@ -482,7 +556,8 @@ typedef enum {
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_BUTTON_PRESSED = 6,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_TEMPERATURE_COMMAND = 7,
   NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_THERMOSTAT_COMMAND = 8,
-  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_MEDIA_PLAYER_COMMAND = 9
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_MEDIA_PLAYER_COMMAND = 9,
+  NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA_COVER_COMMAND = 10
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_MQTTMANAGER_COMMAND__COMMAND_DATA__CASE)
 } NSPanelMQTTManagerCommand__CommandDataCase;
 
@@ -504,6 +579,7 @@ struct  NSPanelMQTTManagerCommand
     NSPanelMQTTManagerCommand__ThermostatTemperatureCommand *thermostat_temperature_command;
     NSPanelMQTTManagerCommand__ThermostatCommand *thermostat_command;
     NSPanelMQTTManagerCommand__MediaPlayerCommand *media_player_command;
+    NSPanelMQTTManagerCommand__CoverCommand *cover_command;
   };
 };
 #define NSPANEL_MQTTMANAGER_COMMAND__INIT \
@@ -514,6 +590,9 @@ struct  NSPanelMQTTManagerCommand
 /* NSPanelConfig__RoomInfo methods */
 void   nspanel_config__room_info__init
                      (NSPanelConfig__RoomInfo         *message);
+/* NSPanelConfig__Sound methods */
+void   nspanel_config__sound__init
+                     (NSPanelConfig__Sound         *message);
 /* NSPanelConfig methods */
 void   nspanel_config__init
                      (NSPanelConfig         *message);
@@ -661,6 +740,9 @@ void   nspanel_mqttmanager_command__thermostat_command__init
 /* NSPanelMQTTManagerCommand__MediaPlayerCommand methods */
 void   nspanel_mqttmanager_command__media_player_command__init
                      (NSPanelMQTTManagerCommand__MediaPlayerCommand         *message);
+/* NSPanelMQTTManagerCommand__CoverCommand methods */
+void   nspanel_mqttmanager_command__cover_command__init
+                     (NSPanelMQTTManagerCommand__CoverCommand         *message);
 /* NSPanelMQTTManagerCommand methods */
 void   nspanel_mqttmanager_command__init
                      (NSPanelMQTTManagerCommand         *message);
@@ -684,6 +766,9 @@ void   nspanel_mqttmanager_command__free_unpacked
 
 typedef void (*NSPanelConfig__RoomInfo_Closure)
                  (const NSPanelConfig__RoomInfo *message,
+                  void *closure_data);
+typedef void (*NSPanelConfig__Sound_Closure)
+                 (const NSPanelConfig__Sound *message,
                   void *closure_data);
 typedef void (*NSPanelConfig_Closure)
                  (const NSPanelConfig *message,
@@ -736,6 +821,9 @@ typedef void (*NSPanelMQTTManagerCommand__ThermostatCommand_Closure)
 typedef void (*NSPanelMQTTManagerCommand__MediaPlayerCommand_Closure)
                  (const NSPanelMQTTManagerCommand__MediaPlayerCommand *message,
                   void *closure_data);
+typedef void (*NSPanelMQTTManagerCommand__CoverCommand_Closure)
+                 (const NSPanelMQTTManagerCommand__CoverCommand *message,
+                  void *closure_data);
 typedef void (*NSPanelMQTTManagerCommand_Closure)
                  (const NSPanelMQTTManagerCommand *message,
                   void *closure_data);
@@ -748,9 +836,11 @@ typedef void (*NSPanelMQTTManagerCommand_Closure)
 extern const ProtobufCEnumDescriptor    nspanel_warning_level__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_config__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_config__room_info__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_config__sound__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_default_page__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_screensaver_mode__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_button_mode__descriptor;
+extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_sound_event__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_warning__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_status_report__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_status_report__state__descriptor;
@@ -771,6 +861,8 @@ extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__thermostat_command__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__media_player_command__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_mqttmanager_command__media_player_command__playback_action__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_mqttmanager_command__cover_command__descriptor;
+extern const ProtobufCEnumDescriptor    nspanel_mqttmanager_command__cover_command__action__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_mqttmanager_command__affect_lights_options__descriptor;
 
 PROTOBUF_C__END_DECLS

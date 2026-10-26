@@ -145,14 +145,15 @@ class NSPMTestCase(TestCase):
         self.assertEqual(self.mqttmanager.reloads, 0, "MQTTManager was told to reload although nothing should have changed")
 
     # MQTTManager reads entities straight from the SQLite database. These are the values its
-    # entity classes (docker/MQTTManager/include/{light,switch,button,thermostat}/) accept for
-    # entity_data["controller"]; anything else is logged as an error, and a non-string throws.
+    # entity classes (docker/MQTTManager/include/{light,switch,button,thermostat,media_player,cover}/)
+    # accept for entity_data["controller"]; anything else is logged as an error, and a non-string throws.
     MANAGER_CONTROLLERS: ClassVar = {
         Entity.EntityType.LIGHT: {"home_assistant", "openhab"},
         Entity.EntityType.SWITCH: {"home_assistant", "openhab"},
         Entity.EntityType.BUTTON: {"home_assistant", "nspm"},
         Entity.EntityType.THERMOSTAT: {"home_assistant", "openhab"},
         Entity.EntityType.MEDIA_PLAYER: {"home_assistant"},
+        Entity.EntityType.COVER: {"home_assistant", "openhab"},
     }
     MANAGER_SCENE_TYPES: ClassVar = {"home_assistant", "openhab", "nspm_scene"}
 
