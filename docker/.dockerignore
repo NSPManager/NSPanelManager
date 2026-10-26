@@ -8,3 +8,6 @@ MQTTManager/build/CMakeCache.txt
 MQTTManager/build/Makefile
 MQTTManager/build/cmake_install.cmake
 MQTTManager/build/compile_commands.json
+# Build output from compiling in the dev container. The release image compiles MQTTManager
+# itself, so none of it is needed, and it can be several hundred MB.
+MQTTManager/build/
