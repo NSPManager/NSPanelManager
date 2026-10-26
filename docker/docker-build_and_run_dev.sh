@@ -74,9 +74,9 @@ fi
 echo "--> Running as dev container. Will compile for platform '${TARGETPLATFORM}'. Will not compile MQTTManager during docker build."
 
 if [ -z "$TARGETPLATFORM" ]; then
-  docker build --target devel --build-arg BUILDTIME="$(date)" -t nspanelmanager .
+  docker build --target devel -t nspanelmanager .
 else
-  docker buildx build --platform "$TARGETPLATFORM" --target devel --build-arg BUILDTIME="$(date)" -t nspanelmanager .
+  docker buildx build --platform "$TARGETPLATFORM" --target devel -t nspanelmanager .
 fi
 if [ "$?" == 0 ]; then
   #docker run --rm --name ${CONTAINER_NAME} --cap-add=SYS_PTRACE --security-opt seccomp=unconfined --mac-address 02:42:ac:11:ff:ff -it -v /etc/timezone:/etc/timezone:ro -v "$(pwd)/web":/usr/src/app/ -v "$(pwd)/data":/data/ -v "$(pwd)/MQTTManager/":/MQTTManager/ -v "$(pwd)/nginx/sites-templates/":/etc/nginx/sites-templates/ -v "$(pwd)/nginx/sites-enabled/":/etc/nginx/sites-enabled/ -v "$(pwd)/HMI_files/":/usr/src/app/nspanelmanager/HMI_files/ -v "$(pwd)/../":/full_git/ -p 8000:8000 nspanelmanager /bin/bash
