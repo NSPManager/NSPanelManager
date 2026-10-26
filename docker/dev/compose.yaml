@@ -1,0 +1,56 @@
+# A self-contained NSPanelManager development stack: its own MQTT broker and NSPanelManager
+# built from this checkout. Nothing here talks to a real broker, panel or Home Assistant, so
+# it can run next to a production install.
+#
+# Use it through ./nspm-dev (see README.md) rather than calling docker compose directly.
+name: nspm-dev
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0.18
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    ports:
+      # Published so tools and real panels can reach the stack, on a free port Docker picks
+      # unless NSPM_DEV_MQTT_PORT sets one (`nspm-dev up` prints it). The broker allows
+      # anonymous clients; NSPM_DEV_MQTT_BIND=127.0.0.1 keeps it off the network.
+      - "${NSPM_DEV_MQTT_BIND:-0.0.0.0}:${NSPM_DEV_MQTT_PORT:-}:1883"
+
+  nspm:
+    build:
+      context: ..
+      target: devel
+      args:
+        WEB_UI_REF: "${NSPM_DEV_WEB_UI_REF:-main}"
+    image: nspanelmanager-dev
+    depends_on:
+      - mosquitto
+    command: bash /dev-stack/nspm-entrypoint.sh
+    environment:
+      # The manager's timezone (runserver_devel.sh writes it to /etc/timezone); empty keeps the image's.
+      TZ: "${NSPM_DEV_TZ:-}"
+    ports:
+      - "${NSPM_DEV_PORT:-8010}:8000"
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp=unconfined
+    volumes:
+      - ./:/dev-stack:ro
+      - ../web:/usr/src/app
+      - ../HMI_files:/usr/src/app/nspanelmanager/HMI_files:ro
+      # Mounted beside /etc/nginx/sites-templates, nspm-entrypoint.sh puts an adjusted copy there.
+      - ../nginx/sites-templates:/nspm-nginx-templates:ro
+      - ../MQTTManager:/MQTTManager
+      # Build output and Conan packages live in volumes, so they survive restarts and no
+      # root-owned build files end up in the checkout. NSPM_CONAN_CACHE may name a host
+      # directory instead, to share one Conan cache with other checkouts.
+      - nspm-dev-build:/MQTTManager/build
+      - "${NSPM_CONAN_CACHE:-nspm-dev-conan}:/MQTTManager/conan_cache"
+      - nspm-dev-data:/data
+      - /etc/localtime:/etc/localtime:ro
+
+volumes:
+  nspm-dev-build:
+  nspm-dev-conan:
+  nspm-dev-data:
