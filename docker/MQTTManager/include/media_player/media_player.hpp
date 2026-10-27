@@ -169,6 +169,10 @@ protected:
   bool _is_muted = false;
   bool _has_source_volume = false;
   uint8_t _source_volume = 0;
+  bool _has_media_position = false;
+  int32_t _media_position = 0;            // In seconds, at _media_position_updated_at
+  int64_t _media_position_updated_at = 0; // Unix time in seconds
+  int32_t _media_duration = 0;            // In seconds, 0 if unknown
 
   bool _can_play = false;
   bool _can_pause = false;
