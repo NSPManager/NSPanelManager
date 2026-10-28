@@ -550,7 +550,7 @@ def room_put(request):
 
             if "friendly_name" in data:
                 room.friendly_name = data["friendly_name"]
-            if "displayOrder" in data:
+            if "display_order" in data:
                 room.displayOrder = data["display_order"]
             if "room_temp_provider" in data:
                 room.room_temp_provider = data["room_temp_provider"]
