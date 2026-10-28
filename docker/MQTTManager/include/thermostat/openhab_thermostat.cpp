@@ -40,6 +40,7 @@ OpenhabThermostat::OpenhabThermostat(uint32_t thermostat_id) : ThermostatEntity(
 
 OpenhabThermostat::~OpenhabThermostat() {
   OpenhabManager::detach_event_observer(this->_openhab_target_temperature_item, boost::bind(&OpenhabThermostat::openhab_target_temperature_event_callback, this, _1));
+  OpenhabManager::detach_event_observer(this->_openhab_current_temperature_item, boost::bind(&OpenhabThermostat::openhab_current_temperature_event_callback, this, _1));
   OpenhabManager::detach_event_observer(this->_openhab_fan_mode_item, boost::bind(&OpenhabThermostat::openhab_fan_mode_event_callback, this, _1));
   OpenhabManager::detach_event_observer(this->_openhab_mode_item, boost::bind(&OpenhabThermostat::openhab_mode_event_callback, this, _1));
   OpenhabManager::detach_event_observer(this->_openhab_preset_item, boost::bind(&OpenhabThermostat::openhab_preset_event_callback, this, _1));
@@ -94,28 +95,37 @@ void OpenhabThermostat::reload_config() {
     SPDLOG_WARN("No openhab_hvac_mode_item name defined for Thermostat {}::{}", this->_id, this->_name);
   }
 
-  if (entity_data.contains("openhab_preset_item")) {
+  if (entity_data.contains("openhab_preset_mode_item") && !std::string(entity_data["openhab_preset_mode_item"]).empty()) {
+    this->_openhab_preset_item = entity_data["openhab_preset_mode_item"];
+  } else if (entity_data.contains("openhab_preset_item")) { // Thermostats saved by the older settings form.
     this->_openhab_preset_item = entity_data["openhab_preset_item"];
   } else {
-    SPDLOG_WARN("No openhab_preset_item name defined for Thermostat {}::{}", this->_id, this->_name);
+    SPDLOG_WARN("No openhab_preset_mode_item name defined for Thermostat {}::{}", this->_id, this->_name);
   }
 
-  if (entity_data.contains("openhab_swing_item")) {
+  if (entity_data.contains("openhab_swing_mode_item") && !std::string(entity_data["openhab_swing_mode_item"]).empty()) {
+    this->_openhab_swing_item = entity_data["openhab_swing_mode_item"];
+  } else if (entity_data.contains("openhab_swing_item")) { // Thermostats saved by the older settings form.
     this->_openhab_swing_item = entity_data["openhab_swing_item"];
   } else {
-    SPDLOG_WARN("No openhab_swing_item name defined for Thermostat {}::{}", this->_id, this->_name);
+    SPDLOG_WARN("No openhab_swing_mode_item name defined for Thermostat {}::{}", this->_id, this->_name);
   }
 
-  if (entity_data.contains("openhab_swingh_item")) {
+  if (entity_data.contains("openhab_swingh_mode_item") && !std::string(entity_data["openhab_swingh_mode_item"]).empty()) {
+    this->_openhab_swingh_item = entity_data["openhab_swingh_mode_item"];
+  } else if (entity_data.contains("openhab_swingh_item")) { // Thermostats saved by the older settings form.
     this->_openhab_swingh_item = entity_data["openhab_swingh_item"];
   } else {
-    SPDLOG_WARN("No openhab_swingh_item name defined for Thermostat {}::{}", this->_id, this->_name);
+    SPDLOG_WARN("No openhab_swingh_mode_item name defined for Thermostat {}::{}", this->_id, this->_name);
   }
 
   SPDLOG_DEBUG("Thermostat {}::{} Attaching openhab target temp item: {}", this->_id, this->_name, this->_openhab_target_temperature_item);
 
   // Attach new event observers
   OpenhabManager::attach_event_observer(this->_openhab_target_temperature_item, boost::bind(&OpenhabThermostat::openhab_target_temperature_event_callback, this, _1));
+  if (this->_use_current_temperature) {
+    OpenhabManager::attach_event_observer(this->_openhab_current_temperature_item, boost::bind(&OpenhabThermostat::openhab_current_temperature_event_callback, this, _1));
+  }
   OpenhabManager::attach_event_observer(this->_openhab_fan_mode_item, boost::bind(&OpenhabThermostat::openhab_fan_mode_event_callback, this, _1));
   OpenhabManager::attach_event_observer(this->_openhab_mode_item, boost::bind(&OpenhabThermostat::openhab_mode_event_callback, this, _1));
   OpenhabManager::attach_event_observer(this->_openhab_preset_item, boost::bind(&OpenhabThermostat::openhab_preset_event_callback, this, _1));
@@ -231,12 +241,11 @@ void OpenhabThermostat::openhab_target_temperature_event_callback(nlohmann::json
     std::string topic = data["topic"];
     std::vector<std::string> topic_parts;
     boost::split(topic_parts, topic, boost::is_any_of("/"));
-    std::string topic_item = topic_parts[2];
-
     if (topic_parts.size() < 3) {
       SPDLOG_ERROR("Received ItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
       return;
     }
+    std::string topic_item = topic_parts[2];
 
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
     if (topic_item.compare(this->_openhab_target_temperature_item) == 0) {
@@ -281,7 +290,7 @@ void OpenhabThermostat::openhab_target_temperature_event_callback(nlohmann::json
         return;
       }
 
-      float target_temperature = std::round(atof(std::string(payload["state"]).c_str()));
+      float target_temperature = std::round(atof(std::string(payload["state"]).c_str()) * 10) / 10; // Round to 1 decimal
 
       SPDLOG_DEBUG("Thermostat {}::{} got new temperature {}, current temperature: {}.", this->_id, this->_name, target_temperature, this->_current_temperature);
       if (target_temperature != this->_current_temperature) {
@@ -303,15 +312,14 @@ void OpenhabThermostat::openhab_current_temperature_event_callback(nlohmann::jso
     std::string topic = data["topic"];
     std::vector<std::string> topic_parts;
     boost::split(topic_parts, topic, boost::is_any_of("/"));
-    std::string topic_item = topic_parts[2];
-
     if (topic_parts.size() < 3) {
       SPDLOG_ERROR("Received ItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
       return;
     }
+    std::string topic_item = topic_parts[2];
 
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
-    if (topic_item.compare(this->_openhab_target_temperature_item) == 0) {
+    if (topic_item.compare(this->_openhab_current_temperature_item) == 0) {
       // We only care about the first event from Openhab, ignore the rest but still indicate that event was handled so the manager stops looping over all entities.
       if (CurrentTimeMilliseconds() >= this->_last_target_temperature_change + 1000) {
         SPDLOG_DEBUG("Thermostat {}::{}, payload: {}", this->_id, this->_name, payload.dump());
@@ -332,8 +340,9 @@ void OpenhabThermostat::openhab_current_temperature_event_callback(nlohmann::jso
           }
         }
         SPDLOG_DEBUG("Thermostat {}::{} got new temperature sensor value {}, current temperature: {}.", this->_id, this->_name, current_temperature, this->_current_temperature_sensor);
-        if (current_temperature != this->_current_temperature_sensor) {
+        if (current_temperature != this->_current_temperature_sensor || !this->_current_temperature_sensor_available) {
           this->_current_temperature_sensor = current_temperature;
+          this->_current_temperature_sensor_available = true;
           this->send_state_update_to_nspanel();
           this->_signal_entity_changed();
         }
@@ -341,7 +350,7 @@ void OpenhabThermostat::openhab_current_temperature_event_callback(nlohmann::jso
     }
   } else if (std::string(data["type"]).compare("ItemStateFetched") == 0) {
     SPDLOG_TRACE("OpenHAB thermostat {}::{} Got initial data from OpenHAB via custom ItemStateFetched event.", this->_id, this->_name);
-    if (this->_openhab_target_temperature_item.compare(data["payload"]["name"]) == 0) {
+    if (this->_openhab_current_temperature_item.compare(data["payload"]["name"]) == 0) {
       nlohmann::json payload = data["payload"];
       if (payload["state"].is_null()) { // Got state but state is NULL, ignore.
         return;
@@ -351,7 +360,7 @@ void OpenhabThermostat::openhab_current_temperature_event_callback(nlohmann::jso
         return;
       }
 
-      std::string payload_string = payload["value"].get<std::string>();
+      std::string payload_string = payload["state"].get<std::string>();
       float current_temperature = 0;
       if (!payload_string.empty()) {
         auto [ptr, ec] = std::from_chars(payload_string.data(), payload_string.data() + payload_string.size(), current_temperature);
@@ -360,9 +369,9 @@ void OpenhabThermostat::openhab_current_temperature_event_callback(nlohmann::jso
         }
       }
       SPDLOG_DEBUG("Thermostat {}::{} got new temperature {}, current temperature: {}.", this->_id, this->_name, current_temperature, this->_current_temperature_sensor);
-      if (current_temperature != this->_current_temperature_sensor) {
+      if (current_temperature != this->_current_temperature_sensor || !this->_current_temperature_sensor_available) {
         this->_current_temperature_sensor = current_temperature;
-        this->_last_target_temperature_change = CurrentTimeMilliseconds();
+        this->_current_temperature_sensor_available = true;
         this->send_state_update_to_nspanel();
         this->_signal_entity_changed();
       }
@@ -376,12 +385,11 @@ void OpenhabThermostat::openhab_fan_mode_event_callback(nlohmann::json data) {
     std::string topic = data["topic"];
     std::vector<std::string> topic_parts;
     boost::split(topic_parts, topic, boost::is_any_of("/"));
-    std::string topic_item = topic_parts[2];
-
     if (topic_parts.size() < 3) {
       SPDLOG_ERROR("Received ItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
       return;
     }
+    std::string topic_item = topic_parts[2];
 
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
     if (topic_item.compare(this->_openhab_fan_mode_item) == 0) {
@@ -453,12 +461,11 @@ void OpenhabThermostat::openhab_mode_event_callback(nlohmann::json data) {
     std::string topic = data["topic"];
     std::vector<std::string> topic_parts;
     boost::split(topic_parts, topic, boost::is_any_of("/"));
-    std::string topic_item = topic_parts[2];
-
     if (topic_parts.size() < 3) {
       SPDLOG_ERROR("Received ItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
       return;
     }
+    std::string topic_item = topic_parts[2];
 
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
     if (topic_item.compare(this->_openhab_mode_item) == 0) {
@@ -530,12 +537,11 @@ void OpenhabThermostat::openhab_preset_event_callback(nlohmann::json data) {
     std::string topic = data["topic"];
     std::vector<std::string> topic_parts;
     boost::split(topic_parts, topic, boost::is_any_of("/"));
-    std::string topic_item = topic_parts[2];
-
     if (topic_parts.size() < 3) {
       SPDLOG_ERROR("Received ItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
       return;
     }
+    std::string topic_item = topic_parts[2];
 
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
     if (topic_item.compare(this->_openhab_preset_item) == 0) {
@@ -581,8 +587,8 @@ void OpenhabThermostat::openhab_preset_event_callback(nlohmann::json data) {
       }
 
       std::string mode = std::string(payload["state"]);
-      SPDLOG_DEBUG("Thermostat {}::{} got new mode {}, current mode: {}.", this->_id, this->_name, mode, this->_current_mode.value);
-      if (this->_current_mode.value.compare(mode) != 0) {
+      SPDLOG_DEBUG("Thermostat {}::{} got new preset {}, current preset: {}.", this->_id, this->_name, mode, this->_current_preset.value);
+      if (this->_current_preset.value.compare(mode) != 0) {
         auto new_preset = std::find_if(this->_supported_presets.begin(), this->_supported_presets.end(), [&](const ThermostatOptionHolder &option) {
           return option.value.compare(mode) == 0;
         });
@@ -607,12 +613,11 @@ void OpenhabThermostat::openhab_swing_event_callback(nlohmann::json data) {
     std::string topic = data["topic"];
     std::vector<std::string> topic_parts;
     boost::split(topic_parts, topic, boost::is_any_of("/"));
-    std::string topic_item = topic_parts[2];
-
     if (topic_parts.size() < 3) {
       SPDLOG_ERROR("Received ItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
       return;
     }
+    std::string topic_item = topic_parts[2];
 
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
     if (topic_item.compare(this->_openhab_swing_item) == 0) {
@@ -684,12 +689,11 @@ void OpenhabThermostat::openhab_swingh_event_callback(nlohmann::json data) {
     std::string topic = data["topic"];
     std::vector<std::string> topic_parts;
     boost::split(topic_parts, topic, boost::is_any_of("/"));
-    std::string topic_item = topic_parts[2];
-
     if (topic_parts.size() < 3) {
       SPDLOG_ERROR("Received ItemStateChangedEvent with a topic with not enough parts, topic: {}", std::string(data["topic"]));
       return;
     }
+    std::string topic_item = topic_parts[2];
 
     nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
     if (topic_item.compare(this->_openhab_swingh_item) == 0) {
@@ -724,7 +728,7 @@ void OpenhabThermostat::openhab_swingh_event_callback(nlohmann::json data) {
     }
   } else if (std::string(data["type"]).compare("ItemStateFetched") == 0) {
     SPDLOG_TRACE("OpenHAB thermostat {}::{} Got initial data from OpenHAB via custom ItemStateFetched event.", this->_id, this->_name);
-    if (data.contains("payload") && data.at("payload").contains("name") && this->_openhab_swing_item.compare(data["payload"]["name"]) == 0) {
+    if (data.contains("payload") && data.at("payload").contains("name") && this->_openhab_swingh_item.compare(data["payload"]["name"]) == 0) {
       nlohmann::json payload = data["payload"];
       if (payload["state"].is_null()) { // Got state but state is NULL, ignore.
         return;
