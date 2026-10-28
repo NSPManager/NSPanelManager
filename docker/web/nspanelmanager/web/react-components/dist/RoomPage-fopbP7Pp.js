@@ -1,23 +1,25 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-DJzR3g3Q.js";
-import { a as useWatch, i as useForm, r as useAvailableEntitiesStore } from "./MultiStep_AddEditEntity-BfFCMlp0.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-z47lTFt8.js";
-import { n as Notify } from "./NSPanelToastContainer-Cw-F-8Z1.js";
-import EntitiesPagesView from "./EntitiesPagesView-fdTwSOis.js";
-import { t as useStompStore } from "./StompStore-CmF4arUj.js";
-import { t as useEntityStatesStore } from "./EntityStore-5I3H8-1N.js";
-import { b as require_Icon, u as mdiTextShort } from "./mdi-0l9b4ssQ.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-BdeFQTXB.js";
+import { a as useWatch, i as useForm, r as useAvailableEntitiesStore } from "./MultiStep_AddEditEntity-DbpfQWxh.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-eSdaNbjU.js";
+import { n as Notify } from "./NSPanelToastContainer-NzkRaQha.js";
+import EntitiesPagesView from "./EntitiesPagesView-0-3GePKL.js";
+import { t as useStompStore } from "./StompStore-D5QKvGWI.js";
+import { t as useEntityStatesStore } from "./EntityStore-BDLbozhk.js";
+import { b as require_Icon, u as mdiTextShort } from "./mdi-C56dFNLp.js";
 //#region src/components/RoomPage/RoomPage.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_Icon = require_Icon();
 var import_jsx_runtime = require_jsx_runtime();
 function RoomPage({ room_id }) {
 	const { status: stompStatus } = useStompStore();
-	const { status: entityStatus, rooms } = useEntityStatesStore();
+	const { status: entityStatus, rooms, _nspanels } = useEntityStatesStore();
 	const home_assistant_options = useAvailableEntitiesStore((s) => s.home_assistant_options);
 	const openhab_options = useAvailableEntitiesStore((s) => s.openhab_options);
 	const all_options = [...home_assistant_options.filter((option) => option.value.startsWith("sensor.")), ...openhab_options];
 	const room = rooms[room_id];
 	const [hasLoadedValues, setHasLoadedValues] = (0, import_react.useState)(false);
+	const delete_confirm_dialog_ref = (0, import_react.useRef)(null);
+	const can_delete = Object.keys(rooms).length > 1 || _nspanels.length === 0;
 	const { control, register, getValues, setValue, reset, handleSubmit } = useForm({ defaultValues: {
 		id: room?.id,
 		friendly_name: room?.friendly_name,
@@ -70,6 +72,23 @@ function RoomPage({ room_id }) {
 		}).catch((error) => {
 			Notify({
 				message: `Error saving entity. Error: ${error}`,
+				level: "error",
+				duration: 1e4
+			});
+		});
+	};
+	const deleteRoom = () => {
+		fetch(`/rest/rooms/${room_id}`, {
+			method: "DELETE",
+			headers: { "X-CSRFToken": getCookie("csrftoken") }
+		}).then(async (response) => {
+			const data = await response.json();
+			if (!response.ok) return Promise.reject(data && data.message || response.status);
+			window.location.href = "/rooms";
+		}).catch((error) => {
+			delete_confirm_dialog_ref.current?.close();
+			Notify({
+				message: `Failed to delete room: ${error}`,
 				level: "error",
 				duration: 1e4
 			});
@@ -137,6 +156,43 @@ function RoomPage({ room_id }) {
 	};
 	const select_components = { Option: CustomOption };
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dialog", {
+			ref: delete_confirm_dialog_ref,
+			className: "modal",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "modal-box",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+						className: "text-lg font-bold",
+						children: "Delete room"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+						className: "py-4",
+						children: [
+							"Are you sure you want to delete room '",
+							room.friendly_name,
+							"'? Its entities, scenes and pages will be deleted. Any panels in it will be moved to another room."
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex justify-end join",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: () => delete_confirm_dialog_ref.current?.close(),
+							className: "btn btn-neutral join-item",
+							children: "Cancel"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: deleteRoom,
+							className: "btn btn-error join-item",
+							children: "Delete"
+						})]
+					})
+				]
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("form", {
+				method: "dialog",
+				className: "modal-backdrop",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { children: "close" })
+			})]
+		}),
 		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
 			onSubmit: handleSubmit(onSubmit),
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -230,12 +286,18 @@ function RoomPage({ room_id }) {
 								}
 							})]
 						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "my-4" }),
+						!can_delete && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							role: "alert",
+							className: "alert alert-info my-4",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children: "The last room cannot be deleted while panels are assigned to it. Create another room or remove the panels first." })
+						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "text-right mt-4",
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								type: "button",
 								className: "btn btn-error",
-								disabled: Object.keys(rooms).length === 1,
+								disabled: !can_delete,
+								onClick: () => delete_confirm_dialog_ref.current?.showModal(),
 								children: "Delete"
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 								type: "submit",
