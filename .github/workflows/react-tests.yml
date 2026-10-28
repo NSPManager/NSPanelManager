@@ -1,0 +1,55 @@
+name: "React tests"
+
+on:
+  pull_request:
+    paths:
+      - "docker/web/nspanelmanager/web/react-components/**"
+      - ".github/workflows/react-tests.yml"
+  push:
+    branches:
+      - "main"
+      - "devel"
+      - "beta"
+    paths:
+      - "docker/web/nspanelmanager/web/react-components/**"
+      - ".github/workflows/react-tests.yml"
+
+# Fork pull requests already get a read-only token and no repository secrets; this keeps
+# same-repo runs read-only too. Don't switch to pull_request_target or add a workflow_run
+# follow-up without reviewing what code it checks out: those run with secrets.
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: docker/web/nspanelmanager/web/react-components
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22" # Vite, Vitest and jsdom all support ^22.12.0
+          cache: npm
+          cache-dependency-path: docker/web/nspanelmanager/web/react-components/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc -b
+
+      - name: Run tests
+        run: npm test -- --reporter=default --reporter=junit --outputFile.junit=${{ github.workspace }}/test-results/react.xml
+
+      # annotate_only writes the job summary and failure annotations without creating a
+      # check run, which needs checks: write and so fails on pull requests from forks.
+      - name: Report test results
+        if: ${{ !cancelled() }}
+        uses: mikepenz/action-junit-report@v6
+        with:
+          report_paths: test-results/*.xml
+          annotate_only: true

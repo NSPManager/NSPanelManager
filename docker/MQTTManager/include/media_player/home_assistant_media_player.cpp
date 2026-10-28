@@ -1,20 +1,24 @@
 #include "home_assistant_media_player.hpp"
 #include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
+#include "media_player/home_assistant_source_player.hpp"
 #include "media_player/home_assistant_source_volume.hpp"
 #include "media_player/media_player.hpp"
 #include "protobuf_nspanel_entity.pb.h"
 #include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/bind.hpp>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <date/date.h>
 #include <home_assistant_manager/home_assistant_manager.hpp>
 #include <list>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
+#include <sstream>
 #include <string>
 #include <web_helper/WebHelper.hpp>
 
@@ -67,7 +71,7 @@ void HomeAssistantMediaPlayer::reload_config() {
 
   this->_create_source_volume_strategy(entity_data.value_or(nlohmann::json::object()));
   // The name or source volume might have changed, unchanged states are not sent again.
-  this->_update_source_volume_and_send_state();
+  this->_update_source_player_and_send_state();
 
   if (home_assistant_name_changed && !this->_home_assistant_name.empty()) {
     // This will also request the current state from Home Assistant.
@@ -113,7 +117,7 @@ void HomeAssistantMediaPlayer::_create_source_volume_strategy(const nlohmann::js
   }
 
   auto strategy = std::shared_ptr<HomeAssistantSourceVolumeStrategy>(HomeAssistantSourceVolumeStrategy::create(this->_id, entity_data, [this]() {
-    this->_update_source_volume_and_send_state();
+    this->_update_source_player_and_send_state();
   }));
 
   nlohmann::json player_attributes;
@@ -132,11 +136,12 @@ std::shared_ptr<HomeAssistantSourceVolumeStrategy> HomeAssistantMediaPlayer::_ge
   return this->_source_volume_strategy;
 }
 
-void HomeAssistantMediaPlayer::_update_source_volume_and_send_state() {
+void HomeAssistantMediaPlayer::_update_source_player_and_send_state() {
   auto strategy = this->_get_source_volume_strategy();
   std::optional<uint8_t> source_volume = strategy ? strategy->get_source_volume() : std::nullopt;
   this->_has_source_volume = source_volume.has_value();
   this->_source_volume = source_volume.value_or(0);
+  this->_set_source_player_sources(strategy ? strategy->get_source_player_sources() : std::nullopt);
   this->send_state_update_to_nspanel();
 }
 
@@ -169,6 +174,7 @@ void HomeAssistantMediaPlayer::home_assistant_event_callback(nlohmann::json data
       // Entity was removed from Home Assistant.
       this->_state = NSPanelEntityState_MediaPlayer_PlaybackState_UNKNOWN;
       this->_set_album_art_source("");
+      this->_set_player_sources(MediaPlayerSources());
     } else {
       std::string new_state = new_state_data.contains("state") && new_state_data["state"].is_string() ? new_state_data["state"].get<std::string>() : "";
       if (new_state.compare("playing") == 0) {
@@ -213,7 +219,9 @@ void HomeAssistantMediaPlayer::home_assistant_event_callback(nlohmann::json data
       this->_can_previous_track = supported_features & HomeAssistantMediaPlayer::feature_previous_track;
       this->_can_set_volume = supported_features & HomeAssistantMediaPlayer::feature_volume_set;
       this->_can_mute = supported_features & HomeAssistantMediaPlayer::feature_volume_mute;
+      this->_set_player_sources(HomeAssistantSourcePlayer::sources_from_attributes(attributes));
     }
+    this->_update_media_position(attributes);
 
     std::shared_ptr<HomeAssistantSourceVolumeStrategy> strategy;
     {
@@ -229,7 +237,7 @@ void HomeAssistantMediaPlayer::home_assistant_event_callback(nlohmann::json data
     return;
   }
 
-  this->_update_source_volume_and_send_state();
+  this->_update_source_player_and_send_state();
   if (previous_icon_color != this->get_icon_color()) {
     this->_signal_entity_changed();
   }
@@ -245,6 +253,44 @@ void HomeAssistantMediaPlayer::_call_service(const std::string &service, nlohman
     command["service_data"] = service_data;
   }
   HomeAssistantManager::send_json(command);
+}
+
+void HomeAssistantMediaPlayer::_update_media_position(const nlohmann::json &attributes) {
+  // Home Assistant only has a position for media that is playing or paused. The position is
+  // only meaningful together with the time it was taken at, so both are needed.
+  std::optional<int64_t> updated_at;
+  if (attributes.contains("media_position_updated_at") && attributes["media_position_updated_at"].is_string()) {
+    updated_at = HomeAssistantMediaPlayer::parse_timestamp(attributes["media_position_updated_at"].get<std::string>());
+    if (!updated_at.has_value()) {
+      SPDLOG_WARN("Could not parse media_position_updated_at '{}' for HA media player {}::{}.", attributes["media_position_updated_at"].get<std::string>(), this->_id, this->_name);
+    }
+  }
+  if (updated_at.has_value() && attributes.contains("media_position") && attributes["media_position"].is_number()) {
+    this->_has_media_position = true;
+    this->_media_position = std::lround(std::max(attributes["media_position"].get<double>(), 0.0));
+    this->_media_position_updated_at = updated_at.value();
+  } else {
+    this->_has_media_position = false;
+    this->_media_position = 0;
+    this->_media_position_updated_at = 0;
+  }
+
+  if (attributes.contains("media_duration") && attributes["media_duration"].is_number()) {
+    this->_media_duration = std::lround(std::max(attributes["media_duration"].get<double>(), 0.0));
+  } else {
+    this->_media_duration = 0;
+  }
+}
+
+std::optional<int64_t> HomeAssistantMediaPlayer::parse_timestamp(const std::string &timestamp) {
+  // ISO 8601 as Home Assistant writes it: "YYYY-MM-DDTHH:MM:SS", optional fraction, then "+HH:MM"/"-HH:MM".
+  date::sys_time<std::chrono::microseconds> time_point;
+  std::istringstream stream(timestamp);
+  stream >> date::parse("%FT%T%Ez", time_point);
+  if (stream.fail() || stream.peek() != std::char_traits<char>::eof()) {
+    return std::nullopt;
+  }
+  return std::chrono::floor<std::chrono::seconds>(time_point).time_since_epoch().count();
 }
 
 void HomeAssistantMediaPlayer::play() {
@@ -309,4 +355,15 @@ bool HomeAssistantMediaPlayer::_download_album_art(const std::string &source, st
 
 void HomeAssistantMediaPlayer::set_muted(bool muted) {
   this->_call_service("volume_mute", {{"is_volume_muted", muted}});
+}
+
+void HomeAssistantMediaPlayer::select_player_source(const std::string &source) {
+  this->_call_service("select_source", {{"source", source}});
+}
+
+void HomeAssistantMediaPlayer::select_source_player_source(const std::string &source) {
+  auto strategy = this->_get_source_volume_strategy();
+  if (strategy) {
+    strategy->select_source_player_source(source);
+  }
 }

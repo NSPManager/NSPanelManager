@@ -284,6 +284,9 @@ message NSPanelMQTTManagerCommand {
     int32 source_volume = 6; // Volume in 0-100%
     bool has_muted = 7;
     bool muted = 8;
+    // Name of a source to select, as sent in the state's source lists. Empty means no change.
+    string select_player_source = 9;
+    string select_source_player_source = 10;
   }
 
   oneof CommandData {

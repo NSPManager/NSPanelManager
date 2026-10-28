@@ -84,6 +84,32 @@ message NSPanelEntityState {
 
     // How much one volume up/down press changes the volume and source volume, in 1-100%.
     int32 volume_step = 17;
+
+    message SourceSelection {
+      repeated string sources = 1;
+      // Empty if unknown. Not every player reports its current source, and it
+      // is not always one of the listed sources.
+      string current_source = 2;
+      bool can_select = 3;
+    }
+
+    // Sources (inputs) of this player.
+    SourceSelection player_sources = 18;
+    // Sources of the source player feeding this player, if it has one (see
+    // source_volume). Unset when there is no source player. Changes completely
+    // when the player switches to another source.
+    SourceSelection source_player_sources = 19;
+
+    // Playback position of the current media. Only valid if has_media_position is set.
+    // The controller only reports the position when playback starts, stops or seeks,
+    // not continuously. While playing, the current position is
+    // media_position + (now - media_position_updated_at). As the state is retained,
+    // a panel may receive it long after it was sent, so it must not count from when
+    // the state arrived.
+    bool has_media_position = 20;
+    int32 media_position = 21; // In seconds, at media_position_updated_at
+    int64 media_position_updated_at = 22; // Unix time in seconds
+    int32 media_duration = 23; // In seconds, 0 if unknown (for example a live stream)
   }
 
   oneof entity {

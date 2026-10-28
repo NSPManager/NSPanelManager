@@ -17,6 +17,7 @@ PROTOBUF_C__BEGIN_DECLS
 
 typedef struct NSPanelConfig NSPanelConfig;
 typedef struct NSPanelConfig__RoomInfo NSPanelConfig__RoomInfo;
+typedef struct NSPanelConfig__Sound NSPanelConfig__Sound;
 typedef struct NSPanelWarning NSPanelWarning;
 typedef struct NSPanelStatusReport NSPanelStatusReport;
 typedef struct NSPanelRoomEntitiesPage NSPanelRoomEntitiesPage;
@@ -67,6 +68,25 @@ typedef enum _NSPanelConfig__NSPanelButtonMode {
   NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__THERMOSTAT_COOL = 4
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_CONFIG__NSPANEL_BUTTON_MODE)
 } NSPanelConfig__NSPanelButtonMode;
+/*
+ * Sounds played by the panel buzzer, one entry per event. An event without an entry, or with an empty rtttl, is silent.
+ * Panels ignore events they do not know about.
+ */
+typedef enum _NSPanelConfig__NSPanelSoundEvent {
+  /*
+   * The screen was touched
+   */
+  NSPANEL_CONFIG__NSPANEL_SOUND_EVENT__TOUCH = 0,
+  /*
+   * A scene was triggered from the panel. Played instead of the TOUCH sound for that touch.
+   */
+  NSPANEL_CONFIG__NSPANEL_SOUND_EVENT__SCENE_ACTIVATED = 1,
+  /*
+   * A scene was saved from the panel
+   */
+  NSPANEL_CONFIG__NSPANEL_SOUND_EVENT__SCENE_SAVED = 2
+    PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_CONFIG__NSPANEL_SOUND_EVENT)
+} NSPanelConfig__NSPanelSoundEvent;
 typedef enum _NSPanelStatusReport__State {
   NSPANEL_STATUS_REPORT__STATE__ONLINE = 0,
   NSPANEL_STATUS_REPORT__STATE__OFFLINE = 1,
@@ -124,6 +144,20 @@ struct  NSPanelConfig__RoomInfo
 #define NSPANEL_CONFIG__ROOM_INFO__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__room_info__descriptor) \
     , 0, 0,NULL, 0,NULL }
+
+
+struct  NSPanelConfig__Sound
+{
+  ProtobufCMessage base;
+  NSPanelConfig__NSPanelSoundEvent event;
+  /*
+   * Melody in RTTTL format, ex. "touch:d=32,o=6,b=190:g6,16p,32c7"
+   */
+  char *rtttl;
+};
+#define NSPANEL_CONFIG__SOUND__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__sound__descriptor) \
+    , NSPANEL_CONFIG__NSPANEL_SOUND_EVENT__TOUCH, (char *)protobuf_c_empty_string }
 
 
 struct  NSPanelConfig
@@ -190,10 +224,17 @@ struct  NSPanelConfig
    * At what temperature should relay2 turn off (heating) or on (cooling) when in thermostat mode.
    */
   int32_t button2_upper_temperature;
+  size_t n_sounds;
+  NSPanelConfig__Sound **sounds;
+  /*
+   * POSIX TZ rule for the manager's timezone, ex. "CET-1CEST,M3.5.0,M10.5.0/3", for setenv("TZ", ...) and tzset().
+   * Empty if the manager could not work it out, in which case show the time from the manager's status/time topic.
+   */
+  char *tz_posix;
 };
 #define NSPANEL_CONFIG__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__descriptor) \
-    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, 0,NULL, 0, 0, 0, 0,NULL, 0,NULL, 0, 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0 }
+    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, 0,NULL, 0, 0, 0, 0,NULL, 0,NULL, 0, 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0,NULL, (char *)protobuf_c_empty_string }
 
 
 struct  NSPanelWarning
@@ -461,10 +502,15 @@ struct  NSPanelMQTTManagerCommand__MediaPlayerCommand
   int32_t source_volume;
   protobuf_c_boolean has_muted;
   protobuf_c_boolean muted;
+  /*
+   * Name of a source to select, as sent in the state's source lists. Empty means no change.
+   */
+  char *select_player_source;
+  char *select_source_player_source;
 };
 #define NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_mqttmanager_command__media_player_command__descriptor) \
-    , 0, NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION__NONE, 0, 0, 0, 0, 0, 0 }
+    , 0, NSPANEL_MQTTMANAGER_COMMAND__MEDIA_PLAYER_COMMAND__PLAYBACK_ACTION__NONE, 0, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string }
 
 
 typedef enum {
@@ -509,6 +555,9 @@ struct  NSPanelMQTTManagerCommand
 /* NSPanelConfig__RoomInfo methods */
 void   nspanel_config__room_info__init
                      (NSPanelConfig__RoomInfo         *message);
+/* NSPanelConfig__Sound methods */
+void   nspanel_config__sound__init
+                     (NSPanelConfig__Sound         *message);
 /* NSPanelConfig methods */
 void   nspanel_config__init
                      (NSPanelConfig         *message);
@@ -680,6 +729,9 @@ void   nspanel_mqttmanager_command__free_unpacked
 typedef void (*NSPanelConfig__RoomInfo_Closure)
                  (const NSPanelConfig__RoomInfo *message,
                   void *closure_data);
+typedef void (*NSPanelConfig__Sound_Closure)
+                 (const NSPanelConfig__Sound *message,
+                  void *closure_data);
 typedef void (*NSPanelConfig_Closure)
                  (const NSPanelConfig *message,
                   void *closure_data);
@@ -743,9 +795,11 @@ typedef void (*NSPanelMQTTManagerCommand_Closure)
 extern const ProtobufCEnumDescriptor    nspanel_warning_level__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_config__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_config__room_info__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_config__sound__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_default_page__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_screensaver_mode__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_button_mode__descriptor;
+extern const ProtobufCEnumDescriptor    nspanel_config__nspanel_sound_event__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_warning__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_status_report__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_status_report__state__descriptor;

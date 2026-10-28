@@ -222,7 +222,9 @@ def save_panel_settings(request, panel_id: int):
     panel.friendly_name = request.POST["name"]
     panel.button1_mode = request.POST["button1_mode"]
     if request.POST["button1_mode"] == "1":  # Detached mode
-        panel.button1_detached_mode_entity = Entity.objects.get(id=request.POST["button1_detached_mode_light"])
+        # With no entities to choose from the field is empty or missing; the button is then detached without an entity, as when its entity is deleted.
+        button1_entity_id = request.POST.get("button1_detached_mode_light", "")
+        panel.button1_detached_mode_entity = Entity.objects.get(id=button1_entity_id) if button1_entity_id else None
     else:
         panel.button1_detached_mode_entity = None
 
@@ -239,7 +241,9 @@ def save_panel_settings(request, panel_id: int):
 
     panel.button2_mode = request.POST["button2_mode"]
     if request.POST["button2_mode"] == "1":  # Detached mode
-        panel.button2_detached_mode_entity = Entity.objects.get(id=request.POST["button2_detached_mode_light"])
+        # With no entities to choose from the field is empty or missing; the button is then detached without an entity, as when its entity is deleted.
+        button2_entity_id = request.POST.get("button2_detached_mode_light", "")
+        panel.button2_detached_mode_entity = Entity.objects.get(id=button2_entity_id) if button2_entity_id else None
     else:
         panel.button2_detached_mode_entity = None
 

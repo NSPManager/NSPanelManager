@@ -553,7 +553,7 @@ def room_put(request):
 
             if "friendly_name" in data:
                 room.friendly_name = data["friendly_name"]
-            if "displayOrder" in data:
+            if "display_order" in data:
                 room.displayOrder = data["display_order"]
             if "room_temp_provider" in data:
                 room.room_temp_provider = data["room_temp_provider"]
@@ -682,7 +682,7 @@ def scenes_post(request):
             scene.lightstate_set.all().delete()  # Remove all old states
             # TODO: Convert light states to JSON fields in DB.
             for light_state in data["light_states"]:
-                light = Light.objects.filter(id=light_state["light_id"]).first()
+                light = Entity.objects.filter(id=light_state["light_id"], entity_type=Entity.EntityType.LIGHT).first()
                 if light:
                     new_state = LightState()
                     new_state.light = light
@@ -1166,7 +1166,7 @@ def entities_media_players(request):
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=405)
 
 
 def put_media_player_entity(request):

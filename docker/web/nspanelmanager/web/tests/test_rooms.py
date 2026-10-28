@@ -1,5 +1,4 @@
 import json
-from unittest import expectedFailure
 
 from django.urls import reverse
 
@@ -49,6 +48,17 @@ class RoomUITests(NSPMTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(list(Room.objects.order_by("displayOrder").values_list("friendly_name", flat=True)), ["C", "A", "B"])
+        self.assertManagerReloaded(times=1)
+
+    def test_reorder_rooms_when_a_room_has_a_panel(self):
+        # Issue #337: the re-rendered room list shows each panel's status badge, which used to 500.
+        a, b = self.make_room("A"), self.make_room("B")
+        self.make_panel(a, accepted=True)
+
+        response = self.client.post(reverse("htmx_partial_reorder_rooms"), {"htmx_form_save_rooms_order_field": json.dumps({"rooms": [b.id, a.id]})})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(Room.objects.order_by("displayOrder").values_list("friendly_name", flat=True)), ["B", "A"])
         self.assertManagerReloaded(times=1)
 
     def test_reorder_rooms_with_missing_or_empty_payload_is_rejected(self):
@@ -149,11 +159,8 @@ class RoomRESTTests(NSPMTestCase):
         self.assertEqual((room.friendly_name, room.room_temp_provider, room.room_temp_sensor), ("Study", "home_assistant", "sensor.study"))
         self.assertManagerReloaded(times=1)
 
-    @expectedFailure
     def test_update_room_display_order(self):
-        # KNOWN BUG: room_put checks for "displayOrder" but reads data["display_order"], so
-        # sending display_order (the key GET /rest/rooms returns) is silently ignored and
-        # sending displayOrder raises KeyError and returns 500.
+        # display_order is the key GET /rest/rooms returns. room_put used to check for "displayOrder" instead, so it was ignored.
         room = self.make_room("Office")
 
         response = self.put_json(reverse("rest_rooms_create"), {"id": room.id, "display_order": 7})

@@ -23,6 +23,14 @@ public:
   void set_volume(uint8_t volume);
   void set_source_volume(uint8_t volume);
   void set_muted(bool muted);
+  void select_player_source(const std::string &source);
+  void select_source_player_source(const std::string &source);
+
+  /**
+   * Parse a timestamp from Home Assistant, for example "2026-10-17T01:59:45.666287+00:00".
+   * @return Unix time in seconds, or nothing if the timestamp could not be parsed.
+   */
+  static std::optional<int64_t> parse_timestamp(const std::string &timestamp);
 
 protected:
   /**
@@ -50,14 +58,19 @@ private:
   std::shared_ptr<HomeAssistantSourceVolumeStrategy> _get_source_volume_strategy();
 
   /**
-   * Update source volume from the strategy and send the new state to the NSPanel.
+   * Update source volume and source player sources from the strategy and send the new state to the NSPanel.
    */
-  void _update_source_volume_and_send_state();
+  void _update_source_player_and_send_state();
 
   /**
    * Call a "media_player" domain service in Home Assistant.
    */
   void _call_service(const std::string &service, nlohmann::json service_data = nlohmann::json::object());
+
+  /**
+   * Update the playback position and duration from the attributes of the media player in Home Assistant.
+   */
+  void _update_media_position(const nlohmann::json &attributes);
 
   std::string _home_assistant_name;
 
