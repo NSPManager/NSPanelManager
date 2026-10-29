@@ -208,7 +208,7 @@ class ToolTest(unittest.TestCase):
             self.assertIn('newfont9', out)
             with open(os.path.join(tmp, 'fonts.json')) as f:
                 summary = json.load(f)
-            self.assertEqual([s['index'] for s in summary], list(range(17)))
+            self.assertEqual([s['index'] for s in summary], list(range(18)))
             folder = os.path.join(tmp, '09_newfont9')
             with open(os.path.join(folder, 'newfont9.zi'), 'rb') as f:
                 self.assertEqual(f.read(), load('us').font_blocks()[9][1])
@@ -225,7 +225,7 @@ class ToolTest(unittest.TestCase):
         home = next(p for p in data['pages'] if p['name'] == 'home')
         timer = next(c for c in home['components'] if c['attrs']['objname'] == 'sleep_display')
         self.assertEqual(timer['events'], {'timer': ['printh 92 FF FF FF']})
-        self.assertEqual(len(data['fonts']), 17)
+        self.assertEqual(len(data['fonts']), 18)
 
 
 class EditTest(unittest.TestCase):
