@@ -93,7 +93,7 @@ class PanelLifecycleTests(NSPMTestCase):
     def test_deleting_a_room_keeps_its_panels(self):
         other = self.make_room("Lounge")
 
-        self.client.get(reverse("delete_room", kwargs={"room_id": self.room.id}))
+        self.client.delete(reverse("rest_room_delete", kwargs={"room_id": self.room.id}))
 
         self.panel.refresh_from_db()
         self.assertEqual(self.panel.room, other)
@@ -204,6 +204,21 @@ class PanelSettingsFormTests(NSPMTestCase):
 
         self.panel.refresh_from_db()
         self.assertIsNone(self.panel.button1_detached_mode_entity)
+
+    def test_detached_mode_without_an_entity_is_saved(self):
+        # Issue #80: with no entities yet, the entity field is empty, or missing entirely as the browser leaves out an empty <select>.
+        for case, overrides in (("empty", {"button1_detached_mode_light": ""}), ("missing", {})):
+            with self.subTest(case):
+                form = PANEL_FORM | {"room_id": self.room.id, "button1_mode": "1"} | overrides
+                if case == "missing":
+                    del form["button1_detached_mode_light"]
+
+                response = self.client.post(reverse("save_panel_settings", kwargs={"panel_id": self.panel.id}), form)
+
+                self.assertLess(response.status_code, 400)
+                self.panel.refresh_from_db()
+                self.assertEqual(self.panel.button1_mode, 1)
+                self.assertIsNone(self.panel.button1_detached_mode_entity)
 
     def test_deleting_the_detached_entity_unlinks_it(self):
         light = self.make_light(self.room, "Ceiling")

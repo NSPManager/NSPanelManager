@@ -1,5 +1,5 @@
 import { type ClassNamesConfig, type GroupBase } from "react-select";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { useStompStore } from "../../stores/StompStore";
 import { useEntityStatesStore } from "../../stores/EntityStore";
@@ -13,12 +13,15 @@ import { Notify } from "../NSPanelToastContainer";
 
 export default function RoomPage({ room_id }: { room_id: number }) {
   const { status: stompStatus } = useStompStore();
-  const { status: entityStatus, rooms } = useEntityStatesStore();
+  const { status: entityStatus, rooms, _nspanels } = useEntityStatesStore();
   const home_assistant_options = useAvailableEntitiesStore((s) => s.home_assistant_options);
   const openhab_options = useAvailableEntitiesStore((s) => s.openhab_options);
   const all_options = [...home_assistant_options.filter((option) => option.value.startsWith("sensor.")), ...openhab_options];
   const room = rooms[room_id];
   const [hasLoadedValues, setHasLoadedValues] = useState(false);
+  const delete_confirm_dialog_ref = useRef<HTMLDialogElement>(null);
+  // Panels must belong to a room, so the last room can only be deleted once it has no panels.
+  const can_delete = Object.keys(rooms).length > 1 || _nspanels.length === 0;
 
   const { control, register, getValues, setValue, reset, handleSubmit } = useForm({
     defaultValues: {
@@ -70,6 +73,21 @@ export default function RoomPage({ room_id }: { room_id: number }) {
       .catch((error) => {
         // setErrorMessage(error);
         Notify({ message: `Error saving entity. Error: ${error}`, level: "error", duration: 10000 });
+      });
+  };
+
+  const deleteRoom = () => {
+    fetch(`/rest/rooms/${room_id}`, { method: "DELETE", headers: { "X-CSRFToken": getCookie("csrftoken") } })
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok) {
+          return Promise.reject((data && data.message) || response.status);
+        }
+        window.location.href = "/rooms";
+      })
+      .catch((error) => {
+        delete_confirm_dialog_ref.current?.close();
+        Notify({ message: `Failed to delete room: ${error}`, level: "error", duration: 10000 });
       });
   };
 
@@ -145,6 +163,25 @@ export default function RoomPage({ room_id }: { room_id: number }) {
 
   return (
     <>
+      <dialog ref={delete_confirm_dialog_ref} className="modal">
+        <div className="modal-box">
+          <h3 className="text-lg font-bold">Delete room</h3>
+          <p className="py-4">
+            Are you sure you want to delete room '{room.friendly_name}'? Its entities, scenes and pages will be deleted. Any panels in it will be moved to another room.
+          </p>
+          <div className="flex justify-end join">
+            <button onClick={() => delete_confirm_dialog_ref.current?.close()} className="btn btn-neutral join-item">
+              Cancel
+            </button>
+            <button onClick={deleteRoom} className="btn btn-error join-item">
+              Delete
+            </button>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="flex items-center justify-between" id="nspanel_settings_container">
           <div>
@@ -216,17 +253,13 @@ export default function RoomPage({ room_id }: { room_id: number }) {
             </div>
             {/*{% component "alert" level="info" text="A specific temperature sensor is not a requirement but it can be used to provide a more accurate value on the screensaver. If no sensor is selected the temperature will be read using the built-in NTC thermistor. If a sensor is selected the panel will still report its temperature over MQTT to Home Assistant and OpenHAB." %}{% endcomponent %}*/}
 
-            {/*{% if total_num_rooms <= 1 %}*/}
-            <div className="my-4">
-              {/*{% component "alert" level="info" text="The last room cannot be deleted. Rename this or create another room before removing this one." %}{% endcomponent %}*/}
-            </div>
-            {/*{% endif %}*/}
+            {!can_delete && (
+              <div role="alert" className="alert alert-info my-4">
+                <span>The last room cannot be deleted while panels are assigned to it. Create another room or remove the panels first.</span>
+              </div>
+            )}
             <div className="text-right mt-4">
-              <button
-                // href="{% if total_num_rooms != 1 %}{{ ingress_path }}{% url 'delete_room' room_id=room.id %}{% else %}#{% endif %}"
-                className="btn btn-error"
-                disabled={Object.keys(rooms).length === 1}
-              >
+              <button type="button" className="btn btn-error" disabled={!can_delete} onClick={() => delete_confirm_dialog_ref.current?.showModal()}>
                 Delete
               </button>
               <button type="submit" className="btn btn-success">

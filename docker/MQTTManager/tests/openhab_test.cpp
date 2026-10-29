@@ -2,6 +2,7 @@
 #include "test_helpers.hpp"
 #include <cover/openhab_cover.hpp>
 #include <gtest/gtest.h>
+#include <set>
 #include <protobuf_nspanel_entity.pb.h>
 #include <scenes/openhab_scene.hpp>
 #include <switch/openhab_switch.hpp>
@@ -243,10 +244,9 @@ TEST_F(OpenhabSceneTest, activating_runs_the_rule) {
   EXPECT_TRUE(OpenhabManager::test_take_sent_messages().empty());
 }
 
-// KNOWN BUG: OpenhabScene::activate() builds the Authorization header with
-// fmt::format(...).c_str() on a temporary, so the header list holds a dangling pointer and the
-// header sent is whatever that memory holds by then. Remove DISABLED_ when fixing.
-TEST_F(OpenhabSceneTest, DISABLED_activating_sends_the_token) {
+// activate() used to build the Authorization header with fmt::format(...).c_str() on a temporary, so
+// the header list held a dangling pointer and sent whatever that memory held by then.
+TEST_F(OpenhabSceneTest, activating_sends_the_token) {
   server.respond("/rest/rules/movie_rule/runnow", "");
   ScopedScene row("openhab", "Movie time", "movie_rule", std::nullopt);
   OpenhabScene scene(row.id);
@@ -364,10 +364,8 @@ TEST_F(OpenhabThermostatTest, fetches_the_initial_mode_over_rest) {
   EXPECT_EQ(thermostat->get_mode().value, "heat");
 }
 
-// KNOWN BUG: the initial target temperature fetched over REST is rounded to a whole degree
-// (std::round without the * 10 / 10 used for websocket events), so 21.5 shows as 22.
-// Remove DISABLED_ when fixing.
-TEST_F(OpenhabThermostatTest, DISABLED_fetches_the_initial_target_temperature_over_rest) {
+// #386: the initial target temperature fetched over REST was rounded to a whole degree, so 21.5 showed as 22.
+TEST_F(OpenhabThermostatTest, fetches_the_initial_target_temperature_over_rest) {
   server.respond("/rest/items/HP_Target", rest_item("HP_Target", "Number", "21.5"));
 
   create_thermostat();
@@ -375,28 +373,27 @@ TEST_F(OpenhabThermostatTest, DISABLED_fetches_the_initial_target_temperature_ov
   EXPECT_FLOAT_EQ(thermostat->get_temperature(), 21.5);
 }
 
-// KNOWN BUG: OpenhabThermostat reads openhab_preset_item, openhab_swing_item and
-// openhab_swingh_item, but Django stores openhab_preset_mode_item, openhab_swing_mode_item and
-// openhab_swingh_mode_item. Presets and swing modes are commanded on "openhab/items//command"
-// and never follow OpenHAB. Remove DISABLED_ when fixing.
-TEST_F(OpenhabThermostatTest, DISABLED_set_preset_and_swing_command_their_items) {
+// The React UI stores openhab_preset_mode_item, openhab_swing_mode_item and openhab_swingh_mode_item, but only the
+// names the older settings form used were read, so presets and swing modes were commanded on "openhab/items//command".
+TEST_F(OpenhabThermostatTest, set_preset_and_swing_command_their_items) {
   create_thermostat();
 
   thermostat->set_preset("away");
   thermostat->set_swing_mode("on");
   thermostat->set_swing_horizontal_mode("on");
 
-  auto commands = item_commands();
-  ASSERT_EQ(commands.size(), 3);
-  EXPECT_EQ(commands[0].first, "HP_Preset");
-  EXPECT_EQ(commands[1].first, "HP_Swing");
-  EXPECT_EQ(commands[2].first, "HP_SwingH");
+  // Without optimistic mode each call also re-sends the earlier changes OpenHAB hasn't confirmed yet, so check which
+  // items were commanded rather than how often.
+  std::set<std::string> items;
+  for (const auto &command : item_commands()) {
+    items.insert(command.first);
+  }
+  EXPECT_EQ(items, (std::set<std::string>{"HP_Preset", "HP_Swing", "HP_SwingH"}));
 }
 
-// KNOWN BUG: see DISABLED_set_preset_and_swing_command_their_items. Once the item names are
-// read, the initial preset fetched over REST is also compared with the current HVAC mode
-// instead of the current preset, and the horizontal swing fetch checks the vertical swing item.
-TEST_F(OpenhabThermostatTest, DISABLED_fetches_the_initial_preset_and_swing_over_rest) {
+// The initial preset fetched over REST was also compared with the current HVAC mode instead of the current preset,
+// and the horizontal swing fetch checked the vertical swing item's name.
+TEST_F(OpenhabThermostatTest, fetches_the_initial_preset_and_swing_over_rest) {
   server.respond("/rest/items/HP_Preset", rest_item("HP_Preset", "String", "away"));
   server.respond("/rest/items/HP_Swing", rest_item("HP_Swing", "String", "on"));
   server.respond("/rest/items/HP_SwingH", rest_item("HP_SwingH", "String", "on"));
@@ -408,11 +405,9 @@ TEST_F(OpenhabThermostatTest, DISABLED_fetches_the_initial_preset_and_swing_over
   EXPECT_EQ(thermostat->get_swing_horizontal_mode().value, "on");
 }
 
-// KNOWN BUG: the current temperature item is never observed (reload_config detaches it but
-// never attaches it), and its callback compares events against the target temperature item
-// and never marks the reading available. The panels never show the thermostat's own reading.
-// Remove DISABLED_ when fixing.
-TEST_F(OpenhabThermostatTest, DISABLED_publishes_the_current_temperature_from_openhab) {
+// #386: the current temperature item was never observed, its callback compared events against the target temperature
+// item, and the reading was never marked available, so the panels showed 0.0°.
+TEST_F(OpenhabThermostatTest, publishes_the_current_temperature_from_openhab) {
   create_thermostat();
   last_published_state();
 
@@ -422,4 +417,60 @@ TEST_F(OpenhabThermostatTest, DISABLED_publishes_the_current_temperature_from_op
   ASSERT_TRUE(state.has_value());
   EXPECT_TRUE(state->has_current_temperature());
   EXPECT_FLOAT_EQ(state->current_temperature(), 19.5);
+}
+
+// #386: the current temperature is also fetched over REST when the thermostat loads. That fetch read the wrong field.
+TEST_F(OpenhabThermostatTest, fetches_the_initial_current_temperature_over_rest) {
+  server.respond("/rest/items/HP_Current", rest_item("HP_Current", "Number", "19.5"));
+
+  create_thermostat();
+
+  auto state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_TRUE(state->has_current_temperature());
+  EXPECT_FLOAT_EQ(state->current_temperature(), 19.5);
+}
+
+// Thermostats saved by the older settings form have the original item names, without "_mode".
+TEST_F(OpenhabThermostatTest, reads_preset_and_swing_items_saved_by_the_older_settings_form) {
+  auto data = django_openhab_thermostat_data();
+  for (const std::string kind : {"preset", "swing", "swingh"}) {
+    data.erase("openhab_" + kind + "_mode_item");
+  }
+  data["openhab_preset_item"] = "Old_Preset";
+  data["openhab_swing_item"] = "Old_Swing";
+  data["openhab_swingh_item"] = "Old_SwingH";
+  row = std::make_unique<ScopedEntity>("thermostat", "Heat pump", data, 2, 8, 1);
+  thermostat = std::make_unique<OpenhabThermostat>(row->id);
+
+  thermostat->set_preset("away");
+  thermostat->set_swing_mode("on");
+  thermostat->set_swing_horizontal_mode("on");
+
+  // Without optimistic mode each call also re-sends the earlier changes OpenHAB hasn't confirmed yet, so check which
+  // items were commanded rather than how often.
+  std::set<std::string> items;
+  for (const auto &command : item_commands()) {
+    items.insert(command.first);
+  }
+  EXPECT_EQ(items, (std::set<std::string>{"Old_Preset", "Old_Swing", "Old_SwingH"}));
+}
+
+// The callbacks read the item from the topic before checking it had one. OpenhabManager already drops such topics, so
+// this only guards the callbacks themselves.
+TEST_F(OpenhabThermostatTest, callbacks_ignore_a_topic_without_an_item) {
+  create_thermostat();
+  float temperature_before = thermostat->get_temperature();
+  auto event = nlohmann::json::parse(item_state_changed("HP_Target", "Decimal", "25"));
+  event["topic"] = "openhab/items";
+
+  thermostat->openhab_target_temperature_event_callback(event);
+  thermostat->openhab_current_temperature_event_callback(event);
+  thermostat->openhab_fan_mode_event_callback(event);
+  thermostat->openhab_mode_event_callback(event);
+  thermostat->openhab_preset_event_callback(event);
+  thermostat->openhab_swing_event_callback(event);
+  thermostat->openhab_swingh_event_callback(event);
+
+  EXPECT_FLOAT_EQ(thermostat->get_temperature(), temperature_before);
 }

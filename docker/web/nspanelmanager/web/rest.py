@@ -515,10 +515,13 @@ def room_delete(request, room_id):
     if request.method == "DELETE":
         try:
             room = Room.objects.get(id=room_id)
-            # Panels are not deleted with their room. As in the UI's delete_room view, move them to another room.
+            # Panels are not deleted with their room; move them to another room.
             new_room = Room.objects.exclude(id=room.id).first()
             if new_room:
                 NSPanel.objects.filter(room=room).update(room=new_room)
+            elif NSPanel.objects.filter(room=room).exists():
+                # Panels must belong to a room, so the last room can only be deleted once it has no panels.
+                return JsonResponse({"status": "error", "message": "The last room cannot be deleted while panels are assigned to it."}, status=400)
             room.delete()
             send_mqttmanager_reload_command()
             return JsonResponse({"status": "ok", "room_id": room_id}, status=200)
@@ -550,7 +553,7 @@ def room_put(request):
 
             if "friendly_name" in data:
                 room.friendly_name = data["friendly_name"]
-            if "displayOrder" in data:
+            if "display_order" in data:
                 room.displayOrder = data["display_order"]
             if "room_temp_provider" in data:
                 room.room_temp_provider = data["room_temp_provider"]
@@ -679,7 +682,7 @@ def scenes_post(request):
             scene.lightstate_set.all().delete()  # Remove all old states
             # TODO: Convert light states to JSON fields in DB.
             for light_state in data["light_states"]:
-                light = Light.objects.filter(id=light_state["light_id"]).first()
+                light = Entity.objects.filter(id=light_state["light_id"], entity_type=Entity.EntityType.LIGHT).first()
                 if light:
                     new_state = LightState()
                     new_state.light = light
