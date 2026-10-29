@@ -1,10 +1,10 @@
-import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-BdeFQTXB.js";
-import { t as create } from "./react-MTMSzDan.js";
-import { t as useSettingsStore } from "./SettingsStore-BHXuDxlS.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-eSdaNbjU.js";
-import { n as Notify } from "./NSPanelToastContainer-NzkRaQha.js";
-import { t as motion } from "./proxy-D4hT3_8D.js";
-import { t as AnimatePresence } from "./AnimatePresence-BunWdja-.js";
+import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-6bHsUdwk.js";
+import { t as create } from "./react-BoNY6E92.js";
+import { t as useSettingsStore } from "./SettingsStore-DzKRIyG_.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-OR2VwJxc.js";
+import { n as Notify } from "./NSPanelToastContainer-Uu4mGZ3z.js";
+import { t as motion } from "./proxy-C2Vy6RZV.js";
+import { t as AnimatePresence } from "./AnimatePresence-BaM8E_jm.js";
 //#region src/stores/EntitiesPagesStore.ts
 function getCookie$1(name) {
 	let cookieValue = "";
@@ -106,6 +106,7 @@ var MultiStep_AddEditEntity_Step1 = ({ handleButtonSelectEvent, next_step }) => 
 	const [buttonHovered, setButtonHovered] = (0, import_react.useState)(false);
 	const [thermostatHovered, setThermostatHovered] = (0, import_react.useState)(false);
 	const [mediaPlayerHovered, setMediaPlayerHovered] = (0, import_react.useState)(false);
+	const [coverHovered, setCoverHovered] = (0, import_react.useState)(false);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "grid grid-cols-3 gap-4 w-full",
 		children: [
@@ -203,6 +204,25 @@ var MultiStep_AddEditEntity_Step1 = ({ handleButtonSelectEvent, next_step }) => 
 						children: "Media player"
 					})
 				})]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				onMouseEnter: () => setCoverHovered(true),
+				onMouseLeave: () => setCoverHovered(false),
+				className: "group bg-base-100 rounded-box border border-neutral border-dashed p-6 cursor-pointer hover:bg-yellow-500/10",
+				onClick: () => {
+					handleButtonSelectEvent("entity_type", "cover")();
+					next_step();
+				},
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "flex justify-center items-center",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mdi ${coverHovered ? "mdi-window-shutter-open" : "mdi-window-shutter"} text-3xl text-neutral-content/50 group-hover:text-yellow-500` })
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "flex justify-center items-center",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+						className: "text-base-content/50 group-hover:text-base-content text-center",
+						children: "Cover / blind"
+					})
+				})]
 			})
 		]
 	}) });
@@ -216,6 +236,7 @@ var MultiStep_AddEditEntity_Step2 = ({ handleButtonSelectEvent, entity_type, nex
 		button: ["home_assistant", "nspm"],
 		thermostat: ["home_assistant", "openhab"],
 		media_player: ["home_assistant"],
+		cover: ["home_assistant", "openhab"],
 		scene: [
 			"home_assistant",
 			"openhab",
@@ -7686,6 +7707,7 @@ function getOptionsFromItems(items) {
 		else if (item.item_id.startsWith("scene")) mdi_icon = "mdi-palette";
 		else if (item.item_id.startsWith("script")) mdi_icon = "mdi-code-json";
 		else if (item.item_id.startsWith("media_player")) mdi_icon = "mdi-speaker";
+		else if (item.item_id.startsWith("cover")) mdi_icon = "mdi-window-shutter";
 		options.push({
 			value: item.item_id,
 			label: item.label,
@@ -7742,7 +7764,7 @@ var useAvailableEntitiesStore = create((set) => ({
 }));
 //#endregion
 //#region src/components/MultiStep_AddEditEntity/entity_types/step3_edit_light.tsx
-var schema$5 = object({
+var schema$6 = object({
 	id: number().nullable(),
 	type: string(),
 	entity_type: string(),
@@ -7761,7 +7783,7 @@ var schema$5 = object({
 	openhab_item_dimmer: string().optional(),
 	openhab_item_rgb: string().optional()
 });
-var CustomOption$5 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
+var CustomOption$6 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
 	if (isDisabled) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		...innerProps,
@@ -7769,10 +7791,10 @@ var CustomOption$5 = ({ innerProps, isDisabled, isFocused, isSelected, children,
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mdi ${data.icon} me-2` }), children]
 	});
 };
-var select_components$5 = { Option: CustomOption$5 };
+var select_components$6 = { Option: CustomOption$6 };
 var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_id, room_view_position, id, onComplete }) => {
 	const { handleSubmit, register, reset, getValues, setValue, formState: { isValid } } = useForm({
-		resolver: u(schema$5),
+		resolver: u(schema$6),
 		defaultValues: {
 			id: id ?? null,
 			controller,
@@ -7907,7 +7929,7 @@ var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_
 							shouldDirty: true
 						}),
 						unstyled: true,
-						components: select_components$5,
+						components: select_components$6,
 						value: useAvailableEntitiesStore.getState().home_assistant_options.find((option) => option.value === getValues("home_assistant_name")),
 						styles: {
 							input: (base) => ({
@@ -8079,7 +8101,7 @@ var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_
 						}),
 						value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_item_dimmer")),
 						unstyled: true,
-						components: select_components$5,
+						components: select_components$6,
 						styles: {
 							input: (base) => ({
 								...base,
@@ -8109,7 +8131,7 @@ var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_
 							});
 						},
 						value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_item_color_temp")),
-						components: select_components$5,
+						components: select_components$6,
 						unstyled: true,
 						styles: {
 							input: (base) => ({
@@ -8138,7 +8160,7 @@ var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_
 							shouldDirty: true
 						}),
 						value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_item_rgb")),
-						components: select_components$5,
+						components: select_components$6,
 						unstyled: true,
 						styles: {
 							input: (base) => ({
@@ -8171,7 +8193,7 @@ var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_
 };
 //#endregion
 //#region src/components/MultiStep_AddEditEntity/entity_types/step3_edit_switch.tsx
-var schema$4 = object({
+var schema$5 = object({
 	id: number().nullable(),
 	type: string(),
 	entity_type: string(),
@@ -8183,7 +8205,7 @@ var schema$4 = object({
 	home_assistant_name: string().optional(),
 	openhab_item_switch: string().optional()
 });
-var CustomOption$4 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
+var CustomOption$5 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
 	if (isDisabled) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		...innerProps,
@@ -8191,10 +8213,10 @@ var CustomOption$4 = ({ innerProps, isDisabled, isFocused, isSelected, children,
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mdi ${data.icon} me-2` }), children]
 	});
 };
-var select_components$4 = { Option: CustomOption$4 };
+var select_components$5 = { Option: CustomOption$5 };
 var MultiStep_AddEditEntity_Step3_Switch = ({ controller, room_id, entities_page_id, room_view_position, id, onComplete }) => {
 	const { handleSubmit, register, reset, getValues, setValue, formState: { isValid } } = useForm({
-		resolver: u(schema$4),
+		resolver: u(schema$5),
 		defaultValues: {
 			id: id ?? null,
 			controller,
@@ -8321,7 +8343,7 @@ var MultiStep_AddEditEntity_Step3_Switch = ({ controller, room_id, entities_page
 							setValue("home_assistant_name", newValue ? newValue.value : "");
 						},
 						unstyled: true,
-						components: select_components$4,
+						components: select_components$5,
 						value: useAvailableEntitiesStore.getState().home_assistant_options.find((option) => option.value === getValues("home_assistant_name")),
 						styles: {
 							input: (base) => ({
@@ -8348,7 +8370,7 @@ var MultiStep_AddEditEntity_Step3_Switch = ({ controller, room_id, entities_page
 						onChange: (newValue) => setValue("openhab_item_switch", newValue ? newValue.value : ""),
 						value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_item_switch")),
 						unstyled: true,
-						components: select_components$4,
+						components: select_components$5,
 						styles: {
 							input: (base) => ({
 								...base,
@@ -8381,7 +8403,7 @@ var MultiStep_AddEditEntity_Step3_Switch = ({ controller, room_id, entities_page
 };
 //#endregion
 //#region src/components/MultiStep_AddEditEntity/entity_types/step3_edit_button.tsx
-var schema$3 = object({
+var schema$4 = object({
 	id: number().nullable(),
 	type: string(),
 	entity_type: string(),
@@ -8394,7 +8416,7 @@ var schema$3 = object({
 	mqtt_topic: string().optional(),
 	mqtt_payload: string().optional()
 });
-var CustomOption$3 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
+var CustomOption$4 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
 	if (isDisabled) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		...innerProps,
@@ -8402,10 +8424,10 @@ var CustomOption$3 = ({ innerProps, isDisabled, isFocused, isSelected, children,
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mdi ${data.icon} me-2` }), children]
 	});
 };
-var select_components$3 = { Option: CustomOption$3 };
+var select_components$4 = { Option: CustomOption$4 };
 var MultiStep_AddEditEntity_Step3_Button = ({ controller, room_id, entities_page_id, room_view_position, id, onComplete }) => {
 	const { handleSubmit, register, reset, getValues, setValue, formState: { isValid } } = useForm({
-		resolver: u(schema$3),
+		resolver: u(schema$4),
 		defaultValues: {
 			id: null,
 			controller,
@@ -8533,7 +8555,7 @@ var MultiStep_AddEditEntity_Step3_Button = ({ controller, room_id, entities_page
 							setValue("home_assistant_name", newValue ? newValue.value : "");
 						},
 						unstyled: true,
-						components: select_components$3,
+						components: select_components$4,
 						value: useAvailableEntitiesStore.getState().home_assistant_options.find((option) => option.value === getValues("home_assistant_name")),
 						styles: {
 							input: (base) => ({
@@ -8602,7 +8624,7 @@ var MultiStep_AddEditEntity_Step3_Button = ({ controller, room_id, entities_page
 };
 //#endregion
 //#region src/components/MultiStep_AddEditEntity/entity_types/step3_edit_thermostat.tsx
-var schema$2 = object({
+var schema$3 = object({
 	id: number().nullable(),
 	type: string(),
 	entity_type: string(),
@@ -8647,7 +8669,7 @@ var schema$2 = object({
 		value: string().min(1)
 	})).optional()
 });
-var CustomOption$2 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
+var CustomOption$3 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
 	if (isDisabled) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		...innerProps,
@@ -8655,7 +8677,7 @@ var CustomOption$2 = ({ innerProps, isDisabled, isFocused, isSelected, children,
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mdi ${data.icon} me-2` }), children]
 	});
 };
-var select_components$2 = { Option: CustomOption$2 };
+var select_components$3 = { Option: CustomOption$3 };
 var IconSelector = ({ value, onChange }) => {
 	const climateIcons = [
 		{
@@ -8812,7 +8834,7 @@ var IconSelector = ({ value, onChange }) => {
 };
 var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_page_id, room_view_position, id, onComplete }) => {
 	const { control, handleSubmit, register, reset, getValues, setValue, formState: { isValid }, watch } = useForm({
-		resolver: u(schema$2),
+		resolver: u(schema$3),
 		defaultValues: {
 			id: id ?? null,
 			controller,
@@ -9070,7 +9092,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 								});
 							},
 							unstyled: true,
-							components: select_components$2,
+							components: select_components$3,
 							value: useAvailableEntitiesStore.getState().home_assistant_options.find((option) => option.value === getValues("home_assistant_name")),
 							styles: {
 								input: (base) => ({
@@ -9115,7 +9137,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 									onChange: (newValue) => setValue("openhab_temperature_item", newValue ? newValue.value : ""),
 									value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_temperature_item")),
 									unstyled: true,
-									components: select_components$2,
+									components: select_components$3,
 									styles: {
 										input: (base) => ({
 											...base,
@@ -9144,7 +9166,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 									onChange: (newValue) => setValue("openhab_current_temperature_item", newValue ? newValue.value : ""),
 									value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_current_temperature_item")),
 									unstyled: true,
-									components: select_components$2,
+									components: select_components$3,
 									styles: {
 										input: (base) => ({
 											...base,
@@ -9224,7 +9246,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 									onChange: (newValue) => setValue("openhab_fan_mode_item", newValue ? newValue.value : ""),
 									value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_fan_mode_item")),
 									unstyled: true,
-									components: select_components$2,
+									components: select_components$3,
 									styles: {
 										input: (base) => ({
 											...base,
@@ -9322,7 +9344,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 									onChange: (newValue) => setValue("openhab_hvac_mode_item", newValue ? newValue.value : ""),
 									value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_hvac_mode_item")),
 									unstyled: true,
-									components: select_components$2,
+									components: select_components$3,
 									styles: {
 										input: (base) => ({
 											...base,
@@ -9420,7 +9442,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 									onChange: (newValue) => setValue("openhab_preset_mode_item", newValue ? newValue.value : ""),
 									value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_preset_mode_item")),
 									unstyled: true,
-									components: select_components$2,
+									components: select_components$3,
 									styles: {
 										input: (base) => ({
 											...base,
@@ -9518,7 +9540,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 									onChange: (newValue) => setValue("openhab_swing_mode_item", newValue ? newValue.value : ""),
 									value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_swing_mode_item")),
 									unstyled: true,
-									components: select_components$2,
+									components: select_components$3,
 									styles: {
 										input: (base) => ({
 											...base,
@@ -9620,7 +9642,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 									onChange: (newValue) => setValue("openhab_swingh_mode_item", newValue ? newValue.value : ""),
 									value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_swingh_mode_item")),
 									unstyled: true,
-									components: select_components$2,
+									components: select_components$3,
 									styles: {
 										input: (base) => ({
 											...base,
@@ -9716,7 +9738,7 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 };
 //#endregion
 //#region src/components/MultiStep_AddEditEntity/entity_types/step3_edit_scene.tsx
-var schema$1 = object({
+var schema$2 = object({
 	id: number().nullable(),
 	type: string(),
 	controller: string(),
@@ -9727,7 +9749,7 @@ var schema$1 = object({
 	friendly_name: string().min(1),
 	backend_name: string().optional()
 });
-var CustomOption$1 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
+var CustomOption$2 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
 	if (isDisabled) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		...innerProps,
@@ -9735,10 +9757,10 @@ var CustomOption$1 = ({ innerProps, isDisabled, isFocused, isSelected, children,
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mdi ${data.icon} me-2` }), children]
 	});
 };
-var select_components$1 = { Option: CustomOption$1 };
+var select_components$2 = { Option: CustomOption$2 };
 var MultiStep_AddEditEntity_Step3_Scene = ({ controller, room_id, entities_page_id, room_view_position, id, onComplete }) => {
 	const { handleSubmit, register, reset, getValues, setValue, formState: { isValid } } = useForm({
-		resolver: u(schema$1),
+		resolver: u(schema$2),
 		defaultValues: {
 			id: id ?? null,
 			type: "scene",
@@ -9863,7 +9885,7 @@ var MultiStep_AddEditEntity_Step3_Scene = ({ controller, room_id, entities_page_
 							setValue("backend_name", newValue ? newValue.value : "");
 						},
 						unstyled: true,
-						components: select_components$1,
+						components: select_components$2,
 						value: useAvailableEntitiesStore.getState().home_assistant_options.find((option) => option.value === getValues("backend_name")),
 						styles: {
 							input: (base) => ({
@@ -9890,7 +9912,7 @@ var MultiStep_AddEditEntity_Step3_Scene = ({ controller, room_id, entities_page_
 						onChange: (newValue) => setValue("backend_name", newValue ? newValue.value : ""),
 						value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("backend_name")),
 						unstyled: true,
-						components: select_components$1,
+						components: select_components$2,
 						styles: {
 							input: (base) => ({
 								...base,
@@ -9923,7 +9945,7 @@ var MultiStep_AddEditEntity_Step3_Scene = ({ controller, room_id, entities_page_
 };
 //#endregion
 //#region src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.tsx
-var schema = object({
+var schema$1 = object({
 	id: number().nullable(),
 	type: string(),
 	entity_type: string(),
@@ -9953,7 +9975,7 @@ var schema = object({
 		message: "Required for this multi-room setup"
 	});
 });
-var CustomOption = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
+var CustomOption$1 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
 	if (isDisabled) return null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		...innerProps,
@@ -9961,7 +9983,7 @@ var CustomOption = ({ innerProps, isDisabled, isFocused, isSelected, children, d
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mdi ${data.icon} me-2` }), children]
 	});
 };
-var select_components = { Option: CustomOption };
+var select_components$1 = { Option: CustomOption$1 };
 var multi_room_strategies = [{
 	value: "source_entity",
 	label: "The room player says which player feeds it",
@@ -9988,7 +10010,7 @@ var MultiStep_AddEditEntity_Step3_MediaPlayer = ({ controller, room_id, entities
 		source_volume_attribute: ""
 	};
 	const { handleSubmit, register, reset, setValue, watch, formState: { isValid, errors } } = useForm({
-		resolver: u(schema),
+		resolver: u(schema$1),
 		mode: "onChange",
 		defaultValues
 	});
@@ -10139,7 +10161,7 @@ var MultiStep_AddEditEntity_Step3_MediaPlayer = ({ controller, room_id, entities
 								setValue("home_assistant_name", newValue ? newValue.value : "", { shouldValidate: true });
 							},
 							unstyled: true,
-							components: select_components,
+							components: select_components$1,
 							value: useAvailableEntitiesStore.getState().home_assistant_options.find((option) => option.value === home_assistant_name) ?? null,
 							styles: {
 								input: (base) => ({
@@ -10325,6 +10347,265 @@ var MultiStep_AddEditEntity_Step3_MediaPlayer = ({ controller, room_id, entities
 							] })
 						]
 					})
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "flex mt-4 justify-end items-center",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					type: "submit",
+					className: "btn btn-info",
+					disabled: !isValid,
+					children: "Save"
+				})
+			})
+		]
+	});
+};
+//#endregion
+//#region src/components/MultiStep_AddEditEntity/entity_types/step3_edit_cover.tsx
+var schema = object({
+	id: number().nullable(),
+	type: string(),
+	entity_type: string(),
+	room_id: number(),
+	entities_page_id: number(),
+	room_view_position: number(),
+	friendly_name: string().min(1),
+	controller: string(),
+	home_assistant_name: string(),
+	openhab_item: string()
+}).superRefine((data, ctx) => {
+	if (data.controller == "home_assistant") {
+		if (!data.home_assistant_name.startsWith("cover.")) ctx.addIssue({
+			code: "custom",
+			path: ["home_assistant_name"],
+			message: "Select a Home Assistant cover entity"
+		});
+	} else if (data.controller == "openhab") {
+		if (data.openhab_item.trim() == "") ctx.addIssue({
+			code: "custom",
+			path: ["openhab_item"],
+			message: "Select an OpenHAB Rollershutter item"
+		});
+	}
+});
+var CustomOption = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
+	if (isDisabled) return null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		...innerProps,
+		className: `p-1 ${isSelected ? "bg-primary/20 rounded-sm" : ""} ${isFocused ? "bg-primary/20 rounded-sm" : ""}`,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mdi ${data.icon} me-2` }), children]
+	});
+};
+var select_components = { Option: CustomOption };
+var selectStyles = {
+	input: (base) => ({
+		...base,
+		"input:focus": { boxShadow: "none" }
+	}),
+	multiValueLabel: (base) => ({
+		...base,
+		whiteSpace: "normal",
+		overflow: "visible"
+	}),
+	control: (base) => ({
+		...base,
+		transition: "none"
+	})
+};
+var MultiStep_AddEditEntity_Step3_Cover = ({ controller, room_id, entities_page_id, room_view_position, id, onComplete }) => {
+	const defaultValues = {
+		id: id ?? null,
+		controller,
+		type: "entity",
+		entity_type: "cover",
+		friendly_name: "",
+		room_id,
+		entities_page_id,
+		room_view_position,
+		home_assistant_name: "",
+		openhab_item: ""
+	};
+	const { handleSubmit, register, reset, setValue, watch, formState: { isValid, errors } } = useForm({
+		resolver: u(schema),
+		mode: "onChange",
+		defaultValues
+	});
+	const home_assistant_name = watch("home_assistant_name");
+	const openhab_item = watch("openhab_item");
+	function getCookie(name) {
+		let cookieValue = "";
+		if (document.cookie && document.cookie !== "") {
+			const cookies = document.cookie.split(";");
+			for (let i = 0; i < cookies.length; i++) {
+				const cookie = cookies[i].trim();
+				if (cookie.substring(0, name.length + 1) === name + "=") {
+					cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+					break;
+				}
+			}
+		}
+		return cookieValue;
+	}
+	(0, import_react.useEffect)(() => {
+		if (id != null) {
+			const entityData = useEntitiesPagesStore.getState().entities.find((entity) => entity.id == id);
+			reset({
+				...defaultValues,
+				...entityData
+			});
+		}
+	}, [id, useEntitiesPagesStore.getState().entities]);
+	function saveEntity(data) {
+		fetch("/rest/entities/covers", {
+			credentials: "same-origin",
+			method: "PUT",
+			mode: "same-origin",
+			headers: {
+				"Content-Type": "application/json",
+				"X-CSRFToken": getCookie("csrftoken")
+			},
+			body: JSON.stringify(data)
+		}).then(async (response) => {
+			const data = await response.json();
+			if (!response.ok) {
+				const error = data && data.message || response.status;
+				return Promise.reject(error);
+			}
+			onComplete?.();
+		}).catch((error) => {
+			Notify({
+				message: `Error saving entity. Error: ${error}`,
+				level: "error",
+				duration: 1e4
+			});
+		});
+	}
+	const ha_entity = useAvailableEntitiesStore.getState().home_assistant_entities.find((entity) => entity.item_id == home_assistant_name);
+	const supported_features = Number(ha_entity?.item?.attributes?.supported_features ?? 0);
+	const supports_position = (supported_features & 4) !== 0;
+	const supports_tilt = (supported_features & 128) !== 0;
+	const openhab_cover_options = useAvailableEntitiesStore.getState().openhab_items.filter((item) => item.item?.type === "Rollershutter").map((item) => ({
+		value: item.item_id,
+		label: item.label,
+		icon: "mdi-window-shutter",
+		type: item.type
+	}));
+	const classNames = {
+		control: (state) => `${state.isFocused ? "border" : "border-0"} border-accent p-2.5 text-sm rounded-box bg-base-300 rounded-md`,
+		menu: () => "bg-base-300 p-2.5 rounded-box",
+		option: (state) => `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`
+	};
+	const text_input_class = "outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5";
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+		onSubmit: handleSubmit(saveEntity),
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				type: "hidden",
+				...register("id")
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				type: "hidden",
+				...register("controller")
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				type: "hidden",
+				...register("type")
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				type: "hidden",
+				...register("entity_type")
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				type: "hidden",
+				...register("room_id")
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				type: "hidden",
+				...register("entities_page_id")
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				type: "hidden",
+				...register("room_view_position")
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "alert alert-warning mb-4",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mdi mdi-alert text-xl" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "font-bold",
+					children: "BETA:"
+				}), " Covers are a beta feature. The panel firmware and TFTs that add the cover control page may not be installed on your panels yet."] })]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "w-full",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "flex justify-center mb-4 duration-500 transition-transform ease-linear",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "w-full",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+								htmlFor: "add_new_cover_name",
+								className: "block mb-2 text-sm font-medium",
+								children: "Name"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+								className: "flex flex-row-reverse",
+								children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									className: text_input_class,
+									type: "text",
+									id: "add_new_cover_name",
+									...register("friendly_name"),
+									required: true
+								})
+							})]
+						})
+					}),
+					controller == "home_assistant" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "block mb-2 text-sm font-medium",
+							children: "Home Assistant entity"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StateManagedSelect$1, {
+							options: useAvailableEntitiesStore.getState().home_assistant_options.filter((option) => option.value.startsWith("cover.")),
+							classNames,
+							onChange: (newValue) => {
+								setValue("home_assistant_name", newValue ? newValue.value : "", { shouldValidate: true });
+							},
+							unstyled: true,
+							components: select_components,
+							value: useAvailableEntitiesStore.getState().home_assistant_options.find((option) => option.value === home_assistant_name) ?? null,
+							styles: selectStyles
+						}),
+						ha_entity && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+							className: "block mt-2 text-xs text-base-content/50",
+							children: [
+								"Detected: ",
+								supports_position ? "position" : "open/close only",
+								supports_tilt ? ", tilt" : ""
+							]
+						}),
+						errors.home_assistant_name && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "block mt-1 text-xs text-error",
+							children: "Select a Home Assistant cover entity."
+						})
+					] }),
+					controller == "openhab" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "block mb-2 text-sm font-medium",
+							children: "OpenHAB Rollershutter item"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StateManagedSelect$1, {
+							options: openhab_cover_options,
+							classNames,
+							onChange: (newValue) => setValue("openhab_item", newValue ? newValue.value : "", { shouldValidate: true }),
+							unstyled: true,
+							components: select_components,
+							value: openhab_cover_options.find((option) => option.value === openhab_item) ?? null,
+							styles: selectStyles
+						}),
+						errors.openhab_item && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "block mt-1 text-xs text-error",
+							children: "Select an OpenHAB Rollershutter item."
+						})
+					] })
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -10544,6 +10825,14 @@ var MultiStep_AddOrEditEntity = ({ room_id, entities_page_id, room_view_position
 									onComplete
 								});
 								case "media_player": return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MultiStep_AddEditEntity_Step3_MediaPlayer, {
+									controller: String(formData.controller),
+									room_id,
+									id,
+									entities_page_id,
+									room_view_position,
+									onComplete
+								});
+								case "cover": return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MultiStep_AddEditEntity_Step3_Cover, {
 									controller: String(formData.controller),
 									room_id,
 									id,

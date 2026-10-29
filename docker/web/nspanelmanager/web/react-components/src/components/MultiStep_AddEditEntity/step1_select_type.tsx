@@ -7,6 +7,7 @@ const MultiStep_AddEditEntity_Step1 = ({ handleButtonSelectEvent, next_step }: {
   const [buttonHovered, setButtonHovered] = useState(false);
   const [thermostatHovered, setThermostatHovered] = useState(false);
   const [mediaPlayerHovered, setMediaPlayerHovered] = useState(false);
+  const [coverHovered, setCoverHovered] = useState(false);
 
   return (
     <div>
@@ -95,6 +96,22 @@ const MultiStep_AddEditEntity_Step1 = ({ handleButtonSelectEvent, next_step }: {
           </div>
           <div className="flex justify-center items-center">
             <span className="text-base-content/50 group-hover:text-base-content text-center">Media player</span>
+          </div>
+        </div>
+        <div
+          onMouseEnter={() => setCoverHovered(true)}
+          onMouseLeave={() => setCoverHovered(false)}
+          className="group bg-base-100 rounded-box border border-neutral border-dashed p-6 cursor-pointer hover:bg-yellow-500/10"
+          onClick={() => {
+            handleButtonSelectEvent("entity_type", "cover")();
+            next_step();
+          }}
+        >
+          <div className="flex justify-center items-center">
+            <span className={`mdi ${coverHovered ? "mdi-window-shutter-open" : "mdi-window-shutter"} text-3xl text-neutral-content/50 group-hover:text-yellow-500`}></span>
+          </div>
+          <div className="flex justify-center items-center">
+            <span className="text-base-content/50 group-hover:text-base-content text-center">Cover / blind</span>
           </div>
         </div>
       </div>

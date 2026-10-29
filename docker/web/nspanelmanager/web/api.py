@@ -92,6 +92,8 @@ def get_all_available_entities(request):
                             data["entity_type"] = "light"
                         elif data["entity_id"].startswith("switch."):
                             data["entity_type"] = "switch"
+                        elif data["entity_id"].startswith("cover."):
+                            data["entity_type"] = "cover"
                         else:
                             logging.warn("Unknown entity type for entity: " + data["entity_id"])
 
@@ -133,6 +135,7 @@ def get_all_available_entities(request):
                                     "Color",
                                     "Switch",
                                     "String",
+                                    "Rollershutter",
                                 ]
                                 if "itemType" in channel and (channel["itemType"] in add_items_with_channels_of_type):
                                     add_entity = True

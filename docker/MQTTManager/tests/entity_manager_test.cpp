@@ -1,5 +1,6 @@
 #include "test_helpers.hpp"
 #include <button/button.hpp>
+#include <cover/cover.hpp>
 #include <entity_manager/entity_manager.hpp>
 #include <gtest/gtest.h>
 #include <media_player/media_player.hpp>
@@ -10,6 +11,7 @@
 #include <thermostat/thermostat.hpp>
 
 using nspm_test::django_button_data;
+using nspm_test::django_cover_data;
 using nspm_test::django_media_player_data;
 using nspm_test::django_switch_data;
 using nspm_test::django_thermostat_data;
@@ -31,6 +33,7 @@ protected:
     EntityManager::load_buttons();
     EntityManager::load_thermostats();
     EntityManager::load_media_players();
+    EntityManager::load_covers();
     EntityManager::load_scenes();
   }
 
@@ -142,6 +145,19 @@ TEST_F(EntityManagerTest, loads_thermostats_and_media_players) {
   EXPECT_TRUE(EntityManager::get_entity_by_id<MediaPlayerEntity>(MQTT_MANAGER_ENTITY_TYPE::MEDIA_PLAYER, speaker.id).has_value());
   // OpenHAB media players are not implemented, so none is created.
   EXPECT_FALSE(EntityManager::get_entity_by_id<MediaPlayerEntity>(MQTT_MANAGER_ENTITY_TYPE::MEDIA_PLAYER, openhab_speaker.id).has_value());
+}
+
+TEST_F(EntityManagerTest, loads_covers_for_home_assistant_and_openhab) {
+  ScopedEntity ha_cover("cover", "Blind", django_cover_data("home_assistant", "cover.blind"));
+  ScopedEntity openhab_cover("cover", "Shutter", django_cover_data("openhab", "", "Shutter_Item"));
+  nlohmann::json unknown_data = django_cover_data("zigbee", "cover.unknown");
+  ScopedEntity unknown_cover("cover", "Unknown", unknown_data);
+
+  EntityManager::load_covers();
+
+  EXPECT_TRUE(EntityManager::get_entity_by_id<CoverEntity>(MQTT_MANAGER_ENTITY_TYPE::COVER, ha_cover.id).has_value());
+  EXPECT_TRUE(EntityManager::get_entity_by_id<CoverEntity>(MQTT_MANAGER_ENTITY_TYPE::COVER, openhab_cover.id).has_value());
+  EXPECT_FALSE(EntityManager::get_entity_by_id<CoverEntity>(MQTT_MANAGER_ENTITY_TYPE::COVER, unknown_cover.id).has_value());
 }
 
 TEST_F(EntityManagerTest, scenes_are_created_for_their_type) {

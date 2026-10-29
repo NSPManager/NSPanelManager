@@ -95,6 +95,7 @@ class Entity(models.Model):
         BUTTON = "button"
         THERMOSTAT = "thermostat"
         MEDIA_PLAYER = "media_player"
+        COVER = "cover"
 
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     friendly_name = models.CharField(max_length=255, default="")
