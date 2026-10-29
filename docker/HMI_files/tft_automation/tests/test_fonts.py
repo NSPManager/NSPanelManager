@@ -11,11 +11,11 @@ UNDRAWABLE = {('eu', 'dropdown', 'i4_button')}
 
 
 class ProjectFontsTest(unittest.TestCase):
-    def test_every_project_has_seventeen_fonts_in_main_hmi_order(self):
+    def test_every_project_has_eighteen_fonts_in_main_hmi_order(self):
         for region in PROJECTS:
             project = load(region)
             names = [f.name for f in project.fonts()]
-            self.assertEqual(len(names), 17, region)
+            self.assertEqual(len(names), 18, region)
             self.assertEqual(names[:4], ['hamlin18_latA', 'replace_h23bold_id_1', 'timeandtemp', 'replace_h22_id_3'])
             self.assertEqual([m for m, _ in project.font_blocks()],
                              [n for n in project.resources() if n.endswith('.zi')])
