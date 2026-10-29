@@ -10,7 +10,7 @@
 
 HomeAssistantCover::HomeAssistantCover(uint32_t cover_id) : CoverEntity(cover_id) {
   if (this->_controller != MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT) {
-    SPDLOG_ERROR("HomeAssistantCover has not been recognized as controlled by HOME_ASSISTANT. Will stop processing cover.");
+    SPDLOG_ERROR("HomeAssistantCover {}::{} has not been recognized as controlled by HOME_ASSISTANT. Will stop processing cover.", this->_id, this->_name);
     return;
   }
 

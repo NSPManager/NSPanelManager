@@ -29,7 +29,6 @@ There are more topics that are used internally, these are:
 | Topic                                                | Payload                    | Description                                                                                             |
 |------------------------------------------------------|----------------------------|---------------------------------------------------------------------------------------------------------|
 | nspanel/entities/\<type\>/\<id\>/state_\<attribute\> | The value of the attribute | An update of entity state value sent out by MQTTManager. Example:nspanel/entities/light/42/state_kelvin |
-| nspanel/mqttmanager_\<manager\>/entities/covers/\<id\>/state | Protobuf `NSPanelEntityState` | Retained cover state (open/closed/position) used by the panel cover page when the firmware/TFT supports it. |
 | nspanel/status/time                                  | Time as a string           | Current time sent by MQTTManager.                                                                       |
 | nspanel/status/weather                               | JSON                       | A JSON representation of the current weather and weather forecast.                                      |
 | nspanel/\<panel_name\>/status_report                 | JSON                       | JSON payload with current state of the panel.                                                           |

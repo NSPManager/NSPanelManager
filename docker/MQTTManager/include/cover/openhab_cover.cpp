@@ -13,7 +13,7 @@
 
 OpenhabCover::OpenhabCover(uint32_t cover_id) : CoverEntity(cover_id) {
   if (this->_controller != MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB) {
-    SPDLOG_ERROR("OpenhabCover has not been recognized as controlled by OPENHAB. Will stop processing cover.");
+    SPDLOG_ERROR("OpenhabCover {}::{} has not been recognized as controlled by OPENHAB. Will stop processing cover.", this->_id, this->_name);
     return;
   }
 

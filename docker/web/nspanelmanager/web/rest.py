@@ -1360,8 +1360,6 @@ def put_cover_entity(request):
         placement_error = get_placement_error(new_cover, room, entities_page, room_view_position)
         if placement_error:
             return JsonResponse({"status": "error", "message": placement_error}, status=400)
-        if Scene.objects.filter(entities_page=entities_page, room_view_position=room_view_position).exists():
-            return JsonResponse({"status": "error", "message": "That position on the page is already taken by a scene."}, status=400)
 
         entity_data = {
             "controller": data["controller"],

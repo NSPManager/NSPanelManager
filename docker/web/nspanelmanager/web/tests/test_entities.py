@@ -547,18 +547,6 @@ class CoverTests(EntityRESTCommonTests, EntityRESTTestCase):
                 self.assertEqual(self.save(self.payload(**{field: 1})).status_code, 400)
         self.assertFalse(Entity.objects.exists())
 
-    def test_add_to_slot_with_a_scene_is_rejected(self):
-        Scene.objects.create(
-            friendly_name="Movie",
-            backend_name="scene.movie",
-            scene_type="home_assistant",
-            room=self.room,
-            entities_page=self.page,
-            room_view_position=0,
-        )
-
-        self.assertCreatesNothing(self.save(self.payload(slot=0)))
-
     def test_editing_another_entity_type_is_rejected(self):
         switch = Entity.objects.create(
             entity_type=Entity.EntityType.SWITCH,

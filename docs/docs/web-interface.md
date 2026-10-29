@@ -143,18 +143,6 @@ to the room.
 Each entity may only be assigned to one slot. If the list of entities is empty then all entities has been assigned a slot.
 :::
 
-### Covers
-
-Covers (blinds, shutters, curtains, awnings and garage doors) are added to an entities page the same way as lights.
-Choose **Cover / blind**, then select a Home Assistant `cover.*` entity or an OpenHAB `Rollershutter` item.
-
-Covers are a beta feature. The manager already sends cover state and accepts open, close, stop and position commands, but
-the panel firmware and TFT with a dedicated cover control page may not be installed on your panels yet. Until both are
-updated, a cover slot may show on the entities page without the full control page.
-
-Home Assistant covers report their position as 0% closed to 100% open. OpenHAB Rollershutter items use the opposite
-convention internally (0% open, 100% closed); NSPanel Manager converts this automatically.
-
 ## Relay groups
 
 Relay groups are used to bind multiple NSPanels and relays together so that when one relay in the group changes state, 
