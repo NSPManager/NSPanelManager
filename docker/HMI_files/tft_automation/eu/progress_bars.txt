@@ -1,0 +1,4 @@
+# Image progress bars (sta=1) whose pictures make_pictures.sh generates from this region's
+# gui.HMI: the empty part is cut from each theme's page background, the full part is the
+# colour given here, the same in every theme. One page per line: PAGE OBJECT=#RRGGBB...
+mediaplayer p_pos=#DEAA31 p_volume=#DEAA31
