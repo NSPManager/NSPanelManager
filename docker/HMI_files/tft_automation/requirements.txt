@@ -1,3 +1,3 @@
 # The Nextion file formats (HMI, fonts, pictures, TFT checksums), with numpy and Pillow.
 # Pinned to a release, so a change there cannot break this build until someone bumps it.
-nextion-tools[images]==0.1.0
+nextion-tools[images]==0.1.1
