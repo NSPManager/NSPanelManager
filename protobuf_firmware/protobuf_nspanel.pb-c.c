@@ -579,22 +579,24 @@ const ProtobufCEnumDescriptor nspanel_config__nspanel_screensaver_mode__descript
   nspanel_config__nspanel_screensaver_mode__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCEnumValue nspanel_config__nspanel_button_mode__enum_values_by_number[5] =
+static const ProtobufCEnumValue nspanel_config__nspanel_button_mode__enum_values_by_number[6] =
 {
   { "DIRECT", "NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT", 0 },
   { "FOLLOW", "NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__FOLLOW", 1 },
   { "NOTIFY_MANAGER", "NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__NOTIFY_MANAGER", 2 },
   { "THERMOSTAT_HEAT", "NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__THERMOSTAT_HEAT", 3 },
   { "THERMOSTAT_COOL", "NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__THERMOSTAT_COOL", 4 },
+  { "OPEN_ENTITY_PAGE", "NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__OPEN_ENTITY_PAGE", 5 },
 };
 static const ProtobufCIntRange nspanel_config__nspanel_button_mode__value_ranges[] = {
-{0, 0},{0, 5}
+{0, 0},{0, 6}
 };
-static const ProtobufCEnumValueIndex nspanel_config__nspanel_button_mode__enum_values_by_name[5] =
+static const ProtobufCEnumValueIndex nspanel_config__nspanel_button_mode__enum_values_by_name[6] =
 {
   { "DIRECT", 0 },
   { "FOLLOW", 1 },
   { "NOTIFY_MANAGER", 2 },
+  { "OPEN_ENTITY_PAGE", 5 },
   { "THERMOSTAT_COOL", 4 },
   { "THERMOSTAT_HEAT", 3 },
 };
@@ -605,9 +607,9 @@ const ProtobufCEnumDescriptor nspanel_config__nspanel_button_mode__descriptor =
   "NSPanelButtonMode",
   "NSPanelConfig__NSPanelButtonMode",
   "",
-  5,
+  6,
   nspanel_config__nspanel_button_mode__enum_values_by_number,
-  5,
+  6,
   nspanel_config__nspanel_button_mode__enum_values_by_name,
   1,
   nspanel_config__nspanel_button_mode__value_ranges,
@@ -643,7 +645,7 @@ const ProtobufCEnumDescriptor nspanel_config__nspanel_sound_event__descriptor =
   nspanel_config__nspanel_sound_event__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[38] =
+static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[40] =
 {
   {
     "name",
@@ -1101,11 +1103,37 @@ static const ProtobufCFieldDescriptor nspanel_config__field_descriptors[38] =
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "button1_entity_page_topic",
+    47,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, button1_entity_page_topic),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "button2_entity_page_topic",
+    48,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelConfig, button2_entity_page_topic),
+    NULL,
+    &protobuf_c_empty_string,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_config__field_indices_by_name[] = {
+  38,   /* field[38] = button1_entity_page_topic */
   32,   /* field[32] = button1_lower_temperature */
   21,   /* field[21] = button1_mode */
   33,   /* field[33] = button1_upper_temperature */
+  39,   /* field[39] = button2_entity_page_topic */
   34,   /* field[34] = button2_lower_temperature */
   22,   /* field[22] = button2_mode */
   35,   /* field[35] = button2_upper_temperature */
@@ -1149,7 +1177,7 @@ static const ProtobufCIntRange nspanel_config__number_ranges[5 + 1] =
   { 30, 23 },
   { 35, 27 },
   { 37, 28 },
-  { 0, 38 }
+  { 0, 40 }
 };
 const ProtobufCMessageDescriptor nspanel_config__descriptor =
 {
@@ -1159,7 +1187,7 @@ const ProtobufCMessageDescriptor nspanel_config__descriptor =
   "NSPanelConfig",
   "",
   sizeof(NSPanelConfig),
-  38,
+  40,
   nspanel_config__field_descriptors,
   nspanel_config__field_indices_by_name,
   5,  nspanel_config__number_ranges,

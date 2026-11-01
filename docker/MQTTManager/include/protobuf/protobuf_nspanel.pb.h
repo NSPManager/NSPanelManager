@@ -191,6 +191,7 @@ enum NSPanelConfig_NSPanelButtonMode : int {
   NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER = 2,
   NSPanelConfig_NSPanelButtonMode_THERMOSTAT_HEAT = 3,
   NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL = 4,
+  NSPanelConfig_NSPanelButtonMode_OPEN_ENTITY_PAGE = 5,
   NSPanelConfig_NSPanelButtonMode_NSPanelConfig_NSPanelButtonMode_INT_MIN_SENTINEL_DO_NOT_USE_ =
       std::numeric_limits<::int32_t>::min(),
   NSPanelConfig_NSPanelButtonMode_NSPanelConfig_NSPanelButtonMode_INT_MAX_SENTINEL_DO_NOT_USE_ =
@@ -200,8 +201,8 @@ enum NSPanelConfig_NSPanelButtonMode : int {
 bool NSPanelConfig_NSPanelButtonMode_IsValid(int value);
 extern const uint32_t NSPanelConfig_NSPanelButtonMode_internal_data_[];
 constexpr NSPanelConfig_NSPanelButtonMode NSPanelConfig_NSPanelButtonMode_NSPanelButtonMode_MIN = static_cast<NSPanelConfig_NSPanelButtonMode>(0);
-constexpr NSPanelConfig_NSPanelButtonMode NSPanelConfig_NSPanelButtonMode_NSPanelButtonMode_MAX = static_cast<NSPanelConfig_NSPanelButtonMode>(4);
-constexpr int NSPanelConfig_NSPanelButtonMode_NSPanelButtonMode_ARRAYSIZE = 4 + 1;
+constexpr NSPanelConfig_NSPanelButtonMode NSPanelConfig_NSPanelButtonMode_NSPanelButtonMode_MAX = static_cast<NSPanelConfig_NSPanelButtonMode>(5);
+constexpr int NSPanelConfig_NSPanelButtonMode_NSPanelButtonMode_ARRAYSIZE = 5 + 1;
 const ::google::protobuf::EnumDescriptor*
 NSPanelConfig_NSPanelButtonMode_descriptor();
 template <typename T>
@@ -214,7 +215,7 @@ const std::string& NSPanelConfig_NSPanelButtonMode_Name(T value) {
 template <>
 inline const std::string& NSPanelConfig_NSPanelButtonMode_Name(NSPanelConfig_NSPanelButtonMode value) {
   return ::google::protobuf::internal::NameOfDenseEnum<NSPanelConfig_NSPanelButtonMode_descriptor,
-                                                 0, 4>(
+                                                 0, 5>(
       static_cast<int>(value));
 }
 inline bool NSPanelConfig_NSPanelButtonMode_Parse(absl::string_view name, NSPanelConfig_NSPanelButtonMode* value) {
@@ -5379,6 +5380,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
   static constexpr NSPanelButtonMode NOTIFY_MANAGER = NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER;
   static constexpr NSPanelButtonMode THERMOSTAT_HEAT = NSPanelConfig_NSPanelButtonMode_THERMOSTAT_HEAT;
   static constexpr NSPanelButtonMode THERMOSTAT_COOL = NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL;
+  static constexpr NSPanelButtonMode OPEN_ENTITY_PAGE = NSPanelConfig_NSPanelButtonMode_OPEN_ENTITY_PAGE;
   static inline bool NSPanelButtonMode_IsValid(int value) {
     return NSPanelConfig_NSPanelButtonMode_IsValid(value);
   }
@@ -5426,6 +5428,8 @@ class NSPanelConfig final : public ::google::protobuf::Message
     kNameFieldNumber = 1,
     kInsideTemperatureSensorMqttTopicFieldNumber = 40,
     kTzPosixFieldNumber = 46,
+    kButton1EntityPageTopicFieldNumber = 47,
+    kButton2EntityPageTopicFieldNumber = 48,
     kDefaultRoomFieldNumber = 2,
     kDefaultPageFieldNumber = 3,
     kScreensaverActivationTimeoutFieldNumber = 4,
@@ -5591,6 +5595,38 @@ class NSPanelConfig final : public ::google::protobuf::Message
   inline PROTOBUF_ALWAYS_INLINE void _internal_set_tz_posix(
       const std::string& value);
   std::string* _internal_mutable_tz_posix();
+
+  public:
+  // string button1_entity_page_topic = 47;
+  void clear_button1_entity_page_topic() ;
+  const std::string& button1_entity_page_topic() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_button1_entity_page_topic(Arg_&& arg, Args_... args);
+  std::string* mutable_button1_entity_page_topic();
+  PROTOBUF_NODISCARD std::string* release_button1_entity_page_topic();
+  void set_allocated_button1_entity_page_topic(std::string* value);
+
+  private:
+  const std::string& _internal_button1_entity_page_topic() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_button1_entity_page_topic(
+      const std::string& value);
+  std::string* _internal_mutable_button1_entity_page_topic();
+
+  public:
+  // string button2_entity_page_topic = 48;
+  void clear_button2_entity_page_topic() ;
+  const std::string& button2_entity_page_topic() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_button2_entity_page_topic(Arg_&& arg, Args_... args);
+  std::string* mutable_button2_entity_page_topic();
+  PROTOBUF_NODISCARD std::string* release_button2_entity_page_topic();
+  void set_allocated_button2_entity_page_topic(std::string* value);
+
+  private:
+  const std::string& _internal_button2_entity_page_topic() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_button2_entity_page_topic(
+      const std::string& value);
+  std::string* _internal_mutable_button2_entity_page_topic();
 
   public:
   // int32 default_room = 2;
@@ -5898,8 +5934,8 @@ class NSPanelConfig final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 38, 2,
-      102, 7>
+      5, 40, 2,
+      160, 7>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -5930,6 +5966,8 @@ class NSPanelConfig final : public ::google::protobuf::Message
     ::google::protobuf::internal::ArenaStringPtr name_;
     ::google::protobuf::internal::ArenaStringPtr inside_temperature_sensor_mqtt_topic_;
     ::google::protobuf::internal::ArenaStringPtr tz_posix_;
+    ::google::protobuf::internal::ArenaStringPtr button1_entity_page_topic_;
+    ::google::protobuf::internal::ArenaStringPtr button2_entity_page_topic_;
     ::int32_t default_room_;
     int default_page_;
     ::int32_t screensaver_activation_timeout_;
@@ -7216,6 +7254,106 @@ inline void NSPanelConfig::set_allocated_tz_posix(std::string* value) {
         }
   #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.tz_posix)
+}
+
+// string button1_entity_page_topic = 47;
+inline void NSPanelConfig::clear_button1_entity_page_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_entity_page_topic_.ClearToEmpty();
+}
+inline const std::string& NSPanelConfig::button1_entity_page_topic() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.button1_entity_page_topic)
+  return _internal_button1_entity_page_topic();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelConfig::set_button1_entity_page_topic(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_entity_page_topic_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelConfig.button1_entity_page_topic)
+}
+inline std::string* NSPanelConfig::mutable_button1_entity_page_topic() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_button1_entity_page_topic();
+  // @@protoc_insertion_point(field_mutable:NSPanelConfig.button1_entity_page_topic)
+  return _s;
+}
+inline const std::string& NSPanelConfig::_internal_button1_entity_page_topic() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.button1_entity_page_topic_.Get();
+}
+inline void NSPanelConfig::_internal_set_button1_entity_page_topic(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_entity_page_topic_.Set(value, GetArena());
+}
+inline std::string* NSPanelConfig::_internal_mutable_button1_entity_page_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.button1_entity_page_topic_.Mutable( GetArena());
+}
+inline std::string* NSPanelConfig::release_button1_entity_page_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelConfig.button1_entity_page_topic)
+  return _impl_.button1_entity_page_topic_.Release();
+}
+inline void NSPanelConfig::set_allocated_button1_entity_page_topic(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button1_entity_page_topic_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.button1_entity_page_topic_.IsDefault()) {
+          _impl_.button1_entity_page_topic_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.button1_entity_page_topic)
+}
+
+// string button2_entity_page_topic = 48;
+inline void NSPanelConfig::clear_button2_entity_page_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_entity_page_topic_.ClearToEmpty();
+}
+inline const std::string& NSPanelConfig::button2_entity_page_topic() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.button2_entity_page_topic)
+  return _internal_button2_entity_page_topic();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelConfig::set_button2_entity_page_topic(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_entity_page_topic_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelConfig.button2_entity_page_topic)
+}
+inline std::string* NSPanelConfig::mutable_button2_entity_page_topic() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_button2_entity_page_topic();
+  // @@protoc_insertion_point(field_mutable:NSPanelConfig.button2_entity_page_topic)
+  return _s;
+}
+inline const std::string& NSPanelConfig::_internal_button2_entity_page_topic() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.button2_entity_page_topic_.Get();
+}
+inline void NSPanelConfig::_internal_set_button2_entity_page_topic(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_entity_page_topic_.Set(value, GetArena());
+}
+inline std::string* NSPanelConfig::_internal_mutable_button2_entity_page_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.button2_entity_page_topic_.Mutable( GetArena());
+}
+inline std::string* NSPanelConfig::release_button2_entity_page_topic() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelConfig.button2_entity_page_topic)
+  return _impl_.button2_entity_page_topic_.Release();
+}
+inline void NSPanelConfig::set_allocated_button2_entity_page_topic(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.button2_entity_page_topic_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.button2_entity_page_topic_.IsDefault()) {
+          _impl_.button2_entity_page_topic_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.button2_entity_page_topic)
 }
 
 // -------------------------------------------------------------------

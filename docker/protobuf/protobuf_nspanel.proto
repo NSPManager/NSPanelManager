@@ -54,6 +54,7 @@ message NSPanelConfig {
     NOTIFY_MANAGER = 2;
     THERMOSTAT_HEAT = 3;
     THERMOSTAT_COOL = 4;
+    OPEN_ENTITY_PAGE = 5; // Open the entity page for buttonN_entity_page_topic. The relay is left alone.
   }
   NSPanelButtonMode button1_mode = 22;
   NSPanelButtonMode button2_mode = 25;
@@ -93,6 +94,10 @@ message NSPanelConfig {
   // POSIX TZ rule for the manager's timezone, ex. "CET-1CEST,M3.5.0,M10.5.0/3", for setenv("TZ", ...) and tzset().
   // Empty if the manager could not work it out, in which case show the time from the manager's status/time topic.
   string tz_posix = 46;
+
+  // State topic of the entity whose page a button opens when buttonN_mode is OPEN_ENTITY_PAGE. Empty otherwise.
+  string button1_entity_page_topic = 47;
+  string button2_entity_page_topic = 48;
 }
 
 enum NSPanelWarningLevel {
