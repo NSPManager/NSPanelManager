@@ -218,6 +218,7 @@ private:
     FOLLOW,
     THERMOSTAT_HEATING,
     THERMOSTAT_COOLING,
+    OPEN_MEDIA_PLAYER, // Opens the first media player in the panel's room. Stored in the database: only append.
   };
 
   // MQTT Stuff:

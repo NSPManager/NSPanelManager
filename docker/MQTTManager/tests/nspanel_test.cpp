@@ -4,12 +4,14 @@
 #include <functional>
 #include <iterator>
 #include <gtest/gtest.h>
+#include <media_player/media_player.hpp>
 #include <nspanel/nspanel.hpp>
 #include <protobuf_nspanel.pb.h>
 #include <room/room.hpp>
 #include <room/room_entities_page.hpp>
 #include <vector>
 
+using nspm_test::django_media_player_data;
 using nspm_test::django_switch_data;
 using nspm_test::home_assistant_service_calls;
 using nspm_test::ScopedEntity;
@@ -30,6 +32,7 @@ enum DjangoButtonMode {
   FOLLOW = 3,
   THERMOSTAT_HEATING = 4,
   THERMOSTAT_COOLING = 5,
+  OPEN_MEDIA_PLAYER = 6,
 };
 
 // Rooms shared by every test here (rooms are never removed, see create_room). The first has one
@@ -292,6 +295,93 @@ TEST_F(NSPanelTest, manager_handled_button_modes_are_sent_as_notify_manager) {
   ASSERT_TRUE(config.has_value());
   EXPECT_EQ(config->button1_mode(), NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   EXPECT_EQ(config->button2_mode(), NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
+}
+
+// Media players are attached to their room when the rooms load, so load both, and again once the rows are removed.
+void load_media_players_and_rooms() {
+  EntityManager::load_media_players();
+  EntityManager::load_rooms();
+}
+
+TEST_F(NSPanelTest, open_media_player_button_opens_the_first_media_player_in_the_panels_room) {
+  OnExit unload{[] { load_media_players_and_rooms(); }}; // Runs after the rows are removed.
+  ScopedEntity second("media_player", "Kitchen speaker", django_media_player_data("media_player.kitchen"), panel_rooms().room_id, panel_rooms().entities_page_id, 2);
+  ScopedEntity first("media_player", "Hall speaker", django_media_player_data("media_player.hall"), panel_rooms().room_id, panel_rooms().entities_page_id, 1);
+  load_media_players_and_rooms();
+  update_row([](auto &settings) {
+    settings.button1_mode = OPEN_MEDIA_PLAYER;
+    settings.button2_mode = OPEN_MEDIA_PLAYER;
+  });
+
+  load_panel();
+
+  auto config = last_published_config();
+  ASSERT_TRUE(config.has_value());
+  auto player = EntityManager::get_entity_by_id<MediaPlayerEntity>(MQTT_MANAGER_ENTITY_TYPE::MEDIA_PLAYER, first.id);
+  ASSERT_TRUE(player);
+  EXPECT_EQ(config->button1_mode(), NSPanelConfig_NSPanelButtonMode_OPEN_ENTITY_PAGE);
+  EXPECT_EQ(config->button1_entity_page_topic(), (*player)->get_mqtt_state_topic());
+  EXPECT_EQ(config->button2_mode(), NSPanelConfig_NSPanelButtonMode_OPEN_ENTITY_PAGE);
+  EXPECT_EQ(config->button2_entity_page_topic(), (*player)->get_mqtt_state_topic());
+}
+
+TEST_F(NSPanelTest, open_media_player_button_ignores_media_players_in_other_rooms) {
+  database_manager::RoomEntitiesPage page;
+  page.room_id = panel_rooms().other_room_id;
+  page.page_type = 4;
+  page.is_scenes_page = false;
+  int other_page_id = database_manager::database.insert(page);
+  OnExit unload{[other_page_id] {
+    database_manager::database.remove<database_manager::RoomEntitiesPage>(other_page_id);
+    load_media_players_and_rooms();
+  }};
+  ScopedEntity elsewhere("media_player", "Lounge speaker", django_media_player_data("media_player.lounge"), panel_rooms().other_room_id, other_page_id, 0);
+  load_media_players_and_rooms();
+  update_row([](auto &settings) { settings.button1_mode = OPEN_MEDIA_PLAYER; });
+  ScopedErrorLog log(spdlog::level::warn);
+
+  load_panel();
+
+  auto config = last_published_config();
+  ASSERT_TRUE(config.has_value());
+  EXPECT_EQ(config->button1_mode(), NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
+  EXPECT_EQ(config->button1_entity_page_topic(), "");
+  auto errors = log.errors();
+  EXPECT_TRUE(std::any_of(errors.begin(), errors.end(), [](auto &error) { return error.find("has no media player") != std::string::npos; }));
+}
+
+TEST_F(NSPanelTest, open_media_player_button_falls_back_when_its_media_player_is_removed) {
+  OnExit unload{[] { load_media_players_and_rooms(); }}; // Runs after the row is removed.
+  auto speaker = std::make_unique<ScopedEntity>("media_player", "Hall speaker", django_media_player_data("media_player.hall"), panel_rooms().room_id, panel_rooms().entities_page_id, 0);
+  load_media_players_and_rooms();
+  update_row([](auto &settings) { settings.button1_mode = OPEN_MEDIA_PLAYER; });
+  load_panel();
+  ASSERT_EQ(last_published_config()->button1_mode(), NSPanelConfig_NSPanelButtonMode_OPEN_ENTITY_PAGE);
+
+  // What EntityManager::load_entities() does when Django signals that the player was deleted.
+  speaker.reset();
+  load_media_players_and_rooms();
+  panel->reload_config();
+  panel->send_config();
+
+  auto config = last_published_config();
+  ASSERT_TRUE(config.has_value());
+  EXPECT_EQ(config->button1_mode(), NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
+  EXPECT_EQ(config->button1_entity_page_topic(), "");
+}
+
+TEST_F(NSPanelTest, other_button_modes_send_no_entity_page_topic) {
+  update_row([](auto &settings) {
+    settings.button1_mode = DIRECT;
+    settings.button2_mode = DETACHED;
+  });
+
+  load_panel();
+
+  auto config = last_published_config();
+  ASSERT_TRUE(config.has_value());
+  EXPECT_EQ(config->button1_entity_page_topic(), "");
+  EXPECT_EQ(config->button2_entity_page_topic(), "");
 }
 
 TEST_F(NSPanelTest, thermostat_button_modes_send_their_temperature_limits) {
@@ -786,6 +876,21 @@ TEST_F(NSPanelTest, button_presses_from_other_panels_are_ignored) {
   press_button(1, row->id + 1000);
 
   EXPECT_TRUE(nspm_test::mqtt_published_to("hall/doorbell").empty());
+}
+
+// The panel only notifies the manager in this mode when the room had no media player.
+TEST_F(NSPanelTest, open_media_player_button_press_without_a_media_player_is_only_logged) {
+  update_row([](auto &settings) { settings.button1_mode = OPEN_MEDIA_PLAYER; });
+  load_panel();
+  home_assistant_service_calls();
+  ScopedErrorLog log(spdlog::level::warn);
+
+  press_button(1, row->id);
+
+  EXPECT_TRUE(home_assistant_service_calls().empty());
+  auto errors = log.errors();
+  EXPECT_TRUE(std::any_of(errors.begin(), errors.end(), [](auto &error) { return error.find("no media player in its room") != std::string::npos; }));
+  EXPECT_TRUE(std::none_of(errors.begin(), errors.end(), [](auto &error) { return error.find("Unknown button mode") != std::string::npos; }));
 }
 
 TEST_F(NSPanelTest, detached_button_toggles_its_entity) {

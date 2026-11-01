@@ -2,6 +2,7 @@
 #include "database_manager/database_manager.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include "manager_clock/manager_clock.hpp"
+#include "media_player/media_player.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_nspanel.pb.h"
@@ -334,6 +335,15 @@ void NSPanel::send_config() {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
     config.set_button1_lower_temperature(this->_get_nspanel_temperature_limit_setting("button1_relay_lower_temperature"));
     config.set_button1_upper_temperature(this->_get_nspanel_temperature_limit_setting("button1_relay_upper_temperature"));
+  } else if (b1_mode == ButtonMode::OPEN_MEDIA_PLAYER) {
+    auto media_players = (*default_room)->get_all_entities_by_type<MediaPlayerEntity>(MQTT_MANAGER_ENTITY_TYPE::MEDIA_PLAYER);
+    if (!media_players.empty()) {
+      config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_OPEN_ENTITY_PAGE);
+      config.set_button1_entity_page_topic(media_players.front()->get_mqtt_state_topic());
+    } else {
+      SPDLOG_WARN("Button 1 on NSPanel {}::{} opens the room's first media player, but room {} has no media player.", this->_id, this->_name, this->_settings.room_id);
+      config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
+    }
   } else {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
@@ -351,6 +361,15 @@ void NSPanel::send_config() {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
     config.set_button2_lower_temperature(this->_get_nspanel_temperature_limit_setting("button2_relay_lower_temperature"));
     config.set_button2_upper_temperature(this->_get_nspanel_temperature_limit_setting("button2_relay_upper_temperature"));
+  } else if (b2_mode == ButtonMode::OPEN_MEDIA_PLAYER) {
+    auto media_players = (*default_room)->get_all_entities_by_type<MediaPlayerEntity>(MQTT_MANAGER_ENTITY_TYPE::MEDIA_PLAYER);
+    if (!media_players.empty()) {
+      config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_OPEN_ENTITY_PAGE);
+      config.set_button2_entity_page_topic(media_players.front()->get_mqtt_state_topic());
+    } else {
+      SPDLOG_WARN("Button 2 on NSPanel {}::{} opens the room's first media player, but room {} has no media player.", this->_id, this->_name, this->_settings.room_id);
+      config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
+    }
   } else {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
@@ -1681,6 +1700,11 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
           break;
         }
 
+        case ButtonMode::OPEN_MEDIA_PLAYER:
+          // The panel opens the media player itself. It only notifies the manager when the room has no media player.
+          SPDLOG_WARN("Button 1 on NSPanel {}::{} was pressed, but there is no media player in its room to open.", this->_id, this->_name);
+          break;
+
         default:
           SPDLOG_WARN("Unknown button mode triggered from panel.");
           break;
@@ -1714,6 +1738,11 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
           MQTT_Manager::publish(topic, payload);
           break;
         }
+
+        case ButtonMode::OPEN_MEDIA_PLAYER:
+          // The panel opens the media player itself. It only notifies the manager when the room has no media player.
+          SPDLOG_WARN("Button 2 on NSPanel {}::{} was pressed, but there is no media player in its room to open.", this->_id, this->_name);
+          break;
 
         default:
           SPDLOG_WARN("Unknown button mode triggered from panel.");
