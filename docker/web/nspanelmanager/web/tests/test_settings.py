@@ -1,5 +1,5 @@
 """
-Global settings: the settings page form, weather & time, theme, the first-run setup
+Global settings: the settings page, weather & time, theme, the first-run setup
 wizard, the settings REST endpoints and web.settings_helper.
 """
 
@@ -17,117 +17,28 @@ from web.settings_helper import (
 
 from .harness import NSPMTestCase
 
-# Every field the settings page form submits.
-SETTINGS_FORM = {
-    "mqtt_server": "mqtt.local",
-    "mqtt_port": "1883",
-    "mqtt_username": "nspm",
-    "mqtt_password": "",
-    "home_assistant_address": "http://ha.local:8123",
-    "home_assistant_token": "",
-    "openhab_address": "",
-    "openhab_token": "",
-    "raise_to_100_light_level": "95",
-    "default_nspanel_type": "eu",
-    "color_temp_min": "2000",
-    "color_temp_max": "6000",
-    "reverse_color_temp": "False",
-    "min_button_push_time": "50",
-    "button_long_press_time": "300",
-    "special_mode_trigger_time": "300",
-    "special_mode_release_time": "5000",
-    "screensaver_activation_timeout": "30000",
-    "screen_dim_level": "100",
-    "screensaver_dim_level": "0",
-    "screensaver_mode": "with_background",
-    "show_screensaver_inside_temperature": "True",
-    "show_screensaver_outside_temperature": "True",
-    "turn_on_behavior": "color_temp",
-    "max_live_log_messages": "10",
-    "max_log_buffer_size": "10",
-    "mqttmanager_log_level": "info",
-    "manager_address": "192.168.1.10",
-    "manager_port": "8000",
-    "optimistic_mode": "optimistic",
-    "all_rooms_status_backoff_time": "250",
-    "room_status_backoff_time": "250",
-    "light_turn_on_brightness": "50",
-}
-
 
 def setting(name):
     return get_setting_with_default(name)
 
 
 class SettingsPageTests(NSPMTestCase):
-    def save(self, **overrides):
-        return self.client.post(reverse("save_settings"), SETTINGS_FORM | overrides)
+    """The page is the React SettingsPage; what it saves is tested in test_rest_v2_settings.py."""
 
-    def test_save_settings(self):
-        response = self.save()
-
-        self.assertRedirects(response, reverse("settings"), fetch_redirect_response=False)
-        for name in ("mqtt_server", "mqtt_port", "color_temp_min", "screensaver_mode", "manager_address", "light_turn_on_brightness"):
-            with self.subTest(name=name):
-                self.assertEqual(setting(name), SETTINGS_FORM[name])
-        self.assertEqual(setting("optimistic_mode"), "True")
-        self.assertManagerReloaded(times=1)
-
-    def test_trailing_slash_is_stripped_from_addresses(self):
-        self.save(home_assistant_address="http://ha.local:8123/", openhab_address="http://openhab.local/")
-
-        self.assertEqual(setting("home_assistant_address"), "http://ha.local:8123")
-        self.assertEqual(setting("openhab_address"), "http://openhab.local")
-
-    def test_blank_secret_fields_keep_the_stored_secret(self):
-        # The form never echoes secrets back, so a blank field means "unchanged".
-        set_setting_value("mqtt_password", "hunter2")
-        set_setting_value("home_assistant_token", "ha-token")
-        set_setting_value("openhab_token", "oh-token")
-
-        self.save()
-
-        self.assertEqual((setting("mqtt_password"), setting("home_assistant_token"), setting("openhab_token")), ("hunter2", "ha-token", "oh-token"))
-
-    def test_new_secrets_replace_the_stored_ones(self):
+    def test_settings_page_mounts_the_react_page_without_any_values(self):
+        set_setting_value("mqtt_server", "mqtt.local")
         set_setting_value("mqtt_password", "hunter2")
 
-        self.save(mqtt_password="correct horse", home_assistant_token="new-token")
+        response = self.client.get(reverse("settings"), headers={"X-Ingress-Path": "/ingress"})
 
-        self.assertEqual((setting("mqtt_password"), setting("home_assistant_token")), ("correct horse", "new-token"))
-
-    def test_clear_checkboxes_remove_secrets(self):
-        set_setting_value("mqtt_password", "hunter2")
-        set_setting_value("openhab_token", "oh-token")
-
-        self.save(clear_mqtt_password="on", clear_home_assistant_token="on", clear_openhab_token="on", mqtt_password="ignored")
-
-        self.assertEqual((setting("mqtt_password"), setting("home_assistant_token"), setting("openhab_token")), ("", "", ""))
-
-    def test_optional_fields_fall_back_to_defaults(self):
-        form = {k: v for k, v in SETTINGS_FORM.items() if k not in ("show_screensaver_inside_temperature", "turn_on_behavior", "optimistic_mode")}
-        set_setting_value("optimistic_mode", "False")
-
-        self.client.post(reverse("save_settings"), form)
-
-        self.assertEqual(setting("show_screensaver_inside_temperature"), "True")
-        self.assertEqual(setting("turn_on_behavior"), "color_temp")
-        self.assertEqual(setting("optimistic_mode"), "False")  # left alone when not submitted
-
-    def test_missing_required_field_is_rejected(self):
-        form = {k: v for k, v in SETTINGS_FORM.items() if k != "manager_port"}
-
-        self.assertRejected(self.client.post(reverse("save_settings"), form))
-        self.assertManagerNotReloaded()
-
-    def test_settings_page_shows_saved_values_but_not_secrets(self):
-        self.save(mqtt_password="hunter2", home_assistant_token="ha-secret-token")
-
-        response = self.client.get(reverse("settings"))
-
-        self.assertContains(response, "mqtt.local")
+        self.assertContains(response, "data-react-component='SettingsPage'")
+        self.assertContains(response, '"logDownloadUrl": "/ingress/download_mqttmanager_log"')
+        self.assertNotContains(response, "mqtt.local")
         self.assertNotContains(response, "hunter2")
-        self.assertNotContains(response, "ha-secret-token")
+
+    def test_legacy_save_url_is_gone(self):
+        self.assertEqual(self.client.post("/save_settings", {"mqtt_server": "x"}).status_code, 404)
+        self.assertManagerNotReloaded()
 
 
 WEATHER_FORM = {
