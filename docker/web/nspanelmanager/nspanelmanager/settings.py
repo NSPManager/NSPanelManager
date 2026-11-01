@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     #'django.contrib.staticfiles', Disabled and make use of django_components.safer_staticfiles instead. It will not serve out .py or .html files
     "django_components.safer_staticfiles",
     "django_components",
+    "rest_framework",
 ]
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "web/components"), os.path.join(BASE_DIR, "web/react-components/dist")]
@@ -169,3 +170,14 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
+
+# Django REST Framework, used by the /rest/v2/* views (web/rest_v2/). The older /rest/* views are plain Django views.
+REST_FRAMEWORK = {
+    # There are no user accounts. CsrfOnlyAuthentication keeps the CSRF check the plain views get from
+    # CsrfViewMiddleware: DRF exempts its views from the middleware and leaves CSRF to authentication.
+    "DEFAULT_AUTHENTICATION_CLASSES": ["web.rest_v2.auth.CsrfOnlyAuthentication"],
+    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
+    "UNAUTHENTICATED_USER": None,
+    "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
+    "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
+}

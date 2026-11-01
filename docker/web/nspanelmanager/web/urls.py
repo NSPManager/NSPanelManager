@@ -1,6 +1,7 @@
 from django.urls import path
 
 from . import api, htmx, rest, views
+from .rest_v2 import global_settings as rest_v2_settings
 
 urlpatterns = [
     # Web routes
@@ -75,6 +76,7 @@ urlpatterns = [
     path("rest/rooms", rest.rooms, name="rest_rooms_create"),
     # Settings URLs
     path("rest/settings", rest.settings, name="rest_settings"),
+    path("rest/v2/settings", rest_v2_settings.SettingsView.as_view(), name="rest_v2_settings"),
     # Scene URLs
     path("rest/scenes", rest.scenes, name="rest_lights"),
     # Misc
