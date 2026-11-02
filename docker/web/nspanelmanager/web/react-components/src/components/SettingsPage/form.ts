@@ -1,6 +1,6 @@
 import type { Settings, SettingsUpdateRequest } from "../../api/client";
 
-// The settings this page edits. Weather and time, the theme and the buzzer sounds are edited elsewhere.
+// The settings this page edits. Weather and time, and the theme, are edited elsewhere.
 export const PAGE_FIELDS = [
   "manager_address",
   "manager_port",
@@ -32,6 +32,9 @@ export const PAGE_FIELDS = [
   "mqtt_username",
   "home_assistant_address",
   "openhab_address",
+  "buzzer_sound_touch",
+  "buzzer_sound_scene_activated",
+  "buzzer_sound_scene_saved",
 ] as const satisfies readonly (keyof Settings & keyof SettingsUpdateRequest)[];
 
 export const SECRETS = ["mqtt_password", "home_assistant_token", "openhab_token"] as const;

@@ -178,7 +178,7 @@ describe("saving", () => {
 
   it("shows field errors next to their fields and saves nothing", async () => {
     const user = await renderPage();
-    patchReply = { status: 400, body: { screen_dim_level: ["Ensure this value is greater than or equal to 1."], buzzer_sound_touch: ["Unknown setting."] } };
+    patchReply = { status: 400, body: { screen_dim_level: ["Ensure this value is greater than or equal to 1."], theme: ["Unknown setting."] } };
 
     await user.clear(screen.getByLabelText("Screen brightness (%)"));
     await user.type(screen.getByLabelText("Screen brightness (%)"), "0");
@@ -186,7 +186,7 @@ describe("saving", () => {
 
     expect(await screen.findByText("Ensure this value is greater than or equal to 1.")).toBeInTheDocument();
     expect(screen.getByLabelText("Screen brightness (%)")).toHaveAttribute("aria-invalid", "true");
-    expect(Notify).toHaveBeenCalledWith(expect.objectContaining({ level: "error", message: "Nothing was saved. buzzer_sound_touch: Unknown setting." }));
+    expect(Notify).toHaveBeenCalledWith(expect.objectContaining({ level: "error", message: "Nothing was saved. theme: Unknown setting." }));
   });
 
   it("reports other errors", async () => {
@@ -301,5 +301,221 @@ describe("helpers", () => {
     await user.click(test());
 
     await waitFor(() => expect(requests.some((request) => request.url === "/rest/home_assistant/test?address=http%3A%2F%2Fha.local%3A8123&token=abc")).toBe(true));
+  });
+});
+
+// Records what the preview schedules. Oscillators end only when a test calls end().
+class FakeParam {
+  value = 0;
+  readonly events: [string, number, number][] = [];
+  setValueAtTime(value: number, time: number) {
+    this.events.push(["set", value, time]);
+  }
+  linearRampToValueAtTime(value: number, time: number) {
+    this.events.push(["ramp", value, time]);
+  }
+}
+
+class FakeNode {
+  connect<T>(target: T) {
+    return target;
+  }
+  disconnect() {}
+}
+
+class FakeOscillator extends FakeNode {
+  type = "sine";
+  frequency = new FakeParam();
+  onended: (() => void) | null = null;
+  stopped = false;
+  start() {}
+  stop(time?: number) {
+    if (time === undefined) {
+      this.stopped = true;
+      this.onended?.();
+    }
+  }
+  end() {
+    this.onended?.();
+  }
+}
+
+const oscillators: FakeOscillator[] = [];
+const filters: { type: string }[] = [];
+
+class FakeAudioContext {
+  state = "running";
+  currentTime = 0;
+  destination = new FakeNode();
+  createOscillator() {
+    const oscillator = new FakeOscillator();
+    oscillators.push(oscillator);
+    return oscillator;
+  }
+  createGain() {
+    return Object.assign(new FakeNode(), { gain: new FakeParam() });
+  }
+  createBiquadFilter() {
+    const filter = Object.assign(new FakeNode(), { type: "", frequency: new FakeParam(), Q: new FakeParam() });
+    filters.push(filter);
+    return filter;
+  }
+  resume() {
+    return Promise.resolve();
+  }
+}
+
+// The frequencies a preview played, in order.
+const played = (oscillator: FakeOscillator) => oscillator.frequency.events.map(([, frequency]) => frequency);
+
+describe("buzzer sounds", () => {
+  const choice = (label: string) => screen.getByLabelText(label) as HTMLSelectElement;
+  const rtttl = (label: string) => screen.getByLabelText(`${label} RTTTL`) as HTMLInputElement;
+  const previewButton = (label: string) => screen.getByRole("button", { name: new RegExp(`(Preview|Stop) the ${label.toLowerCase()}`) });
+
+  beforeEach(() => {
+    vi.stubGlobal("AudioContext", FakeAudioContext);
+    oscillators.length = 0;
+    filters.length = 0;
+  });
+
+  it("is off by default", async () => {
+    await renderPage();
+
+    expect(choice("Screen touch")).toHaveDisplayValue("Off");
+    expect(choice("Scene activated")).toHaveDisplayValue("Same as screen touch");
+    expect(choice("Scene saved")).toHaveDisplayValue("Off");
+    for (const label of ["Screen touch", "Scene activated", "Scene saved"]) {
+      expect(rtttl(label)).toHaveValue("");
+      expect(previewButton(label)).toBeDisabled();
+    }
+  });
+
+  it("shows stored sounds as their preset, or as custom", async () => {
+    await renderPage({ buzzer_sound_touch: "chime:d=32,o=6,b=190:g6,16p,32c7", buzzer_sound_scene_activated: "silent:d=64,o=6,b=900:p", buzzer_sound_scene_saved: "mine:d=8:c,d" });
+
+    expect(choice("Screen touch")).toHaveDisplayValue("Chime");
+    expect(choice("Scene activated")).toHaveDisplayValue("Silent");
+    expect(choice("Scene saved")).toHaveDisplayValue("Custom…");
+    expect(rtttl("Scene saved")).toHaveValue("mine:d=8:c,d");
+    expect(screen.getByText(/Played on every press of the screen. Plays for 157 ms./)).toBeInTheDocument();
+    expect(screen.getByText(/instead of the touch sound .* Silent\./)).toBeInTheDocument();
+  });
+
+  it("saves a chosen preset as its RTTTL, and nothing else", async () => {
+    const user = await renderPage();
+
+    await user.selectOptions(choice("Screen touch"), "Tick");
+    expect(rtttl("Screen touch")).toHaveValue("tick:d=64,o=7,b=625:b");
+    await save(user);
+
+    expect(patches()).toHaveLength(1);
+    expect(patches()[0].body).toEqual({ buzzer_sound_touch: "tick:d=64,o=7,b=625:b" });
+  });
+
+  it("turns a sound off by saving it blank", async () => {
+    const user = await renderPage({ buzzer_sound_scene_saved: "saved:d=16,o=6,b=200:c,e,g,8c7" });
+
+    await user.selectOptions(choice("Scene saved"), "Off");
+    await save(user);
+
+    expect(patches()[0].body).toEqual({ buzzer_sound_scene_saved: "" });
+  });
+
+  it("lets a preset be edited as a custom sound", async () => {
+    const user = await renderPage({ buzzer_sound_touch: "tick:d=64,o=7,b=625:b" });
+
+    await user.selectOptions(choice("Screen touch"), "Custom…");
+    expect(choice("Screen touch")).toHaveDisplayValue("Custom…");
+    expect(rtttl("Screen touch")).toHaveFocus();
+    await user.type(rtttl("Screen touch"), ",b");
+    await save(user);
+
+    expect(patches()[0].body).toEqual({ buzzer_sound_touch: "tick:d=64,o=7,b=625:b,b" });
+  });
+
+  it("shows invalid RTTTL as it is typed and doesn't save it", async () => {
+    const user = await renderPage();
+
+    await user.selectOptions(choice("Scene saved"), "Custom…");
+    await user.type(rtttl("Scene saved"), "x:b=999:c");
+
+    expect(screen.getByText("b must be 1 to 900.")).toBeInTheDocument();
+    expect(rtttl("Scene saved")).toHaveAttribute("aria-invalid", "true");
+    expect(previewButton("Scene saved")).toBeDisabled();
+    await user.click(saveButton());
+    expect(patches()).toHaveLength(0);
+
+    await user.clear(rtttl("Scene saved"));
+    await user.type(rtttl("Scene saved"), "x:b=900:c");
+    expect(screen.queryByText("b must be 1 to 900.")).not.toBeInTheDocument();
+    await save(user);
+    expect(patches()[0].body).toEqual({ buzzer_sound_scene_saved: "x:b=900:c" });
+  });
+
+  it("flags a stored sound the panel can't play", async () => {
+    await renderPage({ buzzer_sound_touch: "beep" });
+
+    expect(choice("Screen touch")).toHaveDisplayValue("Custom…");
+    expect(screen.getByText(/Expected name:defaults:notes/)).toBeInTheDocument();
+  });
+
+  it("shows a server error next to the sound", async () => {
+    const user = await renderPage();
+    patchReply = { status: 400, body: { buzzer_sound_touch: ["Rejected by the server."] } };
+
+    await user.selectOptions(choice("Screen touch"), "Chime");
+    await user.click(saveButton());
+
+    expect(await screen.findByText("Rejected by the server.")).toBeInTheDocument();
+  });
+
+  it("previews the panel's steps, one sound at a time", async () => {
+    const user = await renderPage({ buzzer_sound_touch: "chime:d=32,o=6,b=190:g6,16p,32c7", buzzer_sound_scene_saved: "confirm:d=16,o=6,b=357:e,g" });
+
+    await user.click(previewButton("Screen touch"));
+    expect(oscillators).toHaveLength(1);
+    expect(oscillators[0].type).toBe("square");
+    expect(played(oscillators[0])).toEqual([1568, 2093]);
+    expect(previewButton("Screen touch")).toHaveAccessibleName("Stop the screen touch preview");
+
+    // Starting another preview stops the first
+    await user.click(previewButton("Scene saved"));
+    expect(oscillators[0].stopped).toBe(true);
+    expect(played(oscillators[1])).toEqual([1319, 1568]);
+    expect(previewButton("Screen touch")).toHaveAccessibleName("Preview the screen touch sound");
+
+    // And it ends by itself
+    oscillators[1].end();
+    await waitFor(() => expect(previewButton("Scene saved")).toHaveAccessibleName("Preview the scene saved sound"));
+    expect(patches()).toHaveLength(0);
+  });
+
+  it("previews the touch sound for a blank scene activated sound", async () => {
+    const user = await renderPage({ buzzer_sound_touch: "tick:d=64,o=7,b=625:b" });
+
+    await user.click(previewButton("Scene activated"));
+    expect(played(oscillators[0])).toEqual([3951]);
+  });
+
+  it("simulates the piezo unless that is turned off", async () => {
+    const user = await renderPage({ buzzer_sound_touch: "tick:d=64,o=7,b=625:b" });
+
+    await user.click(previewButton("Screen touch"));
+    expect(filters).toEqual([expect.objectContaining({ type: "bandpass" })]);
+
+    await user.click(screen.getByLabelText(/sound like the panel's buzzer/));
+    await user.click(previewButton("Screen touch")); // stop
+    await user.click(previewButton("Screen touch"));
+    expect(oscillators).toHaveLength(2);
+    expect(filters).toHaveLength(1);
+  });
+
+  it("says when the browser can't preview", async () => {
+    vi.stubGlobal("AudioContext", undefined);
+    await renderPage({ buzzer_sound_touch: "tick:d=64,o=7,b=625:b" });
+
+    expect(screen.getByText("This browser can't play the preview.")).toBeInTheDocument();
+    expect(previewButton("Screen touch")).toBeDisabled();
   });
 });
