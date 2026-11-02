@@ -241,12 +241,17 @@ components:
           maxLength: 255
         buzzer_sound_touch:
           type: string
+          description: RTTTL played on a screen touch. Blank for no sound.
           maxLength: 255
         buzzer_sound_scene_activated:
           type: string
+          description: RTTTL played when a scene is activated from the panel. Blank
+            plays the touch sound instead.
           maxLength: 255
         buzzer_sound_scene_saved:
           type: string
+          description: RTTTL played when a scene is saved from the panel. Blank for
+            no sound.
           maxLength: 255
         mqtt_server:
           type: string
