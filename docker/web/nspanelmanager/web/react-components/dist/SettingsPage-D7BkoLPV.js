@@ -1,6 +1,6 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-DSJsHH7_.js";
-import { c as useFormContext, i as get, l as useWatch, n as FormProvider, s as useForm, t as Controller } from "./index.esm-Cmf-KG5s.js";
-import { n as Notify } from "./NSPanelToastContainer-CFs_vfa-.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-D932VXe-.js";
+import { c as useFormContext, i as get, l as useWatch, n as FormProvider, s as useForm, t as Controller } from "./index.esm-Dw7Wq8n9.js";
+import { n as Notify } from "./NSPanelToastContainer-BtKVQVmS.js";
 //#region node_modules/openapi-fetch/dist/index.mjs
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var PATH_PARAM_RE = /\{[^{}]+\}/g;
@@ -755,6 +755,26 @@ var PRESETS = {
 		name: "Tick",
 		rtttl: "tick:d=64,o=7,b=625:b"
 	},
+	pip: {
+		id: "pip",
+		name: "Pip",
+		rtttl: "pip:d=64,o=7,b=900:c"
+	},
+	midTick: {
+		id: "midTick",
+		name: "Mid tick",
+		rtttl: "mtick:d=64,o=6,b=625:g"
+	},
+	tuk: {
+		id: "tuk",
+		name: "Tuk",
+		rtttl: "tuk:d=64,o=6,b=900:e,c"
+	},
+	tock: {
+		id: "tock",
+		name: "Tock",
+		rtttl: "tock:d=64,o=5,b=900:a"
+	},
 	chime: {
 		id: "chime",
 		name: "Chime",
@@ -789,6 +809,10 @@ var BUZZER_EVENTS = [
 		hint: "Played on every press of the screen.",
 		presets: [
 			PRESETS.tick,
+			PRESETS.pip,
+			PRESETS.midTick,
+			PRESETS.tuk,
+			PRESETS.tock,
 			PRESETS.chime,
 			PRESETS.confirm,
 			PRESETS.rising,
@@ -806,6 +830,10 @@ var BUZZER_EVENTS = [
 			PRESETS.rising,
 			PRESETS.chime,
 			PRESETS.tick,
+			PRESETS.pip,
+			PRESETS.midTick,
+			PRESETS.tuk,
+			PRESETS.tock,
 			PRESETS.saved
 		]
 	},
@@ -819,7 +847,11 @@ var BUZZER_EVENTS = [
 			PRESETS.rising,
 			PRESETS.confirm,
 			PRESETS.chime,
-			PRESETS.tick
+			PRESETS.tick,
+			PRESETS.pip,
+			PRESETS.midTick,
+			PRESETS.tuk,
+			PRESETS.tock
 		]
 	}
 ];
