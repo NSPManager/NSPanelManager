@@ -9,6 +9,7 @@
 #include <prometheus/counter.h>
 #include <prometheus/family.h>
 #include <prometheus/gauge.h>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -72,16 +73,27 @@ struct PanelMetrics {
   // Labels last seen for each panel, by MAC, to remove the old series when they change.
   std::mutex labels_mutex;
   std::map<std::string, ManagerMetrics::PanelLabels> labels_by_mac;
+  // The reason label values nspm_panel_configs_sent_total has under each panel's current labels, by MAC.
+  std::map<std::string, std::set<std::string>> config_reasons_by_mac;
   std::vector<std::function<void(const ManagerMetrics::PanelLabels &)>> removed_callbacks;
 
   // Remove every series under these labels. Family::Add returns the existing child, or creates one that is removed straight away.
+  // Called with labels_mutex held.
   void remove(const ManagerMetrics::PanelLabels &old_labels) {
     prometheus::Labels labels = panel_labels_map(old_labels);
     this->status_reports.Remove(&this->status_reports.Add(labels));
     this->last_status_report.Remove(&this->last_status_report.Add(labels));
     this->register_requests.Remove(&this->register_requests.Add(labels));
-    this->configs_sent.Remove(&this->configs_sent.Add(labels));
     this->config_bytes.Remove(&this->config_bytes.Add(labels));
+    auto reasons = this->config_reasons_by_mac.find(old_labels.mac);
+    if (reasons != this->config_reasons_by_mac.end()) {
+      for (const std::string &reason : reasons->second) {
+        prometheus::Labels reason_labels = labels;
+        reason_labels["reason"] = reason;
+        this->configs_sent.Remove(&this->configs_sent.Add(reason_labels));
+      }
+      this->config_reasons_by_mac.erase(reasons);
+    }
   }
 
   // Record the panel's labels and remove its old series if they changed. Returns the old labels if they were removed.
@@ -255,12 +267,17 @@ void ManagerMetrics::panel_register_request(const PanelLabels &panel) {
   panels().register_requests.Add(panel_labels_map(panel)).Increment();
 }
 
-void ManagerMetrics::panel_config_sent(const PanelLabels &panel, size_t bytes) {
+void ManagerMetrics::panel_config_sent(const PanelLabels &panel, size_t bytes, const std::string &reason) {
   ManagerMetrics::panel_labels(panel);
   PanelMetrics &metrics = panels();
   prometheus::Labels labels = panel_labels_map(panel);
-  metrics.configs_sent.Add(labels).Increment();
   metrics.config_bytes.Add(labels).Increment(static_cast<double>(bytes));
+  labels["reason"] = reason;
+  {
+    std::lock_guard<std::mutex> lock_guard(metrics.labels_mutex);
+    metrics.config_reasons_by_mac[panel.mac].insert(reason);
+  }
+  metrics.configs_sent.Add(labels).Increment();
 }
 
 void ManagerMetrics::integration_connection_changed(Integration which, bool connected) {

@@ -12,8 +12,8 @@
 #include <google/protobuf/message.h>
 #include <iostream>
 #include <metrics/drop_log_limiter.hpp>
-#include <metrics/manager_metrics.hpp>
 #include <metrics/latency_metrics.hpp>
+#include <metrics/manager_metrics.hpp>
 #include <mqtt/client.h>
 #include <mqtt/message.h>
 #include <mqtt/subscribe_options.h>
@@ -320,9 +320,14 @@ void MQTT_Manager::_reconnect_mqtt_client() {
               .topic = msg->get_topic(),
               .message = msg->get_payload_str(),
               .enqueued_at = std::chrono::steady_clock::now()};
-          while (!MQTT_Manager::_mqtt_message_queue.push(message_struct)) {
-            // Queue full: the processing thread is awake draining it, give it the CPU.
-            std::this_thread::yield();
+          if (!MQTT_Manager::_mqtt_message_queue.push(message_struct)) {
+            // Queue full: the processing thread is awake draining it, give it the CPU until there is
+            // room (measured only, see nspm_mqtt_queue_full_wait*).
+            auto wait_start = LatencyMetrics::clock::now();
+            while (!MQTT_Manager::_mqtt_message_queue.push(message_struct)) {
+              std::this_thread::yield();
+            }
+            LatencyMetrics::mqtt_queue_full_wait(LatencyMetrics::seconds_since(wait_start));
           }
           LatencyMetrics::mqtt_message_enqueued();
           MQTT_Manager::_notify_mqtt_message_queued();

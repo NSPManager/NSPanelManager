@@ -1114,14 +1114,14 @@ TEST_F(NSPanelTest, invalid_metrics_port_is_ignored) {
 
 TEST_F(NSPanelTest, sent_configs_are_counted) {
   load_panel();
-  std::string name = panel_series("nspm_panel_configs_sent_total", row->id) + " ";
+  std::string name = "nspm_panel_configs_sent_total{mac=\"" + PANEL_MAC + "\",nspm_id=\"" + std::to_string(row->id) + "\",panel=\"" + PANEL_NAME + "\",reason=\"buzzer_mute\"} ";
   auto count = [&name]() {
     std::string text = Metrics::serialize();
     size_t start = text.find(name);
     return start == std::string::npos ? 0.0 : std::stod(text.substr(start + name.size()));
   };
   double before = count();
-  panel->send_config();
+  panel->send_config("buzzer_mute");
   EXPECT_EQ(count(), before + 1);
   EXPECT_NE(Metrics::serialize().find(panel_series("nspm_panel_config_bytes_total", row->id)), std::string::npos);
 }

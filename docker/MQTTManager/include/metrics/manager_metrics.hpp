@@ -45,7 +45,12 @@ public:
 
   static void panel_status_report(const PanelLabels &panel);
   static void panel_register_request(const PanelLabels &panel);
-  static void panel_config_sent(const PanelLabels &panel, size_t bytes);
+  /**
+   * A config was published to the panel.
+   * @param reason: What triggered it (startup, register, reload, reload_resend, buzzer_mute, other), the
+   *                reason label of nspm_panel_configs_sent_total. Must come from a small fixed set.
+   */
+  static void panel_config_sent(const PanelLabels &panel, size_t bytes, const std::string &reason);
 
   /**
    * Record the panel's current labels (keyed by MAC). When they differ from the ones last seen for the

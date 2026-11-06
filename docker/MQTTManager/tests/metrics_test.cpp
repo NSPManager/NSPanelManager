@@ -143,7 +143,7 @@ TEST(ManagerMetricsTest, counts_show_up_in_serialized_text) {
   ManagerMetrics::init();
   ManagerMetrics::mqtt_message_received("nspanel/C0:49:EF:D1:A7:30/status_report", 120);
   ManagerMetrics::mqtt_message_published(true, 10);
-  ManagerMetrics::panel_config_sent({.panel = "MetricsTestPanel", .mac = "AA:BB:CC:00:00:01", .nspm_id = "901"}, 512);
+  ManagerMetrics::panel_config_sent({.panel = "MetricsTestPanel", .mac = "AA:BB:CC:00:00:01", .nspm_id = "901"}, 512, "test");
   ManagerMetrics::http_request(ManagerMetrics::HttpRoute::TARGETS, 200);
   std::string text = Metrics::serialize();
   EXPECT_NE(text.find("nspm_mqtt_messages_received_total{topic_class=\"status_report\"}"), std::string::npos) << text;
@@ -187,7 +187,7 @@ TEST(ManagerMetricsTest, renaming_a_panel_removes_its_old_series) {
     }
   });
 
-  ManagerMetrics::panel_config_sent(old_labels, 10);
+  ManagerMetrics::panel_config_sent(old_labels, 10, "test");
   ManagerMetrics::panel_status_report(old_labels);
   EXPECT_NE(Metrics::serialize().find("panel=\"Rename Before\""), std::string::npos);
 
@@ -197,7 +197,7 @@ TEST(ManagerMetricsTest, renaming_a_panel_removes_its_old_series) {
   ASSERT_EQ(removed.size(), 1u);
   EXPECT_EQ(removed[0], old_labels);
 
-  ManagerMetrics::panel_config_sent(new_labels, 10);
+  ManagerMetrics::panel_config_sent(new_labels, 10, "test");
   EXPECT_NE(Metrics::serialize().find("panel=\"Rename After\""), std::string::npos);
   ManagerMetrics::panel_labels(new_labels); // Unchanged: nothing removed.
   EXPECT_EQ(removed.size(), 1u);

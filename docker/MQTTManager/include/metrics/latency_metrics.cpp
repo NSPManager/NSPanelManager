@@ -22,13 +22,21 @@ const prometheus::Histogram::BucketBoundaries &update_buckets() {
 // One child per topic class, looked up once since these are on the path of every MQTT message.
 struct MqttQueueMetrics {
   prometheus::Gauge *depth;
+  prometheus::Gauge *depth_max;
+  prometheus::Counter *full_waits;
+  prometheus::Counter *full_wait_seconds;
+  // Messages pushed and not yet taken off: the source of depth_max. Two threads push (the receive loop and
+  // the subscribe path), so the maximum is raised atomically.
+  std::atomic<long> current_depth = 0;
+  std::atomic<long> max_depth = 0;
   std::array<prometheus::Histogram *, Metrics::topic_class_count> wait;
   std::array<prometheus::Histogram *, Metrics::topic_class_count> handler_duration;
   std::array<prometheus::Counter *, Metrics::topic_class_count> handler_exceptions;
   std::array<prometheus::Counter *, Metrics::topic_class_count> dropped;
 
   static MqttQueueMetrics &get() {
-    static MqttQueueMetrics metrics = []() {
+    // Never destroyed, and not copyable (atomics).
+    static MqttQueueMetrics *metrics = []() {
       auto &registry = Metrics::registry();
       auto &depth = prometheus::BuildGauge()
                         .Name("nspm_mqtt_queue_depth")
@@ -50,18 +58,33 @@ struct MqttQueueMetrics {
                           .Name("nspm_mqtt_messages_dropped_total")
                           .Help("Received MQTT messages dropped because the processing queue was full.")
                           .Register(registry);
-      MqttQueueMetrics result;
-      result.depth = &depth.Add({});
+      auto *result = new MqttQueueMetrics();
+      result->depth = &depth.Add({});
+      result->depth_max = &prometheus::BuildGauge()
+                              .Name("nspm_mqtt_queue_depth_max")
+                              .Help("Highest number of MQTT messages waiting to be processed since start.")
+                              .Register(registry)
+                              .Add({});
+      result->full_waits = &prometheus::BuildCounter()
+                               .Name("nspm_mqtt_queue_full_waits_total")
+                               .Help("Messages the subscribe path could not queue at once because the processing queue was full.")
+                               .Register(registry)
+                               .Add({});
+      result->full_wait_seconds = &prometheus::BuildCounter()
+                                      .Name("nspm_mqtt_queue_full_wait_seconds_total")
+                                      .Help("Time the subscribe path spent waiting for room in the full processing queue.")
+                                      .Register(registry)
+                                      .Add({});
       for (size_t i = 0; i < Metrics::topic_class_count; i++) {
         prometheus::Labels labels = {{"topic_class", Metrics::topic_class_label(static_cast<Metrics::TopicClass>(i))}};
-        result.wait[i] = &wait.Add(labels, Metrics::fast_buckets());
-        result.handler_duration[i] = &duration.Add(labels, Metrics::latency_buckets());
-        result.handler_exceptions[i] = &exceptions.Add(labels);
-        result.dropped[i] = &dropped.Add(labels);
+        result->wait[i] = &wait.Add(labels, Metrics::fast_buckets());
+        result->handler_duration[i] = &duration.Add(labels, Metrics::latency_buckets());
+        result->handler_exceptions[i] = &exceptions.Add(labels);
+        result->dropped[i] = &dropped.Add(labels);
       }
       return result;
     }();
-    return metrics;
+    return *metrics;
   }
 };
 
@@ -90,7 +113,23 @@ thread_local std::optional<CommandInFlight> command_in_flight;
 } // namespace
 
 void LatencyMetrics::mqtt_message_enqueued() {
-  MqttQueueMetrics::get().depth->Increment();
+  auto &metrics = MqttQueueMetrics::get();
+  metrics.depth->Increment();
+  long depth = metrics.current_depth.fetch_add(1) + 1;
+  if (LatencyMetrics::raise_max(metrics.max_depth, depth)) {
+    // Set from the atomic, and again if another thread raised it meanwhile, so the gauge never ends below it.
+    long value;
+    do {
+      value = metrics.max_depth.load();
+      metrics.depth_max->Set(static_cast<double>(value));
+    } while (metrics.max_depth.load() != value);
+  }
+}
+
+void LatencyMetrics::mqtt_queue_full_wait(double seconds) {
+  auto &metrics = MqttQueueMetrics::get();
+  metrics.full_waits->Increment();
+  metrics.full_wait_seconds->Increment(seconds);
 }
 
 void LatencyMetrics::mqtt_message_dropped(Metrics::TopicClass topic_class) {
@@ -100,6 +139,7 @@ void LatencyMetrics::mqtt_message_dropped(Metrics::TopicClass topic_class) {
 void LatencyMetrics::mqtt_message_dequeued(Metrics::TopicClass topic_class, double wait_seconds) {
   auto &metrics = MqttQueueMetrics::get();
   metrics.depth->Decrement();
+  metrics.current_depth.fetch_sub(1);
   metrics.wait[static_cast<size_t>(topic_class)]->Observe(wait_seconds);
 }
 
@@ -179,86 +219,73 @@ void LatencyMetrics::integration_call_issued() {
 namespace {
 
 /**
- * Per-panel series of nspm_panel_log_lines_total, keyed by MAC, so that the series under a panel's
- * old name or id can be removed when it changes, and all of them when the panel is deleted.
+ * The children of nspm_panel_log_lines_total, by MAC, so that they can be removed when ManagerMetrics
+ * removes the panel's series (renamed, new id, destroyed).
  */
 struct PanelLogLines {
   struct Panel {
-    std::string name;
-    uint32_t nspm_id;
+    ManagerMetrics::PanelLabels labels;
     std::map<std::string, prometheus::Counter *> by_level;
   };
 
   std::mutex mutex;
   std::map<std::string, Panel> panels;
+  prometheus::Family<prometheus::Counter> &family = prometheus::BuildCounter()
+                                                        .Name("nspm_panel_log_lines_total")
+                                                        .Help("Log lines received from a panel over MQTT, by level.")
+                                                        .Register(Metrics::registry());
 
   static PanelLogLines &get() {
-    static PanelLogLines instance;
-    return instance;
+    // Never destroyed: used from threads that may outlive static destruction at exit.
+    static PanelLogLines *instance = []() {
+      auto *instance = new PanelLogLines();
+      ManagerMetrics::on_panel_labels_removed([instance](const ManagerMetrics::PanelLabels &old_labels) {
+        instance->remove(old_labels);
+      });
+      return instance;
+    }();
+    return *instance;
   }
 
-  static prometheus::Family<prometheus::Counter> &family() {
-    static auto &family = prometheus::BuildCounter()
-                              .Name("nspm_panel_log_lines_total")
-                              .Help("Log lines received from a panel over MQTT, by level.")
-                              .Register(Metrics::registry());
-    return family;
-  }
-
-  // Called with mutex held.
-  void remove(Panel &panel) {
-    for (auto &[level, counter] : panel.by_level) {
-      PanelLogLines::family().Remove(counter);
+  void remove(const ManagerMetrics::PanelLabels &old_labels) {
+    std::lock_guard<std::mutex> lock_guard(this->mutex);
+    auto it = this->panels.find(old_labels.mac);
+    if (it == this->panels.end() || !(it->second.labels == old_labels)) {
+      return;
     }
-    panel.by_level.clear();
+    for (auto &[level, counter] : it->second.by_level) {
+      this->family.Remove(counter);
+    }
+    this->panels.erase(it);
   }
 };
 
 } // namespace
 
-void LatencyMetrics::panel_log_line(const std::string &panel, const std::string &mac, uint32_t nspm_id, const char *level) {
+void LatencyMetrics::panel_log_line(const ManagerMetrics::PanelLabels &panel, const char *level) {
   auto &log_lines = PanelLogLines::get();
+  // Before taking our lock: if the labels changed, this calls back into PanelLogLines::remove().
+  ManagerMetrics::panel_labels(panel);
+
   std::lock_guard<std::mutex> lock_guard(log_lines.mutex);
-  auto [it, inserted] = log_lines.panels.try_emplace(mac, PanelLogLines::Panel{.name = panel, .nspm_id = nspm_id, .by_level = {}});
-  if (!inserted && (it->second.name != panel || it->second.nspm_id != nspm_id)) {
-    log_lines.remove(it->second);
-    it->second.name = panel;
-    it->second.nspm_id = nspm_id;
+  auto it = log_lines.panels.find(panel.mac);
+  if (it != log_lines.panels.end() && !(it->second.labels == panel)) {
+    // Changed on another thread since panel_labels() above; drop ours for the old labels.
+    for (auto &[old_level, counter] : it->second.by_level) {
+      log_lines.family.Remove(counter);
+    }
+    log_lines.panels.erase(it);
+    it = log_lines.panels.end();
+  }
+  if (it == log_lines.panels.end()) {
+    it = log_lines.panels.emplace(panel.mac, PanelLogLines::Panel{.labels = panel, .by_level = {}}).first;
   }
   auto counter = it->second.by_level.find(level);
   if (counter == it->second.by_level.end()) {
-    prometheus::Counter *added = &PanelLogLines::family().Add({{"panel", panel}, {"mac", mac}, {"nspm_id", std::to_string(nspm_id)}, {"level", level}});
+    prometheus::Counter *added = &log_lines.family.Add({{"panel", panel.panel}, {"mac", panel.mac}, {"nspm_id", panel.nspm_id}, {"level", level}});
     counter = it->second.by_level.emplace(level, added).first;
   }
   counter->second->Increment();
-}
-
-void LatencyMetrics::panel_removed(const std::string &mac) {
-  auto &log_lines = PanelLogLines::get();
-  std::lock_guard<std::mutex> lock_guard(log_lines.mutex);
-  auto it = log_lines.panels.find(mac);
-  if (it != log_lines.panels.end()) {
-    log_lines.remove(it->second);
-    log_lines.panels.erase(it);
-  }
-}
-
-const char *LatencyMetrics::panel_log_level(const std::string &level) {
-  if (level.empty()) {
-    return "unknown";
-  }
-  switch (std::toupper(static_cast<unsigned char>(level[0]))) {
-  case 'E':
-    return "error";
-  case 'W':
-    return "warning";
-  case 'I':
-    return "info";
-  case 'D':
-    return "debug";
-  default:
-    return "unknown";
-  }
 }
 
 void LatencyMetrics::panel_update(const char *type, const char *outcome) {

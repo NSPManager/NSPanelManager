@@ -1,7 +1,11 @@
 #include <gtest/gtest.h>
 #include <metrics/latency_metrics.hpp>
+#include <metrics/manager_metrics.hpp>
 #include <metrics/metrics.hpp>
+#include <atomic>
 #include <string>
+#include <thread>
+#include <vector>
 
 namespace {
 
@@ -31,13 +35,30 @@ TEST(LatencyMetricsTest, failed_home_assistant_calls_are_counted_by_domain) {
 }
 
 TEST(LatencyMetricsTest, panel_log_line_series_follow_renames_and_deletion) {
-  LatencyMetrics::panel_log_line("TestOldName", "AA:BB:CC:00:00:01", 901, "warning");
-  EXPECT_TRUE(exposition_contains("nspm_panel_log_lines_total{level=\"warning\",mac=\"AA:BB:CC:00:00:01\",nspm_id=\"901\",panel=\"TestOldName\"} 1"));
-  LatencyMetrics::panel_log_line("TestNewName", "AA:BB:CC:00:00:01", 901, "warning");
+  ManagerMetrics::PanelLabels old_labels = {.panel = "TestOldName", .mac = "AA:BB:CC:00:00:51", .nspm_id = "951"};
+  ManagerMetrics::PanelLabels new_labels = {.panel = "TestNewName", .mac = "AA:BB:CC:00:00:51", .nspm_id = "951"};
+  LatencyMetrics::panel_log_line(old_labels, "warning");
+  EXPECT_TRUE(exposition_contains("nspm_panel_log_lines_total{level=\"warning\",mac=\"AA:BB:CC:00:00:51\",nspm_id=\"951\",panel=\"TestOldName\"} 1"));
+  // Renamed, noticed by another phase-1 call: ManagerMetrics' removal hook drops our old series too.
+  ManagerMetrics::panel_labels(new_labels);
   EXPECT_FALSE(exposition_contains("panel=\"TestOldName\""));
-  EXPECT_TRUE(exposition_contains("nspm_panel_log_lines_total{level=\"warning\",mac=\"AA:BB:CC:00:00:01\",nspm_id=\"901\",panel=\"TestNewName\"} 1"));
-  LatencyMetrics::panel_removed("AA:BB:CC:00:00:01");
-  EXPECT_FALSE(exposition_contains("mac=\"AA:BB:CC:00:00:01\""));
+  LatencyMetrics::panel_log_line(new_labels, "warning");
+  EXPECT_TRUE(exposition_contains("nspm_panel_log_lines_total{level=\"warning\",mac=\"AA:BB:CC:00:00:51\",nspm_id=\"951\",panel=\"TestNewName\"} 1"));
+  // Destroyed (EntityManager::load_nspanels -> ~NSPanel -> ManagerMetrics::panel_removed).
+  ManagerMetrics::panel_removed("AA:BB:CC:00:00:51");
+  EXPECT_FALSE(exposition_contains("mac=\"AA:BB:CC:00:00:51\""));
+}
+
+TEST(LatencyMetricsTest, configs_sent_carry_reason_and_are_removed_with_the_panel) {
+  ManagerMetrics::PanelLabels labels = {.panel = "TestReasonPanel", .mac = "AA:BB:CC:00:00:52", .nspm_id = "952"};
+  ManagerMetrics::panel_config_sent(labels, 100, "reload");
+  ManagerMetrics::panel_config_sent(labels, 100, "reload_resend");
+  ManagerMetrics::panel_config_sent(labels, 100, "reload");
+  EXPECT_TRUE(exposition_contains("nspm_panel_configs_sent_total{mac=\"AA:BB:CC:00:00:52\",nspm_id=\"952\",panel=\"TestReasonPanel\",reason=\"reload\"} 2"));
+  EXPECT_TRUE(exposition_contains("nspm_panel_configs_sent_total{mac=\"AA:BB:CC:00:00:52\",nspm_id=\"952\",panel=\"TestReasonPanel\",reason=\"reload_resend\"} 1"));
+  EXPECT_TRUE(exposition_contains("nspm_panel_config_bytes_total{mac=\"AA:BB:CC:00:00:52\",nspm_id=\"952\",panel=\"TestReasonPanel\"} 300"));
+  ManagerMetrics::panel_removed("AA:BB:CC:00:00:52");
+  EXPECT_FALSE(exposition_contains("mac=\"AA:BB:CC:00:00:52\""));
 }
 
 TEST(LatencyMetricsTest, panel_command_observes_only_the_first_integration_call) {
@@ -80,4 +101,66 @@ TEST(LatencyMetricsTest, dropped_messages_are_counted_by_topic_class) {
   LatencyMetrics::mqtt_message_dropped(Metrics::TopicClass::HA_DISCOVERY);
   LatencyMetrics::mqtt_message_dropped(Metrics::TopicClass::HA_DISCOVERY);
   EXPECT_TRUE(exposition_contains("nspm_mqtt_messages_dropped_total{topic_class=\"ha_discovery\"} 2"));
+}
+
+TEST(LatencyMetricsTest, raise_max_only_raises) {
+  std::atomic<long> max = 5;
+  EXPECT_FALSE(LatencyMetrics::raise_max(max, 3));
+  EXPECT_FALSE(LatencyMetrics::raise_max(max, 5));
+  EXPECT_EQ(max.load(), 5);
+  EXPECT_TRUE(LatencyMetrics::raise_max(max, 9));
+  EXPECT_EQ(max.load(), 9);
+}
+
+TEST(LatencyMetricsTest, raise_max_from_several_threads_ends_at_the_highest_value) {
+  std::atomic<long> max = 0;
+  std::vector<std::thread> threads;
+  for (int t = 0; t < 4; t++) {
+    threads.emplace_back([&max, t]() {
+      for (long value = 0; value < 10000; value++) {
+        LatencyMetrics::raise_max(max, value * 4 + t);
+      }
+    });
+  }
+  for (auto &thread : threads) {
+    thread.join();
+  }
+  EXPECT_EQ(max.load(), 9999 * 4 + 3);
+}
+
+TEST(LatencyMetricsTest, queue_depth_max_keeps_the_highest_depth) {
+  auto value = [](const std::string &name) {
+    std::string text = Metrics::serialize();
+    size_t start = text.find("\n" + name + " ");
+    EXPECT_NE(start, std::string::npos) << name;
+    return start == std::string::npos ? -1.0 : std::stod(text.substr(start + name.size() + 2));
+  };
+  LatencyMetrics::mqtt_message_enqueued(); // Registers the series.
+  LatencyMetrics::mqtt_message_dequeued(Metrics::TopicClass::OTHER, 0);
+  double depth = value("nspm_mqtt_queue_depth");
+  double max_before = value("nspm_mqtt_queue_depth_max");
+  // Push far enough past anything else in the test binary to raise the maximum.
+  int pushes = static_cast<int>(max_before) + 5;
+  for (int i = 0; i < pushes; i++) {
+    LatencyMetrics::mqtt_message_enqueued();
+  }
+  for (int i = 0; i < pushes; i++) {
+    LatencyMetrics::mqtt_message_dequeued(Metrics::TopicClass::OTHER, 0);
+  }
+  EXPECT_EQ(value("nspm_mqtt_queue_depth"), depth);
+  EXPECT_EQ(value("nspm_mqtt_queue_depth_max"), depth + pushes);
+}
+
+TEST(LatencyMetricsTest, queue_full_waits_count_once_and_add_their_time) {
+  auto value = [](const std::string &name) {
+    std::string text = Metrics::serialize();
+    size_t start = text.find("\n" + name + " ");
+    return start == std::string::npos ? 0.0 : std::stod(text.substr(start + name.size() + 2));
+  };
+  double waits = value("nspm_mqtt_queue_full_waits_total");
+  double seconds = value("nspm_mqtt_queue_full_wait_seconds_total");
+  LatencyMetrics::mqtt_queue_full_wait(0.25);
+  LatencyMetrics::mqtt_queue_full_wait(0.5);
+  EXPECT_EQ(value("nspm_mqtt_queue_full_waits_total"), waits + 2);
+  EXPECT_DOUBLE_EQ(value("nspm_mqtt_queue_full_wait_seconds_total"), seconds + 0.75);
 }
