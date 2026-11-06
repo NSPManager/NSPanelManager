@@ -8,6 +8,7 @@
 #include <database_manager/database_manager.hpp>
 #include <metrics/manager_metrics.hpp>
 #include <memory>
+#include <metrics/panel_update_tracker.hpp>
 #include <mqtt_manager/mqtt_manager.hpp>
 #include <mutex>
 #include <nlohmann/json.hpp>
@@ -75,9 +76,10 @@ public:
   static std::shared_ptr<NSPanel> create_from_discovery_request(nlohmann::json request_data);
 
   /*
-   * Reload configuration from database
+   * Reload configuration from database, then send the config to the panel.
+   * @param reason: Why, for the reason label of nspm_panel_configs_sent_total (see send_config).
    */
-  void reload_config();
+  void reload_config(const char *reason = "reload");
 
   ~NSPanel();
 
@@ -93,8 +95,9 @@ public:
 
   /**
    * Send an updated config to the config topic on MQTT
+   * @param reason: What triggered it, a fixed string used as the reason label of nspm_panel_configs_sent_total.
    */
-  void send_config();
+  void send_config(const char *reason = "other");
 
   /**
    * Get the ID of this NSPanel.
@@ -331,5 +334,10 @@ private:
 
   // Mutex to allow only one thread to send config at a time
   std::mutex _send_config_mutex;
+
+  // Follows OTA updates from the reported state, for nspm_panel_updates_total and nspm_panel_update_duration_seconds.
+  PanelUpdateTracker _update_tracker;
+  // Feed the current state to _update_tracker. Called after the state was set from the panel's status or status report.
+  void _track_update_state(bool is_status_report);
 };
 #endif // !MQTT_MANAGER_NSPANEL

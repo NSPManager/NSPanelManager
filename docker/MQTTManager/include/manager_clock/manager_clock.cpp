@@ -1,6 +1,7 @@
 #include "manager_clock.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
+#include "metrics/latency_metrics.hpp"
 #include <cstdlib>
 #include <ctime>
 #include <fmt/format.h>
@@ -78,9 +79,12 @@ void ManagerClock::_run_clock_thread() {
 
 void ManagerClock::publish_epoch() {
   std::string topic = fmt::format("nspanel/mqttmanager_{}/status/epoch", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS));
-  MQTT_Manager::publish_if_connected(topic, [] {
+  bool sent = MQTT_Manager::publish_if_connected(topic, [] {
     return ManagerClock::epoch_payload(std::chrono::system_clock::now());
   });
+  if (sent) {
+    LatencyMetrics::clock_broadcast();
+  }
 }
 
 std::optional<std::string> ManagerClock::epoch_payload(std::chrono::system_clock::time_point now) {

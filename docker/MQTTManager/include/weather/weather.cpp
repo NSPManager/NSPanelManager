@@ -4,6 +4,7 @@
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "openhab_manager/openhab_manager.hpp"
 #include "web_helper/WebHelper.hpp"
+#include "metrics/latency_metrics.hpp"
 #include <bits/types/time_t.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/classification.hpp>
@@ -87,14 +88,16 @@ void MQTTManagerWeather::_pull_new_weather_data() {
   std::string response_data;
   if (WebHelper::perform_get_request(&pull_weather_url, &response_data, &headers)) {
     SPDLOG_DEBUG("Successfully received new weather forecast from Open Meteo. Will process new data.");
-    MQTTManagerWeather::_process_weather_data(response_data);
+    bool processed = MQTTManagerWeather::_process_weather_data(response_data);
+    LatencyMetrics::weather_fetch(processed ? "success" : "parse_error");
     SPDLOG_DEBUG("Weather data processed.");
   } else {
+    LatencyMetrics::weather_fetch("http_error");
     SPDLOG_ERROR("Failed to get weather.");
   }
 }
 
-void MQTTManagerWeather::_process_weather_data(std::string &weather_string) {
+bool MQTTManagerWeather::_process_weather_data(std::string &weather_string) {
   // Set timezone
   setenv("TZ", MqttManagerConfig::timezone.c_str(), 1);
   tzset();
@@ -186,6 +189,7 @@ void MQTTManagerWeather::_process_weather_data(std::string &weather_string) {
       std::time_t current_weather_time = data["current"]["time"];
       MQTTManagerWeather::_current_weather_time = *std::localtime(&current_weather_time);
       MQTTManagerWeather::send_state_update();
+      return true;
     } else {
       SPDLOG_ERROR("Failed to load forecast!");
     }
@@ -193,6 +197,7 @@ void MQTTManagerWeather::_process_weather_data(std::string &weather_string) {
   } catch (const std::exception &e) {
     SPDLOG_ERROR("Caught exception when trying to decode weather data: {}", boost::diagnostic_information(e, true));
   }
+  return false;
 }
 
 void MQTTManagerWeather::home_assistant_event_callback(nlohmann::json event_data) {

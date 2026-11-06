@@ -5,6 +5,7 @@
 #include <boost/lockfree/spsc_queue.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/signals2.hpp>
+#include <chrono>
 #include <condition_variable>
 #include <functional>
 #include <google/protobuf/message.h>
@@ -27,6 +28,7 @@
 struct MQTTMessage {
   std::string topic;
   std::string message;
+  std::chrono::steady_clock::time_point enqueued_at; // For nspm_mqtt_queue_wait_seconds
 };
 
 class MQTT_Manager {

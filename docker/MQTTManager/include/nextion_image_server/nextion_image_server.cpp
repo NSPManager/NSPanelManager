@@ -7,6 +7,7 @@
 #include <media_player/media_player.hpp>
 #include <memory>
 #include <metrics/manager_metrics.hpp>
+#include <metrics/latency_metrics.hpp>
 #include <metrics/metrics.hpp>
 #include <metrics/panel_metrics_collector.hpp>
 #include <metrics/prometheus_targets.hpp>
@@ -150,10 +151,14 @@ ix::HttpResponsePtr NextionImageServer::_handle_album_art_request(uint32_t media
     std::lock_guard<std::mutex> lock_guard(NextionImageServer::_converted_images_mutex);
     ConvertedImageKey key = {.media_player_id = media_player_id, .width = size[0], .height = size[1], .format = format};
     auto cached = NextionImageServer::_converted_images.find(key);
-    if (cached != NextionImageServer::_converted_images.end() && cached->second.source == album_art) {
+    bool cache_hit = cached != NextionImageServer::_converted_images.end() && cached->second.source == album_art;
+    LatencyMetrics::image_request(cache_hit, format == ImageFormat::PNG ? "png" : "rgb565");
+    if (cache_hit) {
       image = cached->second.image;
     } else {
+      auto convert_start = LatencyMetrics::clock::now();
       std::optional<ConvertedImage> converted = NextionImageServer::_convert_image(*album_art, size[0], size[1], format);
+      LatencyMetrics::image_converted(LatencyMetrics::seconds_since(convert_start));
       if (!converted) {
         return NextionImageServer::_text_response(502, "Bad Gateway", "Failed to convert album art.");
       }

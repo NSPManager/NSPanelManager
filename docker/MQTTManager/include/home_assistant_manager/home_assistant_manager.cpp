@@ -21,6 +21,7 @@
 #include <ixwebsocket/IXWebSocketMessage.h>
 #include <ixwebsocket/IXWebSocketMessageType.h>
 #include <metrics/manager_metrics.hpp>
+#include <metrics/latency_metrics.hpp>
 #include <mutex>
 #include <nlohmann/detail/json_pointer.hpp>
 #include <nlohmann/json_fwd.hpp>
@@ -117,12 +118,14 @@ void HomeAssistantManager::_websocket_message_callback(const ix::WebSocketMessag
     HomeAssistantManager::_authenticated = false;
     HomeAssistantManager::_connected = false;
     ManagerMetrics::integration_connection_changed(ManagerMetrics::Integration::HOME_ASSISTANT, false);
+    LatencyMetrics::home_assistant_disconnected();
   } else if (msg->type == ix::WebSocketMessageType::Error) {
     WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "Home Assistant not connected.");
     SPDLOG_ERROR("Failed to connect to Home Assistant websocket. Reason: {}", msg->errorInfo.reason);
     HomeAssistantManager::_authenticated = false;
     HomeAssistantManager::_connected = false;
     ManagerMetrics::integration_connection_changed(ManagerMetrics::Integration::HOME_ASSISTANT, false);
+    LatencyMetrics::home_assistant_disconnected();
   }
 }
 
@@ -154,6 +157,9 @@ void HomeAssistantManager::_process_websocket_message(const std::string &message
       SPDLOG_ERROR("Invalid authentication token when trying to connect to Home Assistant. Will try again in 5 seconds.");
       std::this_thread::sleep_for(std::chrono::milliseconds(5000));
     } else if (type.compare("result") == 0) {
+      if (data.contains("id") && data["id"].is_number_integer()) {
+        LatencyMetrics::home_assistant_result_received(data["id"].get<long>());
+      }
       bool success = data["success"];
       if (!success) {
         SPDLOG_ERROR("[HA WS] Command failed. Data: {}", message);
@@ -172,6 +178,11 @@ void HomeAssistantManager::_process_websocket_message(const std::string &message
         }
       }
     } else if (type.compare("event") == 0) {
+      // Counted here, not in _process_home_assistant_event, which also replays the get_states snapshot.
+      if (data.contains("event") && data["event"].is_object() && data["event"].value("event_type", "").compare("state_changed") == 0 &&
+          data["event"].contains("data") && data["event"]["data"].is_object() && data["event"]["data"].contains("entity_id") && data["event"]["data"]["entity_id"].is_string()) {
+        LatencyMetrics::home_assistant_state_changed(data["event"]["data"]["entity_id"].get<std::string>());
+      }
       HomeAssistantManager::_process_home_assistant_event(data);
     } else {
       SPDLOG_WARN("Got unhandled message: {}", message);
@@ -194,7 +205,14 @@ void HomeAssistantManager::_send_auth() {
 }
 
 void HomeAssistantManager::send_json(nlohmann::json &data) {
-  data["id"] = HomeAssistantManager::_next_message_id++;
+  long id = HomeAssistantManager::_next_message_id++;
+  data["id"] = id;
+  if (data.contains("type") && data["type"].is_string()) {
+    LatencyMetrics::home_assistant_request_sent(id, data["type"].get<std::string>(), data.contains("domain") && data["domain"].is_string() ? data["domain"].get<std::string>() : "");
+    if (data["type"].get<std::string>().compare("call_service") == 0) {
+      LatencyMetrics::integration_call_issued();
+    }
+  }
 #if defined(TEST_MODE) && TEST_MODE == 1
   {
     std::lock_guard<std::mutex> lock_guard(HomeAssistantManager::_test_sent_messages_mutex);

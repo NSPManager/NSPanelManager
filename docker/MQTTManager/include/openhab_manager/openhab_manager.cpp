@@ -11,6 +11,7 @@
 #include <ixwebsocket/IXWebSocketMessage.h>
 #include <ixwebsocket/IXWebSocketMessageType.h>
 #include <metrics/manager_metrics.hpp>
+#include <metrics/latency_metrics.hpp>
 #include <mutex>
 #include <nlohmann/detail/json_pointer.hpp>
 #include <nlohmann/json_fwd.hpp>
@@ -250,6 +251,9 @@ std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
 
 void OpenhabManager::send_json(nlohmann::json &data) {
   data["source"] = "NSPanelManager::MqttManager";
+  if (data.contains("type") && data["type"].is_string() && data["type"].get<std::string>().compare("ItemCommandEvent") == 0) {
+    LatencyMetrics::integration_call_issued();
+  }
 #if defined(TEST_MODE) && TEST_MODE == 1
   {
     std::lock_guard<std::mutex> lock_guard(OpenhabManager::_test_sent_messages_mutex);

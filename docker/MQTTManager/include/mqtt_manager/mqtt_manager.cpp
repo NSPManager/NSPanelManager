@@ -12,6 +12,7 @@
 #include <google/protobuf/message.h>
 #include <iostream>
 #include <metrics/manager_metrics.hpp>
+#include <metrics/latency_metrics.hpp>
 #include <mqtt/client.h>
 #include <mqtt/message.h>
 #include <mqtt/subscribe_options.h>
@@ -68,8 +69,10 @@ void MQTT_Manager::connect() {
             ManagerMetrics::mqtt_message_received(msg->get_topic(), msg->get_payload().size());
             MQTTMessage message_struct{
                 .topic = msg->get_topic(),
-                .message = msg->get_payload_str()};
+                .message = msg->get_payload_str(),
+                .enqueued_at = std::chrono::steady_clock::now()};
             if (MQTT_Manager::_mqtt_message_queue.push(message_struct)) {
+              LatencyMetrics::mqtt_message_enqueued();
               MQTT_Manager::_notify_mqtt_message_queued();
             }
           } else if (!MQTT_Manager::_mqtt_client->is_connected()) {
@@ -298,11 +301,13 @@ void MQTT_Manager::_reconnect_mqtt_client() {
           ManagerMetrics::mqtt_message_received(msg->get_topic(), msg->get_payload().size());
           MQTTMessage message_struct{
               .topic = msg->get_topic(),
-              .message = msg->get_payload_str()};
+              .message = msg->get_payload_str(),
+              .enqueued_at = std::chrono::steady_clock::now()};
           while (!MQTT_Manager::_mqtt_message_queue.push(message_struct)) {
             // Queue full: the processing thread is awake draining it, give it the CPU.
             std::this_thread::yield();
           }
+          LatencyMetrics::mqtt_message_enqueued();
           MQTT_Manager::_notify_mqtt_message_queued();
         }
       } while (received_message);
@@ -334,15 +339,21 @@ void MQTT_Manager::_process_mqtt_messages() {
       }
     }
     MQTT_Manager::_mqtt_message_queue.consume_all([](MQTTMessage message) {
+      Metrics::TopicClass topic_class = Metrics::classify_topic(message.topic);
+      LatencyMetrics::mqtt_message_dequeued(topic_class, LatencyMetrics::seconds_since(message.enqueued_at));
+      auto handler_start = LatencyMetrics::clock::now();
+      bool threw = true;
       try {
         SPDLOG_TRACE("Processing message from topic {}", message.topic);
         // Call each observer/listener until a callback return true, ie. the callback was handled.
         MQTT_Manager::_mqtt_callbacks[message.topic](message.topic, message.message);
+        threw = false;
       } catch (std::exception &ex) {
         SPDLOG_ERROR("Caught std::exception while processing message on topic '{}'. message: '{}'. Exception: ", message.topic, message.message, boost::diagnostic_information(ex, true));
       } catch (...) {
         SPDLOG_ERROR("Caught exception of type other than std::exception while processing message on topic '{}'. message: {}", message.topic, message.message);
       }
+      LatencyMetrics::mqtt_handler_finished(topic_class, LatencyMetrics::seconds_since(handler_start), threw);
     });
   }
 }

@@ -176,6 +176,14 @@ target_include_directories(MQTTManager_NextionImageServer PUBLIC ${CMAKE_INCLUDE
 target_link_libraries(MQTTManager_NextionImageServer ixwebsocket::ixwebsocket spdlog::spdlog stb::stb MQTTManager_EntityManager MQTTManager_MediaPlayer MQTTManager_Metrics MQTTManager_PrometheusTargets gtest::gtest)
 
 
+# Phase 2 metrics (latency, queueing, outcomes of long operations), see include/metrics/latency_metrics.hpp.
+add_library(MQTTManager_LatencyMetrics STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/latency_metrics.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/latency_metrics.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/ha_call_tracker.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/panel_update_tracker.hpp)
+target_include_directories(MQTTManager_LatencyMetrics PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
+target_link_libraries(MQTTManager_LatencyMetrics MQTTManager_Metrics prometheus-cpp::core)
+foreach(library MQTT_Manager MQTTManager_CommandManager MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_ManagerClock MQTTManager_Weather MQTTManager_NSPanel MQTTManager_EntityManager MQTTManager_NextionImageServer)
+    target_link_libraries(${library} MQTTManager_LatencyMetrics)
+endforeach()
+
 add_executable(${PROJECT_NAME} src/main.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(${PROJECT_NAME} MQTT_Manager MQTTManager_ManagerClock MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager MQTTManager_NextionImageServer MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_CommandManager MQTTManager_Metrics gtest::gtest)
