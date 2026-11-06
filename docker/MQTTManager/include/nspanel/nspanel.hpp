@@ -242,7 +242,7 @@ private:
   bool _has_humidity = false;
   bool _has_pressure = false;
   std::atomic<bool> _status_report_received = false;
-  // Port the panel serves Prometheus /metrics on, from "metrics_port" in its register_request. 0 if not advertised.
+  // Port the panel serves Prometheus /metrics on, from "metrics_port" in its register_request or status reports. 0 if not advertised.
   std::atomic<uint16_t> _metrics_port = 0;
   MQTT_MANAGER_NSPANEL_STATE _state;
   std::vector<NSPanelWarningWebsocketRepresentation> _nspanel_warnings;

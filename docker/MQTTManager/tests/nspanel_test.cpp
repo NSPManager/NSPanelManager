@@ -1012,8 +1012,9 @@ TEST_F(NSPanelTest, renamed_panel_moves_its_legacy_subscriptions_to_the_new_name
 
 namespace {
 
-std::string status_report_payload() {
+std::string status_report_payload(int32_t metrics_port = 0) {
   NSPanelStatusReport report;
+  report.set_metrics_port(metrics_port);
   report.set_nspanel_state(NSPanelStatusReport_state_ONLINE);
   report.set_rssi(-61);
   report.set_heap_used_pct(42);
@@ -1110,6 +1111,42 @@ TEST_F(NSPanelTest, invalid_metrics_port_is_ignored) {
     panel->register_to_manager(register_request(port));
     EXPECT_EQ(panel->get_metrics_snapshot().metrics_port, 0) << port.dump();
   }
+}
+
+TEST_F(NSPanelTest, status_report_metrics_port_makes_panel_a_target) {
+  // A restarted manager never sees the register_request; the next status report must be enough.
+  load_panel();
+  panel->mqtt_callback("nspanel/" + PANEL_MAC + "/status_report", status_report_payload());
+  EXPECT_TRUE(PrometheusTargets::select_panel_targets({panel->get_metrics_snapshot()}).empty()) << "no metrics_port yet";
+
+  panel->mqtt_callback("nspanel/" + PANEL_MAC + "/status_report", status_report_payload(80));
+  auto targets = PrometheusTargets::select_panel_targets({panel->get_metrics_snapshot()});
+  ASSERT_EQ(targets.size(), 1u);
+  EXPECT_EQ(targets[0].ip_address, "10.8.0.79");
+  EXPECT_EQ(targets[0].metrics_port, 80);
+}
+
+TEST_F(NSPanelTest, status_report_without_metrics_port_keeps_registered_port) {
+  // Firmware that predates the field sends 0 in every report.
+  load_panel();
+  panel->register_to_manager(register_request(80));
+  panel->mqtt_callback("nspanel/" + PANEL_MAC + "/status_report", status_report_payload(0));
+  EXPECT_EQ(panel->get_metrics_snapshot().metrics_port, 80);
+  EXPECT_EQ(PrometheusTargets::select_panel_targets({panel->get_metrics_snapshot()}).size(), 1u);
+
+  for (int32_t port : {-1, 70000}) {
+    panel->mqtt_callback("nspanel/" + PANEL_MAC + "/status_report", status_report_payload(port));
+    EXPECT_EQ(panel->get_metrics_snapshot().metrics_port, 80) << port;
+  }
+}
+
+TEST_F(NSPanelTest, status_report_metrics_port_overrides_registered_port) {
+  load_panel();
+  panel->register_to_manager(register_request(80));
+  panel->mqtt_callback("nspanel/" + PANEL_MAC + "/status_report", status_report_payload(9100));
+  auto targets = PrometheusTargets::select_panel_targets({panel->get_metrics_snapshot()});
+  ASSERT_EQ(targets.size(), 1u);
+  EXPECT_EQ(targets[0].metrics_port, 9100);
 }
 
 TEST_F(NSPanelTest, sent_configs_are_counted) {
