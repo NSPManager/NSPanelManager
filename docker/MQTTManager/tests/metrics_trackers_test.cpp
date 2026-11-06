@@ -131,11 +131,10 @@ TEST(PanelUpdateTrackerTest, forced_reflash_of_the_staged_image_succeeds_after_r
   PanelUpdateTracker tracker;
   auto t = PanelUpdateTracker::clock::time_point(100s);
   tracker.observe(Phase::UPDATING_FIRMWARE, true, all_match, t);
-  tracker.observe(Phase::DOWN, true, all_match, t + 60s);
-  // Already matching while DOWN after leaving: counted as soon as it has rebooted.
-  tracker.observe(Phase::UPDATING_LITTLEFS, true, all_match, t + 61s);
-  auto events = kinds(tracker.observe(Phase::DOWN, true, all_match, t + 70s));
-  EXPECT_EQ(events, (std::vector<std::pair<Type, Kind>>{{Type::LITTLEFS, Kind::FINISHED}, {Type::FIRMWARE, Kind::SUCCEEDED}, {Type::LITTLEFS, Kind::SUCCEEDED}}));
+  // The md5 already matches, so the first report after leaving the updating state while down decides it.
+  EXPECT_EQ(kinds(tracker.observe(Phase::DOWN, true, all_match, t + 60s)), (std::vector<std::pair<Type, Kind>>{{Type::FIRMWARE, Kind::FINISHED}, {Type::FIRMWARE, Kind::SUCCEEDED}}));
+  EXPECT_EQ(kinds(tracker.observe(Phase::UPDATING_LITTLEFS, true, all_match, t + 61s)), (std::vector<std::pair<Type, Kind>>{{Type::LITTLEFS, Kind::STARTED}}));
+  EXPECT_EQ(kinds(tracker.observe(Phase::DOWN, true, all_match, t + 70s)), (std::vector<std::pair<Type, Kind>>{{Type::LITTLEFS, Kind::FINISHED}, {Type::LITTLEFS, Kind::SUCCEEDED}}));
 }
 
 TEST(PanelUpdateTrackerTest, restarting_an_unconfirmed_update_counts_the_previous_one_as_failed) {
