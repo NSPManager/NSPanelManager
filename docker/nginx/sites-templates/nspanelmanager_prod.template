@@ -55,6 +55,14 @@ server {
         proxy_pass  http://nextion_img;
     }
 
+    # Prometheus metrics and http_sd service discovery, served by MQTTManager's HTTP server.
+    # The Host header is passed on so that /prometheus/targets can list the manager by the
+    # address Prometheus reached it at ($http_host keeps the port).
+    location /prometheus {
+        proxy_pass  http://nextion_img;
+        proxy_set_header Host $http_host;
+    }
+
     location /webapp {
         alias /var/www/html/webapp;
         
