@@ -236,7 +236,8 @@ private:
   static inline std::vector<TestPublishedMessage> _test_mirrored_messages;
   static inline std::atomic<bool> _test_broker_connected = false;
 #endif
-  static inline boost::lockfree::spsc_queue<MQTTMessage, boost::lockfree::capacity<256>> _mqtt_message_queue;
+  static constexpr size_t _mqtt_message_queue_capacity = 256;
+  static inline boost::lockfree::spsc_queue<MQTTMessage, boost::lockfree::capacity<_mqtt_message_queue_capacity>> _mqtt_message_queue;
   static inline std::thread _process_messages_thread;
   // Wakes _process_mqtt_messages when a message is pushed to _mqtt_message_queue. The queue itself
   // stays lock-free; the mutex only guards the wait so a notification can't be lost.

@@ -1,6 +1,7 @@
 #include <array>
 #include <chrono>
 #include <gtest/gtest.h>
+#include <metrics/drop_log_limiter.hpp>
 #include <metrics/ha_call_tracker.hpp>
 #include <metrics/panel_update_tracker.hpp>
 #include <vector>
@@ -163,4 +164,54 @@ TEST(PanelUpdateTrackerTest, tracking_only_while_an_update_runs_or_awaits_its_ou
   EXPECT_TRUE(tracker.tracking());
   tracker.observe(Phase::ONLINE, true, {false, false, true}, t + 90s);
   EXPECT_FALSE(tracker.tracking());
+}
+
+namespace {
+
+using Line = DropLogLimiter::Line;
+using Level = DropLogLimiter::Line::Level;
+
+} // namespace
+
+TEST(DropLogLimiterTest, first_drop_warns_with_topic_class_and_capacity) {
+  DropLogLimiter limiter(256);
+  auto t = DropLogLimiter::clock::time_point(100s);
+  EXPECT_TRUE(limiter.tick(t).empty());
+  EXPECT_EQ(limiter.on_drop("status_report", t), (std::vector<Line>{{Level::WARNING, "Dropped an MQTT message (status_report): processing queue full (256)."}}));
+}
+
+TEST(DropLogLimiterTest, continued_drops_are_summarised_at_most_once_per_window) {
+  DropLogLimiter limiter(256);
+  auto t = DropLogLimiter::clock::time_point(100s);
+  limiter.on_drop("status_report", t);
+  for (int i = 0; i < 30; i++) {
+    EXPECT_TRUE(limiter.on_drop("status_report", t + 1s).empty());
+  }
+  for (int i = 0; i < 7; i++) {
+    EXPECT_TRUE(limiter.on_drop("other", t + 2s).empty());
+  }
+  EXPECT_TRUE(limiter.tick(t + 9s).empty());
+  EXPECT_EQ(limiter.tick(t + 10s), (std::vector<Line>{{Level::WARNING, "Dropped 37 MQTT messages in the last 10 s (other: 7, status_report: 30); processing queue full (256)."}}));
+  EXPECT_TRUE(limiter.tick(t + 11s).empty());
+  // A drop in the next window is held for that window's summary, which a later drop can trigger too.
+  EXPECT_TRUE(limiter.on_drop("log", t + 12s).empty());
+  EXPECT_EQ(limiter.on_drop("log", t + 20s), (std::vector<Line>{{Level::WARNING, "Dropped 1 MQTT messages in the last 10 s (log: 1); processing queue full (256)."}}));
+}
+
+TEST(DropLogLimiterTest, a_quiet_window_logs_recovery_once_and_the_next_drop_warns_again) {
+  DropLogLimiter limiter(256);
+  auto t = DropLogLimiter::clock::time_point(100s);
+  limiter.on_drop("status_report", t);
+  limiter.on_drop("status_report", t + 1s);
+  EXPECT_EQ(limiter.tick(t + 10s).size(), 1); // Summary of the second drop.
+  EXPECT_EQ(limiter.tick(t + 20s), (std::vector<Line>{{Level::INFO, "No MQTT messages dropped in the last 10 s; 2 dropped in total since the queue filled up."}}));
+  EXPECT_TRUE(limiter.tick(t + 30s).empty());
+  EXPECT_EQ(limiter.on_drop("command", t + 40s), (std::vector<Line>{{Level::WARNING, "Dropped an MQTT message (command): processing queue full (256)."}}));
+}
+
+TEST(DropLogLimiterTest, single_drop_then_quiet_logs_recovery_without_a_summary) {
+  DropLogLimiter limiter(256);
+  auto t = DropLogLimiter::clock::time_point(100s);
+  limiter.on_drop("other", t);
+  EXPECT_EQ(limiter.tick(t + 10s), (std::vector<Line>{{Level::INFO, "No MQTT messages dropped in the last 10 s; 1 dropped in total since the queue filled up."}}));
 }

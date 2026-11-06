@@ -25,6 +25,7 @@ struct MqttQueueMetrics {
   std::array<prometheus::Histogram *, Metrics::topic_class_count> wait;
   std::array<prometheus::Histogram *, Metrics::topic_class_count> handler_duration;
   std::array<prometheus::Counter *, Metrics::topic_class_count> handler_exceptions;
+  std::array<prometheus::Counter *, Metrics::topic_class_count> dropped;
 
   static MqttQueueMetrics &get() {
     static MqttQueueMetrics metrics = []() {
@@ -45,6 +46,10 @@ struct MqttQueueMetrics {
                              .Name("nspm_mqtt_handler_exceptions_total")
                              .Help("Received MQTT messages whose callbacks ended in an exception.")
                              .Register(registry);
+      auto &dropped = prometheus::BuildCounter()
+                          .Name("nspm_mqtt_messages_dropped_total")
+                          .Help("Received MQTT messages dropped because the processing queue was full.")
+                          .Register(registry);
       MqttQueueMetrics result;
       result.depth = &depth.Add({});
       for (size_t i = 0; i < Metrics::topic_class_count; i++) {
@@ -52,6 +57,7 @@ struct MqttQueueMetrics {
         result.wait[i] = &wait.Add(labels, Metrics::fast_buckets());
         result.handler_duration[i] = &duration.Add(labels, Metrics::latency_buckets());
         result.handler_exceptions[i] = &exceptions.Add(labels);
+        result.dropped[i] = &dropped.Add(labels);
       }
       return result;
     }();
@@ -85,6 +91,10 @@ thread_local std::optional<CommandInFlight> command_in_flight;
 
 void LatencyMetrics::mqtt_message_enqueued() {
   MqttQueueMetrics::get().depth->Increment();
+}
+
+void LatencyMetrics::mqtt_message_dropped(Metrics::TopicClass topic_class) {
+  MqttQueueMetrics::get().dropped[static_cast<size_t>(topic_class)]->Increment();
 }
 
 void LatencyMetrics::mqtt_message_dequeued(Metrics::TopicClass topic_class, double wait_seconds) {

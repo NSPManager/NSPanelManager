@@ -11,6 +11,7 @@
 #include <fstream>
 #include <google/protobuf/message.h>
 #include <iostream>
+#include <metrics/drop_log_limiter.hpp>
 #include <metrics/manager_metrics.hpp>
 #include <metrics/latency_metrics.hpp>
 #include <mqtt/client.h>
@@ -60,8 +61,20 @@ void MQTT_Manager::connect() {
     MQTT_Manager::_mqtt_client->start_consuming();
     mqtt::const_message_ptr msg;
     bool received_message = false;
+    // This thread is the queue's only producer, so the drop bookkeeping needs no lock.
+    DropLogLimiter drop_log_limiter(MQTT_Manager::_mqtt_message_queue_capacity);
+    auto log_drop_lines = [](const std::vector<DropLogLimiter::Line> &lines) {
+      for (const auto &line : lines) {
+        if (line.level == DropLogLimiter::Line::Level::WARNING) {
+          SPDLOG_WARN("{}", line.text);
+        } else {
+          SPDLOG_INFO("{}", line.text);
+        }
+      }
+    };
     while (true) {
       if (!MQTT_Manager::_stop_consuming && MQTT_Manager::_mqtt_client != nullptr) [[likely]] {
+        log_drop_lines(drop_log_limiter.tick());
         // We should be consuming message, try for 1 second.
         received_message = MQTT_Manager::_mqtt_client->try_consume_message_for(&msg, std::chrono::milliseconds(1000));
         if (received_message) {
@@ -74,6 +87,10 @@ void MQTT_Manager::connect() {
             if (MQTT_Manager::_mqtt_message_queue.push(message_struct)) {
               LatencyMetrics::mqtt_message_enqueued();
               MQTT_Manager::_notify_mqtt_message_queued();
+            } else {
+              Metrics::TopicClass topic_class = Metrics::classify_topic(message_struct.topic);
+              LatencyMetrics::mqtt_message_dropped(topic_class);
+              log_drop_lines(drop_log_limiter.on_drop(Metrics::topic_class_label(topic_class)));
             }
           } else if (!MQTT_Manager::_mqtt_client->is_connected()) {
             ManagerMetrics::mqtt_connection_changed(false);

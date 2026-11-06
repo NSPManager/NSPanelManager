@@ -24,6 +24,8 @@ public:
 
   // A received message was put on the processing queue.
   static void mqtt_message_enqueued();
+  // A received message was dropped because the processing queue was full.
+  static void mqtt_message_dropped(Metrics::TopicClass topic_class);
   // A message was taken off the queue after waiting `wait_seconds`.
   static void mqtt_message_dequeued(Metrics::TopicClass topic_class, double wait_seconds);
   // The callbacks for a message ran for `seconds`. `threw` when they ended in an exception.

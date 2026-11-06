@@ -75,3 +75,9 @@ TEST(LatencyMetricsTest, mqtt_queue_depth_follows_enqueue_and_dequeue) {
   EXPECT_TRUE(exposition_contains("nspm_mqtt_queue_wait_seconds_bucket{topic_class=\"other\""));
   LatencyMetrics::mqtt_message_dequeued(Metrics::TopicClass::OTHER, 0.001);
 }
+
+TEST(LatencyMetricsTest, dropped_messages_are_counted_by_topic_class) {
+  LatencyMetrics::mqtt_message_dropped(Metrics::TopicClass::HA_DISCOVERY);
+  LatencyMetrics::mqtt_message_dropped(Metrics::TopicClass::HA_DISCOVERY);
+  EXPECT_TRUE(exposition_contains("nspm_mqtt_messages_dropped_total{topic_class=\"ha_discovery\"} 2"));
+}
