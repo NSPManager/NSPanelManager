@@ -36,6 +36,7 @@ target_link_libraries(nspm_mqttmanager_tests PRIVATE
     MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_CommandManager
     MQTTManager_Switch MQTTManager_Button MQTTManager_Thermostat MQTTManager_MediaPlayer
     MQTTManager_Cover MQTTManager_Weather MQTTManager_NSPanel
+    MQTTManager_Metrics MQTTManager_PrometheusTargets
     ixwebsocket::ixwebsocket gtest::gtest
 )
 

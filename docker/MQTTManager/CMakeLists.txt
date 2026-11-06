@@ -39,6 +39,11 @@ find_package(SqliteOrm REQUIRED)
 find_package(stb REQUIRED)
 find_package(GTest REQUIRED)
 find_package(Boost REQUIRED COMPONENTS signals2 stacktrace_backtrace)
+find_package(prometheus-cpp REQUIRED)
+
+# Reported by nspm_build_info. The image does not carry a version, so pass these when building one.
+set(NSPM_VERSION "unknown" CACHE STRING "MQTTManager version reported by nspm_build_info")
+set(NSPM_GIT_SHA "unknown" CACHE STRING "Git commit reported by nspm_build_info")
 
 # Load CMake google test module
 include(GoogleTest)
@@ -64,6 +69,13 @@ add_library(MQTTManager_Entity STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/enti
 set_target_properties(MQTTManager_Entity PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity.hpp PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/entity/entity_icons.hpp)
 target_include_directories(MQTTManager_Entity PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(MQTTManager_Entity spdlog::spdlog Boost::boost nlohmann_json::nlohmann_json gtest::gtest)
+
+# Prometheus registry, text serializer and /proc/self process collector. Depends on nothing else in
+# MQTTManager so that every component can link it.
+add_library(MQTTManager_Metrics STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/metrics.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/metrics.hpp)
+target_include_directories(MQTTManager_Metrics PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
+target_compile_definitions(MQTTManager_Metrics PRIVATE NSPM_VERSION="${NSPM_VERSION}" NSPM_GIT_SHA="${NSPM_GIT_SHA}")
+target_link_libraries(MQTTManager_Metrics PUBLIC prometheus-cpp::core spdlog::spdlog)
 
 add_library(MQTTManager_WebsocketServer STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/websocket_server/websocket_server.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/websocket_server/websocket_server.hpp)
 set_target_properties(MQTTManager_WebsocketServer PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/websocket_server/websocket_server.hpp)
@@ -103,22 +115,22 @@ target_link_libraries(MQTTManager_Weather MQTTManager_WebHelper spdlog::spdlog n
 add_library(MQTTManager_Light STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/light.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/light.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/home_assistant_light.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/home_assistant_light.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/openhab_light.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/openhab_light.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/openhab_light.cpp)
 set_target_properties(MQTTManager_Light PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/light.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/home_assistant_light.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/light/openhab_light.hpp)
 target_include_directories(MQTTManager_Light PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_Light MQTTManager_HomeAssistantManager spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager gtest::gtest)
+target_link_libraries(MQTTManager_Light MQTTManager_HomeAssistantManager spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager MQTTManager_Metrics gtest::gtest)
 
 add_library(MQTTManager_Button STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/button/button.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/button/button.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/button/home_assistant_button.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/button/home_assistant_button.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/button/nspm_button.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/button/nspm_button.hpp)
 set_target_properties(MQTTManager_Button PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/button/button.hpp)
 target_include_directories(MQTTManager_Button PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_Button MQTTManager_HomeAssistantManager spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager gtest::gtest)
+target_link_libraries(MQTTManager_Button MQTTManager_HomeAssistantManager spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager MQTTManager_Metrics gtest::gtest)
 
 add_library(MQTTManager_Thermostat STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/thermostat.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/thermostat.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/home_assistant_thermostat.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/home_assistant_thermostat.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/openhab_thermostat.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/openhab_thermostat.cpp)
 set_target_properties(MQTTManager_Thermostat PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/thermostat/thermostat.hpp)
 target_include_directories(MQTTManager_Thermostat PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_Thermostat MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager gtest::gtest)
+target_link_libraries(MQTTManager_Thermostat MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager MQTTManager_Metrics gtest::gtest)
 
 add_library(MQTTManager_MediaPlayer STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/media_player.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/media_player.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_media_player.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_media_player.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_source_volume.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_source_volume.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_source_player.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_source_player.cpp)
 set_target_properties(MQTTManager_MediaPlayer PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/media_player.hpp)
 target_include_directories(MQTTManager_MediaPlayer PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_MediaPlayer MQTTManager_HomeAssistantManager MQTTManager_WebHelper spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager date::date Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager gtest::gtest)
+target_link_libraries(MQTTManager_MediaPlayer MQTTManager_HomeAssistantManager MQTTManager_WebHelper spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager date::date Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager MQTTManager_Metrics gtest::gtest)
 
 add_library(MQTTManager_Cover STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/cover/cover.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/cover/cover.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/cover/home_assistant_cover.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/cover/home_assistant_cover.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/cover/openhab_cover.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/cover/openhab_cover.cpp)
 set_target_properties(MQTTManager_Cover PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/cover/cover.hpp)
@@ -128,7 +140,7 @@ target_link_libraries(MQTTManager_Cover MQTTManager_HomeAssistantManager MQTTMan
 add_library(MQTTManager_Switch STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/switch.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/switch.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/home_assistant_switch.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/home_assistant_switch.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/openhab_switch.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/openhab_switch.hpp)
 set_target_properties(MQTTManager_Switch PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/switch.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/home_assistant_switch.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/switch/openhab_switch.hpp)
 target_include_directories(MQTTManager_Switch PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_Switch MQTTManager_HomeAssistantManager spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager gtest::gtest)
+target_link_libraries(MQTTManager_Switch MQTTManager_HomeAssistantManager spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager MQTTManager_Metrics gtest::gtest)
 
 add_library(MQTTManager_NSPanel STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.hpp)
 set_target_properties(MQTTManager_NSPanel PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.hpp)
@@ -159,14 +171,19 @@ target_include_directories(MQTTManager_Config PUBLIC MQTTManager_WebHelper ${CMA
 target_link_libraries(MQTTManager_Config spdlog::spdlog MQTTManager_WebHelper nlohmann_json::nlohmann_json Boost::boost Protobuf_MQTTManager MQTTManager_DatabaseManager MQTTManager_WebsocketServer gtest::gtest)
 
 
+# Prometheus http_sd target list, built from the panels EntityManager holds.
+add_library(MQTTManager_PrometheusTargets STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/prometheus_targets.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/prometheus_targets.hpp)
+target_include_directories(MQTTManager_PrometheusTargets PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
+target_link_libraries(MQTTManager_PrometheusTargets MQTTManager_Metrics MQTTManager_EntityManager MQTTManager_NSPanel spdlog::spdlog nlohmann_json::nlohmann_json gtest::gtest)
+
 add_library(MQTTManager_NextionImageServer STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/nextion_image_server/nextion_image_server.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/nextion_image_server/nextion_image_server.hpp)
 target_include_directories(MQTTManager_NextionImageServer PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_NextionImageServer ixwebsocket::ixwebsocket spdlog::spdlog stb::stb MQTTManager_EntityManager MQTTManager_MediaPlayer gtest::gtest)
+target_link_libraries(MQTTManager_NextionImageServer ixwebsocket::ixwebsocket spdlog::spdlog stb::stb MQTTManager_EntityManager MQTTManager_MediaPlayer MQTTManager_Metrics MQTTManager_PrometheusTargets gtest::gtest)
 
 
 add_executable(${PROJECT_NAME} src/main.cpp)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(${PROJECT_NAME} MQTT_Manager MQTTManager_ManagerClock MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager MQTTManager_NextionImageServer MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_CommandManager gtest::gtest)
+target_link_libraries(${PROJECT_NAME} MQTT_Manager MQTTManager_ManagerClock MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager MQTTManager_NextionImageServer MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_CommandManager MQTTManager_Metrics gtest::gtest)
 
 if(NSPM_BUILD_TESTS)
     enable_testing()

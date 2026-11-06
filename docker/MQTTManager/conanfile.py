@@ -21,6 +21,7 @@ class CompressorRecipe(ConanFile):
         self.requires("protobuf/5.27.0")
         self.requires("sqlite_orm/1.9.1")
         self.requires("stb/cci.20240531")  # Header-only image decoding/resizing for the Nextion image server
+        self.requires("prometheus-cpp/1.3.0")  # Metrics registry + text serializer for /prometheus/metrics
         # Testing tools:
         self.requires("gtest/1.16.0")
 
@@ -29,6 +30,11 @@ class CompressorRecipe(ConanFile):
         self.options["boost"].with_stacktrace_backtrace = True
         self.options["sqlite_orm"].SQLITE_ORM_ENABLE_CXX_17 = True
         self.options["date"].header_only = True
+        # Core only: we serve the text exposition from our own HTTP server, so leave out
+        # prometheus-cpp's civetweb pull server, its curl push client and zlib compression.
+        self.options["prometheus-cpp"].with_pull = False
+        self.options["prometheus-cpp"].with_push = False
+        self.options["prometheus-cpp"].with_compression = False
 
     def layout(self):
         cmake_layout(self)

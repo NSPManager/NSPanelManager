@@ -6,6 +6,8 @@
 #include <ixwebsocket/IXHttpServer.h>
 #include <media_player/media_player.hpp>
 #include <memory>
+#include <metrics/metrics.hpp>
+#include <metrics/prometheus_targets.hpp>
 #include <nextion_image_server/nextion_image_server.hpp>
 #include <regex>
 #include <spdlog/spdlog.h>
@@ -63,6 +65,21 @@ ix::HttpResponsePtr NextionImageServer::_route_request(ix::HttpRequestPtr reques
   if (query_start != std::string::npos) {
     query = path.substr(query_start + 1);
     path = path.substr(0, query_start);
+  }
+
+  // Prometheus metrics and service discovery, see METRICS.md.
+  if (path.compare("/prometheus/metrics") == 0) {
+    ix::WebSocketHttpHeaders headers;
+    headers["Content-Type"] = "text/plain; version=0.0.4; charset=utf-8";
+    return std::make_shared<ix::HttpResponse>(200, "OK", ix::HttpErrorCode::Ok, headers, Metrics::serialize());
+  }
+  if (path.compare("/prometheus/targets") == 0) {
+    // nginx passes the Host the request arrived with, so the manager lists itself the way Prometheus reached it.
+    auto host = request->headers.find("Host");
+    ix::WebSocketHttpHeaders headers;
+    headers["Content-Type"] = "application/json";
+    return std::make_shared<ix::HttpResponse>(200, "OK", ix::HttpErrorCode::Ok, headers,
+                                              PrometheusTargets::build_json(host != request->headers.end() ? host->second : "", PrometheusTargets::current_panel_targets()));
   }
 
   static const std::regex album_art_path(R"(^/nextion-img/media_player/(\d+)/album_art$)");
