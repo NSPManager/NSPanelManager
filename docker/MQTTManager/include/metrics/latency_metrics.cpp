@@ -288,6 +288,24 @@ void LatencyMetrics::panel_log_line(const ManagerMetrics::PanelLabels &panel, co
   counter->second->Increment();
 }
 
+const char *LatencyMetrics::panel_log_level(const std::string &level) {
+  if (level.empty()) {
+    return "unknown";
+  }
+  switch (std::toupper(static_cast<unsigned char>(level[0]))) {
+  case 'E':
+    return "error";
+  case 'W':
+    return "warning";
+  case 'I':
+    return "info";
+  case 'D':
+    return "debug";
+  default:
+    return "unknown";
+  }
+}
+
 void LatencyMetrics::panel_update(const char *type, const char *outcome) {
   static auto &family = prometheus::BuildCounter()
                             .Name("nspm_panel_updates_total")
