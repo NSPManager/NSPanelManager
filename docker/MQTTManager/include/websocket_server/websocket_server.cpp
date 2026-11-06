@@ -19,7 +19,9 @@
 #include <ixwebsocket/IXWebSocketMessageType.h>
 #include <ixwebsocket/IXWebSocketPerMessageDeflate.h>
 #include <ixwebsocket/IXWebSocketServer.h>
+#include <array>
 #include <memory>
+#include <metrics/manager_metrics.hpp>
 #include <mutex>
 #include <shared_mutex>
 #include <spdlog/spdlog.h>
@@ -152,6 +154,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
       if (boost::algorithm::ends_with(msg->openInfo.uri, "/stomp")) {
         std::unique_lock<std::shared_mutex> lock_guard(WebsocketServer::_server_mutex);
         WebsocketServer::_connected_websockets_stomps.push_back(&webSocket);
+        ManagerMetrics::websocket_clients(WebsocketServer::_connected_websockets_stomps.size());
       } else {
         SPDLOG_ERROR("Connected websocket does not end with /stomp. Unknown protocol. Will close socket.");
         webSocket.close();
@@ -161,6 +164,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
         std::unique_lock<std::shared_mutex> lock_guard(WebsocketServer::_server_mutex);
         SPDLOG_DEBUG("Websocket closed. Code: {}, Reason: {}", msg->closeInfo.code, msg->closeInfo.reason);
         WebsocketServer::_connected_websockets_stomps.remove(&webSocket);
+        ManagerMetrics::websocket_clients(WebsocketServer::_connected_websockets_stomps.size());
 
         for (auto &topic : WebsocketServer::_stomp_topics) {
           topic->unsubscribe(webSocket, "");
@@ -204,6 +208,7 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
         if (msg->str.length() == 1 && *msg->str.data() == '\n') {
           return;
         }
+        ManagerMetrics::websocket_message_received();
 
         // STOMP connection
         std::string data = msg->str;
@@ -534,6 +539,7 @@ void WebsocketServer::send_stomp_frame(StompFrame &frame, ix::WebSocket &websock
 
   try {
     websocket.send(message);
+    ManagerMetrics::websocket_message_sent();
   } catch (std::exception &ex) {
     SPDLOG_ERROR("Failed to send message over websocket. Error: {}", ex.what());
   }
@@ -604,7 +610,11 @@ void WebsocketServer::_send_active_warnings() {
   SPDLOG_DEBUG("Broadcasting active warnings to all connected weboscket clients.");
   nlohmann::json base;
   base["warnings"] = nlohmann::json::array();
+  std::array<size_t, 4> count_by_level = {0, 0, 0, 0}; // Indexed by ActiveWarningLevel.
   for (auto &warning : WebsocketServer::_active_warnings) {
+    if (warning.level >= 0 && static_cast<size_t>(warning.level) < count_by_level.size()) {
+      count_by_level[warning.level]++;
+    }
     SPDLOG_DEBUG("Sending warnings, found warning: {}", warning.warning_text);
     std::string warning_level_str = "unknown";
     switch (warning.level) {
@@ -623,5 +633,6 @@ void WebsocketServer::_send_active_warnings() {
     }
     base["warnings"].push_back({{"level", warning_level_str}, {"text", warning.warning_text}});
   }
+  ManagerMetrics::warnings_active(count_by_level);
   WebsocketServer::update_stomp_topic_value("mqttmanager/warnings", base);
 }

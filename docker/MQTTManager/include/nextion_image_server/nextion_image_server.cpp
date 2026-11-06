@@ -6,7 +6,9 @@
 #include <ixwebsocket/IXHttpServer.h>
 #include <media_player/media_player.hpp>
 #include <memory>
+#include <metrics/manager_metrics.hpp>
 #include <metrics/metrics.hpp>
+#include <metrics/panel_metrics_collector.hpp>
 #include <metrics/prometheus_targets.hpp>
 #include <nextion_image_server/nextion_image_server.hpp>
 #include <regex>
@@ -31,6 +33,7 @@ void NextionImageServer::start() {
     NextionImageServer::_server = new ix::HttpServer(8003, "0.0.0.0");
     NextionImageServer::_server->setOnConnectionCallback(&NextionImageServer::_handle_request);
   }
+  PanelMetricsCollector::install();
 
   auto res = NextionImageServer::_server->listen();
   if (!res.first) {
@@ -43,13 +46,17 @@ void NextionImageServer::start() {
 
 ix::HttpResponsePtr NextionImageServer::_handle_request(ix::HttpRequestPtr request, std::shared_ptr<ix::ConnectionState> connection_state) {
   // Requests come from anything on the network, never let a bad one take down the manager.
+  ManagerMetrics::HttpRoute route = ManagerMetrics::http_route(request->uri);
   try {
-    return NextionImageServer::_route_request(request, connection_state);
+    ix::HttpResponsePtr response = NextionImageServer::_route_request(request, connection_state);
+    ManagerMetrics::http_request(route, response ? response->statusCode : 500);
+    return response;
   } catch (const std::exception &e) {
     SPDLOG_ERROR("Nextion image server failed to handle {} {}: {}", request->method, request->uri, e.what());
   } catch (...) {
     SPDLOG_ERROR("Nextion image server failed to handle {} {}: unknown exception", request->method, request->uri);
   }
+  ManagerMetrics::http_request(route, 500);
   return NextionImageServer::_text_response(500, "Internal Server Error", "Internal server error.");
 }
 

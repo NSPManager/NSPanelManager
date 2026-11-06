@@ -20,6 +20,7 @@
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXWebSocketMessage.h>
 #include <ixwebsocket/IXWebSocketMessageType.h>
+#include <metrics/manager_metrics.hpp>
 #include <mutex>
 #include <nlohmann/detail/json_pointer.hpp>
 #include <nlohmann/json_fwd.hpp>
@@ -104,20 +105,24 @@ void HomeAssistantManager::reload_config() {
 
 void HomeAssistantManager::_websocket_message_callback(const ix::WebSocketMessagePtr &msg) {
   if (msg->type == ix::WebSocketMessageType::Message) {
+    ManagerMetrics::integration_message_received(ManagerMetrics::Integration::HOME_ASSISTANT);
     HomeAssistantManager::_process_websocket_message(msg->str);
   } else if (msg->type == ix::WebSocketMessageType::Open) {
     SPDLOG_INFO("Connected to Home Assistant websocket.");
     HomeAssistantManager::_connected = true;
+    ManagerMetrics::integration_connection_changed(ManagerMetrics::Integration::HOME_ASSISTANT, true);
   } else if (msg->type == ix::WebSocketMessageType::Close) {
     WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "Home Assistant not connected.");
     SPDLOG_WARN("Disconnected from Home Assistant websocket.");
     HomeAssistantManager::_authenticated = false;
     HomeAssistantManager::_connected = false;
+    ManagerMetrics::integration_connection_changed(ManagerMetrics::Integration::HOME_ASSISTANT, false);
   } else if (msg->type == ix::WebSocketMessageType::Error) {
     WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "Home Assistant not connected.");
     SPDLOG_ERROR("Failed to connect to Home Assistant websocket. Reason: {}", msg->errorInfo.reason);
     HomeAssistantManager::_authenticated = false;
     HomeAssistantManager::_connected = false;
+    ManagerMetrics::integration_connection_changed(ManagerMetrics::Integration::HOME_ASSISTANT, false);
   }
 }
 
@@ -134,6 +139,7 @@ void HomeAssistantManager::_process_websocket_message(const std::string &message
       WebsocketServer::remove_warning("Home Assistant authentication invalid.");
       SPDLOG_INFO("Successfully authenticated to Home Assistant websocket API.");
       HomeAssistantManager::_authenticated = true;
+      ManagerMetrics::integration_authenticated(ManagerMetrics::Integration::HOME_ASSISTANT, true);
 
       // Subscribe to all state changes.
       nlohmann::json subscribe_command;
@@ -144,6 +150,7 @@ void HomeAssistantManager::_process_websocket_message(const std::string &message
       HomeAssistantManager::_request_all_states();
     } else if (type.compare("auth_invalid") == 0) {
       WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "Home Assistant authentication invalid.");
+      ManagerMetrics::integration_auth_failure(ManagerMetrics::Integration::HOME_ASSISTANT);
       SPDLOG_ERROR("Invalid authentication token when trying to connect to Home Assistant. Will try again in 5 seconds.");
       std::this_thread::sleep_for(std::chrono::milliseconds(5000));
     } else if (type.compare("result") == 0) {
@@ -204,6 +211,7 @@ void HomeAssistantManager::_send_string(std::string &data) {
     SPDLOG_TRACE("[HA WS] Sending data: {}", data);
     try {
       HomeAssistantManager::_websocket->send(data);
+      ManagerMetrics::integration_message_sent(ManagerMetrics::Integration::HOME_ASSISTANT);
     } catch (std::exception &e) {
       SPDLOG_ERROR("[HA WS] Send failed. Caught error: {}", e.what());
     }

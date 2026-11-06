@@ -14,14 +14,6 @@
 #include <unistd.h>
 #include <vector>
 
-// Set by CMake (NSPM_VERSION / NSPM_GIT_SHA cache variables), "unknown" when not given.
-#ifndef NSPM_VERSION
-#define NSPM_VERSION "unknown"
-#endif
-#ifndef NSPM_GIT_SHA
-#define NSPM_GIT_SHA "unknown"
-#endif
-
 namespace {
 
 /**
@@ -121,14 +113,7 @@ bool starts_with(std::string_view value, std::string_view prefix) {
 prometheus::Registry &Metrics::registry() {
   static prometheus::Registry *registry = []() {
     // Never destroyed: metrics are incremented from threads that may outlive static destruction at exit.
-    auto *registry = new prometheus::Registry();
-    prometheus::BuildGauge()
-        .Name("nspm_build_info")
-        .Help("MQTTManager build information. Always 1.")
-        .Register(*registry)
-        .Add({{"version", NSPM_VERSION}, {"git_sha", NSPM_GIT_SHA}})
-        .Set(1);
-    return registry;
+    return new prometheus::Registry();
   }();
   return *registry;
 }

@@ -41,10 +41,6 @@ find_package(GTest REQUIRED)
 find_package(Boost REQUIRED COMPONENTS signals2 stacktrace_backtrace)
 find_package(prometheus-cpp REQUIRED)
 
-# Reported by nspm_build_info. The image does not carry a version, so pass these when building one.
-set(NSPM_VERSION "unknown" CACHE STRING "MQTTManager version reported by nspm_build_info")
-set(NSPM_GIT_SHA "unknown" CACHE STRING "Git commit reported by nspm_build_info")
-
 # Load CMake google test module
 include(GoogleTest)
 
@@ -72,20 +68,19 @@ target_link_libraries(MQTTManager_Entity spdlog::spdlog Boost::boost nlohmann_js
 
 # Prometheus registry, text serializer and /proc/self process collector. Depends on nothing else in
 # MQTTManager so that every component can link it.
-add_library(MQTTManager_Metrics STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/metrics.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/metrics.hpp)
+add_library(MQTTManager_Metrics STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/metrics.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/metrics.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/manager_metrics.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/manager_metrics.hpp)
 target_include_directories(MQTTManager_Metrics PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_compile_definitions(MQTTManager_Metrics PRIVATE NSPM_VERSION="${NSPM_VERSION}" NSPM_GIT_SHA="${NSPM_GIT_SHA}")
 target_link_libraries(MQTTManager_Metrics PUBLIC prometheus-cpp::core spdlog::spdlog)
 
 add_library(MQTTManager_WebsocketServer STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/websocket_server/websocket_server.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/websocket_server/websocket_server.hpp)
 set_target_properties(MQTTManager_WebsocketServer PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/websocket_server/websocket_server.hpp)
 target_include_directories(MQTTManager_WebsocketServer PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_WebsocketServer ixwebsocket::ixwebsocket spdlog::spdlog nlohmann_json::nlohmann_json Boost::boost gtest::gtest)
+target_link_libraries(MQTTManager_WebsocketServer MQTTManager_Metrics ixwebsocket::ixwebsocket spdlog::spdlog nlohmann_json::nlohmann_json Boost::boost gtest::gtest)
 
 add_library(MQTT_Manager STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.hpp)
 set_target_properties(MQTT_Manager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/mqtt_manager/mqtt_manager.hpp)
 target_include_directories(MQTT_Manager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTT_Manager PahoMqttCpp::paho-mqttpp3-static MQTTManager_Config MQTTManager_WebsocketServer spdlog::spdlog Boost::boost protobuf::protobuf MQTTManager_WebsocketServer gtest::gtest)
+target_link_libraries(MQTT_Manager MQTTManager_Metrics PahoMqttCpp::paho-mqttpp3-static MQTTManager_Config MQTTManager_WebsocketServer spdlog::spdlog Boost::boost protobuf::protobuf MQTTManager_WebsocketServer gtest::gtest)
 
 add_library(MQTTManager_CommandManager STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/command_manager/command_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/command_manager/command_manager.hpp)
 set_target_properties(MQTTManager_CommandManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/command_manager/command_manager.hpp)
@@ -95,12 +90,12 @@ target_link_libraries(MQTTManager_CommandManager MQTT_Manager spdlog::spdlog Boo
 add_library(MQTTManager_HomeAssistantManager STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/home_assistant_manager/home_assistant_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/home_assistant_manager/home_assistant_manager.hpp)
 set_target_properties(MQTTManager_HomeAssistantManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/home_assistant_manager/home_assistant_manager.hpp)
 target_include_directories(MQTTManager_HomeAssistantManager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_HomeAssistantManager Boost::stacktrace_backtrace spdlog::spdlog nlohmann_json::nlohmann_json ixwebsocket::ixwebsocket Boost::boost Boost::stacktrace_backtrace MQTTManager_Config MQTTManager_WebsocketServer gtest::gtest)
+target_link_libraries(MQTTManager_HomeAssistantManager MQTTManager_Metrics Boost::stacktrace_backtrace spdlog::spdlog nlohmann_json::nlohmann_json ixwebsocket::ixwebsocket Boost::boost Boost::stacktrace_backtrace MQTTManager_Config MQTTManager_WebsocketServer gtest::gtest)
 
 add_library(MQTTManager_OpenhabManager STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/openhab_manager/openhab_manager.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/openhab_manager/openhab_manager.hpp)
 set_target_properties(MQTTManager_OpenhabManager PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/openhab_manager/openhab_manager.hpp)
 target_include_directories(MQTTManager_OpenhabManager PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_OpenhabManager Boost::stacktrace_backtrace spdlog::spdlog nlohmann_json::nlohmann_json ixwebsocket::ixwebsocket Boost::boost MQTTManager_Config MQTTManager_WebsocketServer gtest::gtest)
+target_link_libraries(MQTTManager_OpenhabManager MQTTManager_Metrics Boost::stacktrace_backtrace spdlog::spdlog nlohmann_json::nlohmann_json ixwebsocket::ixwebsocket Boost::boost MQTTManager_Config MQTTManager_WebsocketServer gtest::gtest)
 
 add_library(MQTTManager_ManagerClock STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/manager_clock/manager_clock.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/manager_clock/manager_clock.hpp)
 set_target_properties(MQTTManager_ManagerClock PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/manager_clock/manager_clock.hpp)
@@ -145,7 +140,7 @@ target_link_libraries(MQTTManager_Switch MQTTManager_HomeAssistantManager spdlog
 add_library(MQTTManager_NSPanel STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.hpp)
 set_target_properties(MQTTManager_NSPanel PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/nspanel/nspanel.hpp)
 target_include_directories(MQTTManager_NSPanel PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_NSPanel spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager MQTTManager_ManagerClock MQTTManager_Room MQTTManager_WebsocketServer tz::tz Boost::boost MQTTManager_Config Protobuf_MQTTManager MQTTManager_DatabaseManager gtest::gtest)
+target_link_libraries(MQTTManager_NSPanel MQTTManager_Metrics spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager MQTTManager_ManagerClock MQTTManager_Room MQTTManager_WebsocketServer tz::tz Boost::boost MQTTManager_Config Protobuf_MQTTManager MQTTManager_DatabaseManager gtest::gtest)
 
 add_library(MQTTManager_Scene STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/nspm_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/nspm_scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/home_assistant_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/home_assistant_scene.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/openhab_scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scenes/openhab_scene.cpp)
 # set_target_properties(MQTTManager_Scene PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/scene/scene.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/scene/nspm_scene.hpp)
@@ -171,8 +166,8 @@ target_include_directories(MQTTManager_Config PUBLIC MQTTManager_WebHelper ${CMA
 target_link_libraries(MQTTManager_Config spdlog::spdlog MQTTManager_WebHelper nlohmann_json::nlohmann_json Boost::boost Protobuf_MQTTManager MQTTManager_DatabaseManager MQTTManager_WebsocketServer gtest::gtest)
 
 
-# Prometheus http_sd target list, built from the panels EntityManager holds.
-add_library(MQTTManager_PrometheusTargets STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/prometheus_targets.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/prometheus_targets.hpp)
+# Prometheus http_sd target list and the scrape-time panel collector, built from the panels EntityManager holds.
+add_library(MQTTManager_PrometheusTargets STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/prometheus_targets.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/prometheus_targets.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/panel_metrics_collector.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/metrics/panel_metrics_collector.hpp)
 target_include_directories(MQTTManager_PrometheusTargets PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(MQTTManager_PrometheusTargets MQTTManager_Metrics MQTTManager_EntityManager MQTTManager_NSPanel spdlog::spdlog nlohmann_json::nlohmann_json gtest::gtest)
 

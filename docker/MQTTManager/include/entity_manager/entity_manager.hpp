@@ -215,6 +215,11 @@ public:
   static void websocket_callback(StompFrame frame);
 
   static std::expected<std::shared_ptr<NSPanel>, EntityError> get_nspanel_by_id(uint id);
+
+  /**
+   * A copy of the list of all loaded NSPanels.
+   */
+  static std::vector<std::shared_ptr<NSPanel>> get_all_nspanels();
   static std::expected<std::shared_ptr<NSPanel>, EntityError> get_nspanel_by_mac(std::string mac);
   static std::expected<int32_t, EntityError> get_room_id_for_panel_id(uint32_t nspanel_id);
 

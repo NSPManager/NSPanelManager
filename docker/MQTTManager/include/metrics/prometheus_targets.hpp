@@ -2,6 +2,7 @@
 #define MQTTMANAGER_PROMETHEUS_TARGETS_HPP
 
 #include <cstdint>
+#include <nspanel/nspanel.hpp>
 #include <string>
 #include <vector>
 
@@ -9,7 +10,7 @@
  * Prometheus http_sd service discovery, served at GET /prometheus/targets.
  *
  * Lists the manager itself, under the Host the request arrived with, and every panel that can be
- * scraped: accepted, not denied, not offline, with a known IP and a metrics_port advertised in its
+ * scraped: accepted, online (not offline, waiting, rebooting or updating), with a known IP and a metrics_port advertised in its
  * register_request. See METRICS.md, "Service discovery endpoint".
  */
 class PrometheusTargets {
@@ -32,6 +33,11 @@ public:
    * The panels currently loaded in EntityManager that should be scraped.
    */
   static std::vector<PanelTarget> current_panel_targets();
+
+  /**
+   * The panels among the given ones that should be scraped.
+   */
+  static std::vector<PanelTarget> select_panel_targets(const std::vector<NSPanelMetricsSnapshot> &panels);
 
   /**
    * Whether host is a plain host[:port] (letters, digits, '.', '-', '_', ':', '[' and ']').

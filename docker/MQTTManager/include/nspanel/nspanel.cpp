@@ -34,6 +34,7 @@
 #include <iomanip>
 #include <ixwebsocket/IXWebSocketSendInfo.h>
 #include <light/light.hpp>
+#include <metrics/manager_metrics.hpp>
 #include <limits>
 #include <mutex>
 #include <netinet/in.h>
@@ -187,6 +188,9 @@ void NSPanel::reload_config() {
       this->_humidity = 0;
       this->_pressure = 0;
       this->_update_progress = 0;
+      this->_has_humidity = false;
+      this->_has_pressure = false;
+      this->_status_report_received = false;
     }
 
     // Last thing to do, check if the panel as actually accepted into our manager.
@@ -205,6 +209,7 @@ void NSPanel::reload_config() {
     }
 
     SPDLOG_DEBUG("Building MQTT topics for NSPanel {}::{}", this->_id, this->_name);
+    ManagerMetrics::panel_labels(this->_metrics_labels()); // Removes the old series if the panel was renamed.
     this->reset_mqtt_topics();
     // Convert stored MAC to MAC used in MQTT, ex. AA:AA:AA:BB:BB:BB to aa_aa_aa_bb_bb_bb
     std::string mqtt_register_mac = this->_mac;
@@ -524,10 +529,13 @@ void NSPanel::send_config() {
 
   SPDLOG_DEBUG("Sending updated NSPanelConfig to panel {}::{} over MQTT.", this->_id, this->_name);
   MQTT_Manager::publish_protobuf(this->_mqtt_config_topic, config, true);
+  ManagerMetrics::panel_config_sent(this->_metrics_labels(), config.ByteSizeLong());
 }
 
 NSPanel::~NSPanel() {
   SPDLOG_INFO("Destroying NSPanel {}::{}", this->_id, this->_name);
+  // Panels are destroyed when they are deleted from the manager (EntityManager::load_nspanels).
+  ManagerMetrics::panel_removed(this->_mac);
   CommandManager::detach_callback(boost::bind(&NSPanel::command_callback, this, _1));
   WebsocketServer::detach_stomp_callback(fmt::format("nspanel/{}/command", this->_mac), boost::bind(&NSPanel::handle_stomp_command_callback, this, _1));
 
@@ -683,6 +691,8 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
       NSPanelStatusReport report;
       if (report.ParseFromString(payload)) {
         SPDLOG_DEBUG("Got new status report from NSPanel {}::{}", this->_id, this->_name);
+        ManagerMetrics::panel_status_report(this->_metrics_labels());
+        this->_status_report_received = true;
         this->_ip_address = report.ip_address();
         this->_rssi = report.rssi();
         this->_heap_used_pct = report.heap_used_pct();
@@ -694,11 +704,13 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         MQTT_Manager::publish(this->_mqtt_temperature_topic, fmt::format("{:.1f}", this->_temperature));
         if (report.has_humidity()) {
           this->_humidity = report.humidity();
+          this->_has_humidity = true;
           MQTT_Manager::publish(this->_mqtt_humidity_topic, fmt::format("{:.1f}", this->_humidity));
         }
 
         if (report.has_pressure()) {
           this->_pressure = report.pressure();
+          this->_has_pressure = true;
           MQTT_Manager::publish(this->_mqtt_pressure_topic, fmt::format("{:.1f}", this->_pressure / 100));
         }
 
@@ -764,6 +776,8 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
 
         nlohmann::json data = nlohmann::json::parse(payload);
         if (std::string(data["mac"]).compare(this->_mac) == 0) {
+          ManagerMetrics::panel_status_report(this->_metrics_labels());
+          this->_status_report_received = true;
           // Update internal status
           this->_rssi = data["rssi"];
           this->_heap_used_pct = data["heap_used_pct"];
@@ -1299,6 +1313,40 @@ void NSPanel::send_command(nlohmann::json &command) {
   }
 }
 
+ManagerMetrics::PanelLabels NSPanel::_metrics_labels() {
+  return ManagerMetrics::PanelLabels{.panel = this->_name, .mac = this->_mac, .nspm_id = std::to_string(this->_id)};
+}
+
+NSPanelMetricsSnapshot NSPanel::get_metrics_snapshot() {
+  // Read the same way as send_websocket_status_update() and get_websocket_json_representation().
+  std::string model = "sonoff";
+  if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::CUSTOM) {
+    model = "custom";
+  } else if (this->_model == MQTT_MANAGER_NSPANEL_MODEL::WEB) {
+    model = "web";
+  }
+  return NSPanelMetricsSnapshot{
+      .id = this->_id,
+      .name = this->_name,
+      .mac = this->_mac,
+      .ip_address = this->_ip_address,
+      .model = model,
+      .state = this->_state,
+      .registered = this->_has_registered_to_manager,
+      .rssi = this->_rssi,
+      .heap_used_pct = this->_heap_used_pct,
+      .temperature = this->_temperature,
+      .humidity = this->_has_humidity ? std::optional<float>(this->_humidity) : std::nullopt,
+      .pressure = this->_has_pressure ? std::optional<float>(this->_pressure) : std::nullopt,
+      .update_progress = this->_update_progress,
+      .md5_firmware = this->_current_firmware_md5_checksum,
+      .md5_littlefs = this->_current_littlefs_md5_checksum,
+      .md5_tft = this->_current_tft_md5_checksum,
+      .status_report_received = this->_status_report_received,
+      .metrics_port = this->_metrics_port,
+  };
+}
+
 std::string NSPanel::get_name() {
   return this->_name;
 }
@@ -1317,6 +1365,25 @@ bool NSPanel::register_to_manager(const nlohmann::json &register_request_payload
     SPDLOG_TRACE("Processing register_request. Data: {}", register_request_payload.dump(4));
 
     SPDLOG_INFO("Registering NSPanel {}::{} to manager.", this->_id, this->_name);
+    {
+      ManagerMetrics::PanelLabels labels = this->_metrics_labels();
+      if (labels.panel.empty() && register_request_payload.contains("friendly_name") && register_request_payload.at("friendly_name").is_string()) {
+        labels.panel = register_request_payload.at("friendly_name").get<std::string>(); // A new panel has no name of its own yet.
+      }
+      ManagerMetrics::panel_register_request(labels);
+    }
+
+    // Optional: the port the panel serves Prometheus /metrics on. Panels without it are not listed in /prometheus/targets.
+    uint16_t metrics_port = 0;
+    if (register_request_payload.contains("metrics_port") && register_request_payload.at("metrics_port").is_number_integer()) {
+      int64_t port = register_request_payload.at("metrics_port").get<int64_t>();
+      if (port > 0 && port <= 65535) {
+        metrics_port = static_cast<uint16_t>(port);
+      } else {
+        SPDLOG_WARN("Ignoring metrics_port {} in register_request from NSPanel {}::{}.", port, this->_id, this->_name);
+      }
+    }
+    this->_metrics_port = metrics_port;
     // Verify a valid MAC address was provided in the register_request
     if (register_request_payload.contains("mac") && register_request_payload.at("mac").is_string()) {
       this->_mac = register_request_payload.at("mac");

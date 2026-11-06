@@ -10,6 +10,7 @@
 #include <ixwebsocket/IXWebSocket.h>
 #include <ixwebsocket/IXWebSocketMessage.h>
 #include <ixwebsocket/IXWebSocketMessageType.h>
+#include <metrics/manager_metrics.hpp>
 #include <mutex>
 #include <nlohmann/detail/json_pointer.hpp>
 #include <nlohmann/json_fwd.hpp>
@@ -104,12 +105,17 @@ void OpenhabManager::reload_config() {
 
 void OpenhabManager::_websocket_message_callback(const ix::WebSocketMessagePtr &msg) {
   if (msg->type == ix::WebSocketMessageType::Message) {
+    ManagerMetrics::integration_message_received(ManagerMetrics::Integration::OPENHAB);
+  }
+  if (msg->type == ix::WebSocketMessageType::Message) {
     OpenhabManager::_process_websocket_message(msg->str);
   } else if (msg->type == ix::WebSocketMessageType::Open) {
     WebsocketServer::remove_warning("Openhab not connected.");
     SPDLOG_INFO("Connected to Openhab websocket.");
     OpenhabManager::_authenticated = true;
     OpenhabManager::_connected = true;
+    ManagerMetrics::integration_connection_changed(ManagerMetrics::Integration::OPENHAB, true);
+    ManagerMetrics::integration_authenticated(ManagerMetrics::Integration::OPENHAB, true);
 
     // Fetch current state of all items as we've just connected to OpenHAB and things might be in an inconsistent state
     for (auto item_observer_pairs : OpenhabManager::_openhab_item_observers) {
@@ -137,11 +143,13 @@ void OpenhabManager::_websocket_message_callback(const ix::WebSocketMessagePtr &
     SPDLOG_WARN("Disconnected from Openhab websocket.");
     OpenhabManager::_authenticated = false;
     OpenhabManager::_connected = false;
+    ManagerMetrics::integration_connection_changed(ManagerMetrics::Integration::OPENHAB, false);
   } else if (msg->type == ix::WebSocketMessageType::Error) {
     WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "Openhab not connected.");
     SPDLOG_ERROR("Failed to connect to Openhab websocket. Reason: {}", msg->errorInfo.reason);
     OpenhabManager::_authenticated = false;
     OpenhabManager::_connected = false;
+    ManagerMetrics::integration_connection_changed(ManagerMetrics::Integration::OPENHAB, false);
   } else if (msg->type == ix::WebSocketMessageType::Fragment) {
     SPDLOG_ERROR("Received Openhab websocket fragment which is not supported.");
   }
@@ -258,6 +266,7 @@ void OpenhabManager::_send_string(std::string &data) {
     SPDLOG_TRACE("[OH WS] Sending data: {}", data);
     try {
       OpenhabManager::_websocket->send(data);
+      ManagerMetrics::integration_message_sent(ManagerMetrics::Integration::OPENHAB);
     } catch (std::exception &e) {
       SPDLOG_ERROR("[OH WS] Send failed. Caught error: {}", e.what());
     }

@@ -2,9 +2,13 @@
 #include <algorithm>
 #include <command_manager/command_manager.hpp>
 #include <functional>
+#include <iostream>
 #include <iterator>
 #include <gtest/gtest.h>
 #include <media_player/media_player.hpp>
+#include <metrics/metrics.hpp>
+#include <metrics/panel_metrics_collector.hpp>
+#include <metrics/prometheus_targets.hpp>
 #include <nspanel/nspanel.hpp>
 #include <protobuf_nspanel.pb.h>
 #include <room/room.hpp>
@@ -1004,4 +1008,126 @@ TEST_F(NSPanelTest, renamed_panel_moves_its_legacy_subscriptions_to_the_new_name
     EXPECT_EQ(MQTT_Manager::test_callback_count("nspanel/" + PANEL_NAME + suffix), 0);
     EXPECT_EQ(MQTT_Manager::test_callback_count("nspanel/Renamed hall panel" + std::string(suffix)), 1);
   }
+}
+
+namespace {
+
+std::string status_report_payload() {
+  NSPanelStatusReport report;
+  report.set_nspanel_state(NSPanelStatusReport_state_ONLINE);
+  report.set_rssi(-61);
+  report.set_heap_used_pct(42);
+  report.set_temperature(71.5);
+  report.set_ip_address("10.8.0.79");
+  report.set_md5_firmware("d7a9ecce");
+  report.set_md5_littlefs("706c2b5f");
+  report.set_md5_tft_gui("13bf1937");
+  report.set_has_humidity(true);
+  report.set_humidity(40);
+  return report.SerializeAsString();
+}
+
+// The labels every per-panel series of the test panel carries, as serialized.
+std::string panel_series(const std::string &name, int nspm_id) {
+  return name + "{mac=\"" + PANEL_MAC + "\",nspm_id=\"" + std::to_string(nspm_id) + "\",panel=\"" + PANEL_NAME + "\"}";
+}
+
+nlohmann::json register_request(std::optional<nlohmann::json> metrics_port) {
+  nlohmann::json request = {
+      {"command", "register_request"},
+      {"mac", PANEL_MAC},
+      {"friendly_name", PANEL_NAME},
+      {"model", "sonoff"},
+      {"version", "1.0"},
+      {"md5_firmware", "d7a9ecce"},
+      {"md5_data_file", "706c2b5f"},
+      {"md5_tft_file", "13bf1937"},
+  };
+  if (metrics_port) {
+    request["metrics_port"] = *metrics_port;
+  }
+  return request;
+}
+
+} // namespace
+
+TEST_F(NSPanelTest, metrics_snapshot_has_the_latest_status_report) {
+  load_panel();
+  NSPanelMetricsSnapshot before = panel->get_metrics_snapshot();
+  EXPECT_FALSE(before.status_report_received);
+  EXPECT_FALSE(before.humidity.has_value());
+
+  panel->mqtt_callback("nspanel/" + PANEL_MAC + "/status_report", status_report_payload());
+  NSPanelMetricsSnapshot snapshot = panel->get_metrics_snapshot();
+  EXPECT_TRUE(snapshot.status_report_received);
+  EXPECT_EQ(snapshot.state, MQTT_MANAGER_NSPANEL_STATE::ONLINE);
+  EXPECT_EQ(snapshot.ip_address, "10.8.0.79");
+  EXPECT_EQ(snapshot.rssi, -61);
+  EXPECT_EQ(snapshot.heap_used_pct, 42);
+  EXPECT_FLOAT_EQ(snapshot.temperature, 71.5);
+  ASSERT_TRUE(snapshot.humidity.has_value());
+  EXPECT_FLOAT_EQ(*snapshot.humidity, 40);
+  EXPECT_FALSE(snapshot.pressure.has_value());
+  EXPECT_EQ(snapshot.md5_firmware, "d7a9ecce");
+  EXPECT_EQ(snapshot.model, "sonoff");
+  EXPECT_TRUE(PanelMetricsCollector::is_accepted(snapshot));
+  EXPECT_TRUE(PanelMetricsCollector::is_up(snapshot));
+
+  std::string text = Metrics::serialize();
+  EXPECT_NE(text.find(panel_series("nspm_panel_status_reports_total", row->id)), std::string::npos) << text;
+  EXPECT_NE(text.find(panel_series("nspm_panel_last_status_report_timestamp_seconds", row->id)), std::string::npos) << text;
+}
+
+TEST_F(NSPanelTest, panel_is_a_target_once_it_advertises_metrics_port) {
+  load_panel();
+  panel->mqtt_callback("nspanel/" + PANEL_MAC + "/status_report", status_report_payload());
+  EXPECT_TRUE(PrometheusTargets::select_panel_targets({panel->get_metrics_snapshot()}).empty()) << "no metrics_port yet";
+
+  panel->register_to_manager(register_request(80));
+  auto targets = PrometheusTargets::select_panel_targets({panel->get_metrics_snapshot()});
+  ASSERT_EQ(targets.size(), 1u);
+  EXPECT_EQ(targets[0].ip_address, "10.8.0.79");
+  EXPECT_EQ(targets[0].metrics_port, 80);
+  EXPECT_EQ(targets[0].nspm_id, static_cast<uint32_t>(row->id));
+  EXPECT_EQ(targets[0].mac, PANEL_MAC);
+
+  std::string text = Metrics::serialize();
+  EXPECT_NE(text.find(panel_series("nspm_panel_register_requests_total", row->id)), std::string::npos) << text;
+
+  // Sample output for review.
+  std::cout << "--- sample /prometheus/targets ---\n"
+            << PrometheusTargets::build_json("nspm.manque.net", targets) << "\n--- end ---" << std::endl;
+
+  // Re-registering without it (firmware downgraded) drops the panel again.
+  panel->register_to_manager(register_request(std::nullopt));
+  EXPECT_TRUE(PrometheusTargets::select_panel_targets({panel->get_metrics_snapshot()}).empty());
+}
+
+TEST_F(NSPanelTest, invalid_metrics_port_is_ignored) {
+  load_panel();
+  panel->mqtt_callback("nspanel/" + PANEL_MAC + "/status_report", status_report_payload());
+  for (nlohmann::json port : {nlohmann::json(0), nlohmann::json(70000), nlohmann::json(-1), nlohmann::json("80"), nlohmann::json(80.5)}) {
+    panel->register_to_manager(register_request(port));
+    EXPECT_EQ(panel->get_metrics_snapshot().metrics_port, 0) << port.dump();
+  }
+}
+
+TEST_F(NSPanelTest, sent_configs_are_counted) {
+  load_panel();
+  std::string name = panel_series("nspm_panel_configs_sent_total", row->id) + " ";
+  auto count = [&name]() {
+    std::string text = Metrics::serialize();
+    size_t start = text.find(name);
+    return start == std::string::npos ? 0.0 : std::stod(text.substr(start + name.size()));
+  };
+  double before = count();
+  panel->send_config();
+  EXPECT_EQ(count(), before + 1);
+  EXPECT_NE(Metrics::serialize().find(panel_series("nspm_panel_config_bytes_total", row->id)), std::string::npos);
+}
+
+TEST(MetricsSampleOutput, print_metrics) {
+  // Not a check: prints what /prometheus/metrics serves after the other tests, for review.
+  std::cout << "--- sample /prometheus/metrics ---\n"
+            << Metrics::serialize() << "--- end ---" << std::endl;
 }

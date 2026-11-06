@@ -1041,6 +1041,11 @@ std::expected<std::shared_ptr<NSPanel>, EntityManager::EntityError> EntityManage
   return std::unexpected(EntityManager::EntityError::NOT_FOUND);
 }
 
+std::vector<std::shared_ptr<NSPanel>> EntityManager::get_all_nspanels() {
+  std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
+  return EntityManager::_nspanels;
+}
+
 std::expected<int32_t, EntityManager::EntityError> EntityManager::get_room_id_for_panel_id(uint32_t nspanel_id) {
   auto nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
   if (nspanel.has_value()) {
