@@ -584,6 +584,7 @@ void NSPanel::reset_ha_mqtt_topics() {
 }
 
 void NSPanel::erase() {
+  LatencyMetrics::panel_removed(this->_mac);
   this->reboot();
   this->reset_mqtt_topics();
   this->reset_ha_mqtt_topics();
@@ -668,7 +669,7 @@ void NSPanel::mqtt_callback(std::string topic, std::string payload) {
         log_data["mac_address"] = message_parts[0];
         log_data["level"] = message_parts[1];
         log_data["message"] = message;
-        LatencyMetrics::panel_log_line(this->_name, LatencyMetrics::panel_log_level(message_parts[1]));
+        LatencyMetrics::panel_log_line(this->_name, this->_mac, this->_id, LatencyMetrics::panel_log_level(message_parts[1]));
         WebsocketServer::update_stomp_topic_value(fmt::format("nspanel/{}/log", this->_mac), log_data);
 
         // Save log message in backtrace for when (if) the log interface requests it.
@@ -922,11 +923,11 @@ void NSPanel::mqtt_log_callback(std::string topic, std::string payload) {
   } else if (payload[0] == 'D') {
     log_data["level"] = "DEBUG";
   } else {
-    LatencyMetrics::panel_log_line(this->_name, "unknown");
+    LatencyMetrics::panel_log_line(this->_name, this->_mac, this->_id, "unknown");
     SPDLOG_ERROR("Received log message from NSPanel but could not determin level, will not store/forward log message to web interface! Level: {}, Message: {}", payload[0], payload);
     return;
   }
-  LatencyMetrics::panel_log_line(this->_name, LatencyMetrics::panel_log_level(std::string(1, payload[0])));
+  LatencyMetrics::panel_log_line(this->_name, this->_mac, this->_id, LatencyMetrics::panel_log_level(std::string(1, payload[0])));
 
   // Remove first char that indicates log level. This is stored separately
   payload = payload.substr(1);

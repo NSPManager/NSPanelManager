@@ -14,10 +14,30 @@ bool exposition_contains(const std::string &text) {
 TEST(LatencyMetricsTest, home_assistant_call_is_timed_from_request_to_result) {
   LatencyMetrics::home_assistant_request_sent(900001, "call_service", "test_call_domain");
   LatencyMetrics::home_assistant_request_sent(900002, "get_states", "");
-  LatencyMetrics::home_assistant_result_received(900001);
-  LatencyMetrics::home_assistant_result_received(900002); // Not timed: not a call_service.
-  LatencyMetrics::home_assistant_result_received(900001); // Already finished.
+  LatencyMetrics::home_assistant_result_received(900001, true);
+  LatencyMetrics::home_assistant_result_received(900002, true); // Not timed: not a call_service.
+  LatencyMetrics::home_assistant_result_received(900001, true); // Already finished.
   EXPECT_TRUE(exposition_contains("nspm_home_assistant_call_duration_seconds_count{domain=\"test_call_domain\"} 1"));
+  EXPECT_FALSE(exposition_contains("nspm_home_assistant_call_failures_total{domain=\"test_call_domain\"}"));
+}
+
+TEST(LatencyMetricsTest, failed_home_assistant_calls_are_counted_by_domain) {
+  LatencyMetrics::home_assistant_request_sent(900011, "call_service", "test_failing_domain");
+  LatencyMetrics::home_assistant_request_sent(900012, "call_service", "test_failing_domain");
+  LatencyMetrics::home_assistant_result_received(900011, false);
+  LatencyMetrics::home_assistant_result_received(900012, true);
+  EXPECT_TRUE(exposition_contains("nspm_home_assistant_call_failures_total{domain=\"test_failing_domain\"} 1"));
+  EXPECT_TRUE(exposition_contains("nspm_home_assistant_call_duration_seconds_count{domain=\"test_failing_domain\"} 2"));
+}
+
+TEST(LatencyMetricsTest, panel_log_line_series_follow_renames_and_deletion) {
+  LatencyMetrics::panel_log_line("TestOldName", "AA:BB:CC:00:00:01", 901, "warning");
+  EXPECT_TRUE(exposition_contains("nspm_panel_log_lines_total{level=\"warning\",mac=\"AA:BB:CC:00:00:01\",nspm_id=\"901\",panel=\"TestOldName\"} 1"));
+  LatencyMetrics::panel_log_line("TestNewName", "AA:BB:CC:00:00:01", 901, "warning");
+  EXPECT_FALSE(exposition_contains("panel=\"TestOldName\""));
+  EXPECT_TRUE(exposition_contains("nspm_panel_log_lines_total{level=\"warning\",mac=\"AA:BB:CC:00:00:01\",nspm_id=\"901\",panel=\"TestNewName\"} 1"));
+  LatencyMetrics::panel_removed("AA:BB:CC:00:00:01");
+  EXPECT_FALSE(exposition_contains("mac=\"AA:BB:CC:00:00:01\""));
 }
 
 TEST(LatencyMetricsTest, panel_command_observes_only_the_first_integration_call) {

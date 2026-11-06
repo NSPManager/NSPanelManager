@@ -2,7 +2,10 @@
 #include <cctype>
 #include <metrics/ha_call_tracker.hpp>
 #include <metrics/latency_metrics.hpp>
+#include <map>
+#include <mutex>
 #include <optional>
+#include <vector>
 #include <prometheus/counter.h>
 #include <prometheus/family.h>
 #include <prometheus/gauge.h>
@@ -113,14 +116,21 @@ void LatencyMetrics::home_assistant_request_sent(long id, const std::string &typ
   }
 }
 
-void LatencyMetrics::home_assistant_result_received(long id) {
+void LatencyMetrics::home_assistant_result_received(long id, bool success) {
   static auto &family = prometheus::BuildHistogram()
                             .Name("nspm_home_assistant_call_duration_seconds")
                             .Help("Time from sending a call_service request to Home Assistant to receiving its result.")
                             .Register(Metrics::registry());
+  static auto &failures = prometheus::BuildCounter()
+                              .Name("nspm_home_assistant_call_failures_total")
+                              .Help("call_service requests to Home Assistant whose result reported success: false.")
+                              .Register(Metrics::registry());
   auto result = ha_call_tracker().finish(id);
   if (result) {
     family.Add({{"domain", result->domain}}, Metrics::latency_buckets()).Observe(result->seconds);
+    if (!success) {
+      failures.Add({{"domain", result->domain}}).Increment();
+    }
   }
 }
 
@@ -156,12 +166,71 @@ void LatencyMetrics::integration_call_issued() {
   family.Add({{"type", command_in_flight->type}}, Metrics::fast_buckets()).Observe(LatencyMetrics::seconds_since(command_in_flight->started));
 }
 
-void LatencyMetrics::panel_log_line(const std::string &panel, const char *level) {
-  static auto &family = prometheus::BuildCounter()
-                            .Name("nspm_panel_log_lines_total")
-                            .Help("Log lines received from a panel over MQTT, by level.")
-                            .Register(Metrics::registry());
-  family.Add({{"panel", panel}, {"level", level}}).Increment();
+namespace {
+
+/**
+ * Per-panel series of nspm_panel_log_lines_total, keyed by MAC, so that the series under a panel's
+ * old name or id can be removed when it changes, and all of them when the panel is deleted.
+ */
+struct PanelLogLines {
+  struct Panel {
+    std::string name;
+    uint32_t nspm_id;
+    std::map<std::string, prometheus::Counter *> by_level;
+  };
+
+  std::mutex mutex;
+  std::map<std::string, Panel> panels;
+
+  static PanelLogLines &get() {
+    static PanelLogLines instance;
+    return instance;
+  }
+
+  static prometheus::Family<prometheus::Counter> &family() {
+    static auto &family = prometheus::BuildCounter()
+                              .Name("nspm_panel_log_lines_total")
+                              .Help("Log lines received from a panel over MQTT, by level.")
+                              .Register(Metrics::registry());
+    return family;
+  }
+
+  // Called with mutex held.
+  void remove(Panel &panel) {
+    for (auto &[level, counter] : panel.by_level) {
+      PanelLogLines::family().Remove(counter);
+    }
+    panel.by_level.clear();
+  }
+};
+
+} // namespace
+
+void LatencyMetrics::panel_log_line(const std::string &panel, const std::string &mac, uint32_t nspm_id, const char *level) {
+  auto &log_lines = PanelLogLines::get();
+  std::lock_guard<std::mutex> lock_guard(log_lines.mutex);
+  auto [it, inserted] = log_lines.panels.try_emplace(mac, PanelLogLines::Panel{.name = panel, .nspm_id = nspm_id, .by_level = {}});
+  if (!inserted && (it->second.name != panel || it->second.nspm_id != nspm_id)) {
+    log_lines.remove(it->second);
+    it->second.name = panel;
+    it->second.nspm_id = nspm_id;
+  }
+  auto counter = it->second.by_level.find(level);
+  if (counter == it->second.by_level.end()) {
+    prometheus::Counter *added = &PanelLogLines::family().Add({{"panel", panel}, {"mac", mac}, {"nspm_id", std::to_string(nspm_id)}, {"level", level}});
+    counter = it->second.by_level.emplace(level, added).first;
+  }
+  counter->second->Increment();
+}
+
+void LatencyMetrics::panel_removed(const std::string &mac) {
+  auto &log_lines = PanelLogLines::get();
+  std::lock_guard<std::mutex> lock_guard(log_lines.mutex);
+  auto it = log_lines.panels.find(mac);
+  if (it != log_lines.panels.end()) {
+    log_lines.remove(it->second);
+    log_lines.panels.erase(it);
+  }
 }
 
 const char *LatencyMetrics::panel_log_level(const std::string &level) {

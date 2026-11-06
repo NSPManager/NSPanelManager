@@ -157,10 +157,10 @@ void HomeAssistantManager::_process_websocket_message(const std::string &message
       SPDLOG_ERROR("Invalid authentication token when trying to connect to Home Assistant. Will try again in 5 seconds.");
       std::this_thread::sleep_for(std::chrono::milliseconds(5000));
     } else if (type.compare("result") == 0) {
-      if (data.contains("id") && data["id"].is_number_integer()) {
-        LatencyMetrics::home_assistant_result_received(data["id"].get<long>());
-      }
       bool success = data["success"];
+      if (data.contains("id") && data["id"].is_number_integer()) {
+        LatencyMetrics::home_assistant_result_received(data["id"].get<long>(), success);
+      }
       if (!success) {
         SPDLOG_ERROR("[HA WS] Command failed. Data: {}", message);
       }

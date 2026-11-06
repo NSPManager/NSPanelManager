@@ -2,6 +2,7 @@
 #define MQTTMANAGER_LATENCY_METRICS_HPP
 
 #include <chrono>
+#include <cstdint>
 #include <metrics/metrics.hpp>
 #include <string>
 
@@ -37,8 +38,8 @@ public:
 
   // A websocket request with this id was sent. Only call_service requests are timed.
   static void home_assistant_request_sent(long id, const std::string &type, const std::string &domain);
-  // The result for request `id` arrived.
-  static void home_assistant_result_received(long id);
+  // The result for request `id` arrived. `success` is the result's success field.
+  static void home_assistant_result_received(long id, bool success);
   // The websocket closed: results for requests in flight will never arrive.
   static void home_assistant_disconnected();
   // A state_changed event for this entity arrived from Home Assistant.
@@ -64,7 +65,10 @@ public:
   // --- Panels ---
 
   // A log line with this level (error, warning, info, debug or unknown) arrived from a panel.
-  static void panel_log_line(const std::string &panel, const char *level);
+  // Series are labelled panel, mac and nspm_id; when a panel's name or id changes its old series are removed.
+  static void panel_log_line(const std::string &panel, const std::string &mac, uint32_t nspm_id, const char *level);
+  // The panel with this MAC was deleted from the manager: remove its per-panel series.
+  static void panel_removed(const std::string &mac);
   // Map a panel's log level (a letter or a word, any case) to error, warning, info, debug or unknown.
   static const char *panel_log_level(const std::string &level);
   // An OTA update of `type` (firmware, littlefs, tft) was requested / started / succeeded / failed.
