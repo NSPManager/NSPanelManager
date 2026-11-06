@@ -4630,6 +4630,7 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
     kHasHumidityFieldNumber = 12,
     kHasPressureFieldNumber = 14,
     kPressureFieldNumber = 15,
+    kMetricsPortFieldNumber = 16,
   };
   // repeated .NSPanelWarning warnings = 8;
   int warnings_size() const;
@@ -4818,13 +4819,23 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
   void _internal_set_pressure(float value);
 
   public:
+  // int32 metrics_port = 16;
+  void clear_metrics_port() ;
+  ::int32_t metrics_port() const;
+  void set_metrics_port(::int32_t value);
+
+  private:
+  ::int32_t _internal_metrics_port() const;
+  void _internal_set_metrics_port(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:NSPanelStatusReport)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      4, 15, 1,
-      92, 2>
+      4, 16, 1,
+      100, 2>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -4859,6 +4870,7 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
     bool has_humidity_;
     bool has_pressure_;
     float pressure_;
+    ::int32_t metrics_port_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -8253,6 +8265,28 @@ inline float NSPanelStatusReport::_internal_pressure() const {
 inline void NSPanelStatusReport::_internal_set_pressure(float value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.pressure_ = value;
+}
+
+// int32 metrics_port = 16;
+inline void NSPanelStatusReport::clear_metrics_port() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.metrics_port_ = 0;
+}
+inline ::int32_t NSPanelStatusReport::metrics_port() const {
+  // @@protoc_insertion_point(field_get:NSPanelStatusReport.metrics_port)
+  return _internal_metrics_port();
+}
+inline void NSPanelStatusReport::set_metrics_port(::int32_t value) {
+  _internal_set_metrics_port(value);
+  // @@protoc_insertion_point(field_set:NSPanelStatusReport.metrics_port)
+}
+inline ::int32_t NSPanelStatusReport::_internal_metrics_port() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.metrics_port_;
+}
+inline void NSPanelStatusReport::_internal_set_metrics_port(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.metrics_port_ = value;
 }
 
 // -------------------------------------------------------------------
