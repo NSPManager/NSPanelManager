@@ -1936,7 +1936,7 @@
     {
       "type": "timeseries",
       "title": "Queue wait p95 by topic class",
-      "description": "Time a received message waits before it's processed. Includes the processing thread's 100 ms idle poll.",
+      "description": "Time a received message waits before it's processed. Builds whose processing thread polls the queue every 100 ms show waits spread evenly over 0\u2013100 ms; with the thread woken on push (fix/mqtt-queue-wakeup) they should be well under 1 ms.",
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
@@ -2285,21 +2285,88 @@
       }
     },
     {
-      "type": "row",
-      "title": "Manager: integrations",
-      "collapsed": false,
+      "type": "timeseries",
+      "title": "Bytes received/s by topic class",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "id": 30,
       "gridPos": {
         "x": 0,
         "y": 84,
-        "w": 24,
-        "h": 1
+        "w": 6,
+        "h": 8
       },
-      "id": 30,
-      "panels": []
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (topic_class) (rate(nspm_mqtt_received_bytes_total{job=\"nspanelmanager\",role=\"manager\"}[$__rate_interval]))",
+          "legendFormat": "{{topic_class}}",
+          "refId": "A",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 60,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "gradientMode": "none",
+            "axisBorderShow": false,
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
     },
     {
-      "type": "stat",
-      "title": "Home Assistant",
+      "type": "timeseries",
+      "title": "Bytes published/s",
       "description": "",
       "datasource": {
         "type": "prometheus",
@@ -2307,8 +2374,269 @@
       },
       "id": 31,
       "gridPos": {
+        "x": 6,
+        "y": 84,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(rate(nspm_mqtt_published_bytes_total{job=\"nspanelmanager\",role=\"manager\"}[$__rate_interval]))",
+          "legendFormat": "published",
+          "refId": "A",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "gradientMode": "none",
+            "axisBorderShow": false,
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Broker disconnects & publish errors (per hour)",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "id": 32,
+      "gridPos": {
+        "x": 12,
+        "y": 84,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(increase(nspm_mqtt_disconnects_total{job=\"nspanelmanager\",role=\"manager\"}[1h]))",
+          "legendFormat": "disconnects",
+          "refId": "A",
+          "range": true,
+          "instant": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(increase(nspm_mqtt_publish_errors_total{job=\"nspanelmanager\",role=\"manager\"}[1h]))",
+          "legendFormat": "publish errors",
+          "refId": "B",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "sum"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 60,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisSoftMin": 0,
+            "drawStyle": "bars",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "gradientMode": "none",
+            "axisBorderShow": false,
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Time blocked on a full queue (s/min)",
+      "description": "Seconds per minute the subscribe path spent waiting for room in the processing queue.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "id": 33,
+      "gridPos": {
+        "x": 18,
+        "y": 84,
+        "w": 6,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(rate(nspm_mqtt_queue_full_wait_seconds_total{job=\"nspanelmanager\",role=\"manager\"}[$__rate_interval])) * 60",
+          "legendFormat": "blocked",
+          "refId": "A",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "max",
+            "mean"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "gradientMode": "none",
+            "axisBorderShow": false,
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "row",
+      "title": "Manager: integrations",
+      "collapsed": false,
+      "gridPos": {
         "x": 0,
-        "y": 85,
+        "y": 92,
+        "w": 24,
+        "h": 1
+      },
+      "id": 34,
+      "panels": []
+    },
+    {
+      "type": "stat",
+      "title": "Home Assistant",
+      "description": "WebSocket connection (nspm_home_assistant_connected) plus authentication (nspm_home_assistant_authenticated).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "id": 35,
+      "gridPos": {
+        "x": 0,
+        "y": 93,
         "w": 6,
         "h": 4
       },
@@ -2318,7 +2646,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "min(nspm_home_assistant_authenticated{job=\"nspanelmanager\",role=\"manager\"})",
+          "expr": "max(nspm_home_assistant_connected{job=\"nspanelmanager\",role=\"manager\"}) + max(nspm_home_assistant_authenticated{job=\"nspanelmanager\",role=\"manager\"})",
           "legendFormat": "",
           "refId": "A",
           "range": false,
@@ -2349,8 +2677,12 @@
                 "value": null
               },
               {
-                "color": "green",
+                "color": "orange",
                 "value": 1
+              },
+              {
+                "color": "green",
+                "value": 2
               }
             ]
           },
@@ -2362,10 +2694,14 @@
               "type": "value",
               "options": {
                 "0": {
-                  "text": "not authenticated",
+                  "text": "disconnected",
                   "color": "red"
                 },
                 "1": {
+                  "text": "connected, not authenticated",
+                  "color": "orange"
+                },
+                "2": {
                   "text": "authenticated",
                   "color": "green"
                 }
@@ -2384,10 +2720,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 32,
+      "id": 36,
       "gridPos": {
         "x": 6,
-        "y": 85,
+        "y": 93,
         "w": 6,
         "h": 4
       },
@@ -2397,7 +2733,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "max(nspm_openhab_connected{job=\"nspanelmanager\",role=\"manager\"})",
+          "expr": "max(nspm_openhab_connected{job=\"nspanelmanager\",role=\"manager\"}) + max(nspm_openhab_authenticated{job=\"nspanelmanager\",role=\"manager\"})",
           "legendFormat": "",
           "refId": "A",
           "range": false,
@@ -2440,7 +2776,11 @@
                   "text": "not connected"
                 },
                 "1": {
-                  "text": "connected",
+                  "text": "connected, not authenticated",
+                  "color": "orange"
+                },
+                "2": {
+                  "text": "authenticated",
                   "color": "green"
                 }
               }
@@ -2458,10 +2798,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 33,
+      "id": 37,
       "gridPos": {
         "x": 12,
-        "y": 85,
+        "y": 93,
         "w": 6,
         "h": 4
       },
@@ -2519,10 +2859,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 34,
+      "id": 38,
       "gridPos": {
         "x": 18,
-        "y": 85,
+        "y": 93,
         "w": 6,
         "h": 4
       },
@@ -2585,10 +2925,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 35,
+      "id": 39,
       "gridPos": {
         "x": 0,
-        "y": 89,
+        "y": 97,
         "w": 12,
         "h": 8
       },
@@ -2665,10 +3005,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 36,
+      "id": 40,
       "gridPos": {
         "x": 12,
-        "y": 89,
+        "y": 97,
         "w": 12,
         "h": 8
       },
@@ -2744,10 +3084,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 37,
+      "id": 41,
       "gridPos": {
         "x": 0,
-        "y": 97,
+        "y": 105,
         "w": 12,
         "h": 8
       },
@@ -2824,10 +3164,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 38,
+      "id": 42,
       "gridPos": {
         "x": 12,
-        "y": 97,
+        "y": 105,
         "w": 12,
         "h": 8
       },
@@ -2897,16 +3237,229 @@
       }
     },
     {
+      "type": "timeseries",
+      "title": "Integration messages/s",
+      "description": "HA received is dominated by state_changed events for every entity in HA, not only the ones panels use.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "id": 43,
+      "gridPos": {
+        "x": 0,
+        "y": 113,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(rate(nspm_home_assistant_messages_received_total{job=\"nspanelmanager\",role=\"manager\"}[$__rate_interval]))",
+          "legendFormat": "HA received",
+          "refId": "A",
+          "range": true,
+          "instant": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(rate(nspm_home_assistant_messages_sent_total{job=\"nspanelmanager\",role=\"manager\"}[$__rate_interval]))",
+          "legendFormat": "HA sent",
+          "refId": "B",
+          "range": true,
+          "instant": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(rate(nspm_openhab_messages_received_total{job=\"nspanelmanager\",role=\"manager\"}[$__rate_interval]))",
+          "legendFormat": "OpenHAB received",
+          "refId": "C",
+          "range": true,
+          "instant": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(rate(nspm_openhab_messages_sent_total{job=\"nspanelmanager\",role=\"manager\"}[$__rate_interval]))",
+          "legendFormat": "OpenHAB sent",
+          "refId": "D",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "gradientMode": "none",
+            "axisBorderShow": false,
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Integration reconnects & auth failures (per hour)",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "id": 44,
+      "gridPos": {
+        "x": 12,
+        "y": 113,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(increase(nspm_home_assistant_reconnects_total{job=\"nspanelmanager\",role=\"manager\"}[1h]))",
+          "legendFormat": "HA reconnects",
+          "refId": "A",
+          "range": true,
+          "instant": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(increase(nspm_home_assistant_auth_failures_total{job=\"nspanelmanager\",role=\"manager\"}[1h]))",
+          "legendFormat": "HA auth failures",
+          "refId": "B",
+          "range": true,
+          "instant": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(increase(nspm_openhab_reconnects_total{job=\"nspanelmanager\",role=\"manager\"}[1h]))",
+          "legendFormat": "OpenHAB reconnects",
+          "refId": "C",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "sum"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 60,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisSoftMin": 0,
+            "drawStyle": "bars",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "gradientMode": "none",
+            "axisBorderShow": false,
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
       "type": "row",
       "title": "Manager: config, updates, services",
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 105,
+        "y": 121,
         "w": 24,
         "h": 1
       },
-      "id": 39,
+      "id": 45,
       "panels": []
     },
     {
@@ -2917,10 +3470,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 40,
+      "id": 46,
       "gridPos": {
         "x": 0,
-        "y": 106,
+        "y": 122,
         "w": 12,
         "h": 8
       },
@@ -3019,10 +3572,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 41,
+      "id": 47,
       "gridPos": {
         "x": 12,
-        "y": 106,
+        "y": 122,
         "w": 12,
         "h": 8
       },
@@ -3097,10 +3650,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 42,
+      "id": 48,
       "gridPos": {
         "x": 0,
-        "y": 114,
+        "y": 130,
         "w": 12,
         "h": 8
       },
@@ -3177,10 +3730,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 43,
+      "id": 49,
       "gridPos": {
         "x": 12,
-        "y": 114,
+        "y": 130,
         "w": 12,
         "h": 8
       },
@@ -3257,10 +3810,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 44,
+      "id": 50,
       "gridPos": {
         "x": 0,
-        "y": 122,
+        "y": 138,
         "w": 12,
         "h": 8
       },
@@ -3335,10 +3888,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 45,
+      "id": 51,
       "gridPos": {
         "x": 12,
-        "y": 122,
+        "y": 138,
         "w": 12,
         "h": 8
       },
@@ -3408,16 +3961,673 @@
       }
     },
     {
+      "type": "timeseries",
+      "title": "Status reports/min by panel",
+      "description": "About 2/min normally (every 30 s); faster during updates (every 1\u20135 s).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "id": 52,
+      "gridPos": {
+        "x": 0,
+        "y": 146,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (panel) (rate(nspm_panel_status_reports_total{job=\"nspanelmanager\",role=\"manager\"}[$__rate_interval])) * 60",
+          "legendFormat": "{{panel}}",
+          "refId": "A",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "min",
+            "mean",
+            "lastNotNull"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "gradientMode": "none",
+            "axisBorderShow": false,
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Update progress",
+      "description": "Only panels with an update in progress are drawn.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "id": 53,
+      "gridPos": {
+        "x": 12,
+        "y": 146,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "max by (panel) (nspm_panel_update_progress_ratio{job=\"nspanelmanager\",role=\"manager\"}) > 0",
+          "legendFormat": "{{panel}}",
+          "refId": "A",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "lastNotNull"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "gradientMode": "none",
+            "axisBorderShow": false,
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Register requests (per hour)",
+      "description": "A panel sends register_request when it boots, so this is effectively a reboot count.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "id": 54,
+      "gridPos": {
+        "x": 0,
+        "y": 154,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (panel) (increase(nspm_panel_register_requests_total{job=\"nspanelmanager\",role=\"manager\"}[1h]))",
+          "legendFormat": "{{panel}}",
+          "refId": "A",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "sum"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 60,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisSoftMin": 0,
+            "drawStyle": "bars",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "gradientMode": "none",
+            "axisBorderShow": false,
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Config bytes sent (per hour)",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "id": 55,
+      "gridPos": {
+        "x": 12,
+        "y": 154,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (panel) (increase(nspm_panel_config_bytes_total{job=\"nspanelmanager\",role=\"manager\"}[1h]))",
+          "legendFormat": "{{panel}}",
+          "refId": "A",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "sum"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 60,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisSoftMin": 0,
+            "drawStyle": "bars",
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            },
+            "gradientMode": "none",
+            "axisBorderShow": false,
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Weather data age",
+      "description": "Seconds since the last successful weather fetch.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "id": 56,
+      "gridPos": {
+        "x": 0,
+        "y": 162,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "time() - max(nspm_weather_last_success_timestamp_seconds{job=\"nspanelmanager\",role=\"manager\"})",
+          "legendFormat": "age",
+          "refId": "A",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "max",
+            "lastNotNull"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "gradientMode": "none",
+            "axisBorderShow": false,
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 3600
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Clock broadcasts (per hour)",
+      "description": "Wall-clock time the manager publishes to panels (about once a minute).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "id": 57,
+      "gridPos": {
+        "x": 12,
+        "y": 162,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum(increase(nspm_clock_broadcasts_total{job=\"nspanelmanager\",role=\"manager\"}[1h]))",
+          "legendFormat": "broadcasts",
+          "refId": "A",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "sum"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 60,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisSoftMin": 0,
+            "drawStyle": "bars",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "gradientMode": "none",
+            "axisBorderShow": false,
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Album art convert time",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "id": 58,
+      "gridPos": {
+        "x": 0,
+        "y": 170,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "histogram_quantile(0.5, sum by (le) (rate(nspm_image_convert_duration_seconds_bucket{job=\"nspanelmanager\",role=\"manager\"}[$__rate_interval])))",
+          "legendFormat": "p50",
+          "refId": "A",
+          "range": true,
+          "instant": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(nspm_image_convert_duration_seconds_bucket{job=\"nspanelmanager\",role=\"manager\"}[$__rate_interval])))",
+          "legendFormat": "p95",
+          "refId": "B",
+          "range": true,
+          "instant": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "histogram_quantile(0.99, sum by (le) (rate(nspm_image_convert_duration_seconds_bucket{job=\"nspanelmanager\",role=\"manager\"}[$__rate_interval])))",
+          "legendFormat": "p99",
+          "refId": "C",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "gradientMode": "none",
+            "axisBorderShow": false,
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Web UI WebSocket messages/s",
+      "description": "",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "id": 59,
+      "gridPos": {
+        "x": 12,
+        "y": 170,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (direction) (rate(nspm_websocket_messages_total{job=\"nspanelmanager\",role=\"manager\"}[$__rate_interval]))",
+          "legendFormat": "{{direction}}",
+          "refId": "A",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "mean",
+            "max",
+            "lastNotNull"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "gradientMode": "none",
+            "axisBorderShow": false,
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
       "type": "row",
       "title": "Manager: process",
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 130,
+        "y": 178,
         "w": 24,
         "h": 1
       },
-      "id": 46,
+      "id": 60,
       "panels": []
     },
     {
@@ -3428,10 +4638,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 47,
+      "id": 61,
       "gridPos": {
         "x": 0,
-        "y": 131,
+        "y": 179,
         "w": 8,
         "h": 8
       },
@@ -3508,10 +4718,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 48,
+      "id": 62,
       "gridPos": {
         "x": 8,
-        "y": 131,
+        "y": 179,
         "w": 8,
         "h": 8
       },
@@ -3588,10 +4798,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 49,
+      "id": 63,
       "gridPos": {
         "x": 16,
-        "y": 131,
+        "y": 179,
         "w": 8,
         "h": 8
       },

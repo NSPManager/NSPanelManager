@@ -255,8 +255,8 @@
     },
     {
       "type": "stat",
-      "title": "Heap free (min since boot)",
-      "description": "",
+      "title": "Internal heap free (min since boot)",
+      "description": "Internal RAM only (PSRAM excluded): every allocation under 16 KB comes from it.",
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
@@ -274,7 +274,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "min by (panel) (nspanel_heap_min_free_bytes{job=\"nspanelmanager\",role=\"panel\",panel=~\"${panel:regex}\"})",
+          "expr": "min by (panel) (nspanel_heap_min_free_bytes{job=\"nspanelmanager\",role=\"panel\",panel=~\"${panel:regex}\",pool=\"internal\"})",
           "legendFormat": "{{panel}}",
           "refId": "A",
           "range": false,
@@ -1492,16 +1492,94 @@
       }
     },
     {
+      "type": "timeseries",
+      "title": "Power-save set failures (per hour)",
+      "description": "esp_wifi_set_ps() calls that failed when the screensaver switched modem sleep on or off.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "id": 24,
+      "gridPos": {
+        "x": 0,
+        "y": 56,
+        "w": 24,
+        "h": 6
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "sum by (panel) (increase(nspanel_wifi_power_save_set_failures_total{job=\"nspanelmanager\",role=\"panel\",panel=~\"${panel:regex}\"}[1h]))",
+          "legendFormat": "{{panel}}",
+          "refId": "A",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "sum"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 60,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisSoftMin": 0,
+            "drawStyle": "bars",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "gradientMode": "none",
+            "axisBorderShow": false,
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
       "type": "row",
       "title": "Logging and memory",
       "collapsed": false,
       "gridPos": {
         "x": 0,
-        "y": 56,
+        "y": 62,
         "w": 24,
         "h": 1
       },
-      "id": 24,
+      "id": 25,
       "panels": []
     },
     {
@@ -1512,10 +1590,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 25,
+      "id": 26,
       "gridPos": {
         "x": 0,
-        "y": 57,
+        "y": 63,
         "w": 8,
         "h": 8
       },
@@ -1614,10 +1692,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 26,
+      "id": 27,
       "gridPos": {
         "x": 8,
-        "y": 57,
+        "y": 63,
         "w": 8,
         "h": 8
       },
@@ -1716,10 +1794,10 @@
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 27,
+      "id": 28,
       "gridPos": {
         "x": 16,
-        "y": 57,
+        "y": 63,
         "w": 8,
         "h": 8
       },
@@ -1789,16 +1867,16 @@
     },
     {
       "type": "timeseries",
-      "title": "Heap free",
-      "description": "",
+      "title": "Internal heap free",
+      "description": "Internal RAM only (MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT, as the status report's heap_used_pct). Every allocation under 16 KB comes from it; the largest free block is what decides whether one fits.",
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 28,
+      "id": 29,
       "gridPos": {
         "x": 0,
-        "y": 65,
+        "y": 71,
         "w": 12,
         "h": 8
       },
@@ -1808,7 +1886,7 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "min by (panel) (nspanel_heap_free_bytes{job=\"nspanelmanager\",role=\"panel\",panel=~\"${panel:regex}\"})",
+          "expr": "min by (panel) (nspanel_heap_free_bytes{job=\"nspanelmanager\",role=\"panel\",panel=~\"${panel:regex}\",pool=\"internal\"})",
           "legendFormat": "{{panel}} free",
           "refId": "A",
           "range": true,
@@ -1819,9 +1897,20 @@
             "type": "prometheus",
             "uid": "${datasource}"
           },
-          "expr": "min by (panel) (nspanel_heap_min_free_bytes{job=\"nspanelmanager\",role=\"panel\",panel=~\"${panel:regex}\"})",
+          "expr": "min by (panel) (nspanel_heap_min_free_bytes{job=\"nspanelmanager\",role=\"panel\",panel=~\"${panel:regex}\",pool=\"internal\"})",
           "legendFormat": "{{panel}} min since boot",
           "refId": "B",
+          "range": true,
+          "instant": false
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "min by (panel) (nspanel_heap_largest_free_block_bytes{job=\"nspanelmanager\",role=\"panel\",panel=~\"${panel:regex}\",pool=\"internal\"})",
+          "legendFormat": "{{panel}} largest free block",
+          "refId": "C",
           "range": true,
           "instant": false
         }
@@ -1880,15 +1969,15 @@
     {
       "type": "timeseries",
       "title": "Log queue high-water",
-      "description": "",
+      "description": "Highest number of log lines waiting since boot. The queue holds 16 (main.cpp:202); at 16, lines are being dropped.",
       "datasource": {
         "type": "prometheus",
         "uid": "${datasource}"
       },
-      "id": 29,
+      "id": 30,
       "gridPos": {
         "x": 12,
-        "y": 65,
+        "y": 71,
         "w": 12,
         "h": 8
       },
@@ -1923,6 +2012,89 @@
       "fieldConfig": {
         "defaults": {
           "unit": "none",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": true,
+            "axisSoftMin": 0,
+            "drawStyle": "line",
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "gradientMode": "none",
+            "axisBorderShow": false,
+            "thresholdsStyle": {
+              "mode": "line"
+            }
+          },
+          "color": {
+            "mode": "palette-classic-by-name"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 16
+              }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Heap used by pool",
+      "description": "Used fraction of each heap pool. Internal should match the status report's heap_used_pct; PSRAM is the large, mostly idle pool.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${datasource}"
+      },
+      "id": 31,
+      "gridPos": {
+        "x": 0,
+        "y": 79,
+        "w": 24,
+        "h": 7
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "expr": "1 - max by (panel, pool) (nspanel_heap_free_bytes{job=\"nspanelmanager\",role=\"panel\",panel=~\"${panel:regex}\"}) / max by (panel, pool) (nspanel_heap_size_bytes{job=\"nspanelmanager\",role=\"panel\",panel=~\"${panel:regex}\"})",
+          "legendFormat": "{{panel}} {{pool}}",
+          "refId": "A",
+          "range": true,
+          "instant": false
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right",
+          "calcs": [
+            "max",
+            "lastNotNull"
+          ],
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
           "custom": {
             "lineWidth": 2,
             "fillOpacity": 0,

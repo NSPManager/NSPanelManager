@@ -227,7 +227,8 @@ def fleet():
     P.append(ts(L, "Messages published/s",
                 [target(f"sum by (retained) (rate(nspm_mqtt_messages_published_total{{{MGR}}}[{RI}]))", "retained={{retained}}")], unit="reqps", stack=True))
     P.append(ts(L, "Queue wait p95 by topic class", by_quantile("nspm_mqtt_queue_wait_seconds", "topic_class", MGR), unit="s",
-                desc="Time a received message waits before it's processed. Includes the processing thread's 100 ms idle poll."))
+                desc="Time a received message waits before it's processed. Builds whose processing thread polls the queue every 100 ms show "
+                     "waits spread evenly over 0–100 ms; with the thread woken on push (fix/mqtt-queue-wakeup) they should be well under 1 ms."))
     P.append(ts(L, "Handler time p95 by topic class", by_quantile("nspm_mqtt_handler_duration_seconds", "topic_class", MGR), unit="s"))
     P.append(ts(L, "Queue depth", [target(f"max(nspm_mqtt_queue_depth{{{MGR}}})", "depth"), target(f"max(nspm_mqtt_queue_depth_max{{{MGR}}})", "max since start", "B")],
                 unit="none", legend_calcs=("max", "lastNotNull")))
@@ -236,13 +237,27 @@ def fleet():
         target(f"sum by (topic_class) (rate(nspm_mqtt_messages_dropped_total{{{MGR}}}[{RI}])) * 60", "dropped {{topic_class}}", "B"),
         target(f"sum(rate(nspm_mqtt_handler_exceptions_total{{{MGR}}}[{RI}])) * 60", "handler exceptions", "C"),
     ], unit="none", legend_calcs=("max", "sum")))
+    P.append(ts(L, "Bytes received/s by topic class",
+                [target(f"sum by (topic_class) (rate(nspm_mqtt_received_bytes_total{{{MGR}}}[{RI}]))", "{{topic_class}}")], unit="Bps", stack=True, w=6))
+    P.append(ts(L, "Bytes published/s",
+                [target(f"sum(rate(nspm_mqtt_published_bytes_total{{{MGR}}}[{RI}]))", "published")], unit="Bps", w=6))
+    P.append(ts(L, "Broker disconnects & publish errors (per hour)", [
+        target(f"sum(increase(nspm_mqtt_disconnects_total{{{MGR}}}[1h]))", "disconnects"),
+        target(f"sum(increase(nspm_mqtt_publish_errors_total{{{MGR}}}[1h]))", "publish errors", "B"),
+    ], bars=True, w=6, legend_calcs=("sum",)))
+    P.append(ts(L, "Time blocked on a full queue (s/min)",
+                [target(f"sum(rate(nspm_mqtt_queue_full_wait_seconds_total{{{MGR}}}[{RI}])) * 60", "blocked")], unit="s", w=6,
+                desc="Seconds per minute the subscribe path spent waiting for room in the processing queue.", legend_calcs=("max", "mean")))
 
+    conn_mapping = [{"type": "value", "options": {"0": {"text": "disconnected", "color": "red"}, "1": {"text": "connected, not authenticated", "color": "orange"},
+                                                  "2": {"text": "authenticated", "color": "green"}}}]
     P.append(row(L, "Manager: integrations"))
-    P.append(stat(L, "Home Assistant", f"min(nspm_home_assistant_authenticated{{{MGR}}})", w=6,
-                  mappings=[{"type": "value", "options": {"0": {"text": "not authenticated", "color": "red"}, "1": {"text": "authenticated", "color": "green"}}}],
-                  steps=[("red", None), ("green", 1)]))
-    P.append(stat(L, "OpenHAB", f"max(nspm_openhab_connected{{{MGR}}})", w=6,
-                  mappings=[{"type": "value", "options": {"0": {"text": "not connected"}, "1": {"text": "connected", "color": "green"}}}],
+    P.append(stat(L, "Home Assistant", f"max(nspm_home_assistant_connected{{{MGR}}}) + max(nspm_home_assistant_authenticated{{{MGR}}})", w=6,
+                  mappings=conn_mapping, steps=[("red", None), ("orange", 1), ("green", 2)],
+                  desc="WebSocket connection (nspm_home_assistant_connected) plus authentication (nspm_home_assistant_authenticated)."))
+    P.append(stat(L, "OpenHAB", f"max(nspm_openhab_connected{{{MGR}}}) + max(nspm_openhab_authenticated{{{MGR}}})", w=6,
+                  mappings=[{"type": "value", "options": {"0": {"text": "not connected"}, "1": {"text": "connected, not authenticated", "color": "orange"},
+                                                          "2": {"text": "authenticated", "color": "green"}}}],
                   desc="Only meaningful if OpenHAB is configured."))
     P.append(stat(L, "Web UI clients", f"max(nspm_websocket_clients{{{MGR}}})", w=6))
     P.append(stat(L, "HA reconnects (24h)", f"sum(increase(nspm_home_assistant_reconnects_total{{{MGR}}}[24h]))", w=6, decimals=0,
@@ -255,6 +270,17 @@ def fleet():
                 [target(f"sum by (domain) (rate(nspm_home_assistant_state_changes_total{{{MGR}}}[{RI}]))", "{{domain}}")], unit="reqps", stack=True))
     P.append(ts(L, "Panel command → integration call, p95", by_quantile("nspm_panel_command_duration_seconds", "type", MGR), unit="s",
                 desc="From a panel command arriving to the first HA/OpenHAB call it makes."))
+    P.append(ts(L, "Integration messages/s", [
+        target(f"sum(rate(nspm_home_assistant_messages_received_total{{{MGR}}}[{RI}]))", "HA received"),
+        target(f"sum(rate(nspm_home_assistant_messages_sent_total{{{MGR}}}[{RI}]))", "HA sent", "B"),
+        target(f"sum(rate(nspm_openhab_messages_received_total{{{MGR}}}[{RI}]))", "OpenHAB received", "C"),
+        target(f"sum(rate(nspm_openhab_messages_sent_total{{{MGR}}}[{RI}]))", "OpenHAB sent", "D"),
+    ], unit="reqps", desc="HA received is dominated by state_changed events for every entity in HA, not only the ones panels use."))
+    P.append(ts(L, "Integration reconnects & auth failures (per hour)", [
+        target(f"sum(increase(nspm_home_assistant_reconnects_total{{{MGR}}}[1h]))", "HA reconnects"),
+        target(f"sum(increase(nspm_home_assistant_auth_failures_total{{{MGR}}}[1h]))", "HA auth failures", "B"),
+        target(f"sum(increase(nspm_openhab_reconnects_total{{{MGR}}}[1h]))", "OpenHAB reconnects", "C"),
+    ], bars=True, legend_calcs=("sum",)))
 
     P.append(row(L, "Manager: config, updates, services"))
     P.append(ts(L, "Config build time", quantiles("nspm_panel_config_build_seconds", "", MGR, ""), unit="s"))
@@ -268,6 +294,24 @@ def fleet():
                 bars=True, legend_calcs=("sum",)))
     P.append(ts(L, "HTTP requests/s by route", [target(f"sum by (route, code) (rate(nspm_http_requests_total{{{MGR}}}[{RI}]))", "{{route}} {{code}}")],
                 unit="reqps"))
+    P.append(ts(L, "Status reports/min by panel",
+                [target(f"sum by (panel) (rate(nspm_panel_status_reports_total{{{MGR}}}[{RI}])) * 60", "{{panel}}")],
+                desc="About 2/min normally (every 30 s); faster during updates (every 1–5 s).", legend_calcs=("min", "mean", "lastNotNull")))
+    P.append(ts(L, "Update progress", [target(f"max by (panel) (nspm_panel_update_progress_ratio{{{MGR}}}) > 0", "{{panel}}")],
+                unit="percentunit", legend_calcs=("lastNotNull",), desc="Only panels with an update in progress are drawn."))
+    P.append(ts(L, "Register requests (per hour)",
+                [target(f"sum by (panel) (increase(nspm_panel_register_requests_total{{{MGR}}}[1h]))", "{{panel}}")], bars=True, stack=True,
+                desc="A panel sends register_request when it boots, so this is effectively a reboot count.", legend_calcs=("sum",)))
+    P.append(ts(L, "Config bytes sent (per hour)",
+                [target(f"sum by (panel) (increase(nspm_panel_config_bytes_total{{{MGR}}}[1h]))", "{{panel}}")], unit="bytes", bars=True, stack=True,
+                legend_calcs=("sum",)))
+    P.append(ts(L, "Weather data age", [target(f"time() - max(nspm_weather_last_success_timestamp_seconds{{{MGR}}})", "age")], unit="s",
+                steps=[("green", None), ("orange", 3600)], desc="Seconds since the last successful weather fetch.", legend_calcs=("max", "lastNotNull")))
+    P.append(ts(L, "Clock broadcasts (per hour)", [target(f"sum(increase(nspm_clock_broadcasts_total{{{MGR}}}[1h]))", "broadcasts")], bars=True,
+                desc="Wall-clock time the manager publishes to panels (about once a minute).", legend_calcs=("sum",)))
+    P.append(ts(L, "Album art convert time", quantiles("nspm_image_convert_duration_seconds", "", MGR, ""), unit="s"))
+    P.append(ts(L, "Web UI WebSocket messages/s",
+                [target(f"sum by (direction) (rate(nspm_websocket_messages_total{{{MGR}}}[{RI}]))", "{{direction}}")], unit="reqps"))
 
     P.append(row(L, "Manager: process"))
     P.append(ts(L, "CPU", [target(f"rate(process_cpu_seconds_total{{{MGR}}}[{RI}])", "cpu")], unit="percentunit", w=8))
@@ -294,7 +338,8 @@ def panel_detail():
     P.append(stat(L, "RSSI", f"max by (panel) (nspm_panel_wifi_rssi_dbm{{{S}}})", unit="dBm", w=4, legend="{{panel}}",
                   steps=[("red", None), ("orange", -80), ("green", -70)]))
     P.append(stat(L, "Temperature", f"max by (panel) (nspm_panel_temperature_celsius{{{S}}})", unit="celsius", w=4, decimals=1, legend="{{panel}}"))
-    P.append(stat(L, "Heap free (min since boot)", f"min by (panel) (nspanel_heap_min_free_bytes{{{SP}}})", unit="bytes", w=4, legend="{{panel}}"))
+    P.append(stat(L, "Internal heap free (min since boot)", f"min by (panel) (nspanel_heap_min_free_bytes{{{SP},pool=\"internal\"}})", unit="bytes", w=4, legend="{{panel}}",
+                  desc="Internal RAM only (PSRAM excluded): every allocation under 16 KB comes from it."))
     P.append(stat(L, "Wi-Fi power save", f"max by (panel) (nspanel_wifi_power_save_mode{{{SP}}})", w=4, legend="{{panel}}",
                   mappings=[{"type": "value", "options": {"0": {"text": "awake (none)"}, "1": {"text": "modem sleep"}}}]))
     P.append(stat(L, "Log lines dropped (24h)", f"sum by (panel) (increase(nspanel_log_lines_dropped_total{{{SP}}}[24h]))", w=4, decimals=0,
@@ -336,6 +381,9 @@ def panel_detail():
         legend_calcs=("mean", "lastNotNull")))
     P.append(ts(L, "Temperature", [target(f"max by (panel) (nspm_panel_temperature_celsius{{{S}}})", "{{panel}}")], unit="celsius", min0=False,
                 legend_calcs=("min", "max", "lastNotNull")))
+    P.append(ts(L, "Power-save set failures (per hour)",
+                [target(f"sum by (panel) (increase(nspanel_wifi_power_save_set_failures_total{{{SP}}}[1h]))", "{{panel}}")], bars=True, w=24, h=6,
+                desc="esp_wifi_set_ps() calls that failed when the screensaver switched modem sleep on or off.", legend_calcs=("sum",)))
 
     P.append(row(L, "Logging and memory"))
     P.append(ts(L, "Log call duration", quantiles("nspanel_log_call_duration_seconds", "", SP, ""), unit="s", w=8))
@@ -344,11 +392,19 @@ def panel_detail():
     P.append(ts(L, "Log lines dropped/min", [
         target(f"sum by (panel) (rate(nspanel_log_lines_dropped_total{{{SP}}}[{RI}])) * 60", "{{panel}} dropped/min"),
     ], w=8, legend_calcs=("max", "mean")))
-    P.append(ts(L, "Heap free", [target(f"min by (panel) (nspanel_heap_free_bytes{{{SP}}})", "{{panel}} free"),
-                                 target(f"min by (panel) (nspanel_heap_min_free_bytes{{{SP}}})", "{{panel}} min since boot", "B")],
-                unit="bytes", min0=False, legend_calcs=("min", "lastNotNull")))
+    P.append(ts(L, "Internal heap free", [target(f"min by (panel) (nspanel_heap_free_bytes{{{SP},pool=\"internal\"}})", "{{panel}} free"),
+                                          target(f"min by (panel) (nspanel_heap_min_free_bytes{{{SP},pool=\"internal\"}})", "{{panel}} min since boot", "B"),
+                                          target(f"min by (panel) (nspanel_heap_largest_free_block_bytes{{{SP},pool=\"internal\"}})", "{{panel}} largest free block", "C")],
+                unit="bytes", min0=False, legend_calcs=("min", "lastNotNull"),
+                desc="Internal RAM only (MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT, as the status report's heap_used_pct). "
+                     "Every allocation under 16 KB comes from it; the largest free block is what decides whether one fits."))
     P.append(ts(L, "Log queue high-water", [target(f"max by (panel) (nspanel_log_queue_high_water{{{SP}}})", "{{panel}}")],
-                legend_calcs=("max", "lastNotNull")))
+                legend_calcs=("max", "lastNotNull"), steps=[("green", None), ("orange", 16)],
+                desc="Highest number of log lines waiting since boot. The queue holds 16 (main.cpp:202); at 16, lines are being dropped."))
+    P.append(ts(L, "Heap used by pool", [target(
+        f"1 - max by (panel, pool) (nspanel_heap_free_bytes{{{SP}}}) / max by (panel, pool) (nspanel_heap_size_bytes{{{SP}}})", "{{panel}} {{pool}}")],
+        unit="percentunit", w=24, h=7, legend_calcs=("max", "lastNotNull"),
+        desc="Used fraction of each heap pool. Internal should match the status report's heap_used_pct; PSRAM is the large, mostly idle pool."))
 
     return dashboard("nspanel-panel", "NSPanel: Panel detail", P, [datasource_var(), var],
                      "Per-panel internals from the panel's own /metrics (metrics firmware only), plus manager-side status-report values.",
