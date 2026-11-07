@@ -1,11 +1,15 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { api, type Settings, type SettingsErrors } from "../../api/client";
-import { getIpByHostname, testHomeAssistant, testManager, testOpenhab, type TestResult } from "../../api/connectionTests";
+import { getIpByHostname, testHomeAssistant, testManager, testOpenhab } from "../../api/connectionTests";
 import { Notify } from "../NSPanelToastContainer";
 import { LOG_LEVELS, NSPANEL_TYPES, options, SCREENSAVER_MODES, TURN_ON_BEHAVIORS } from "./choices";
-import { Alert, Card, NumberInput, RadioGroup, Row, SecretInput, Select, TextInput } from "./fields";
+import { JoinButton, TestButton } from "../common/buttons";
+import { Alert, Card, Row } from "../common/layout";
+import { typedFields } from "../common/typedFields";
 import { buildPatch, MODES_WITH_OUTSIDE_TEMPERATURE, toFormValues, type SettingsFormValues } from "./form";
+
+const { NumberInput, RadioGroup, SecretInput, Select, TextInput } = typedFields<SettingsFormValues>();
 
 type LoadState = { status: "loading" } | { status: "error"; message: string } | { status: "loaded"; settings: Settings };
 
@@ -220,14 +224,14 @@ function SettingsForm({ settings: loaded, logDownloadUrl }: { settings: Settings
           </Row>
           <Row>
             <TextInput name="mqtt_username" label="MQTT username" hint="Blank for anonymous login." />
-            <SecretInput name="mqtt_password" label="MQTT password" isSet={settings.mqtt_password_set} />
+            <SecretInput name="mqtt_password" clearName="clear_mqtt_password" label="MQTT password" isSet={settings.mqtt_password_set} />
           </Row>
         </Card>
 
         <Card title="Home Assistant API">
           {addon && <Alert level="info">You are running NSPanel Manager as a Home Assistant add-on. These settings are managed by Home Assistant and are locked.</Alert>}
           <TextInput name="home_assistant_address" label="Home Assistant address" hint="For example http://homeassistant.local:8123" disabled={addon} />
-          <SecretInput name="home_assistant_token" label="Home Assistant token" isSet={settings.home_assistant_token_set} disabled={addon} />
+          <SecretInput name="home_assistant_token" clearName="clear_home_assistant_token" label="Home Assistant token" isSet={settings.home_assistant_token_set} disabled={addon} />
           {!addon && (
             <TestButton
               label="Test Home Assistant"
@@ -239,7 +243,7 @@ function SettingsForm({ settings: loaded, logDownloadUrl }: { settings: Settings
 
         <Card title="OpenHAB API">
           <TextInput name="openhab_address" label="OpenHAB address" />
-          <SecretInput name="openhab_token" label="OpenHAB token" isSet={settings.openhab_token_set} />
+          <SecretInput name="openhab_token" clearName="clear_openhab_token" label="OpenHAB token" isSet={settings.openhab_token_set} />
           <TestButton
             label="Test OpenHAB"
             disabledReason={typedOpenhabToken ? undefined : "Enter the token to test it: the stored token isn't sent to the browser."}
@@ -273,35 +277,4 @@ function applyFieldErrors(errors: SettingsErrors, values: SettingsFormValues, se
     }
   }
   return unplaced;
-}
-
-function JoinButton({ onClick, children }: { onClick: () => void; children: ReactNode }) {
-  return (
-    <button type="button" className="btn btn-info join-item" onClick={onClick}>
-      {children}
-    </button>
-  );
-}
-
-function TestButton({ label, run, disabledReason }: { label: string; run: () => Promise<TestResult>; disabledReason?: string }) {
-  const [running, setRunning] = useState(false);
-  const onClick = async () => {
-    setRunning(true);
-    const error = await run();
-    setRunning(false);
-    if (error) {
-      Notify({ message: `${label} failed: ${error}`, level: "error", duration: 8000 });
-    } else {
-      Notify({ message: `${label}: OK.`, level: "success", duration: 5000 });
-    }
-  };
-  return (
-    <div className="mt-1">
-      <button type="button" className="btn btn-accent btn-sm" onClick={onClick} disabled={running || disabledReason !== undefined}>
-        {running && <span className="loading loading-spinner loading-sm" />}
-        {label}
-      </button>
-      {disabledReason && <p className="mt-1 text-sm opacity-60">{disabledReason}</p>}
-    </div>
-  );
 }

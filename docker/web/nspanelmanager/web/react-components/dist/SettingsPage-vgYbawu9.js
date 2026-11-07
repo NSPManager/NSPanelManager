@@ -1,6 +1,6 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-BHcvq7Ci.js";
-import { c as useFormContext, i as get, l as useWatch, n as FormProvider, s as useForm, t as Controller } from "./index.esm-95PhxCjV.js";
-import { n as Notify } from "./NSPanelToastContainer-A83BlIoR.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-D6Rscy_k.js";
+import { c as useFormContext, i as get, l as useWatch, n as FormProvider, s as useForm, t as Controller } from "./index.esm-CUV7lF2s.js";
+import { n as Notify } from "./NSPanelToastContainer-DUFq9t_T.js";
 //#region node_modules/openapi-fetch/dist/index.mjs
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var PATH_PARAM_RE = /\{[^{}]+\}/g;
@@ -495,8 +495,51 @@ var SCREENSAVER_MODES = {
 };
 var options = (choices) => Object.entries(choices);
 //#endregion
-//#region src/components/SettingsPage/fields.tsx
+//#region src/components/common/buttons.tsx
 var import_jsx_runtime = require_jsx_runtime();
+/** A button joined to the end of an input: pass it as the input's `button`. */
+function JoinButton({ onClick, children }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+		type: "button",
+		className: "btn btn-info join-item",
+		onClick,
+		children
+	});
+}
+/** Runs a connection test and reports the result as a toast. With a disabledReason it is disabled, and shows why. */
+function TestButton({ label, run, disabledReason }) {
+	const [running, setRunning] = (0, import_react.useState)(false);
+	const onClick = async () => {
+		setRunning(true);
+		const error = await run();
+		setRunning(false);
+		if (error) Notify({
+			message: `${label} failed: ${error}`,
+			level: "error",
+			duration: 8e3
+		});
+		else Notify({
+			message: `${label}: OK.`,
+			level: "success",
+			duration: 5e3
+		});
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "mt-1",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+			type: "button",
+			className: "btn btn-accent btn-sm",
+			onClick,
+			disabled: running || disabledReason !== void 0,
+			children: [running && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "loading loading-spinner loading-sm" }), label]
+		}), disabledReason && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "mt-1 text-sm opacity-60",
+			children: disabledReason
+		})]
+	});
+}
+//#endregion
+//#region src/components/common/layout.tsx
 function Card({ title, actions, children }) {
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
 		className: "p-4 mt-2 bg-base-100 rounded-box shadow-lg w-full",
@@ -528,10 +571,12 @@ function Alert({ level, children }) {
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children })
 	});
 }
+//#endregion
+//#region src/components/common/fields.tsx
 function Field({ name, label, hint, children }) {
 	const { formState: { errors, defaultValues } } = useFormContext();
 	const error = get(errors, name)?.message;
-	const unreadable = defaultValues?.[name] === null;
+	const unreadable = get(defaultValues, name) === null;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "mb-2 w-full",
 		children: [
@@ -564,7 +609,7 @@ function useInvalid(name) {
 		"aria-describedby": invalid ? `${name}-error` : void 0
 	};
 }
-function TextInput({ name, label, hint, disabled, button }) {
+function TextInput$1({ name, label, hint, disabled, button }) {
 	const { register } = useFormContext();
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
 		name,
@@ -584,7 +629,7 @@ function TextInput({ name, label, hint, disabled, button }) {
 	});
 }
 var toNumber = (value) => value === "" || value === null || value === void 0 ? null : Number(value);
-function NumberInput({ name, label, hint, button }) {
+function NumberInput$1({ name, label, hint, button }) {
 	const { register } = useFormContext();
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
 		name,
@@ -603,7 +648,7 @@ function NumberInput({ name, label, hint, button }) {
 		})
 	});
 }
-function Select({ name, label, options }) {
+function Select$1({ name, label, options }) {
 	const { register } = useFormContext();
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
 		name,
@@ -624,7 +669,7 @@ function Select({ name, label, options }) {
 		})
 	});
 }
-function RadioGroup({ name, label, options }) {
+function RadioGroup$1({ name, label, options }) {
 	const { control } = useFormContext();
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Controller, {
 		control,
@@ -663,17 +708,17 @@ function FieldMessage({ name }) {
 		className: "mt-1 text-sm text-error",
 		children: error
 	});
-	if (defaultValues?.[name] === null) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+	if (get(defaultValues, name) === null) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 		className: "mt-1 text-sm text-warning",
 		children: "No valid value is stored. Choose one."
 	});
 	return null;
 }
-function SecretInput({ name, label, isSet, disabled, button }) {
+function SecretInput$1({ name, clearName, label, isSet, disabled, button }) {
 	const { register, control } = useFormContext();
 	const clear = useWatch({
 		control,
-		name: `clear_${name}`
+		name: clearName
 	});
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Field, {
 		name,
@@ -697,13 +742,25 @@ function SecretInput({ name, label, isSet, disabled, button }) {
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 					type: "checkbox",
 					className: "checkbox checkbox-accent checkbox-sm",
-					...register(`clear_${name}`)
+					...register(clearName)
 				}),
 				"Clear the stored ",
 				label.toLowerCase()
 			]
 		})]
 	});
+}
+//#endregion
+//#region src/components/common/typedFields.ts
+/** The inputs in ./fields with their field names checked against the form T. Call it once, at module level. */
+function typedFields() {
+	return {
+		TextInput: TextInput$1,
+		NumberInput: NumberInput$1,
+		Select: Select$1,
+		RadioGroup: RadioGroup$1,
+		SecretInput: SecretInput$1
+	};
 }
 //#endregion
 //#region src/components/SettingsPage/form.ts
@@ -772,6 +829,7 @@ function buildPatch(values, dirty, isHomeAssistantAddon) {
 }
 //#endregion
 //#region src/components/SettingsPage/SettingsPage.tsx
+var { NumberInput, RadioGroup, SecretInput, Select, TextInput } = typedFields();
 /** The global settings page (/settings), backed by /rest/v2/settings. */
 function SettingsPage({ logDownloadUrl = "/download_mqttmanager_log" }) {
 	const [state, setState] = (0, import_react.useState)({ status: "loading" });
@@ -1050,6 +1108,7 @@ function SettingsForm({ settings: loaded, logDownloadUrl }) {
 						hint: "Blank for anonymous login."
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SecretInput, {
 						name: "mqtt_password",
+						clearName: "clear_mqtt_password",
 						label: "MQTT password",
 						isSet: settings.mqtt_password_set
 					})] })]
@@ -1069,6 +1128,7 @@ function SettingsForm({ settings: loaded, logDownloadUrl }) {
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SecretInput, {
 							name: "home_assistant_token",
+							clearName: "clear_home_assistant_token",
 							label: "Home Assistant token",
 							isSet: settings.home_assistant_token_set,
 							disabled: addon
@@ -1089,6 +1149,7 @@ function SettingsForm({ settings: loaded, logDownloadUrl }) {
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SecretInput, {
 							name: "openhab_token",
+							clearName: "clear_openhab_token",
 							label: "OpenHAB token",
 							isSet: settings.openhab_token_set
 						}),
@@ -1129,45 +1190,6 @@ function applyFieldErrors(errors, values, setError) {
 		else unplaced.push(name === "non_field_errors" ? message : `${name}: ${message}`);
 	}
 	return unplaced;
-}
-function JoinButton({ onClick, children }) {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-		type: "button",
-		className: "btn btn-info join-item",
-		onClick,
-		children
-	});
-}
-function TestButton({ label, run, disabledReason }) {
-	const [running, setRunning] = (0, import_react.useState)(false);
-	const onClick = async () => {
-		setRunning(true);
-		const error = await run();
-		setRunning(false);
-		if (error) Notify({
-			message: `${label} failed: ${error}`,
-			level: "error",
-			duration: 8e3
-		});
-		else Notify({
-			message: `${label}: OK.`,
-			level: "success",
-			duration: 5e3
-		});
-	};
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "mt-1",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
-			type: "button",
-			className: "btn btn-accent btn-sm",
-			onClick,
-			disabled: running || disabledReason !== void 0,
-			children: [running && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "loading loading-spinner loading-sm" }), label]
-		}), disabledReason && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-			className: "mt-1 text-sm opacity-60",
-			children: disabledReason
-		})]
-	});
 }
 //#endregion
 export { SettingsPage as default };
