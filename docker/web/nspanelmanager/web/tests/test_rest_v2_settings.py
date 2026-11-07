@@ -260,6 +260,9 @@ class CompatibilityTests(RestV2TestCase):
             ("mqtt_port", " 1883", None),
             ("mqtt_port", "1883abc", None),
             ("mqtt_port", "18.83", None),
+            ("mqtt_port", "test-123", None),
+            ("mqtt_port", "bla123test", None),
+            ("mqtt_port", "1883\n", None),
             ("manager_port", "", None),
             ("screensaver_mode", "with_background", "with_background"),
             ("screensaver_mode", "removed_mode", None),
@@ -479,11 +482,36 @@ class PatchTests(RestV2TestCase):
 
     def test_a_trailing_slash_is_removed_from_addresses(self):
         for name in ("home_assistant_address", "openhab_address"):
-            for sent, stored in (("http://host:8080/", "http://host:8080"), ("http://host//", "http://host/"), ("http://host", "http://host"), ("", "")):
+            for sent, stored in (("http://host:8080/", "http://host:8080"), ("http://host//", "http://host/"), ("http://host", "http://host"), ("", ""), ("http://host:8080/ ", "http://host:8080"), (" http://host:8080\n", "http://host:8080")):
                 with self.subTest(name=name, sent=sent):
                     data = self.assertPatchOk({name: sent})
                     self.assertEqual(get_setting_with_default(name), stored)
                     self.assertEqual(data[name], stored)
+
+    def test_whitespace_is_trimmed_from_pasted_values(self):
+        for name in ("manager_address", "mqtt_server", "outside_temp_sensor_entity_id", "home_assistant_address", "openhab_address", "location_latitude", "location_longitude"):
+            with self.subTest(name=name):
+                data = self.assertPatchOk({name: " \t12.5 \n"})
+                self.assertEqual(get_setting_with_default(name), "12.5")
+                self.assertEqual(data[name], "12.5")
+        for name in ("home_assistant_token", "openhab_token"):
+            with self.subTest(name=name):
+                data = self.assertPatchOk({name: " pasted-token\n"})
+                self.assertEqual(get_setting_with_default(name), "pasted-token")
+                self.assertIs(data[f"{name}_set"], True)
+
+    def test_only_whitespace_is_rejected_where_whitespace_is_trimmed(self):
+        # Trimmed to blank, a token would be cleared rather than set.
+        for name in ("home_assistant_token", "openhab_token", "home_assistant_address", "mqtt_server"):
+            with self.subTest(name=name):
+                self.assertPatchRejected({name: "  "}, name)
+
+    def test_whitespace_is_kept_elsewhere(self):
+        # A password may really have spaces, and a date format may end in one.
+        for name, value in (("mqtt_password", " pass word "), ("mqtt_username", "user "), ("date_format", "%d/%m ")):
+            with self.subTest(name=name):
+                self.assertPatchOk({name: value})
+                self.assertEqual(get_setting_with_default(name), value)
 
     def test_home_assistant_settings_are_locked_in_the_addon(self):
         with mock.patch.dict(os.environ, {"IS_HOME_ASSISTANT_ADDON": "true"}):

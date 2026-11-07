@@ -108,6 +108,7 @@ components:
       properties:
         manager_address:
           type: string
+          description: Leading and trailing whitespace is removed.
           maxLength: 255
         manager_port:
           type: integer
@@ -197,9 +198,11 @@ components:
           type: boolean
         location_latitude:
           type: string
+          description: Leading and trailing whitespace is removed.
           maxLength: 255
         location_longitude:
           type: string
+          description: Leading and trailing whitespace is removed.
           maxLength: 255
         weather_update_interval:
           type: integer
@@ -221,6 +224,7 @@ components:
           - $ref: '#/components/schemas/BlankEnum'
         outside_temp_sensor_entity_id:
           type: string
+          description: Leading and trailing whitespace is removed.
           maxLength: 255
         date_format:
           type: string
@@ -246,6 +250,7 @@ components:
           maxLength: 255
         mqtt_server:
           type: string
+          description: Leading and trailing whitespace is removed.
           maxLength: 255
         mqtt_port:
           type: integer
@@ -261,21 +266,25 @@ components:
           maxLength: 255
         home_assistant_address:
           type: string
-          description: A trailing / is removed.
+          description: Leading and trailing whitespace is removed. A trailing / is
+            removed.
           maxLength: 255
         home_assistant_token:
           type: string
           writeOnly: true
-          description: Blank clears the token.
+          description: Leading and trailing whitespace is removed. Blank clears the
+            token.
           maxLength: 255
         openhab_address:
           type: string
-          description: A trailing / is removed.
+          description: Leading and trailing whitespace is removed. A trailing / is
+            removed.
           maxLength: 255
         openhab_token:
           type: string
           writeOnly: true
-          description: Blank clears the token.
+          description: Leading and trailing whitespace is removed. Blank clears the
+            token.
           maxLength: 255
     ScreensaverModeEnum:
       enum:

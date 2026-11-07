@@ -55,6 +55,7 @@ export interface components {
         OutsideTempSensorProviderEnum: "home_assistant" | "openhab";
         /** @description A PATCH /rest/v2/settings body. Send only the settings that change. */
         PatchedSettingsUpdateRequest: {
+            /** @description Leading and trailing whitespace is removed. */
             manager_address?: string;
             /** @description null (stored blank) until set. */
             manager_port?: number | null;
@@ -82,7 +83,9 @@ export interface components {
             screensaver_mode?: components["schemas"]["ScreensaverModeEnum"];
             show_screensaver_inside_temperature?: boolean;
             show_screensaver_outside_temperature?: boolean;
+            /** @description Leading and trailing whitespace is removed. */
             location_latitude?: string;
+            /** @description Leading and trailing whitespace is removed. */
             location_longitude?: string;
             /** @description Minutes between weather updates. */
             weather_update_interval?: number;
@@ -95,6 +98,7 @@ export interface components {
              *     * `openhab` - openhab
              */
             outside_temp_sensor_provider?: components["schemas"]["OutsideTempSensorProviderEnum"] | components["schemas"]["BlankEnum"];
+            /** @description Leading and trailing whitespace is removed. */
             outside_temp_sensor_entity_id?: string;
             /** @description strftime() format. */
             date_format?: string;
@@ -104,18 +108,19 @@ export interface components {
             buzzer_sound_touch?: string;
             buzzer_sound_scene_activated?: string;
             buzzer_sound_scene_saved?: string;
+            /** @description Leading and trailing whitespace is removed. */
             mqtt_server?: string;
             mqtt_port?: number;
             mqtt_username?: string;
             /** @description Blank clears the password. */
             mqtt_password?: string;
-            /** @description A trailing / is removed. */
+            /** @description Leading and trailing whitespace is removed. A trailing / is removed. */
             home_assistant_address?: string;
-            /** @description Blank clears the token. */
+            /** @description Leading and trailing whitespace is removed. Blank clears the token. */
             home_assistant_token?: string;
-            /** @description A trailing / is removed. */
+            /** @description Leading and trailing whitespace is removed. A trailing / is removed. */
             openhab_address?: string;
-            /** @description Blank clears the token. */
+            /** @description Leading and trailing whitespace is removed. Blank clears the token. */
             openhab_token?: string;
         };
         /**

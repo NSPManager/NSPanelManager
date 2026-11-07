@@ -83,6 +83,21 @@ class StrictCharField(serializers.CharField):
         return super().to_internal_value(data)
 
 
+class TrimmedCharField(StrictCharField):
+    """Leading and trailing whitespace is removed, for values that are usually pasted (addresses, tokens): a
+    stray space would otherwise be stored and break the connection. Only whitespace is an error, not blank,
+    since blank clears a token."""
+
+    default_error_messages = {"whitespace": "Only whitespace was entered."}
+
+    def to_internal_value(self, data):
+        value = super().to_internal_value(data)
+        trimmed = value.strip()
+        if value and not trimmed:
+            self.fail("whitespace")
+        return trimmed
+
+
 class StrictChoiceField(serializers.ChoiceField):
     def to_internal_value(self, data):
         if not isinstance(data, str):
@@ -99,6 +114,14 @@ def _text(**kwargs):
     return StrictCharField(**kwargs)
 
 
+_TRIMMED = "Leading and trailing whitespace is removed."
+
+
+def _trimmed(help_text=None, **kwargs):
+    kwargs.setdefault("allow_blank", True)
+    return TrimmedCharField(help_text=f"{_TRIMMED} {help_text}" if help_text else _TRIMMED, **kwargs)
+
+
 def _coordinate(limit):
     def validate(value):
         if value == "":
@@ -110,11 +133,12 @@ def _coordinate(limit):
         if not number.is_finite() or not -limit <= number <= limit:
             raise serializers.ValidationError(f"Must be between -{limit} and {limit}.")
 
-    return _text(validators=[validate])
+    return _trimmed(validators=[validate])
 
 
 # Whether a stored integer is one this API reports. MQTTManager's std::stoi would also accept " 50" or
 # "50abc"; those are reported as null so the UI asks for a proper value instead of showing a guess.
+# Used with fullmatch(), so the whole string must match (unlike ^...$, which also accepts "50\n").
 _INTEGER = re.compile(r"-?[0-9]+")
 
 
@@ -122,7 +146,7 @@ class SettingsUpdateSerializer(serializers.Serializer):
     """A PATCH /rest/v2/settings body. Send only the settings that change."""
 
     # Manager
-    manager_address = _text()
+    manager_address = _trimmed()
     manager_port = _int(1, 65535, allow_null=True, help_text="null (stored blank) until set.")
 
     # Logging
@@ -162,7 +186,7 @@ class SettingsUpdateSerializer(serializers.Serializer):
     weather_wind_speed_format = StrictChoiceField(choices=["kmh", "ms", "mph", "knots"])
     weather_precipitation_format = StrictChoiceField(choices=["mm", "inch"])
     outside_temp_sensor_provider = StrictChoiceField(choices=["home_assistant", "openhab"], allow_blank=True, help_text="Blank for no sensor.")
-    outside_temp_sensor_entity_id = _text()
+    outside_temp_sensor_entity_id = _trimmed()
     date_format = _text(allow_blank=False, help_text="strftime() format.")
     clock_us_style = StrictBooleanField()
     use_fahrenheit = StrictBooleanField()
@@ -176,18 +200,18 @@ class SettingsUpdateSerializer(serializers.Serializer):
     buzzer_sound_scene_saved = _text()
 
     # MQTT
-    mqtt_server = _text()
+    mqtt_server = _trimmed()
     mqtt_port = _int(1, 65535)
     mqtt_username = _text()
     mqtt_password = _text(write_only=True, help_text="Blank clears the password.")
 
     # Home Assistant (read-only when running as the Home Assistant add-on)
-    home_assistant_address = _text(help_text="A trailing / is removed.")
-    home_assistant_token = _text(write_only=True, help_text="Blank clears the token.")
+    home_assistant_address = _trimmed(help_text="A trailing / is removed.")
+    home_assistant_token = _trimmed(write_only=True, help_text="Blank clears the token.")
 
     # OpenHAB
-    openhab_address = _text(help_text="A trailing / is removed.")
-    openhab_token = _text(write_only=True, help_text="Blank clears the token.")
+    openhab_address = _trimmed(help_text="A trailing / is removed.")
+    openhab_token = _trimmed(write_only=True, help_text="Blank clears the token.")
 
     def to_internal_value(self, data):
         # Unknown keys are an error rather than ignored: the UI is built with the server, so one it
