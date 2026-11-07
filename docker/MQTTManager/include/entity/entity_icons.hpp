@@ -6,6 +6,10 @@ public:
   static constexpr const char *entity_icon_switch_on = "s";
   static constexpr const char *entity_icon_switch_off = "t";
   static constexpr const char *entity_icon_button = "z";
+  // TODO: Use dedicated cover/shutter glyphs once they are added to the NSPanel icon font.
+  // The switch glyphs are a temporary placeholder for the entities-page slot.
+  static constexpr const char *entity_icon_cover_open = "s";
+  static constexpr const char *entity_icon_cover_closed = "t";
   // TODO: Use a dedicated media player glyph once one is added to the NSPanel icon font.
   static constexpr const char *media_player = "x";
 

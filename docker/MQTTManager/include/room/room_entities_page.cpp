@@ -1,4 +1,5 @@
 #include "button/button.hpp"
+#include "cover/cover.hpp"
 #include "entity/entity.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include "light/light.hpp"
@@ -232,6 +233,18 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
       entity_slot->set_id(thermostat->get_id());
 
       SPDLOG_DEBUG("Thermostat icon: {} (0x{:X})", entity_slot->icon(), entity_slot->icon()[0]);
+    } else if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::COVER) {
+      std::shared_ptr<CoverEntity> cover = std::static_pointer_cast<CoverEntity>(entity);
+      NSPanelRoomEntitiesPage_EntitySlot *entity_slot = proto_state.add_entities();
+      entity_slot->set_name(cover->get_name());
+      entity_slot->set_room_view_position(i);
+      entity_slot->set_icon(cover->get_icon());
+      entity_slot->set_pco(cover->get_icon_color());
+      entity_slot->set_pco2(cover->get_icon_active_color());
+      entity_slot->set_can_save_scene(false); // Entity is not a scene.
+      entity_slot->set_mqtt_state_topic(cover->get_mqtt_state_topic());
+      entity_slot->set_type(NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_COVER);
+      entity_slot->set_id(cover->get_id());
     } else if (entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::MEDIA_PLAYER) {
       std::shared_ptr<MediaPlayerEntity> media_player = std::static_pointer_cast<MediaPlayerEntity>(entity);
       NSPanelRoomEntitiesPage_EntitySlot *entity_slot = proto_state.add_entities();

@@ -451,6 +451,138 @@ class MediaPlayerTests(EntityRESTCommonTests, EntityRESTTestCase):
         self.assertFalse(Entity.objects.exists())
 
 
+class CoverTests(EntityRESTCommonTests, EntityRESTTestCase):
+    url = "rest_entities_covers"
+
+    def payload(self, slot=0, **overrides):
+        return {
+            **placement(self.page, slot),
+            "controller": "home_assistant",
+            "friendly_name": "Living room blind",
+            "home_assistant_name": "cover.living_room_blind",
+            "openhab_item": "",
+        } | overrides
+
+    def form_payload(self, **overrides):
+        return self.payload() | {"id": None, "type": "entity", "entity_type": "cover"} | overrides
+
+    def test_add_home_assistant_cover(self):
+        response = self.save(self.payload(slot=2))
+
+        self.assertEqual(response.status_code, 200)
+        cover = Entity.objects.get()
+        self.assertEqual(cover.entity_type, Entity.EntityType.COVER)
+        self.assertEqual(cover.friendly_name, "Living room blind")
+        self.assertEqual((cover.room, cover.entities_page, cover.room_view_position), (self.room, self.page, 2))
+        self.assertEqual(
+            cover.entity_data,
+            {
+                "controller": "home_assistant",
+                "home_assistant_name": "cover.living_room_blind",
+                "openhab_item": "",
+            },
+        )
+        self.assertLoadableByManager(cover)
+        self.assertManagerReloaded(times=1)
+
+    def test_add_openhab_cover(self):
+        response = self.save(self.payload(controller="openhab", home_assistant_name="", openhab_item="LivingRoom_Shutter"))
+
+        self.assertEqual(response.status_code, 200)
+        cover = Entity.objects.get()
+        self.assertEqual(
+            cover.entity_data,
+            {
+                "controller": "openhab",
+                "home_assistant_name": "",
+                "openhab_item": "LivingRoom_Shutter",
+            },
+        )
+        self.assertLoadableByManager(cover)
+
+    def test_add_with_the_payload_the_form_sends(self):
+        self.assertEqual(self.save(self.form_payload()).status_code, 200)
+
+        cover = Entity.objects.get()
+        self.assertEqual(cover.entity_type, Entity.EntityType.COVER)
+        self.assertEqual(cover.entity_data["home_assistant_name"], "cover.living_room_blind")
+        self.assertLoadableByManager(cover)
+
+    def test_names_are_trimmed(self):
+        self.save(self.payload(friendly_name="  Blind  ", home_assistant_name=" cover.blind "))
+
+        cover = Entity.objects.get()
+        self.assertEqual(cover.friendly_name, "Blind")
+        self.assertEqual(cover.entity_data["home_assistant_name"], "cover.blind")
+
+    def test_blank_name_is_rejected(self):
+        self.assertCreatesNothing(self.save(self.payload(friendly_name="   ")))
+
+    def test_unknown_controller_is_rejected(self):
+        for controller in ("nspm", "zigbee"):
+            with self.subTest(controller=controller):
+                self.assertEqual(self.save(self.payload(controller=controller)).status_code, 400)
+        self.assertFalse(Entity.objects.exists())
+
+    def test_selected_controller_needs_its_entity(self):
+        cases = {
+            "home assistant without an entity": {"home_assistant_name": ""},
+            "openhab without an item": {"controller": "openhab", "home_assistant_name": ""},
+        }
+        for case, overrides in cases.items():
+            with self.subTest(case):
+                self.assertEqual(self.save(self.payload(**overrides)).status_code, 400)
+        self.assertFalse(Entity.objects.exists())
+        self.assertManagerNotReloaded()
+
+    def test_home_assistant_name_must_be_a_cover_entity(self):
+        for name in ("light.kitchen", "switch.fan", "living_room_blind"):
+            with self.subTest(name=name):
+                self.assertEqual(self.save(self.payload(home_assistant_name=name)).status_code, 400)
+        self.assertFalse(Entity.objects.exists())
+
+    def test_non_string_fields_are_rejected(self):
+        for field in ("controller", "friendly_name", "home_assistant_name", "openhab_item"):
+            with self.subTest(field=field):
+                self.assertEqual(self.save(self.payload(**{field: 1})).status_code, 400)
+        self.assertFalse(Entity.objects.exists())
+
+    def test_editing_another_entity_type_is_rejected(self):
+        switch = Entity.objects.create(
+            entity_type=Entity.EntityType.SWITCH,
+            friendly_name="Fan",
+            room=self.room,
+            entities_page=self.page,
+            room_view_position=1,
+            entity_data={"controller": "home_assistant", "home_assistant_name": "switch.fan"},
+        )
+
+        response = self.save(self.payload(id=switch.id, slot=1))
+
+        self.assertEqual(response.status_code, 409)
+        switch.refresh_from_db()
+        self.assertEqual(switch.entity_type, Entity.EntityType.SWITCH)
+        self.assertManagerNotReloaded()
+
+    def test_page_that_is_not_an_entities_page_of_the_room_is_rejected(self):
+        other_room = self.make_room("Lounge")
+        for page in (self.scenes_page(self.room), self.entities_page(other_room)):
+            with self.subTest(page=page.id):
+                self.assertEqual(self.save(self.payload() | {"entities_page_id": page.id}).status_code, 400)
+        self.assertFalse(Entity.objects.exists())
+
+    def test_switching_controller_drops_the_other_controller_name(self):
+        self.save(self.payload())
+        cover = Entity.objects.get()
+
+        self.save(self.payload(id=cover.id, controller="openhab", home_assistant_name="", openhab_item="Blind_Item"))
+
+        cover.refresh_from_db()
+        self.assertEqual(cover.entity_data["controller"], "openhab")
+        self.assertEqual(cover.entity_data["home_assistant_name"], "")
+        self.assertEqual(cover.entity_data["openhab_item"], "Blind_Item")
+
+
 class SceneTests(EntityRESTCommonTests, EntityRESTTestCase):
     url = "rest_entities_scenes"
     model = Scene

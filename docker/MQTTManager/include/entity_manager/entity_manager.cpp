@@ -2,6 +2,9 @@
 #include "button/home_assistant_button.hpp"
 #include "button/nspm_button.hpp"
 #include "command_manager/command_manager.hpp"
+#include "cover/cover.hpp"
+#include "cover/home_assistant_cover.hpp"
+#include "cover/openhab_cover.hpp"
 #include "entity/entity.hpp"
 #include "light/home_assistant_light.hpp"
 #include "light/light.hpp"
@@ -88,6 +91,7 @@ void EntityManager::load_entities() {
   EntityManager::load_buttons();
   EntityManager::load_thermostats();
   EntityManager::load_media_players();
+  EntityManager::load_covers();
   EntityManager::load_switches();
   EntityManager::load_scenes();
   EntityManager::load_global_room_entities_pages();
@@ -360,6 +364,53 @@ void EntityManager::load_media_players() {
     }
   }
   SPDLOG_DEBUG("Loaded {} media players", media_player_ids.size());
+}
+
+void EntityManager::load_covers() {
+  auto cover_ids = database_manager::database.select(&database_manager::Entity::id, sqlite_orm::from<database_manager::Entity>(),
+                                                      sqlite_orm::where(sqlite_orm::glob(&database_manager::Entity::entity_type, "cover")));
+  SPDLOG_INFO("Loading {} covers.", cover_ids.size());
+
+  // Check if any existing cover has been removed.
+  EntityManager::_entities.erase(std::remove_if(EntityManager::_entities.begin(), EntityManager::_entities.end(), [&cover_ids](auto entity) {
+                                   return entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::COVER && std::find_if(cover_ids.begin(), cover_ids.end(), [&entity](auto id) { return id == entity->get_id(); }) == cover_ids.end();
+                                 }),
+                                 EntityManager::_entities.end());
+
+  // Cause existing covers to reload config or add a new cover if it does not exist.
+  for (auto &cover_id : cover_ids) {
+    auto existing_cover = EntityManager::get_entity_by_id<CoverEntity>(MQTT_MANAGER_ENTITY_TYPE::COVER, cover_id);
+    if (existing_cover) [[likely]] {
+      (*existing_cover)->reload_config();
+    } else {
+      std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
+
+      try {
+        auto cover_settings = database_manager::database.get<database_manager::Entity>(cover_id);
+        nlohmann::json entity_data = cover_settings.get_entity_data_json();
+        if (entity_data.contains("controller")) {
+          std::string controller = entity_data["controller"];
+          if (controller.compare("home_assistant") == 0) {
+            std::shared_ptr<HomeAssistantCover> cover_entity = std::make_shared<HomeAssistantCover>(cover_settings.id);
+            SPDLOG_INFO("Cover {}::{} was found in database but not in config. Creating cover.", cover_entity->get_id(), cover_entity->get_name());
+            EntityManager::_entities.push_back(cover_entity);
+          } else if (controller.compare("openhab") == 0) {
+            std::shared_ptr<OpenhabCover> cover_entity = std::make_shared<OpenhabCover>(cover_settings.id);
+            SPDLOG_INFO("Cover {}::{} was found in database but not in config. Creating cover.", cover_entity->get_id(), cover_entity->get_name());
+            EntityManager::_entities.push_back(cover_entity);
+          } else {
+            SPDLOG_ERROR("Unknown cover type '{}'. Will ignore entity.", controller);
+          }
+        } else {
+          SPDLOG_ERROR("Cover {}::{} does not define a controller!", cover_settings.id, cover_settings.friendly_name);
+        }
+      } catch (std::exception &e) {
+        SPDLOG_ERROR("Caught exception: {}", e.what());
+        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
+      }
+    }
+  }
+  SPDLOG_DEBUG("Loaded {} covers", cover_ids.size());
 }
 
 void EntityManager::load_switches() {

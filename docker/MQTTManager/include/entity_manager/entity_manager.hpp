@@ -87,6 +87,11 @@ public:
   static void load_media_players();
 
   /*
+   * Load all covers from the DB and remove any existing cover that no longer exist.
+   */
+  static void load_covers();
+
+  /*
    * Load all switches from the DB and remove any existing switch that no longer exist.
    */
   static void load_switches();

@@ -162,6 +162,7 @@ message NSPanelRoomEntitiesPage {
       ENTITY_TYPE_THERMOSTAT = 4;
       ENTITY_TYPE_SCENE = 5;
       ENTITY_TYPE_MEDIA_PLAYER = 6;
+      ENTITY_TYPE_COVER = 7;
     }
     EntityType type = 8;
     int32 id = 9;
@@ -289,6 +290,27 @@ message NSPanelMQTTManagerCommand {
     string select_source_player_source = 10;
   }
 
+  message CoverCommand {
+    enum Action {
+      NONE = 0;
+      OPEN = 1;
+      CLOSE = 2;
+      STOP = 3;
+      OPEN_TILT = 4;
+      CLOSE_TILT = 5;
+      STOP_TILT = 6;
+    }
+
+    int32 cover_id = 1;
+    Action action = 2;
+
+    bool has_position = 3;
+    int32 position = 4; // 0 = closed, 100 = open
+
+    bool has_tilt_position = 5;
+    int32 tilt_position = 6; // 0-100
+  }
+
   oneof CommandData {
     FirstPageTurnLightOn first_page_turn_on = 1;
     FirstPageTurnLightOff first_page_turn_off = 2;
@@ -300,6 +322,7 @@ message NSPanelMQTTManagerCommand {
     ThermostatTemperatureCommand thermostat_temperature_command = 7;
     ThermostatCommand thermostat_command = 8;
     MediaPlayerCommand media_player_command = 9;
+    CoverCommand cover_command = 10;
   }
 
   int32 nspanel_id = 100;
