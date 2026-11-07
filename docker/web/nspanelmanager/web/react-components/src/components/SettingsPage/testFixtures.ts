@@ -51,8 +51,6 @@ export function settingsFixture(overrides: Partial<Settings> = {}): Settings {
     home_assistant_token_set: true,
     openhab_address: "",
     openhab_token_set: false,
-    openhab_brightness_channel_min: 0,
-    openhab_brightness_channel_max: 255,
     is_home_assistant_addon: false,
     ...overrides,
   };

@@ -277,14 +277,6 @@ components:
           writeOnly: true
           description: Blank clears the token.
           maxLength: 255
-        openhab_brightness_channel_min:
-          type: integer
-          maximum: 255
-          minimum: 0
-        openhab_brightness_channel_max:
-          type: integer
-          maximum: 255
-          minimum: 0
     ScreensaverModeEnum:
       enum:
       - with_background
@@ -463,12 +455,6 @@ components:
         openhab_token_set:
           type: boolean
           description: Whether openhab_token is set.
-        openhab_brightness_channel_min:
-          type: integer
-          nullable: true
-        openhab_brightness_channel_max:
-          type: integer
-          nullable: true
         is_home_assistant_addon:
           type: boolean
           description: Running as the Home Assistant add-on; home_assistant_* are
@@ -502,8 +488,6 @@ components:
       - mqtt_wait_time
       - mqttmanager_log_level
       - openhab_address
-      - openhab_brightness_channel_max
-      - openhab_brightness_channel_min
       - openhab_token_set
       - optimistic_mode
       - outside_temp_sensor_entity_id
@@ -735,14 +719,6 @@ components:
           items:
             type: string
         openhab_token:
-          type: array
-          items:
-            type: string
-        openhab_brightness_channel_min:
-          type: array
-          items:
-            type: string
-        openhab_brightness_channel_max:
           type: array
           items:
             type: string

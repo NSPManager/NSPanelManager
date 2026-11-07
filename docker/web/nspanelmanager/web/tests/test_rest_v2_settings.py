@@ -98,8 +98,6 @@ LEGACY_ROWS = {
     "home_assistant_token": "ha-secret-value",
     "openhab_address": "",
     "openhab_token": "",
-    "openhab_brightness_channel_min": "0",
-    "openhab_brightness_channel_max": "255",
 }
 
 # The integer settings and the range each accepts.
@@ -123,8 +121,6 @@ INTEGER_RANGES = {
     "screensaver_dim_level": (0, 100),
     "screensaver_activation_timeout": (0, 2**31 - 1),
     "weather_update_interval": (1, 2**31 - 1),  # MQTTManager sleeps this many minutes between updates
-    "openhab_brightness_channel_min": (0, 255),
-    "openhab_brightness_channel_max": (0, 255),
 }
 
 CHOICES = {
@@ -563,11 +559,10 @@ class ValidationTests(RestV2TestCase):
         self.assertPatchRejected({"mqtt_server": "a" * 256}, "mqtt_server")
 
     def test_pairs_are_checked_against_the_stored_value(self):
-        # Stored: color_temp_min 2000, color_temp_max 6000, openhab_brightness_channel_min 0, max 255.
+        # Stored: color_temp_min 2000, color_temp_max 6000.
         self.assertPatchRejected({"color_temp_min": 6000}, "color_temp_min")
         self.assertPatchRejected({"color_temp_max": 2000}, "color_temp_max")
         self.assertPatchRejected({"color_temp_min": 7000, "color_temp_max": 6500}, "color_temp_min")
-        self.assertPatchRejected({"openhab_brightness_channel_max": 0}, "openhab_brightness_channel_max")
         self.assertPatchOk({"color_temp_min": 5999})
         self.assertPatchOk({"color_temp_min": 7000, "color_temp_max": 8000})
 

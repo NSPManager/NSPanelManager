@@ -188,8 +188,6 @@ class SettingsUpdateSerializer(serializers.Serializer):
     # OpenHAB
     openhab_address = _text(help_text="A trailing / is removed.")
     openhab_token = _text(write_only=True, help_text="Blank clears the token.")
-    openhab_brightness_channel_min = _int(0, 255)
-    openhab_brightness_channel_max = _int(0, 255)
 
     def to_internal_value(self, data):
         # Unknown keys are an error rather than ignored: the UI is built with the server, so one it
@@ -215,7 +213,7 @@ class SettingsUpdateSerializer(serializers.Serializer):
 
         # Pairs are checked against the stored value of whichever half isn't being changed.
         merged = {**read_settings(), **attrs}
-        for low, high in (("color_temp_min", "color_temp_max"), ("openhab_brightness_channel_min", "openhab_brightness_channel_max")):
+        for low, high in (("color_temp_min", "color_temp_max"),):
             if (low in attrs or high in attrs) and merged.get(low) is not None and merged.get(high) is not None and merged[low] >= merged[high]:
                 errors[low if low in attrs else high] = [f"{low} must be less than {high}."]
 

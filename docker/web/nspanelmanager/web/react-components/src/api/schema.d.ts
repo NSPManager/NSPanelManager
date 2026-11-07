@@ -117,8 +117,6 @@ export interface components {
             openhab_address?: string;
             /** @description Blank clears the token. */
             openhab_token?: string;
-            openhab_brightness_channel_min?: number;
-            openhab_brightness_channel_max?: number;
         };
         /**
          * @description * `with_background` - with_background
@@ -182,8 +180,6 @@ export interface components {
             openhab_address: string | null;
             /** @description Whether openhab_token is set. */
             openhab_token_set: boolean;
-            openhab_brightness_channel_min: number | null;
-            openhab_brightness_channel_max: number | null;
             /** @description Running as the Home Assistant add-on; home_assistant_* are read-only. */
             is_home_assistant_addon: boolean;
         };
@@ -241,8 +237,6 @@ export interface components {
             home_assistant_token?: string[];
             openhab_address?: string[];
             openhab_token?: string[];
-            openhab_brightness_channel_min?: string[];
-            openhab_brightness_channel_max?: string[];
             non_field_errors?: string[];
             detail?: string;
         };
