@@ -29,6 +29,7 @@ from rest_framework.views import APIView
 from web.apps import send_mqttmanager_reload_command
 from web.models import Settings
 
+from . import rtttl
 from .schema import extend_schema
 
 logger = logging.getLogger(__name__)
@@ -122,6 +123,18 @@ def _trimmed(help_text=None, **kwargs):
     return TrimmedCharField(help_text=f"{_TRIMMED} {help_text}" if help_text else _TRIMMED, **kwargs)
 
 
+def _validate_rtttl(value):
+    # The panel plays nothing for RTTTL its parser rejects, and says so only in its own log.
+    try:
+        rtttl.parse(value)
+    except rtttl.RtttlError as error:
+        raise serializers.ValidationError(str(error))
+
+
+def _rtttl(help_text):
+    return _text(validators=[_validate_rtttl], help_text=help_text)
+
+
 def _coordinate(limit):
     def validate(value):
         if value == "":
@@ -194,10 +207,10 @@ class SettingsUpdateSerializer(serializers.Serializer):
     # Web interface
     theme = _text(allow_blank=False)
 
-    # Buzzer (RTTTL; blank for no sound)
-    buzzer_sound_touch = _text()
-    buzzer_sound_scene_activated = _text()
-    buzzer_sound_scene_saved = _text()
+    # Buzzer, as RTTTL. Checked with the panel firmware's parser rules (rest_v2/rtttl.py).
+    buzzer_sound_touch = _rtttl("RTTTL played on a screen touch. Blank for no sound.")
+    buzzer_sound_scene_activated = _rtttl("RTTTL played when a scene is activated from the panel. Blank plays the touch sound instead.")
+    buzzer_sound_scene_saved = _rtttl("RTTTL played when a scene is saved from the panel. Blank for no sound.")
 
     # MQTT
     mqtt_server = _trimmed()

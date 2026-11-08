@@ -3,6 +3,7 @@ import { FormProvider, useForm, useWatch } from "react-hook-form";
 import { api, type Settings, type SettingsErrors } from "../../api/client";
 import { getIpByHostname, testHomeAssistant, testManager, testOpenhab } from "../../api/connectionTests";
 import { Notify } from "../NSPanelToastContainer";
+import { BuzzerCard } from "./BuzzerCard";
 import { LOG_LEVELS, NSPANEL_TYPES, options, SCREENSAVER_MODES, TURN_ON_BEHAVIORS } from "./choices";
 import { JoinButton, TestButton } from "../common/buttons";
 import { Alert, Card, Row } from "../common/layout";
@@ -216,6 +217,8 @@ function SettingsForm({ settings: loaded, logDownloadUrl }: { settings: Settings
             <NumberInput name="all_rooms_status_backoff_time" label={'"All rooms" status backoff time (ms)'} />
           </Row>
         </Card>
+
+        <BuzzerCard />
 
         <Card title="MQTT">
           <Row>

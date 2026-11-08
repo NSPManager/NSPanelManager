@@ -105,8 +105,11 @@ export interface components {
             clock_us_style?: boolean;
             use_fahrenheit?: boolean;
             theme?: string;
+            /** @description RTTTL played on a screen touch. Blank for no sound. */
             buzzer_sound_touch?: string;
+            /** @description RTTTL played when a scene is activated from the panel. Blank plays the touch sound instead. */
             buzzer_sound_scene_activated?: string;
+            /** @description RTTTL played when a scene is saved from the panel. Blank for no sound. */
             buzzer_sound_scene_saved?: string;
             /** @description Leading and trailing whitespace is removed. */
             mqtt_server?: string;
