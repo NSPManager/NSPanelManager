@@ -235,7 +235,7 @@ function SettingsForm({ settings: loaded, logDownloadUrl }: { settings: Settings
           {!addon && (
             <TestButton
               label="Test Home Assistant"
-              disabledReason={typedHomeAssistantToken ? undefined : "Enter the token to test it: the stored token isn't sent to the browser."}
+              disabledReason={typedHomeAssistantToken ? undefined : "Enter a token to test the connection. For security, the saved token is never sent back to the browser, so it can't be used here."}
               run={() => testHomeAssistant(getValues("home_assistant_address") ?? "", typedHomeAssistantToken)}
             />
           )}
@@ -246,7 +246,7 @@ function SettingsForm({ settings: loaded, logDownloadUrl }: { settings: Settings
           <SecretInput name="openhab_token" clearName="clear_openhab_token" label="OpenHAB token" isSet={settings.openhab_token_set} />
           <TestButton
             label="Test OpenHAB"
-            disabledReason={typedOpenhabToken ? undefined : "Enter the token to test it: the stored token isn't sent to the browser."}
+            disabledReason={typedOpenhabToken ? undefined : "Enter a token to test the connection. For security, the saved token is never sent back to the browser, so it can't be used here."}
             run={() => testOpenhab(getValues("openhab_address") ?? "", typedOpenhabToken)}
           />
         </Card>

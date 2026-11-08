@@ -1,6 +1,6 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-B3O6150C.js";
-import { c as useFormContext, i as get, l as useWatch, n as FormProvider, s as useForm, t as Controller } from "./index.esm-Pmk3Xg_M.js";
-import { n as Notify } from "./NSPanelToastContainer-CPNBnOPV.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-Do7e66ik.js";
+import { c as useFormContext, i as get, l as useWatch, n as FormProvider, s as useForm, t as Controller } from "./index.esm-BCRK0eoX.js";
+import { n as Notify } from "./NSPanelToastContainer-63puWOSc.js";
 //#region node_modules/openapi-fetch/dist/index.mjs
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var PATH_PARAM_RE = /\{[^{}]+\}/g;
@@ -1135,7 +1135,7 @@ function SettingsForm({ settings: loaded, logDownloadUrl }) {
 						}),
 						!addon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TestButton, {
 							label: "Test Home Assistant",
-							disabledReason: typedHomeAssistantToken ? void 0 : "Enter the token to test it: the stored token isn't sent to the browser.",
+							disabledReason: typedHomeAssistantToken ? void 0 : "Enter a token to test the connection. For security, the saved token is never sent back to the browser, so it can't be used here.",
 							run: () => testHomeAssistant(getValues("home_assistant_address") ?? "", typedHomeAssistantToken)
 						})
 					]
@@ -1155,7 +1155,7 @@ function SettingsForm({ settings: loaded, logDownloadUrl }) {
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TestButton, {
 							label: "Test OpenHAB",
-							disabledReason: typedOpenhabToken ? void 0 : "Enter the token to test it: the stored token isn't sent to the browser.",
+							disabledReason: typedOpenhabToken ? void 0 : "Enter a token to test the connection. For security, the saved token is never sent back to the browser, so it can't be used here.",
 							run: () => testOpenhab(getValues("openhab_address") ?? "", typedOpenhabToken)
 						})
 					]

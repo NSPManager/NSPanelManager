@@ -533,6 +533,12 @@ class ValidationTests(RestV2TestCase):
                 self.assertPatchRejected({name: low - 1}, name)
                 self.assertPatchRejected({name: high + 1}, name)
 
+    def test_ports_must_be_positive(self):
+        for name in ("manager_port", "mqtt_port"):
+            for port in (0, -1, -1883, -65535):
+                with self.subTest(name=name, port=port):
+                    self.assertPatchRejected({name: port}, name)
+
     def test_wrong_types(self):
         cases = [
             ("mqtt_port", "1883"),
