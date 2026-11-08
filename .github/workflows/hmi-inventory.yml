@@ -1,0 +1,28 @@
+name: "HMI inventory"
+
+on:
+  pull_request:
+    paths:
+      - "docker/HMI_files/**"
+      - ".github/workflows/hmi-inventory.yml"
+  push:
+    branches:
+      - "main"
+      - "devel"
+    paths:
+      - "docker/HMI_files/**"
+      - ".github/workflows/hmi-inventory.yml"
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+
+      # Each .HMI's committed .HMI.txt must be what the script generates from it, so the PR's
+      # diff shows what changed inside the HMI.
+      - name: Inventories match the HMIs
+        run: uv run docker/HMI_files/hmi_inventory.py --check
