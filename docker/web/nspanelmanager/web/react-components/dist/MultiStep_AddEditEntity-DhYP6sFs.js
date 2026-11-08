@@ -1,10 +1,10 @@
-import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-6bHsUdwk.js";
-import { t as create } from "./react-BoNY6E92.js";
-import { t as useSettingsStore } from "./SettingsStore-DzKRIyG_.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-OR2VwJxc.js";
-import { n as Notify } from "./NSPanelToastContainer-Uu4mGZ3z.js";
-import { t as motion } from "./proxy-C2Vy6RZV.js";
-import { t as AnimatePresence } from "./AnimatePresence-BaM8E_jm.js";
+import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-io8Juecn.js";
+import { t as create } from "./react-nplSxVHL.js";
+import { t as useSettingsStore } from "./SettingsStore-DmaTxUXd.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-A5TOH54f.js";
+import { n as Notify } from "./NSPanelToastContainer-DSPf0tHH.js";
+import { t as motion } from "./proxy-Zg8qg2op.js";
+import { t as AnimatePresence } from "./AnimatePresence-DPGfVlQC.js";
 //#region src/stores/EntitiesPagesStore.ts
 function getCookie$1(name) {
 	let cookieValue = "";
@@ -10120,13 +10120,6 @@ var MultiStep_AddEditEntity_Step3_MediaPlayer = ({ controller, room_id, entities
 				...register("room_view_position")
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "alert alert-warning mb-4",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mdi mdi-alert text-xl" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "font-bold",
-					children: "BETA:"
-				}), " Media players are a beta feature. Not all of the changes they require have been merged into the NSPanel firmware yet, so they may not show up or work correctly on your panels."] })]
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "w-full",
 				children: [
 					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
@@ -10527,13 +10520,6 @@ var MultiStep_AddEditEntity_Step3_Cover = ({ controller, room_id, entities_page_
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 				type: "hidden",
 				...register("room_view_position")
-			}),
-			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "alert alert-warning mb-4",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mdi mdi-alert text-xl" }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "font-bold",
-					children: "BETA:"
-				}), " Covers are a beta feature. The panel firmware and TFTs that add the cover control page may not be installed on your panels yet."] })]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "w-full",

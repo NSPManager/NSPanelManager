@@ -1,4 +1,4 @@
-import { t as create } from "./react-BoNY6E92.js";
+import { t as create } from "./react-nplSxVHL.js";
 //#region src/stores/SettingsStore.ts
 function getCookie(name) {
 	let cookieValue = "";
