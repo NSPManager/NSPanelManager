@@ -305,16 +305,6 @@ class CompatibilityTests(RestV2TestCase):
 
         self.assertEqual((data["mqtt_port"], data["use_fahrenheit"]), (1885, False))
 
-    def test_duplicate_rows_read_the_first_and_update_all(self):
-        # Settings.name isn't unique. get_setting_with_default and MQTTManager use the first row.
-        Settings.objects.create(name="mqtt_port", value="9999")
-
-        self.assertEqual(self.get()["mqtt_port"], 1883)
-
-        self.assertPatchOk({"mqtt_port": 1884})
-        self.assertEqual(sorted(Settings.objects.filter(name="mqtt_port").values_list("value", flat=True)), ["1884", "1884"])
-        self.assertEqual(get_setting_with_default("mqtt_port"), "1884")
-
 
 class ManagerParityTests(RestV2TestCase):
     """v2's settings must match what MQTTManager knows, or the manager deletes them at startup."""

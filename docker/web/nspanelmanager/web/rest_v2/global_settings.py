@@ -305,11 +305,7 @@ def _encode(name, value):
 
 
 def _stored_rows():
-    # Settings.name isn't unique. Like get_setting_with_default (and MQTTManager) use the first row.
-    rows = {}
-    for name, value in Settings.objects.order_by("-id").values_list("name", "value"):
-        rows[name] = value
-    return rows
+    return dict(Settings.objects.values_list("name", "value"))
 
 
 def read_settings():
