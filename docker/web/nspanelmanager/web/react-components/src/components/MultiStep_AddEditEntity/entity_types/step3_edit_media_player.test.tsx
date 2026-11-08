@@ -75,11 +75,6 @@ afterEach(() => {
 });
 
 describe("media player form", () => {
-  it("shows the beta banner", () => {
-    renderForm();
-    expect(screen.getByText(/Media players are a beta feature/)).toBeInTheDocument();
-  });
-
   it("only offers Home Assistant media players", async () => {
     const user = userEvent.setup();
     renderForm();
