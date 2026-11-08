@@ -3,11 +3,12 @@ import os
 import signal
 import subprocess
 import sys
-import time
 
 import environ
+import posthog
 import psutil
 from django.apps import AppConfig
+from django.conf import settings
 
 from web.protobuf import protobuf_mqttmanager_pb2
 
@@ -126,6 +127,26 @@ class WebConfig(AppConfig):
         # and simply not using manager.py for some other functionality.
         if "uwsgi" not in sys.argv and "runserver" not in sys.argv:
             return True
+
+        # Under runserver, only the reloaded child process has RUN_MAIN set
+        if sys.argv[1:2] == ["runserver"] and os.environ.get("RUN_MAIN") != "true":
+            return
+
+        posthog.api_key = "phc_vMDHfi23bnuK3bW2jWpsNDksCoTAtgv2SW4KRoWG9Bj7"
+        posthog.host = "https://eu.i.posthog.com"
+
+        from web import telemetry
+
+        if telemetry.telemetry_enabled():
+            # Send container_started event with unique ID for this install
+            posthog.capture(
+                distinct_id=settings.UNIQUE_INSTALL_ID,
+                event="container_started",
+                properties={
+                    "version": os.getenv("APP_VERSION"),
+                    "$process_person_profile": False,  # optional: cheaper anonymous events
+                },
+            )
 
         # Setup handler to catch SIGCHLD from mqttmanager_process
         signal.signal(signal.SIGCHLD, sigchld_handler)

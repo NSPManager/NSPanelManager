@@ -44,6 +44,19 @@ if SECRET_KEY.strip() == "":
     with open(SECRET_KEY_PATH, "w") as f:
         f.write(SECRET_KEY)
 
+# Unique installations ID
+UNIQUE_INSTALL_ID = ""
+UNIQUE_INSTALL_ID_PATH = os.path.join(DATA_DIR, "secret.key")
+if os.path.exists(UNIQUE_INSTALL_ID_PATH):
+    with open(UNIQUE_INSTALL_ID_PATH) as f:
+        UNIQUE_INSTALL_ID = f.read()
+
+if UNIQUE_INSTALL_ID.strip() == "":
+    logging.info("No unique install ID exists, creating!")
+    UNIQUE_INSTALL_ID = get_random_secret_key()
+    with open(UNIQUE_INSTALL_ID_PATH, "w") as f:
+        f.write(UNIQUE_INSTALL_ID_PATH)
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

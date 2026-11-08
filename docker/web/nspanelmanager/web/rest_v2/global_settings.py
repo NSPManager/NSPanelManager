@@ -28,6 +28,8 @@ from rest_framework.views import APIView
 
 from web.apps import send_mqttmanager_reload_command
 from web.models import Settings
+from web.settings_helper import get_setting_with_default
+from web.telemetry import enable_telemetry
 
 from . import rtttl
 from .schema import extend_schema
@@ -166,6 +168,7 @@ class SettingsUpdateSerializer(serializers.Serializer):
     mqttmanager_log_level = StrictChoiceField(choices=["error", "warning", "info", "debug", "trace"])
     max_live_log_messages = _int()
     max_log_buffer_size = _int()
+    telemetry_enabled = StrictBooleanField()
 
     # Panels and lights
     default_nspanel_type = StrictChoiceField(choices=["eu", "us"])
@@ -384,7 +387,13 @@ class SettingsView(APIView):
         serializer = SettingsUpdateSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         changed = write_settings(serializer.validated_data)
+
         if changed:
             logger.info("Settings changed: %s", ", ".join(changed))
+
+            if "telemetry_enabled" in changed and get_setting_with_default("telemetry_enabled", "false").lower() == "true":
+                # Telemetry was switched on, enable and send data to Posthog
+                enable_telemetry()
+
             send_mqttmanager_reload_command()
         return Response(representation())

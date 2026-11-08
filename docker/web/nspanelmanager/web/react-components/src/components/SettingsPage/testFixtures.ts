@@ -20,6 +20,7 @@ export function settingsFixture(overrides: Partial<Settings> = {}): Settings {
     special_mode_trigger_time: 300,
     special_mode_release_time: 5000,
     optimistic_mode: true,
+    telemetry_enabled: false,
     room_status_backoff_time: 100,
     all_rooms_status_backoff_time: 250,
     mqtt_wait_time: 1000,

@@ -3,13 +3,13 @@ import logging
 from .models import NSPanel, NSPanelSettings, Settings
 
 
-def get_setting_with_default(name: str) -> str:
+def get_setting_with_default(name: str, default="") -> str:
     objects = Settings.objects.filter(name=name)
     if objects.count() > 0:
         return str(objects.first().value)
     else:
         logging.error(f"Failed to get default setting with key '{name}'. No value for setting exists.")
-        return ""
+        return default
 
 
 def does_setting_exist(name: str) -> bool:

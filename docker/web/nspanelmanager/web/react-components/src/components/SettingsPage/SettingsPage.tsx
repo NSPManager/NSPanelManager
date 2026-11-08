@@ -99,7 +99,10 @@ function SettingsForm({ settings: loaded, logDownloadUrl }: { settings: Settings
     try {
       setValue("manager_address", await getIpByHostname(window.location.hostname), { shouldDirty: true });
     } catch (error) {
-      Notify({ message: `Couldn't get the manager's IP address from ${window.location.hostname}: ${error instanceof Error ? error.message : error}`, level: "error" });
+      Notify({
+        message: `Couldn't get the manager's IP address from ${window.location.hostname}: ${error instanceof Error ? error.message : error}`,
+        level: "error",
+      });
     }
   };
 
@@ -108,7 +111,10 @@ function SettingsForm({ settings: loaded, logDownloadUrl }: { settings: Settings
     setValue("manager_port", Number(port), { shouldDirty: true });
   };
 
-  const [screensaverMode, typedHomeAssistantToken, typedOpenhabToken] = useWatch({ control, name: ["screensaver_mode", "home_assistant_token", "openhab_token"] });
+  const [screensaverMode, typedHomeAssistantToken, typedOpenhabToken] = useWatch({
+    control,
+    name: ["screensaver_mode", "home_assistant_token", "openhab_token"],
+  });
 
   return (
     <FormProvider {...form}>
@@ -130,11 +136,7 @@ function SettingsForm({ settings: loaded, logDownloadUrl }: { settings: Settings
             </a>
           }
         >
-          <Select
-            name="mqttmanager_log_level"
-            label="MQTTManager log level"
-            options={options(LOG_LEVELS)}
-          />
+          <Select name="mqttmanager_log_level" label="MQTTManager log level" options={options(LOG_LEVELS)} />
           <Row>
             <NumberInput name="max_live_log_messages" label="Messages shown in the live log" />
             <NumberInput name="max_log_buffer_size" label="Messages kept in the buffer" />
@@ -142,11 +144,7 @@ function SettingsForm({ settings: loaded, logDownloadUrl }: { settings: Settings
         </Card>
 
         <Card title="Global NSPanel settings">
-          <Select
-            name="default_nspanel_type"
-            label="Default NSPanel type"
-            options={options(NSPANEL_TYPES)}
-          />
+          <Select name="default_nspanel_type" label="Default NSPanel type" options={options(NSPANEL_TYPES)} />
           <Row>
             <NumberInput name="color_temp_min" label="Minimum color temperature (K)" />
             <NumberInput name="color_temp_max" label="Maximum color temperature (K)" />
@@ -159,11 +157,7 @@ function SettingsForm({ settings: loaded, logDownloadUrl }: { settings: Settings
               [true, "Reverse"],
             ]}
           />
-          <RadioGroup
-            name="turn_on_behavior"
-            label="Turn on behavior"
-            options={options(TURN_ON_BEHAVIORS)}
-          />
+          <RadioGroup name="turn_on_behavior" label="Turn on behavior" options={options(TURN_ON_BEHAVIORS)} />
           <Row>
             <NumberInput name="raise_to_100_light_level" label="Raise lights to 100% above (%)" />
             <NumberInput name="light_turn_on_brightness" label="Default light turn on brightness (%)" />
@@ -181,11 +175,7 @@ function SettingsForm({ settings: loaded, logDownloadUrl }: { settings: Settings
             <NumberInput name="screensaver_dim_level" label="Screensaver brightness (%)" />
           </Row>
           <NumberInput name="screensaver_activation_timeout" label="Screensaver activation timeout (ms)" />
-          <Select
-            name="screensaver_mode"
-            label="Screensaver mode"
-            options={options(SCREENSAVER_MODES)}
-          />
+          <Select name="screensaver_mode" label="Screensaver mode" options={options(SCREENSAVER_MODES)} />
           <RadioGroup
             name="show_screensaver_inside_temperature"
             label="Screensaver inside temperature"
@@ -220,6 +210,41 @@ function SettingsForm({ settings: loaded, logDownloadUrl }: { settings: Settings
 
         <BuzzerCard />
 
+        <Card title="Telemetry">
+          <RadioGroup
+            name="telemetry_enabled"
+            label="Telementry enabled"
+            options={[
+              [true, "Enabled"],
+              [false, "Disabled"],
+            ]}
+          />
+
+          <div className="flex flex-col divide-y divide-accent bg-base-200 rounded-box">
+            <div className="p-2">
+              <div className="text-sm w-full">A randomized installation ID.</div>
+              <span className="text-xs w-full">
+                This is collected to allow us to track number of unique installations and group other tracked items to this ID.
+              </span>
+            </div>
+
+            <div className="p-2">
+              <div className="text-sm w-full">Number of each type of entity</div>
+              <span className="text-xs w-full">
+                This is simply to know what to focus on. If there are to be improvments or there are issues it simply sets our priorities straight.
+              </span>
+            </div>
+
+            <div className="p-2">
+              <div className="text-sm w-full">Errors/Exceptions</div>
+              <span className="text-xs w-full">
+                We want to track errors and exceptions so that we can get feedback on issues that needs to be looked into. These will never include detailed
+                information and will be more like "Failed to decode NSPanel log level".
+              </span>
+            </div>
+          </div>
+        </Card>
+
         <Card title="MQTT">
           <Row>
             <TextInput name="mqtt_server" label="MQTT server" />
@@ -232,13 +257,25 @@ function SettingsForm({ settings: loaded, logDownloadUrl }: { settings: Settings
         </Card>
 
         <Card title="Home Assistant API">
-          {addon && <Alert level="info">You are running NSPanel Manager as a Home Assistant add-on. These settings are managed by Home Assistant and are locked.</Alert>}
+          {addon && (
+            <Alert level="info">You are running NSPanel Manager as a Home Assistant add-on. These settings are managed by Home Assistant and are locked.</Alert>
+          )}
           <TextInput name="home_assistant_address" label="Home Assistant address" hint="For example http://homeassistant.local:8123" disabled={addon} />
-          <SecretInput name="home_assistant_token" clearName="clear_home_assistant_token" label="Home Assistant token" isSet={settings.home_assistant_token_set} disabled={addon} />
+          <SecretInput
+            name="home_assistant_token"
+            clearName="clear_home_assistant_token"
+            label="Home Assistant token"
+            isSet={settings.home_assistant_token_set}
+            disabled={addon}
+          />
           {!addon && (
             <TestButton
               label="Test Home Assistant"
-              disabledReason={typedHomeAssistantToken ? undefined : "Enter a token to test the connection. For security, the saved token is never sent back to the browser, so it can't be used here."}
+              disabledReason={
+                typedHomeAssistantToken
+                  ? undefined
+                  : "Enter a token to test the connection. For security, the saved token is never sent back to the browser, so it can't be used here."
+              }
               run={() => testHomeAssistant(getValues("home_assistant_address") ?? "", typedHomeAssistantToken)}
             />
           )}
@@ -249,7 +286,11 @@ function SettingsForm({ settings: loaded, logDownloadUrl }: { settings: Settings
           <SecretInput name="openhab_token" clearName="clear_openhab_token" label="OpenHAB token" isSet={settings.openhab_token_set} />
           <TestButton
             label="Test OpenHAB"
-            disabledReason={typedOpenhabToken ? undefined : "Enter a token to test the connection. For security, the saved token is never sent back to the browser, so it can't be used here."}
+            disabledReason={
+              typedOpenhabToken
+                ? undefined
+                : "Enter a token to test the connection. For security, the saved token is never sent back to the browser, so it can't be used here."
+            }
             run={() => testOpenhab(getValues("openhab_address") ?? "", typedOpenhabToken)}
           />
         </Card>
@@ -269,7 +310,11 @@ function SettingsForm({ settings: loaded, logDownloadUrl }: { settings: Settings
 }
 
 // Field errors from a 400 go next to their field; returns the messages that have no field on this page.
-function applyFieldErrors(errors: SettingsErrors, values: SettingsFormValues, setError: (name: keyof SettingsFormValues, error: { type: string; message: string }) => void): string[] {
+function applyFieldErrors(
+  errors: SettingsErrors,
+  values: SettingsFormValues,
+  setError: (name: keyof SettingsFormValues, error: { type: string; message: string }) => void,
+): string[] {
   const unplaced: string[] = [];
   for (const [name, messages] of Object.entries(errors)) {
     const message = Array.isArray(messages) ? messages.join(" ") : String(messages);

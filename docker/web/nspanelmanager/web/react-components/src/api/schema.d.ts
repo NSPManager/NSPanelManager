@@ -62,6 +62,7 @@ export interface components {
             mqttmanager_log_level?: components["schemas"]["MqttmanagerLogLevelEnum"];
             max_live_log_messages?: number;
             max_log_buffer_size?: number;
+            telemetry_enabled?: boolean;
             default_nspanel_type?: components["schemas"]["DefaultNspanelTypeEnum"];
             color_temp_min?: number;
             color_temp_max?: number;
@@ -142,6 +143,7 @@ export interface components {
             mqttmanager_log_level: (components["schemas"]["MqttmanagerLogLevelEnum"] | components["schemas"]["NullEnum"]) | null;
             max_live_log_messages: number | null;
             max_log_buffer_size: number | null;
+            telemetry_enabled: boolean | null;
             default_nspanel_type: (components["schemas"]["DefaultNspanelTypeEnum"] | components["schemas"]["NullEnum"]) | null;
             color_temp_min: number | null;
             color_temp_max: number | null;
@@ -202,6 +204,7 @@ export interface components {
             mqttmanager_log_level?: string[];
             max_live_log_messages?: string[];
             max_log_buffer_size?: string[];
+            telemetry_enabled?: string[];
             default_nspanel_type?: string[];
             color_temp_min?: string[];
             color_temp_max?: string[];

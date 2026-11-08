@@ -1,6 +1,6 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-D932VXe-.js";
-import { c as useFormContext, i as get, l as useWatch, n as FormProvider, s as useForm, t as Controller } from "./index.esm-Dw7Wq8n9.js";
-import { n as Notify } from "./NSPanelToastContainer-BtKVQVmS.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-C5A8ecO7.js";
+import { c as useFormContext, i as get, l as useWatch, n as FormProvider, s as useForm, t as Controller } from "./index.esm-B3QxYuWQ.js";
+import { n as Notify } from "./NSPanelToastContainer-D2DXhv9j.js";
 //#region node_modules/openapi-fetch/dist/index.mjs
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var PATH_PARAM_RE = /\{[^{}]+\}/g;
@@ -1305,6 +1305,7 @@ var PAGE_FIELDS = [
 	"mqttmanager_log_level",
 	"max_live_log_messages",
 	"max_log_buffer_size",
+	"telemetry_enabled",
 	"default_nspanel_type",
 	"color_temp_min",
 	"color_temp_max",
@@ -1633,6 +1634,48 @@ function SettingsForm({ settings: loaded, logDownloadUrl }) {
 					]
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(BuzzerCard, {}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
+					title: "Telemetry",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RadioGroup, {
+						name: "telemetry_enabled",
+						label: "Telementry enabled",
+						options: [[true, "Enabled"], [false, "Disabled"]]
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "flex flex-col divide-y divide-accent bg-base-200 rounded-box",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "p-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "text-sm w-full",
+									children: "A randomized installation ID."
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-xs w-full",
+									children: "This is collected to allow us to track number of unique installations and group other tracked items to this ID."
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "p-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "text-sm w-full",
+									children: "Number of each type of entity"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-xs w-full",
+									children: "This is simply to know what to focus on. If there are to be improvments or there are issues it simply sets our priorities straight."
+								})]
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "p-2",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+									className: "text-sm w-full",
+									children: "Errors/Exceptions"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "text-xs w-full",
+									children: "We want to track errors and exceptions so that we can get feedback on issues that needs to be looked into. These will never include detailed information and will be more like \"Failed to decode NSPanel log level\"."
+								})]
+							})
+						]
+					})]
+				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
 					title: "MQTT",
 					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Row, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TextInput, {

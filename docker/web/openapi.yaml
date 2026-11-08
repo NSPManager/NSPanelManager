@@ -126,6 +126,8 @@ components:
           type: integer
           maximum: 2147483647
           minimum: 0
+        telemetry_enabled:
+          type: boolean
         default_nspanel_type:
           $ref: '#/components/schemas/DefaultNspanelTypeEnum'
         color_temp_min:
@@ -327,6 +329,9 @@ components:
         max_log_buffer_size:
           type: integer
           nullable: true
+        telemetry_enabled:
+          type: boolean
+          nullable: true
         default_nspanel_type:
           nullable: true
           oneOf:
@@ -517,6 +522,7 @@ components:
       - show_screensaver_outside_temperature
       - special_mode_release_time
       - special_mode_trigger_time
+      - telemetry_enabled
       - theme
       - turn_on_behavior
       - use_fahrenheit
@@ -561,6 +567,10 @@ components:
           items:
             type: string
         max_log_buffer_size:
+          type: array
+          items:
+            type: string
+        telemetry_enabled:
           type: array
           items:
             type: string

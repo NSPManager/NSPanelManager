@@ -73,6 +73,7 @@ enum MQTT_MANAGER_SETTING {
   BUZZER_SOUND_TOUCH,
   BUZZER_SOUND_SCENE_ACTIVATED,
   BUZZER_SOUND_SCENE_SAVED,
+  TELEMETRY_ENABLED,
   LAST, // Keep last as to be able to reference the last element in the list.
 };
 
@@ -239,6 +240,7 @@ private:
       {MQTT_MANAGER_SETTING::BUZZER_SOUND_TOUCH, {"buzzer_sound_touch", ""}}, // RTTTL, empty for no sound
       {MQTT_MANAGER_SETTING::BUZZER_SOUND_SCENE_ACTIVATED, {"buzzer_sound_scene_activated", ""}},
       {MQTT_MANAGER_SETTING::BUZZER_SOUND_SCENE_SAVED, {"buzzer_sound_scene_saved", ""}},
+      {MQTT_MANAGER_SETTING::TELEMETRY_ENABLED, {"telemetry_enabled", "false"}},
 #if defined(TEST_MODE) && TEST_MODE == 1
       {MQTT_MANAGER_SETTING::LAST, {"last", "last_value"}},
 #endif

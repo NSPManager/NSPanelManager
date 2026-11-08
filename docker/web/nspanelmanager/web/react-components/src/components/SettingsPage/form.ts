@@ -7,6 +7,7 @@ export const PAGE_FIELDS = [
   "mqttmanager_log_level",
   "max_live_log_messages",
   "max_log_buffer_size",
+  "telemetry_enabled",
   "default_nspanel_type",
   "color_temp_min",
   "color_temp_max",
@@ -67,7 +68,11 @@ export function toFormValues(settings: Settings): SettingsFormValues {
  * The PATCH body for a submitted form: only the settings that changed. Secrets are sent when a new
  * value is typed, or as "" when "clear" is ticked. Add-on managed settings are never sent in the add-on.
  */
-export function buildPatch(values: SettingsFormValues, dirty: Partial<Record<keyof SettingsFormValues, unknown>>, isHomeAssistantAddon: boolean): SettingsUpdateRequest {
+export function buildPatch(
+  values: SettingsFormValues,
+  dirty: Partial<Record<keyof SettingsFormValues, unknown>>,
+  isHomeAssistantAddon: boolean,
+): SettingsUpdateRequest {
   const body: Record<string, unknown> = {};
   const allowed = (name: string) => !(isHomeAssistantAddon && ADDON_MANAGED.includes(name));
   for (const name of PAGE_FIELDS) {
