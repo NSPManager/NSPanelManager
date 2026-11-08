@@ -92,11 +92,6 @@ afterEach(() => {
 });
 
 describe("cover form", () => {
-  it("shows the beta banner", () => {
-    renderForm();
-    expect(screen.getByText(/Covers are a beta feature/)).toBeInTheDocument();
-  });
-
   it("only offers Home Assistant cover entities", async () => {
     const user = userEvent.setup();
     renderForm();

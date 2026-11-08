@@ -62,7 +62,7 @@ describe("add or edit entity wizard", () => {
     await user.click(screen.getByText("Cover / blind"));
     await user.click(await screen.findByText("Home Assistant"));
 
-    expect(await screen.findByText(/Covers are a beta feature/)).toBeInTheDocument();
+    expect(await screen.findByText("Home Assistant entity")).toBeInTheDocument();
   });
 
   it("goes from the media player type to the media player form", async () => {
@@ -72,8 +72,7 @@ describe("add or edit entity wizard", () => {
     await user.click(screen.getByText("Media player"));
     await user.click(await screen.findByText("Home Assistant"));
 
-    expect(await screen.findByText(/Media players are a beta feature/)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Standalone device/)).toBeChecked();
+    expect(await screen.findByLabelText(/Standalone device/)).toBeChecked();
   });
 
   it("opens an existing media player straight on its form", async () => {
@@ -99,7 +98,6 @@ describe("add or edit entity wizard", () => {
     });
     renderWizard(7);
 
-    expect(await screen.findByText(/Media players are a beta feature/)).toBeInTheDocument();
     expect(await screen.findByDisplayValue("Kitchen speakers")).toBeInTheDocument();
     expect(screen.queryByText("Media player")).not.toBeInTheDocument();
   });
