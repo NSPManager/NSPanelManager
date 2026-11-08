@@ -7,7 +7,7 @@ from requests.models import default_hooks
 
 
 class Settings(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     value = models.CharField(max_length=255)
 
     def __str__(self) -> str:

@@ -204,14 +204,6 @@ const MultiStep_AddEditEntity_Step3_MediaPlayer = ({
       <input type="hidden" {...register("entities_page_id")} />
       <input type="hidden" {...register("room_view_position")} />
 
-      <div className="alert alert-warning mb-4">
-        <span className="mdi mdi-alert text-xl"></span>
-        <span>
-          <span className="font-bold">BETA:</span> Media players are a beta feature. Not all of the changes they require have been merged into the NSPanel firmware yet, so
-          they may not show up or work correctly on your panels.
-        </span>
-      </div>
-
       <div className="w-full">
         <div className="flex justify-center mb-4 duration-500 transition-transform ease-linear">
           {/* Name */}
@@ -308,8 +300,8 @@ const MultiStep_AddEditEntity_Step3_MediaPlayer = ({
               <label htmlFor="media_player_setup_multi_room" className="w-full py-3 ms-2 text-sm font-medium cursor-pointer">
                 <span className="block text-sm font-medium">Part of a multi-room audio setup</span>
                 <span className="block text-xs text-base-content/50">
-                  Another media player, the source player, feeds this room, for example through an audio matrix. The panel can also control the source player's volume
-                  and select between its sources.
+                  Another media player, the source player, feeds this room, for example through an audio matrix. The panel can also control the source player's
+                  volume and select between its sources.
                 </span>
               </label>
             </div>

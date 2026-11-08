@@ -171,7 +171,8 @@ const MultiStep_AddEditEntity_Step3_Cover = ({
   const classNames: ClassNamesConfig<IOptionType, false, GroupBase<IOptionType>> = {
     control: (state: { isFocused: boolean }) => `${state.isFocused ? "border" : "border-0"} border-accent p-2.5 text-sm rounded-box bg-base-300 rounded-md`,
     menu: () => "bg-base-300 p-2.5 rounded-box",
-    option: (state: { isSelected: boolean; isFocused: boolean }) => `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`,
+    option: (state: { isSelected: boolean; isFocused: boolean }) =>
+      `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`,
   };
 
   const text_input_class =
@@ -186,14 +187,6 @@ const MultiStep_AddEditEntity_Step3_Cover = ({
       <input type="hidden" {...register("room_id")} />
       <input type="hidden" {...register("entities_page_id")} />
       <input type="hidden" {...register("room_view_position")} />
-
-      <div className="alert alert-warning mb-4">
-        <span className="mdi mdi-alert text-xl"></span>
-        <span>
-          <span className="font-bold">BETA:</span> Covers are a beta feature. The panel firmware and TFTs that add the cover control page may not be installed on your panels
-          yet.
-        </span>
-      </div>
 
       <div className="w-full">
         <div className="flex justify-center mb-4 duration-500 transition-transform ease-linear">

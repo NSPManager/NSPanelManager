@@ -8,3 +8,11 @@ MQTTManager/build/CMakeCache.txt
 MQTTManager/build/Makefile
 MQTTManager/build/cmake_install.cmake
 MQTTManager/build/compile_commands.json
+# Build output from compiling in the dev container. The release image compiles MQTTManager
+# itself, so none of it is needed, and it can be several hundred MB.
+MQTTManager/build/
+# Nextion editor sources for the TFT images; only output_tft*/gui.tft and example.png are served.
+HMI_files/tft_automation/**/*.bmp
+HMI_files/tft_automation/**/*.HMI
+HMI_files/tft_automation/**/*.xcf
+HMI_files/tft_automation/gimp_scripts/
