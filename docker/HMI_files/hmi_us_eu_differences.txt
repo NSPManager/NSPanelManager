@@ -1,0 +1,113 @@
+# Differences between the US and EU HMIs that hmi_compare.py allows; see the docstring there.
+#
+#   expected  a difference that is meant to be there; the reason is required
+#   todo      one that should go, or that nobody has yet said is meant to be there
+#
+# Fixing a todo means deleting its line; the check fails while a listed difference no longer exists.
+
+expected  *                        direction  # each layout is drawn for its own panel's orientation
+expected  *                        Program.s  # EU-only lcd_dev display setup at power-on
+
+todo      bootscreen.t_loading     txt_maxl   # US 30, EU 50: the same loading text, so the same limit
+
+todo      cleanscreen.cleanscreen  pic        # EU has a background picture, US a plain colour; deliberate?
+todo      cleanscreen.t_loading    sta        # goes with cleanscreen's pic: EU crops the background, US is a solid colour
+todo      cleanscreen.t_loading    txt_maxl   # US 30, EU 50: the same loading text, so the same limit
+
+expected  cover.pos                hig        # EU's sliders are vertical, US's horizontal
+expected  cover.pos                mode       # EU's sliders are vertical, US's horizontal
+expected  cover.pos                wid        # EU's sliders are vertical, US's horizontal
+
+todo      dropdown.current         vscope     # global on US, local on EU
+todo      dropdown.i1_button       vscope     # item buttons are global on US, local on EU
+todo      dropdown.i1_label        txt_maxl   # label limits 15/10 swapped between US and EU
+todo      dropdown.i2_button       vscope     # item buttons are global on US, local on EU
+todo      dropdown.i2_label        txt_maxl   # label limits 15/10 swapped between US and EU
+todo      dropdown.i3_button       pco2       # pressed text colour: US white, EU orange (i1/i2 match)
+todo      dropdown.i3_button       vscope     # item buttons are global on US, local on EU
+todo      dropdown.i4_button       pco2       # pressed text colour: US white, EU orange (i1/i2 match)
+todo      dropdown.i4_button       txt        # US '', EU '0'
+todo      dropdown.i4_button       vscope     # item buttons are global on US, local on EU
+todo      dropdown.i4_label        txt_maxl   # label limits 15/10 swapped between US and EU
+todo      dropdown.i5_button       pco2       # pressed text colour: US white, EU orange (i1/i2 match)
+todo      dropdown.i5_button       vscope     # item buttons are global on US, local on EU
+todo      dropdown.i6_button       pco2       # pressed text colour: US white, EU orange (i1/i2 match)
+todo      dropdown.i6_button       vscope     # item buttons are global on US, local on EU
+expected  dropdown.next            font       # draws no text (empty txt, picture button), so its font is never seen
+expected  dropdown.prev            font       # draws no text (empty txt, picture button), so its font is never seen
+todo      dropdown.tc0             on up      # US lacks the swipe to the thermostat page (tc0.val==18)
+
+expected  home.b_ceiling           font       # draws no text (empty txt, picture button), so its font is never seen
+expected  home.b_table             font       # draws no text (empty txt, picture button), so its font is never seen
+expected  home.mode                ycen       # text alignment suits each layout
+expected  home.s_brightness        hig        # EU's sliders are vertical, US's horizontal
+expected  home.s_brightness        mode       # EU's sliders are vertical, US's horizontal
+todo      home.s_brightness        val        # starting value US 100, EU 0; the firmware sets it on load
+expected  home.s_brightness        wid        # EU's sliders are vertical, US's horizontal
+expected  home.s_kelvin            hig        # EU's sliders are vertical, US's horizontal
+expected  home.s_kelvin            mode       # EU's sliders are vertical, US's horizontal
+todo      home.s_kelvin            val        # starting value US 100, EU 0; the firmware sets it on load
+expected  home.s_kelvin            wid        # EU's sliders are vertical, US's horizontal
+
+expected  items12.home             font       # draws no text (empty txt, picture button), so its font is never seen
+todo      items12.items12          on load    # US doesn't hide slider_save when the page loads
+expected  items12.next             font       # draws no text (empty txt, picture button), so its font is never seen
+expected  items12.prev             font       # draws no text (empty txt, picture button), so its font is never seen
+todo      items12.slider_save      bco        # save bar colours differ (US green, EU orange on black)
+todo      items12.slider_save      pco        # save bar colours differ (US green, EU orange on black)
+
+expected  items4.home              font       # draws no text (empty txt, picture button), so its font is never seen
+expected  items4.i1_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+todo      items4.i1_button         txt_maxl   # US 1, EU 10 (items8 and items12 are 1 on both)
+expected  items4.i2_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+todo      items4.i2_button         txt_maxl   # US 1, EU 10 (items8 and items12 are 1 on both)
+expected  items4.i3_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+todo      items4.i3_button         txt_maxl   # US 1, EU 10 (items8 and items12 are 1 on both)
+expected  items4.i4_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+todo      items4.i4_button         txt_maxl   # US 1, EU 10 (items8 and items12 are 1 on both)
+todo      items4.items4            on load    # US doesn't hide slider_save when the page loads
+expected  items4.next              font       # draws no text (empty txt, picture button), so its font is never seen
+expected  items4.prev              font       # draws no text (empty txt, picture button), so its font is never seen
+todo      items4.slider_save       bco        # save bar colours differ (US green, EU orange on black)
+todo      items4.slider_save       pco        # save bar colours differ (US green, EU orange on black)
+expected  items4.tc0               on down    # tests the item buttons' font index (US 11, EU 10), which follows their font
+
+expected  items8.home              font       # draws no text (empty txt, picture button), so its font is never seen
+expected  items8.i1_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items8.i2_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items8.i3_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items8.i4_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items8.i5_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items8.i6_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items8.i7_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items8.i8_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+todo      items8.items8            on load    # US doesn't hide slider_save when the page loads
+expected  items8.next              font       # draws no text (empty txt, picture button), so its font is never seen
+expected  items8.prev              font       # draws no text (empty txt, picture button), so its font is never seen
+todo      items8.slider_save       bco        # save bar colours differ (US green, EU orange on black)
+todo      items8.slider_save       pco        # save bar colours differ (US green, EU orange on black)
+expected  items8.tc0               on down    # tests the item buttons' font index (US 11, EU 10), which follows their font
+
+expected  lights.brightness        hig        # EU's sliders are vertical, US's horizontal
+expected  lights.brightness        mode       # EU's sliders are vertical, US's horizontal
+expected  lights.brightness        wid        # EU's sliders are vertical, US's horizontal
+expected  lights.home              font       # draws no text (empty txt, picture button), so its font is never seen
+expected  lights.hue               hig        # EU's sliders are vertical, US's horizontal
+expected  lights.hue               mode       # EU's sliders are vertical, US's horizontal
+expected  lights.hue               wid        # EU's sliders are vertical, US's horizontal
+expected  lights.kelvin_sat        hig        # EU's sliders are vertical, US's horizontal
+expected  lights.kelvin_sat        mode       # EU's sliders are vertical, US's horizontal
+expected  lights.kelvin_sat        wid        # EU's sliders are vertical, US's horizontal
+
+todo      screensaver.curTime      txt        # placeholder: US '', EU '--:--'
+expected  screensaver.curTime      xcen       # text alignment suits each layout
+expected  screensaver.forDay1      xcen       # text alignment suits each layout
+expected  screensaver.forDay2      xcen       # text alignment suits each layout
+expected  screensaver.forDay3      xcen       # text alignment suits each layout
+expected  screensaver.forDay4      xcen       # text alignment suits each layout
+expected  screensaver.forDay5      xcen       # text alignment suits each layout
+
+expected  thermostat.next          font       # draws no text (empty txt, picture button), so its font is never seen
+todo      thermostat.next          on down    # US lacks the block that ends a pending setpoint change (deactivatetemp)
+expected  thermostat.prev          font       # draws no text (empty txt, picture button), so its font is never seen
+todo      thermostat.prev          on down    # US lacks the block that ends a pending setpoint change (deactivatetemp)

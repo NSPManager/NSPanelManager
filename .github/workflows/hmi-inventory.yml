@@ -26,3 +26,8 @@ jobs:
       # diff shows what changed inside the HMI.
       - name: Inventories match the HMIs
         run: uv run docker/HMI_files/hmi_inventory.py --check
+
+      # The US and EU HMIs may differ only by rule or as hmi_us_eu_differences.txt lists.
+      - name: US and EU HMIs differ only where known
+        if: ${{ !cancelled() }}
+        run: uv run docker/HMI_files/hmi_compare.py
