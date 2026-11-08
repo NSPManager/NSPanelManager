@@ -56,7 +56,8 @@ private:
   /**
    * Process new weather data and push out to the panels.
    */
-  static void _process_weather_data(std::string &data);
+  // Returns true if the forecast was loaded and sent out.
+  static bool _process_weather_data(std::string &data);
 
   static std::string_view _get_icon_from_mapping(std::string &condition, uint8_t hour, bool allow_night_icon);
 

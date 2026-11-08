@@ -17,6 +17,7 @@
 #include <filesystem>
 #include <home_assistant_manager/home_assistant_manager.hpp>
 #include <memory>
+#include <metrics/manager_metrics.hpp>
 #include <mqtt_manager/mqtt_manager.hpp>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <nextion_image_server/nextion_image_server.hpp>
@@ -131,6 +132,7 @@ int main(int argc, char *argv[]) {
     SPDLOG_INFO("SQLite3 seems to be compiled with threadsafe mutexes. Setting: {}", sqlite3_threadsafe());
   }
   database_manager::init();
+  ManagerMetrics::init(); // Export every metric from the start, before what it counts has happened.
 
   // Load config from environment/manager
   MqttManagerConfig::load();   // Load all entities, rooms and panels.

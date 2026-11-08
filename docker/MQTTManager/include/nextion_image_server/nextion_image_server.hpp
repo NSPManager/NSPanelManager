@@ -20,6 +20,10 @@
  *     format=rgb565 (default): raw pixels, row by row from the top left, 2 bytes per pixel,
  *                              little endian RGB565. The size is in the X-Image-Width/X-Image-Height headers.
  *     format=png:              the same image as a PNG, to check the conversion in a browser.
+ *
+ * It is also the manager's general HTTP server; nginx forwards /prometheus/ to it as well:
+ *   GET /prometheus/metrics   Prometheus text exposition of MQTTManager's metrics (see metrics/metrics.hpp).
+ *   GET /prometheus/targets   Prometheus http_sd service discovery: the manager and every scrapable panel.
  */
 class NextionImageServer {
 public:

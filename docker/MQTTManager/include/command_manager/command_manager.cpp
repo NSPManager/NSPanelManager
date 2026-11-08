@@ -4,6 +4,7 @@
 #include <boost/exception/diagnostic_information.hpp>
 #include <command_manager/command_manager.hpp>
 #include <exception>
+#include <metrics/latency_metrics.hpp>
 #include <mqtt_manager/mqtt_manager.hpp>
 #include <spdlog/spdlog.h>
 
@@ -12,12 +13,25 @@ void CommandManager::init() {
   SPDLOG_INFO("CommandManager initialized.");
 }
 
+std::string CommandManager::command_type(const NSPanelMQTTManagerCommand &command) {
+  const google::protobuf::OneofDescriptor *oneof = command.GetDescriptor()->FindOneofByName("CommandData");
+  if (oneof != nullptr) {
+    const google::protobuf::FieldDescriptor *field = command.GetReflection()->GetOneofFieldDescriptor(command, oneof);
+    if (field != nullptr) {
+      return std::string(field->name());
+    }
+  }
+  return "none";
+}
+
 void CommandManager::process_command(const std::string &topic, const std::string &payload) {
   SPDLOG_TRACE("Received command from MQTT: {}", payload);
   try {
     NSPanelMQTTManagerCommand command;
     if (command.ParseFromString(payload)) {
       SPDLOG_TRACE("Calling callbacks.");
+      // Times the command until the first Home Assistant or OpenHAB call it makes.
+      LatencyMetrics::CommandScope command_scope(CommandManager::command_type(command));
       CommandManager::_callbacks(command);
       SPDLOG_TRACE("Callback completed.");
     } else {

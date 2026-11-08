@@ -169,8 +169,8 @@ void EntityManager::load_nspanels() {
   for (auto &nspanel_id : nspanel_ids) {
     auto existing_nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
     if (existing_nspanel) [[likely]] {
-      (*existing_nspanel)->reload_config();
-      (*existing_nspanel)->send_config();
+      (*existing_nspanel)->reload_config("reload");
+      (*existing_nspanel)->send_config("reload_resend");
     } else {
       std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
       auto panel = std::shared_ptr<NSPanel>(new NSPanel(nspanel_id));
@@ -1039,6 +1039,11 @@ std::expected<std::shared_ptr<NSPanel>, EntityManager::EntityError> EntityManage
   }
   SPDLOG_TRACE("Did not find NSPanel by ID {}", id);
   return std::unexpected(EntityManager::EntityError::NOT_FOUND);
+}
+
+std::vector<std::shared_ptr<NSPanel>> EntityManager::get_all_nspanels() {
+  std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
+  return EntityManager::_nspanels;
 }
 
 std::expected<int32_t, EntityManager::EntityError> EntityManager::get_room_id_for_panel_id(uint32_t nspanel_id) {

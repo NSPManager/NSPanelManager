@@ -141,6 +141,10 @@ message NSPanelStatusReport {
   float humidity = 13;
   bool has_pressure = 14;
   float pressure = 15;
+
+  // TCP port of the panel's Prometheus /metrics endpoint, 0 if it has none. Also sent in
+  // register_request, but repeated here so a restarted manager relearns it from the next report.
+  int32 metrics_port = 16;
 }
 
 // Container of data shown on the "Entities page".

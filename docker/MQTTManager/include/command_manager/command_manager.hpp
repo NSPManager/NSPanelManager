@@ -10,6 +10,9 @@ public:
   static void init();
   static void process_command(const std::string &topic, const std::string &payload);
 
+  // Name of the CommandData field set in the command, eg. "light_command", or "none". Used as a metric label.
+  static std::string command_type(const NSPanelMQTTManagerCommand &command);
+
   template <typename CALLBACK_BIND>
   static void attach_callback(CALLBACK_BIND callback) {
     CommandManager::_callbacks.disconnect(callback);

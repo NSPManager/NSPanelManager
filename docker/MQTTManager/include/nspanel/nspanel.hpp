@@ -6,10 +6,13 @@
 #include <command_manager/command_manager.hpp>
 #include <cstdint>
 #include <database_manager/database_manager.hpp>
+#include <metrics/manager_metrics.hpp>
 #include <memory>
+#include <metrics/panel_update_tracker.hpp>
 #include <mqtt_manager/mqtt_manager.hpp>
 #include <mutex>
 #include <nlohmann/json.hpp>
+#include <optional>
 #include <string>
 
 class Room; // Forward declare "Room" as to avoid dependancy loops in CMake
@@ -33,6 +36,30 @@ enum MQTT_MANAGER_NSPANEL_MODEL {
   WEB,
 };
 
+/**
+ * A copy of what the manager knows about a panel, taken at once for /prometheus/metrics and /prometheus/targets.
+ */
+struct NSPanelMetricsSnapshot {
+  uint32_t id;
+  std::string name;
+  std::string mac;
+  std::string ip_address;
+  std::string model; // sonoff, custom or web
+  MQTT_MANAGER_NSPANEL_STATE state;
+  bool registered;   // Has registered to the manager (has an NSPM id).
+  int16_t rssi;
+  uint8_t heap_used_pct;
+  float temperature;
+  std::optional<float> humidity; // Only for panels whose status reports carry it.
+  std::optional<float> pressure; // Pa. Only for panels whose status reports carry it.
+  uint8_t update_progress;       // Percent.
+  std::string md5_firmware;
+  std::string md5_littlefs;
+  std::string md5_tft;
+  bool status_report_received; // Whether rssi, heap, temperature and progress come from a status report.
+  uint16_t metrics_port;       // Port the panel serves /metrics on, 0 if it did not advertise one.
+};
+
 struct NSPanelWarningWebsocketRepresentation {
   std::string level;
   std::string text;
@@ -49,9 +76,10 @@ public:
   static std::shared_ptr<NSPanel> create_from_discovery_request(nlohmann::json request_data);
 
   /*
-   * Reload configuration from database
+   * Reload configuration from database, then send the config to the panel.
+   * @param reason: Why, for the reason label of nspm_panel_configs_sent_total (see send_config).
    */
-  void reload_config();
+  void reload_config(const char *reason = "reload");
 
   ~NSPanel();
 
@@ -67,8 +95,9 @@ public:
 
   /**
    * Send an updated config to the config topic on MQTT
+   * @param reason: What triggered it, a fixed string used as the reason label of nspm_panel_configs_sent_total.
    */
-  void send_config();
+  void send_config(const char *reason = "other");
 
   /**
    * Get the ID of this NSPanel.
@@ -94,6 +123,11 @@ public:
    * Get the JSON message that will be sent over the websocket when a client requests the state of the NSPanel.
    */
   nlohmann::json get_websocket_json_representation();
+
+  /**
+   * Copy the panel's state for metrics and Prometheus service discovery.
+   */
+  NSPanelMetricsSnapshot get_metrics_snapshot();
 
   /**
    * Sends a reboot command to the panel over MQTT.
@@ -176,6 +210,9 @@ public:
   int32_t get_default_room_id();
 
 private:
+  // Labels for this panel's per-panel metrics.
+  ManagerMetrics::PanelLabels _metrics_labels();
+
   std::string _get_nspanel_setting_with_default(std::string key, std::string default_value);
   // A thermostat temperature limit setting, or 0 if it is not a number.
   int _get_nspanel_temperature_limit_setting(std::string key);
@@ -202,6 +239,11 @@ private:
   float _pressure;
   uint8_t _heap_used_pct;
   uint8_t _update_progress;
+  bool _has_humidity = false;
+  bool _has_pressure = false;
+  std::atomic<bool> _status_report_received = false;
+  // Port the panel serves Prometheus /metrics on, from "metrics_port" in its register_request or status reports. 0 if not advertised.
+  std::atomic<uint16_t> _metrics_port = 0;
   MQTT_MANAGER_NSPANEL_STATE _state;
   std::vector<NSPanelWarningWebsocketRepresentation> _nspanel_warnings;
   std::string _nspanel_warnings_from_manager;
@@ -292,5 +334,10 @@ private:
 
   // Mutex to allow only one thread to send config at a time
   std::mutex _send_config_mutex;
+
+  // Follows OTA updates from the reported state, for nspm_panel_updates_total and nspm_panel_update_duration_seconds.
+  PanelUpdateTracker _update_tracker;
+  // Feed the current state to _update_tracker. Called after the state was set from the panel's status or status report.
+  void _track_update_state(bool is_status_report);
 };
 #endif // !MQTT_MANAGER_NSPANEL

@@ -11,6 +11,9 @@
 #include <fstream>
 #include <google/protobuf/message.h>
 #include <iostream>
+#include <metrics/drop_log_limiter.hpp>
+#include <metrics/latency_metrics.hpp>
+#include <metrics/manager_metrics.hpp>
 #include <mqtt/client.h>
 #include <mqtt/message.h>
 #include <mqtt/subscribe_options.h>
@@ -58,19 +61,39 @@ void MQTT_Manager::connect() {
     MQTT_Manager::_mqtt_client->start_consuming();
     mqtt::const_message_ptr msg;
     bool received_message = false;
+    // This thread is the queue's only producer, so the drop bookkeeping needs no lock.
+    DropLogLimiter drop_log_limiter(MQTT_Manager::_mqtt_message_queue_capacity);
+    auto log_drop_lines = [](const std::vector<DropLogLimiter::Line> &lines) {
+      for (const auto &line : lines) {
+        if (line.level == DropLogLimiter::Line::Level::WARNING) {
+          SPDLOG_WARN("{}", line.text);
+        } else {
+          SPDLOG_INFO("{}", line.text);
+        }
+      }
+    };
     while (true) {
       if (!MQTT_Manager::_stop_consuming && MQTT_Manager::_mqtt_client != nullptr) [[likely]] {
+        log_drop_lines(drop_log_limiter.tick());
         // We should be consuming message, try for 1 second.
         received_message = MQTT_Manager::_mqtt_client->try_consume_message_for(&msg, std::chrono::milliseconds(1000));
         if (received_message) {
           if (msg) {
+            ManagerMetrics::mqtt_message_received(msg->get_topic(), msg->get_payload().size());
             MQTTMessage message_struct{
                 .topic = msg->get_topic(),
-                .message = msg->get_payload_str()};
+                .message = msg->get_payload_str(),
+                .enqueued_at = std::chrono::steady_clock::now()};
             if (MQTT_Manager::_mqtt_message_queue.push(message_struct)) {
+              LatencyMetrics::mqtt_message_enqueued();
               MQTT_Manager::_notify_mqtt_message_queued();
+            } else {
+              Metrics::TopicClass topic_class = Metrics::classify_topic(message_struct.topic);
+              LatencyMetrics::mqtt_message_dropped(topic_class);
+              log_drop_lines(drop_log_limiter.on_drop(Metrics::topic_class_label(topic_class)));
             }
           } else if (!MQTT_Manager::_mqtt_client->is_connected()) {
+            ManagerMetrics::mqtt_connection_changed(false);
             WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MQTT not connected.");
             MQTT_Manager::_reconnect_mqtt_client();
           }
@@ -142,10 +165,12 @@ void MQTT_Manager::_send(mqtt::const_message_ptr msg) {
   if (MQTT_Manager::_test_broker_connected) {
     std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_test_published_messages_mutex);
     MQTT_Manager::_test_sent_messages.push_back({msg->get_topic(), msg->get_payload_str(), msg->is_retained()});
+    ManagerMetrics::mqtt_message_published(msg->is_retained(), msg->get_payload().size());
     return;
   }
 #endif
   MQTT_Manager::_mqtt_client->publish(msg);
+  ManagerMetrics::mqtt_message_published(msg->is_retained(), msg->get_payload().size());
 }
 
 void MQTT_Manager::_send_buffered_messages() {
@@ -156,6 +181,7 @@ void MQTT_Manager::_send_buffered_messages() {
       MQTT_Manager::_send(*it);
       MQTT_Manager::_mqtt_messages_buffer.erase(it++);
     }
+    ManagerMetrics::mqtt_buffered_messages(MQTT_Manager::_mqtt_messages_buffer.size());
 
     // Then the latest value of every retained topic, as the server may have restarted and lost them.
     // Sent last so that each topic ends on its newest value, whatever was buffered for it.
@@ -168,6 +194,7 @@ void MQTT_Manager::_send_buffered_messages() {
       MQTT_Manager::_send(mqtt::make_message(topic, payload, 0, true));
     }
   } catch (std::exception &e) {
+    ManagerMetrics::mqtt_publish_error();
     SPDLOG_ERROR("Caught exception when trying to publish message: {}", boost::diagnostic_information(e, true));
   }
   // Even if a send failed: buffering everything from now on would be worse, and losing the
@@ -212,6 +239,7 @@ void MQTT_Manager::_reconnect_mqtt_client() {
   }
 
   MQTT_Manager::_stop_consuming = true;
+  ManagerMetrics::mqtt_connection_changed(false);
   // Buffer everything published from here until the buffered messages have been sent after connecting.
   MQTT_Manager::_caught_up = false;
   while (true) {
@@ -263,6 +291,7 @@ void MQTT_Manager::_reconnect_mqtt_client() {
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
   }
   WebsocketServer::remove_warning("MQTT not connected.");
+  ManagerMetrics::mqtt_connection_changed(true);
   SPDLOG_INFO("Established connection to MQTT server. Sending updated MQTT status.");
 
   MQTT_Manager::publish(fmt::format("nspanel/mqttmanager_{}/status/status", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS)),
@@ -286,13 +315,21 @@ void MQTT_Manager::_reconnect_mqtt_client() {
       do {
         received_message = MQTT_Manager::_mqtt_client->try_consume_message_for(&msg, std::chrono::milliseconds(5)); // Wait for max 100ms to see if a message is to be receved on the recently subscribed topic.
         if (received_message) {
+          ManagerMetrics::mqtt_message_received(msg->get_topic(), msg->get_payload().size());
           MQTTMessage message_struct{
               .topic = msg->get_topic(),
-              .message = msg->get_payload_str()};
-          while (!MQTT_Manager::_mqtt_message_queue.push(message_struct)) {
-            // Queue full: the processing thread is awake draining it, give it the CPU.
-            std::this_thread::yield();
+              .message = msg->get_payload_str(),
+              .enqueued_at = std::chrono::steady_clock::now()};
+          if (!MQTT_Manager::_mqtt_message_queue.push(message_struct)) {
+            // Queue full: the processing thread is awake draining it, give it the CPU until there is
+            // room (measured only, see nspm_mqtt_queue_full_wait*).
+            auto wait_start = LatencyMetrics::clock::now();
+            while (!MQTT_Manager::_mqtt_message_queue.push(message_struct)) {
+              std::this_thread::yield();
+            }
+            LatencyMetrics::mqtt_queue_full_wait(LatencyMetrics::seconds_since(wait_start));
           }
+          LatencyMetrics::mqtt_message_enqueued();
           MQTT_Manager::_notify_mqtt_message_queued();
         }
       } while (received_message);
@@ -324,15 +361,21 @@ void MQTT_Manager::_process_mqtt_messages() {
       }
     }
     MQTT_Manager::_mqtt_message_queue.consume_all([](MQTTMessage message) {
+      Metrics::TopicClass topic_class = Metrics::classify_topic(message.topic);
+      LatencyMetrics::mqtt_message_dequeued(topic_class, LatencyMetrics::seconds_since(message.enqueued_at));
+      auto handler_start = LatencyMetrics::clock::now();
+      bool threw = true;
       try {
         SPDLOG_TRACE("Processing message from topic {}", message.topic);
         // Call each observer/listener until a callback return true, ie. the callback was handled.
         MQTT_Manager::_mqtt_callbacks[message.topic](message.topic, message.message);
+        threw = false;
       } catch (std::exception &ex) {
         SPDLOG_ERROR("Caught std::exception while processing message on topic '{}'. message: '{}'. Exception: ", message.topic, message.message, boost::diagnostic_information(ex, true));
       } catch (...) {
         SPDLOG_ERROR("Caught exception of type other than std::exception while processing message on topic '{}'. message: {}", message.topic, message.message);
       }
+      LatencyMetrics::mqtt_handler_finished(topic_class, LatencyMetrics::seconds_since(handler_start), threw);
     });
   }
 }
@@ -360,6 +403,7 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
   if (retain) {
     std::lock_guard<std::mutex> retain_buffer_guard(MQTT_Manager::_mqtt_retain_buffer_mutex);
     MQTT_Manager::_mqtt_retain_buffer[topic] = payload;
+    ManagerMetrics::mqtt_retained_topics(MQTT_Manager::_mqtt_retain_buffer.size());
   }
 
   std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
@@ -373,15 +417,18 @@ void MQTT_Manager::publish(const std::string &topic, const std::string &payload,
           MQTT_Manager::_send(msg);
           break;
         } catch (std::exception &ex) {
+          ManagerMetrics::mqtt_publish_error();
           SPDLOG_WARN("Caught exception while trying to publish '{}' -> '{}'. Retrying...", topic, payload);
           std::this_thread::sleep_for(std::chrono::seconds(1));
         }
       }
     } else {
       MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
+      ManagerMetrics::mqtt_buffered_messages(MQTT_Manager::_mqtt_messages_buffer.size());
     }
   } else {
     MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
+    ManagerMetrics::mqtt_buffered_messages(MQTT_Manager::_mqtt_messages_buffer.size());
   }
 }
 
@@ -412,6 +459,7 @@ bool MQTT_Manager::publish_if_connected(const std::string &topic, std::function<
     SPDLOG_TRACE("Publising '{}' -> '{}'", topic, payload.value());
     MQTT_Manager::_send(mqtt::make_message(topic.c_str(), payload->c_str(), payload->size(), 2, false));
   } catch (std::exception &ex) {
+    ManagerMetrics::mqtt_publish_error();
     SPDLOG_WARN("Caught exception while trying to publish '{}' -> '{}'. Will not retry.", topic, payload.value());
     return false;
   }
@@ -461,6 +509,7 @@ void MQTT_Manager::clear_retain(const std::string &topic) {
   {
     std::lock_guard<std::mutex> retain_buffer_guard(MQTT_Manager::_mqtt_retain_buffer_mutex);
     MQTT_Manager::_mqtt_retain_buffer.erase(topic);
+    ManagerMetrics::mqtt_retained_topics(MQTT_Manager::_mqtt_retain_buffer.size());
   }
 
   std::lock_guard<std::mutex> mutex_guard(MQTT_Manager::_mqtt_client_mutex);
@@ -472,6 +521,7 @@ void MQTT_Manager::clear_retain(const std::string &topic) {
       MQTT_Manager::_send(msg);
     } else {
       MQTT_Manager::_mqtt_messages_buffer.push_back(msg);
+      ManagerMetrics::mqtt_buffered_messages(MQTT_Manager::_mqtt_messages_buffer.size());
     }
   }
 }

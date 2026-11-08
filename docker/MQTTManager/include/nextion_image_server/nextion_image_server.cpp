@@ -6,6 +6,11 @@
 #include <ixwebsocket/IXHttpServer.h>
 #include <media_player/media_player.hpp>
 #include <memory>
+#include <metrics/manager_metrics.hpp>
+#include <metrics/latency_metrics.hpp>
+#include <metrics/metrics.hpp>
+#include <metrics/panel_metrics_collector.hpp>
+#include <metrics/prometheus_targets.hpp>
 #include <nextion_image_server/nextion_image_server.hpp>
 #include <regex>
 #include <spdlog/spdlog.h>
@@ -29,6 +34,7 @@ void NextionImageServer::start() {
     NextionImageServer::_server = new ix::HttpServer(8003, "0.0.0.0");
     NextionImageServer::_server->setOnConnectionCallback(&NextionImageServer::_handle_request);
   }
+  PanelMetricsCollector::install();
 
   auto res = NextionImageServer::_server->listen();
   if (!res.first) {
@@ -41,13 +47,17 @@ void NextionImageServer::start() {
 
 ix::HttpResponsePtr NextionImageServer::_handle_request(ix::HttpRequestPtr request, std::shared_ptr<ix::ConnectionState> connection_state) {
   // Requests come from anything on the network, never let a bad one take down the manager.
+  ManagerMetrics::HttpRoute route = ManagerMetrics::http_route(request->uri);
   try {
-    return NextionImageServer::_route_request(request, connection_state);
+    ix::HttpResponsePtr response = NextionImageServer::_route_request(request, connection_state);
+    ManagerMetrics::http_request(route, response ? response->statusCode : 500);
+    return response;
   } catch (const std::exception &e) {
     SPDLOG_ERROR("Nextion image server failed to handle {} {}: {}", request->method, request->uri, e.what());
   } catch (...) {
     SPDLOG_ERROR("Nextion image server failed to handle {} {}: unknown exception", request->method, request->uri);
   }
+  ManagerMetrics::http_request(route, 500);
   return NextionImageServer::_text_response(500, "Internal Server Error", "Internal server error.");
 }
 
@@ -63,6 +73,21 @@ ix::HttpResponsePtr NextionImageServer::_route_request(ix::HttpRequestPtr reques
   if (query_start != std::string::npos) {
     query = path.substr(query_start + 1);
     path = path.substr(0, query_start);
+  }
+
+  // Prometheus metrics and service discovery, see METRICS.md.
+  if (path.compare("/prometheus/metrics") == 0) {
+    ix::WebSocketHttpHeaders headers;
+    headers["Content-Type"] = "text/plain; version=0.0.4; charset=utf-8";
+    return std::make_shared<ix::HttpResponse>(200, "OK", ix::HttpErrorCode::Ok, headers, Metrics::serialize());
+  }
+  if (path.compare("/prometheus/targets") == 0) {
+    // nginx passes the Host the request arrived with, so the manager lists itself the way Prometheus reached it.
+    auto host = request->headers.find("Host");
+    ix::WebSocketHttpHeaders headers;
+    headers["Content-Type"] = "application/json";
+    return std::make_shared<ix::HttpResponse>(200, "OK", ix::HttpErrorCode::Ok, headers,
+                                              PrometheusTargets::build_json(host != request->headers.end() ? host->second : "", PrometheusTargets::current_panel_targets()));
   }
 
   static const std::regex album_art_path(R"(^/nextion-img/media_player/(\d+)/album_art$)");
@@ -126,10 +151,14 @@ ix::HttpResponsePtr NextionImageServer::_handle_album_art_request(uint32_t media
     std::lock_guard<std::mutex> lock_guard(NextionImageServer::_converted_images_mutex);
     ConvertedImageKey key = {.media_player_id = media_player_id, .width = size[0], .height = size[1], .format = format};
     auto cached = NextionImageServer::_converted_images.find(key);
-    if (cached != NextionImageServer::_converted_images.end() && cached->second.source == album_art) {
+    bool cache_hit = cached != NextionImageServer::_converted_images.end() && cached->second.source == album_art;
+    LatencyMetrics::image_request(cache_hit, format == ImageFormat::PNG ? "png" : "rgb565");
+    if (cache_hit) {
       image = cached->second.image;
     } else {
+      auto convert_start = LatencyMetrics::clock::now();
       std::optional<ConvertedImage> converted = NextionImageServer::_convert_image(*album_art, size[0], size[1], format);
+      LatencyMetrics::image_converted(LatencyMetrics::seconds_since(convert_start));
       if (!converted) {
         return NextionImageServer::_text_response(502, "Bad Gateway", "Failed to convert album art.");
       }
