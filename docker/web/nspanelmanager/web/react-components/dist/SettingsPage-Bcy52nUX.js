@@ -1,0 +1,1195 @@
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-Do7e66ik.js";
+import { c as useFormContext, i as get, l as useWatch, n as FormProvider, s as useForm, t as Controller } from "./index.esm-BCRK0eoX.js";
+import { n as Notify } from "./NSPanelToastContainer-63puWOSc.js";
+//#region node_modules/openapi-fetch/dist/index.mjs
+var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
+var PATH_PARAM_RE = /\{[^{}]+\}/g;
+var supportsRequestInitExt = () => {
+	return typeof process === "object" && Number.parseInt(process?.versions?.node?.substring(0, 2)) >= 18 && process.versions.undici;
+};
+function randomID() {
+	return Math.random().toString(36).slice(2, 11);
+}
+function createClient(clientOptions) {
+	let { baseUrl = "", Request: CustomRequest = globalThis.Request, fetch: baseFetch = globalThis.fetch, querySerializer: globalQuerySerializer, bodySerializer: globalBodySerializer, pathSerializer: globalPathSerializer, headers: baseHeaders, requestInitExt = void 0, ...baseOptions } = { ...clientOptions };
+	requestInitExt = supportsRequestInitExt() ? requestInitExt : void 0;
+	baseUrl = removeTrailingSlash(baseUrl);
+	const globalMiddlewares = [];
+	async function coreFetch(schemaPath, fetchOptions) {
+		const { baseUrl: localBaseUrl, fetch = baseFetch, Request = CustomRequest, headers, params = {}, parseAs = "json", querySerializer: requestQuerySerializer, bodySerializer = globalBodySerializer ?? defaultBodySerializer, pathSerializer: requestPathSerializer, body, middleware: requestMiddlewares = [], ...init } = fetchOptions || {};
+		let finalBaseUrl = baseUrl;
+		if (localBaseUrl) finalBaseUrl = removeTrailingSlash(localBaseUrl) ?? baseUrl;
+		let querySerializer = typeof globalQuerySerializer === "function" ? globalQuerySerializer : createQuerySerializer(globalQuerySerializer);
+		if (requestQuerySerializer) querySerializer = typeof requestQuerySerializer === "function" ? requestQuerySerializer : createQuerySerializer({
+			...typeof globalQuerySerializer === "object" ? globalQuerySerializer : {},
+			...requestQuerySerializer
+		});
+		const pathSerializer = requestPathSerializer || globalPathSerializer || defaultPathSerializer;
+		const serializedBody = body === void 0 ? void 0 : bodySerializer(body, mergeHeaders(baseHeaders, headers, params.header));
+		const finalHeaders = mergeHeaders(serializedBody === void 0 || serializedBody instanceof FormData ? {} : { "Content-Type": "application/json" }, baseHeaders, headers, params.header);
+		const finalMiddlewares = [...globalMiddlewares, ...requestMiddlewares];
+		const requestInit = {
+			redirect: "follow",
+			...baseOptions,
+			...init,
+			body: serializedBody,
+			headers: finalHeaders
+		};
+		let id;
+		let options;
+		let request = new Request(createFinalURL(schemaPath, {
+			baseUrl: finalBaseUrl,
+			params,
+			querySerializer,
+			pathSerializer
+		}), requestInit);
+		let response;
+		for (const key in init) if (!(key in request)) request[key] = init[key];
+		if (finalMiddlewares.length) {
+			id = randomID();
+			options = Object.freeze({
+				baseUrl: finalBaseUrl,
+				fetch,
+				parseAs,
+				querySerializer,
+				bodySerializer,
+				pathSerializer
+			});
+			for (const m of finalMiddlewares) if (m && typeof m === "object" && typeof m.onRequest === "function") {
+				const result = await m.onRequest({
+					request,
+					schemaPath,
+					params,
+					options,
+					id
+				});
+				if (result) {
+					if (result instanceof Request) request = result;
+					else if (result instanceof Response) {
+						response = result;
+						break;
+					} else throw new Error("onRequest: must return new Request() or Response() when modifying the request");
+				}
+			}
+		}
+		if (!response) {
+			try {
+				response = await fetch(request, requestInitExt);
+			} catch (error2) {
+				let errorAfterMiddleware = error2;
+				if (finalMiddlewares.length) for (let i = finalMiddlewares.length - 1; i >= 0; i--) {
+					const m = finalMiddlewares[i];
+					if (m && typeof m === "object" && typeof m.onError === "function") {
+						const result = await m.onError({
+							request,
+							error: errorAfterMiddleware,
+							schemaPath,
+							params,
+							options,
+							id
+						});
+						if (result) {
+							if (result instanceof Response) {
+								errorAfterMiddleware = void 0;
+								response = result;
+								break;
+							}
+							if (result instanceof Error) {
+								errorAfterMiddleware = result;
+								continue;
+							}
+							throw new Error("onError: must return new Response() or instance of Error");
+						}
+					}
+				}
+				if (errorAfterMiddleware) throw errorAfterMiddleware;
+			}
+			if (finalMiddlewares.length) for (let i = finalMiddlewares.length - 1; i >= 0; i--) {
+				const m = finalMiddlewares[i];
+				if (m && typeof m === "object" && typeof m.onResponse === "function") {
+					const result = await m.onResponse({
+						request,
+						response,
+						schemaPath,
+						params,
+						options,
+						id
+					});
+					if (result) {
+						if (!(result instanceof Response)) throw new Error("onResponse: must return new Response() when modifying the response");
+						response = result;
+					}
+				}
+			}
+		}
+		const contentLength = response.headers.get("Content-Length");
+		if (response.status === 204 || request.method === "HEAD" || contentLength === "0" && !response.headers.get("Transfer-Encoding")?.includes("chunked")) return response.ok ? {
+			data: void 0,
+			response
+		} : {
+			error: void 0,
+			response
+		};
+		if (response.ok) {
+			const getResponseData = async () => {
+				if (parseAs === "stream") return response.body;
+				if (parseAs === "json" && !contentLength) {
+					const raw = await response.text();
+					return raw ? JSON.parse(raw) : void 0;
+				}
+				return await response[parseAs]();
+			};
+			return {
+				data: await getResponseData(),
+				response
+			};
+		}
+		let error = await response.text();
+		try {
+			error = JSON.parse(error);
+		} catch {}
+		return {
+			error,
+			response
+		};
+	}
+	return {
+		request(method, url, init) {
+			return coreFetch(url, {
+				...init,
+				method: method.toUpperCase()
+			});
+		},
+		/** Call a GET endpoint */
+		GET(url, init) {
+			return coreFetch(url, {
+				...init,
+				method: "GET"
+			});
+		},
+		/** Call a PUT endpoint */
+		PUT(url, init) {
+			return coreFetch(url, {
+				...init,
+				method: "PUT"
+			});
+		},
+		/** Call a POST endpoint */
+		POST(url, init) {
+			return coreFetch(url, {
+				...init,
+				method: "POST"
+			});
+		},
+		/** Call a DELETE endpoint */
+		DELETE(url, init) {
+			return coreFetch(url, {
+				...init,
+				method: "DELETE"
+			});
+		},
+		/** Call a OPTIONS endpoint */
+		OPTIONS(url, init) {
+			return coreFetch(url, {
+				...init,
+				method: "OPTIONS"
+			});
+		},
+		/** Call a HEAD endpoint */
+		HEAD(url, init) {
+			return coreFetch(url, {
+				...init,
+				method: "HEAD"
+			});
+		},
+		/** Call a PATCH endpoint */
+		PATCH(url, init) {
+			return coreFetch(url, {
+				...init,
+				method: "PATCH"
+			});
+		},
+		/** Call a TRACE endpoint */
+		TRACE(url, init) {
+			return coreFetch(url, {
+				...init,
+				method: "TRACE"
+			});
+		},
+		/** Register middleware */
+		use(...middleware) {
+			for (const m of middleware) {
+				if (!m) continue;
+				if (typeof m !== "object" || !("onRequest" in m || "onResponse" in m || "onError" in m)) throw new Error("Middleware must be an object with one of `onRequest()`, `onResponse() or `onError()`");
+				globalMiddlewares.push(m);
+			}
+		},
+		/** Unregister middleware */
+		eject(...middleware) {
+			for (const m of middleware) {
+				const i = globalMiddlewares.indexOf(m);
+				if (i !== -1) globalMiddlewares.splice(i, 1);
+			}
+		}
+	};
+}
+function serializePrimitiveParam(name, value, options) {
+	if (value === void 0 || value === null) return "";
+	if (typeof value === "object") throw new Error("Deeply-nested arrays/objects aren’t supported. Provide your own `querySerializer()` to handle these.");
+	return `${name}=${options?.allowReserved === true ? value : encodeURIComponent(value)}`;
+}
+function serializeObjectParam(name, value, options) {
+	if (!value || typeof value !== "object") return "";
+	const values = [];
+	const joiner = {
+		simple: ",",
+		label: ".",
+		matrix: ";"
+	}[options.style] || "&";
+	if (options.style !== "deepObject" && options.explode === false) {
+		for (const k in value) values.push(k, options.allowReserved === true ? value[k] : encodeURIComponent(value[k]));
+		const final2 = values.join(",");
+		switch (options.style) {
+			case "form": return `${name}=${final2}`;
+			case "label": return `.${final2}`;
+			case "matrix": return `;${name}=${final2}`;
+			default: return final2;
+		}
+	}
+	for (const k in value) {
+		const finalName = options.style === "deepObject" ? `${name}[${k}]` : k;
+		values.push(serializePrimitiveParam(finalName, value[k], options));
+	}
+	const final = values.join(joiner);
+	return options.style === "label" || options.style === "matrix" ? `${joiner}${final}` : final;
+}
+function serializeArrayParam(name, value, options) {
+	if (!Array.isArray(value)) return "";
+	if (options.explode === false) {
+		const joiner2 = {
+			form: ",",
+			spaceDelimited: "%20",
+			pipeDelimited: "|"
+		}[options.style] || ",";
+		const final = (options.allowReserved === true ? value : value.map((v) => encodeURIComponent(v))).join(joiner2);
+		switch (options.style) {
+			case "simple": return final;
+			case "label": return `.${final}`;
+			case "matrix": return `;${name}=${final}`;
+			default: return `${name}=${final}`;
+		}
+	}
+	const joiner = {
+		simple: ",",
+		label: ".",
+		matrix: ";"
+	}[options.style] || "&";
+	const values = [];
+	for (const v of value) if (options.style === "simple" || options.style === "label") values.push(options.allowReserved === true ? v : encodeURIComponent(v));
+	else values.push(serializePrimitiveParam(name, v, options));
+	return options.style === "label" || options.style === "matrix" ? `${joiner}${values.join(joiner)}` : values.join(joiner);
+}
+function createQuerySerializer(options) {
+	return function querySerializer(queryParams) {
+		const search = [];
+		if (queryParams && typeof queryParams === "object") for (const name in queryParams) {
+			const value = queryParams[name];
+			if (value === void 0 || value === null) continue;
+			if (Array.isArray(value)) {
+				if (value.length === 0) continue;
+				search.push(serializeArrayParam(name, value, {
+					style: "form",
+					explode: true,
+					...options?.array,
+					allowReserved: options?.allowReserved || false
+				}));
+				continue;
+			}
+			if (typeof value === "object") {
+				search.push(serializeObjectParam(name, value, {
+					style: "deepObject",
+					explode: true,
+					...options?.object,
+					allowReserved: options?.allowReserved || false
+				}));
+				continue;
+			}
+			search.push(serializePrimitiveParam(name, value, options));
+		}
+		return search.join("&");
+	};
+}
+function defaultPathSerializer(pathname, pathParams) {
+	let nextURL = pathname;
+	for (const match of pathname.match(PATH_PARAM_RE) ?? []) {
+		let name = match.substring(1, match.length - 1);
+		let explode = false;
+		let style = "simple";
+		if (name.endsWith("*")) {
+			explode = true;
+			name = name.substring(0, name.length - 1);
+		}
+		if (name.startsWith(".")) {
+			style = "label";
+			name = name.substring(1);
+		} else if (name.startsWith(";")) {
+			style = "matrix";
+			name = name.substring(1);
+		}
+		if (!pathParams || pathParams[name] === void 0 || pathParams[name] === null) continue;
+		const value = pathParams[name];
+		if (Array.isArray(value)) {
+			nextURL = nextURL.replace(match, serializeArrayParam(name, value, {
+				style,
+				explode
+			}));
+			continue;
+		}
+		if (typeof value === "object") {
+			nextURL = nextURL.replace(match, serializeObjectParam(name, value, {
+				style,
+				explode
+			}));
+			continue;
+		}
+		if (style === "matrix") {
+			nextURL = nextURL.replace(match, `;${serializePrimitiveParam(name, value)}`);
+			continue;
+		}
+		nextURL = nextURL.replace(match, style === "label" ? `.${encodeURIComponent(value)}` : encodeURIComponent(value));
+	}
+	return nextURL;
+}
+function defaultBodySerializer(body, headers) {
+	if (body instanceof FormData) return body;
+	if (headers) {
+		if ((headers.get instanceof Function ? headers.get("Content-Type") ?? headers.get("content-type") : headers["Content-Type"] ?? headers["content-type"]) === "application/x-www-form-urlencoded") return new URLSearchParams(body).toString();
+	}
+	return JSON.stringify(body);
+}
+function createFinalURL(pathname, options) {
+	let finalURL = `${options.baseUrl}${pathname}`;
+	if (options.params?.path) finalURL = options.pathSerializer(finalURL, options.params.path);
+	let search = options.querySerializer(options.params.query ?? {});
+	if (search.startsWith("?")) search = search.substring(1);
+	if (search) finalURL += `?${search}`;
+	return finalURL;
+}
+function mergeHeaders(...allHeaders) {
+	const finalHeaders = new Headers();
+	for (const h of allHeaders) {
+		if (!h || typeof h !== "object") continue;
+		const iterator = h instanceof Headers ? h.entries() : Object.entries(h);
+		for (const [k, v] of iterator) if (v === null) finalHeaders.delete(k);
+		else if (Array.isArray(v)) for (const v2 of v) finalHeaders.append(k, v2);
+		else if (v !== void 0) finalHeaders.set(k, v);
+	}
+	return finalHeaders;
+}
+function removeTrailingSlash(url) {
+	if (url.endsWith("/")) return url.substring(0, url.length - 1);
+	return url;
+}
+//#endregion
+//#region src/api/client.ts
+function getCookie(name) {
+	for (const cookie of document.cookie ? document.cookie.split(";") : []) {
+		const [key, ...value] = cookie.trim().split("=");
+		if (key === name) return decodeURIComponent(value.join("="));
+	}
+	return "";
+}
+var csrf = { onRequest({ request }) {
+	if (![
+		"GET",
+		"HEAD",
+		"OPTIONS",
+		"TRACE"
+	].includes(request.method)) request.headers.set("X-CSRFToken", getCookie("csrftoken"));
+	return request;
+} };
+var api = createClient({
+	baseUrl: globalThis.location?.origin ?? "",
+	credentials: "same-origin",
+	fetch: (request) => globalThis.fetch(request)
+});
+api.use(csrf);
+//#endregion
+//#region src/api/connectionTests.ts
+async function errorMessage(response) {
+	try {
+		const data = await response.json();
+		return data.message || data.error || `HTTP ${response.status}`;
+	} catch {
+		return `HTTP ${response.status}`;
+	}
+}
+async function runTest(url, params) {
+	try {
+		const response = await fetch(`${url}?${new URLSearchParams(params).toString()}`, {
+			method: "GET",
+			credentials: "same-origin"
+		});
+		return response.ok ? null : await errorMessage(response);
+	} catch (error) {
+		return error instanceof Error ? error.message : String(error);
+	}
+}
+/** The manager's IP address for a hostname, as the server resolves it. */
+async function getIpByHostname(hostname) {
+	const response = await fetch("/rest/get_ip_by_hostname", {
+		method: "POST",
+		credentials: "same-origin",
+		headers: {
+			"Content-Type": "application/json",
+			"X-CSRFToken": getCookie("csrftoken")
+		},
+		body: JSON.stringify({ hostname })
+	});
+	if (!response.ok) throw new Error(await errorMessage(response));
+	const data = await response.json();
+	if (!data.ip) throw new Error("No \"ip\" in the response.");
+	return data.ip;
+}
+function testManager(address, port) {
+	return runTest("/rest/mqttmanager/test", {
+		address,
+		port: String(port)
+	});
+}
+function testHomeAssistant(address, token) {
+	return runTest("/rest/home_assistant/test", {
+		address,
+		token
+	});
+}
+function testOpenhab(address, token) {
+	return runTest("/rest/openhab/test", {
+		address,
+		token
+	});
+}
+//#endregion
+//#region src/components/SettingsPage/choices.ts
+var LOG_LEVELS = {
+	error: "Error",
+	warning: "Warning",
+	info: "Info",
+	debug: "Debug",
+	trace: "Trace"
+};
+var NSPANEL_TYPES = {
+	eu: "EU",
+	us: "US"
+};
+var TURN_ON_BEHAVIORS = {
+	color_temp: "Color temperature",
+	restore: "Restore"
+};
+var SCREENSAVER_MODES = {
+	with_background: "Show with background (clock, date and weather)",
+	without_background: "Show without background (clock, date and weather)",
+	datetime_with_background: "Show with background (no weather)",
+	datetime_without_background: "Show without background (no weather)",
+	no_screensaver: "No screensaver (turn off screen)"
+};
+var options = (choices) => Object.entries(choices);
+//#endregion
+//#region src/components/common/buttons.tsx
+var import_jsx_runtime = require_jsx_runtime();
+/** A button joined to the end of an input: pass it as the input's `button`. */
+function JoinButton({ onClick, children }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+		type: "button",
+		className: "btn btn-info join-item",
+		onClick,
+		children
+	});
+}
+/** Runs a connection test and reports the result as a toast. With a disabledReason it is disabled, and shows why. */
+function TestButton({ label, run, disabledReason }) {
+	const [running, setRunning] = (0, import_react.useState)(false);
+	const onClick = async () => {
+		setRunning(true);
+		const error = await run();
+		setRunning(false);
+		if (error) Notify({
+			message: `${label} failed: ${error}`,
+			level: "error",
+			duration: 8e3
+		});
+		else Notify({
+			message: `${label}: OK.`,
+			level: "success",
+			duration: 5e3
+		});
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "mt-1",
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+			type: "button",
+			className: "btn btn-accent btn-sm",
+			onClick,
+			disabled: running || disabledReason !== void 0,
+			children: [running && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "loading loading-spinner loading-sm" }), label]
+		}), disabledReason && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "mt-1 text-sm opacity-60",
+			children: disabledReason
+		})]
+	});
+}
+//#endregion
+//#region src/components/common/layout.tsx
+function Card({ title, actions, children }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+		className: "p-4 mt-2 bg-base-100 rounded-box shadow-lg w-full",
+		"aria-label": title,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "flex items-center justify-between mb-2",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+				className: "text-xl",
+				children: title
+			}), actions]
+		}), children]
+	});
+}
+function Row({ children }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "flex flex-wrap md:flex-nowrap gap-2",
+		children
+	});
+}
+function Alert({ level, children }) {
+	const className = {
+		info: "alert-info",
+		warning: "alert-warning",
+		error: "alert-error"
+	}[level];
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		role: level === "error" ? "alert" : "status",
+		className: `alert ${className} my-2`,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { children })
+	});
+}
+//#endregion
+//#region src/components/common/fields.tsx
+function Field({ name, label, hint, children }) {
+	const { formState: { errors, defaultValues } } = useFormContext();
+	const error = get(errors, name)?.message;
+	const unreadable = get(defaultValues, name) === null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "mb-2 w-full",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+				htmlFor: name,
+				className: "block mb-1 text-sm font-medium",
+				children: label
+			}),
+			children,
+			error ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-1 text-sm text-error",
+				id: `${name}-error`,
+				children: error
+			}) : unreadable ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-1 text-sm text-warning",
+				children: "No valid value is stored. Enter one."
+			}) : hint ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mt-1 text-sm opacity-60",
+				children: hint
+			}) : null
+		]
+	});
+}
+var inputClass = "input w-full";
+function useInvalid(name) {
+	const { formState: { errors } } = useFormContext();
+	const invalid = get(errors, name) !== void 0;
+	return {
+		"aria-invalid": invalid,
+		"aria-describedby": invalid ? `${name}-error` : void 0
+	};
+}
+function TextInput$1({ name, label, hint, disabled, button }) {
+	const { register } = useFormContext();
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+		name,
+		label,
+		hint,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "join w-full",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				id: name,
+				type: "text",
+				className: `${inputClass} join-item`,
+				disabled,
+				...useInvalid(name),
+				...register(name)
+			}), button]
+		})
+	});
+}
+var toNumber = (value) => value === "" || value === null || value === void 0 ? null : Number(value);
+function NumberInput$1({ name, label, hint, button }) {
+	const { register } = useFormContext();
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+		name,
+		label,
+		hint,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "join w-full",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				id: name,
+				type: "number",
+				step: 1,
+				className: `${inputClass} join-item`,
+				...useInvalid(name),
+				...register(name, { setValueAs: toNumber })
+			}), button]
+		})
+	});
+}
+function Select$1({ name, label, options }) {
+	const { register } = useFormContext();
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Field, {
+		name,
+		label,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("select", {
+			id: name,
+			className: "select w-full",
+			...useInvalid(name),
+			...register(name),
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+				value: "",
+				disabled: true,
+				children: "Choose…"
+			}), options.map(([value, text]) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+				value,
+				children: text
+			}, value))]
+		})
+	});
+}
+function RadioGroup$1({ name, label, options }) {
+	const { control } = useFormContext();
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Controller, {
+		control,
+		name,
+		render: ({ field }) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("fieldset", {
+			className: "mb-2 w-full",
+			"aria-label": label,
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("legend", {
+					className: "block mb-1 text-sm font-medium",
+					children: label
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "flex flex-wrap border border-neutral rounded-lg",
+					children: options.map(([value, text]) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+						className: "flex items-center gap-2 flex-1 px-3 py-3 text-sm font-medium cursor-pointer",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+							type: "radio",
+							className: "radio radio-accent radio-sm",
+							name,
+							checked: field.value === value,
+							onChange: () => field.onChange(value),
+							onBlur: field.onBlur
+						}), text]
+					}, String(value)))
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(FieldMessage, { name })
+			]
+		})
+	});
+}
+function FieldMessage({ name }) {
+	const { formState: { errors, defaultValues } } = useFormContext();
+	const error = get(errors, name)?.message;
+	if (error) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+		className: "mt-1 text-sm text-error",
+		children: error
+	});
+	if (get(defaultValues, name) === null) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+		className: "mt-1 text-sm text-warning",
+		children: "No valid value is stored. Choose one."
+	});
+	return null;
+}
+function SecretInput$1({ name, clearName, label, isSet, disabled, button }) {
+	const { register, control } = useFormContext();
+	const clear = useWatch({
+		control,
+		name: clearName
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Field, {
+		name,
+		label,
+		hint: isSet && !disabled ? "Stored, and not shown. Leave blank to keep it." : void 0,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "join w-full",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+				id: name,
+				type: "password",
+				autoComplete: "new-password",
+				className: `${inputClass} join-item`,
+				placeholder: isSet ? "••••••••" : "",
+				disabled: disabled || clear,
+				...useInvalid(name),
+				...register(name)
+			}), button]
+		}), isSet && !disabled && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+			className: "label mt-1 text-sm",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+					type: "checkbox",
+					className: "checkbox checkbox-accent checkbox-sm",
+					...register(clearName)
+				}),
+				"Clear the stored ",
+				label.toLowerCase()
+			]
+		})]
+	});
+}
+//#endregion
+//#region src/components/common/typedFields.ts
+/** The inputs in ./fields with their field names checked against the form T. Call it once, at module level. */
+function typedFields() {
+	return {
+		TextInput: TextInput$1,
+		NumberInput: NumberInput$1,
+		Select: Select$1,
+		RadioGroup: RadioGroup$1,
+		SecretInput: SecretInput$1
+	};
+}
+//#endregion
+//#region src/components/SettingsPage/form.ts
+var PAGE_FIELDS = [
+	"manager_address",
+	"manager_port",
+	"mqttmanager_log_level",
+	"max_live_log_messages",
+	"max_log_buffer_size",
+	"default_nspanel_type",
+	"color_temp_min",
+	"color_temp_max",
+	"reverse_color_temp",
+	"turn_on_behavior",
+	"raise_to_100_light_level",
+	"min_button_push_time",
+	"button_long_press_time",
+	"special_mode_trigger_time",
+	"special_mode_release_time",
+	"screen_dim_level",
+	"screensaver_dim_level",
+	"screensaver_activation_timeout",
+	"screensaver_mode",
+	"show_screensaver_inside_temperature",
+	"show_screensaver_outside_temperature",
+	"optimistic_mode",
+	"room_status_backoff_time",
+	"all_rooms_status_backoff_time",
+	"light_turn_on_brightness",
+	"mqtt_server",
+	"mqtt_port",
+	"mqtt_username",
+	"home_assistant_address",
+	"openhab_address"
+];
+var SECRETS = [
+	"mqtt_password",
+	"home_assistant_token",
+	"openhab_token"
+];
+var ADDON_MANAGED = ["home_assistant_address", "home_assistant_token"];
+var MODES_WITH_OUTSIDE_TEMPERATURE = ["datetime_with_background", "datetime_without_background"];
+function toFormValues(settings) {
+	const values = {};
+	for (const name of PAGE_FIELDS) values[name] = settings[name];
+	for (const secret of SECRETS) {
+		values[secret] = "";
+		values[`clear_${secret}`] = false;
+	}
+	return values;
+}
+/**
+* The PATCH body for a submitted form: only the settings that changed. Secrets are sent when a new
+* value is typed, or as "" when "clear" is ticked. Add-on managed settings are never sent in the add-on.
+*/
+function buildPatch(values, dirty, isHomeAssistantAddon) {
+	const body = {};
+	const allowed = (name) => !(isHomeAssistantAddon && ADDON_MANAGED.includes(name));
+	for (const name of PAGE_FIELDS) if (dirty[name] && allowed(name)) body[name] = values[name];
+	for (const secret of SECRETS) {
+		if (!allowed(secret)) continue;
+		if (values[`clear_${secret}`]) body[secret] = "";
+		else if (values[secret]) body[secret] = values[secret];
+	}
+	return body;
+}
+//#endregion
+//#region src/components/SettingsPage/SettingsPage.tsx
+var { NumberInput, RadioGroup, SecretInput, Select, TextInput } = typedFields();
+/** The global settings page (/settings), backed by /rest/v2/settings. */
+function SettingsPage({ logDownloadUrl = "/download_mqttmanager_log" }) {
+	const [state, setState] = (0, import_react.useState)({ status: "loading" });
+	const fetchSettings = (0, import_react.useCallback)(() => {
+		api.GET("/rest/v2/settings").then(({ data, response }) => setState(data ? {
+			status: "loaded",
+			settings: data
+		} : {
+			status: "error",
+			message: `HTTP ${response.status}`
+		})).catch((error) => setState({
+			status: "error",
+			message: error instanceof Error ? error.message : String(error)
+		}));
+	}, []);
+	(0, import_react.useEffect)(fetchSettings, [fetchSettings]);
+	const retry = () => {
+		setState({ status: "loading" });
+		fetchSettings();
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "flex items-center justify-between mb-2",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+				className: "font-medium text-2xl",
+				children: "Settings"
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+				href: "https://nspanelmanager.com/docs/web-interface/#global-settings",
+				target: "_blank",
+				rel: "noreferrer",
+				className: "btn btn-outline btn-info",
+				children: "Help"
+			})]
+		}),
+		state.status === "loading" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+			className: "loading loading-spinner",
+			"aria-label": "Loading settings"
+		}),
+		state.status === "error" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Alert, {
+			level: "error",
+			children: ["Couldn't load the settings: ", state.message]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+			type: "button",
+			className: "btn",
+			onClick: retry,
+			children: "Retry"
+		})] }),
+		state.status === "loaded" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SettingsForm, {
+			settings: state.settings,
+			logDownloadUrl
+		})
+	] });
+}
+function SettingsForm({ settings: loaded, logDownloadUrl }) {
+	const [settings, setSettings] = (0, import_react.useState)(loaded);
+	const form = useForm({ defaultValues: toFormValues(loaded) });
+	const { handleSubmit, reset, setError, setValue, getValues, control, formState: { isDirty, isSubmitting, dirtyFields } } = form;
+	const addon = settings.is_home_assistant_addon;
+	const onSubmit = async (values) => {
+		const body = buildPatch(values, dirtyFields, addon);
+		if (Object.keys(body).length === 0) {
+			reset(values);
+			return;
+		}
+		try {
+			const { data, error, response } = await api.PATCH("/rest/v2/settings", { body });
+			if (data) {
+				setSettings(data);
+				reset(toFormValues(data));
+				Notify({
+					message: "Settings saved. Reboot the panels for panel settings to take effect.",
+					level: "success",
+					duration: 5e3
+				});
+				return;
+			}
+			if (response.status === 400 && error && !("detail" in error && error.detail)) {
+				const unplaced = applyFieldErrors(error, values, setError);
+				Notify({
+					message: `Nothing was saved. ${unplaced.length ? unplaced.join(" ") : "Fix the highlighted settings."}`,
+					level: "error",
+					duration: 8e3
+				});
+			} else {
+				const detail = error && "detail" in error ? error.detail : `HTTP ${response.status}`;
+				Notify({
+					message: `Couldn't save the settings: ${detail}`,
+					level: "error"
+				});
+			}
+		} catch (failure) {
+			Notify({
+				message: `Couldn't save the settings: ${failure instanceof Error ? failure.message : String(failure)}`,
+				level: "error"
+			});
+		}
+	};
+	const loadAddressFromUrl = async () => {
+		try {
+			setValue("manager_address", await getIpByHostname(window.location.hostname), { shouldDirty: true });
+		} catch (error) {
+			Notify({
+				message: `Couldn't get the manager's IP address from ${window.location.hostname}: ${error instanceof Error ? error.message : error}`,
+				level: "error"
+			});
+		}
+	};
+	const loadPortFromUrl = () => {
+		const port = window.location.port || (window.location.protocol === "https:" ? "443" : "80");
+		setValue("manager_port", Number(port), { shouldDirty: true });
+	};
+	const [screensaverMode, typedHomeAssistantToken, typedOpenhabToken] = useWatch({
+		control,
+		name: [
+			"screensaver_mode",
+			"home_assistant_token",
+			"openhab_token"
+		]
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormProvider, {
+		...form,
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+			onSubmit: handleSubmit(onSubmit),
+			noValidate: true,
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Alert, {
+					level: "info",
+					children: "Changes to NSPanel settings on this page require a reboot of all NSPanels to take effect."
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
+					title: "NSPanel Manager",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Alert, {
+							level: "warning",
+							children: "The manager address must be an IP address only: not a hostname, and without http://."
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TextInput, {
+							name: "manager_address",
+							label: "Manager address",
+							button: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(JoinButton, {
+								onClick: loadAddressFromUrl,
+								children: "Load from URL"
+							})
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumberInput, {
+							name: "manager_port",
+							label: "Manager port",
+							button: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(JoinButton, {
+								onClick: loadPortFromUrl,
+								children: "Load from URL"
+							})
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TestButton, {
+							label: "Test manager address",
+							run: () => testManager(getValues("manager_address") ?? "", getValues("manager_port") ?? "")
+						})
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
+					title: "Logging",
+					actions: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
+						href: logDownloadUrl,
+						title: "Download MQTTManager log",
+						className: "btn btn-outline btn-info",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "mdi mdi-download" }), " Download"]
+					}),
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Select, {
+						name: "mqttmanager_log_level",
+						label: "MQTTManager log level",
+						options: options(LOG_LEVELS)
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Row, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumberInput, {
+						name: "max_live_log_messages",
+						label: "Messages shown in the live log"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumberInput, {
+						name: "max_log_buffer_size",
+						label: "Messages kept in the buffer"
+					})] })]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
+					title: "Global NSPanel settings",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Select, {
+							name: "default_nspanel_type",
+							label: "Default NSPanel type",
+							options: options(NSPANEL_TYPES)
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Row, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumberInput, {
+							name: "color_temp_min",
+							label: "Minimum color temperature (K)"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumberInput, {
+							name: "color_temp_max",
+							label: "Maximum color temperature (K)"
+						})] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RadioGroup, {
+							name: "reverse_color_temp",
+							label: "Color temperature slider",
+							options: [[false, "Keep default"], [true, "Reverse"]]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RadioGroup, {
+							name: "turn_on_behavior",
+							label: "Turn on behavior",
+							options: options(TURN_ON_BEHAVIORS)
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Row, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumberInput, {
+							name: "raise_to_100_light_level",
+							label: "Raise lights to 100% above (%)"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumberInput, {
+							name: "light_turn_on_brightness",
+							label: "Default light turn on brightness (%)"
+						})] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Row, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumberInput, {
+							name: "min_button_push_time",
+							label: "Minimum button push time (ms)"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumberInput, {
+							name: "button_long_press_time",
+							label: "Minimum long press time (ms)"
+						})] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Row, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumberInput, {
+							name: "special_mode_trigger_time",
+							label: "Special mode activation time (ms)"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumberInput, {
+							name: "special_mode_release_time",
+							label: "Special mode timeout (ms)"
+						})] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Row, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumberInput, {
+							name: "screen_dim_level",
+							label: "Screen brightness (%)"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumberInput, {
+							name: "screensaver_dim_level",
+							label: "Screensaver brightness (%)"
+						})] }),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumberInput, {
+							name: "screensaver_activation_timeout",
+							label: "Screensaver activation timeout (ms)"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Select, {
+							name: "screensaver_mode",
+							label: "Screensaver mode",
+							options: options(SCREENSAVER_MODES)
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RadioGroup, {
+							name: "show_screensaver_inside_temperature",
+							label: "Screensaver inside temperature",
+							options: [[true, "Show inside temperature"], [false, "Hide inside temperature"]]
+						}),
+						MODES_WITH_OUTSIDE_TEMPERATURE.includes(screensaverMode ?? "") && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RadioGroup, {
+							name: "show_screensaver_outside_temperature",
+							label: "Screensaver outside temperature",
+							options: [[true, "Show outside temperature"], [false, "Hide outside temperature"]]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(RadioGroup, {
+							name: "optimistic_mode",
+							label: "Entity update mode",
+							options: [[true, "Optimistic"], [false, "Wait"]]
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Row, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumberInput, {
+							name: "room_status_backoff_time",
+							label: "Room status backoff time (ms)"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumberInput, {
+							name: "all_rooms_status_backoff_time",
+							label: "\"All rooms\" status backoff time (ms)"
+						})] })
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
+					title: "MQTT",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Row, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TextInput, {
+						name: "mqtt_server",
+						label: "MQTT server"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(NumberInput, {
+						name: "mqtt_port",
+						label: "MQTT port"
+					})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Row, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TextInput, {
+						name: "mqtt_username",
+						label: "MQTT username",
+						hint: "Blank for anonymous login."
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(SecretInput, {
+						name: "mqtt_password",
+						clearName: "clear_mqtt_password",
+						label: "MQTT password",
+						isSet: settings.mqtt_password_set
+					})] })]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
+					title: "Home Assistant API",
+					children: [
+						addon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Alert, {
+							level: "info",
+							children: "You are running NSPanel Manager as a Home Assistant add-on. These settings are managed by Home Assistant and are locked."
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TextInput, {
+							name: "home_assistant_address",
+							label: "Home Assistant address",
+							hint: "For example http://homeassistant.local:8123",
+							disabled: addon
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SecretInput, {
+							name: "home_assistant_token",
+							clearName: "clear_home_assistant_token",
+							label: "Home Assistant token",
+							isSet: settings.home_assistant_token_set,
+							disabled: addon
+						}),
+						!addon && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(TestButton, {
+							label: "Test Home Assistant",
+							disabledReason: typedHomeAssistantToken ? void 0 : "Enter a token to test the connection. For security, the saved token is never sent back to the browser, so it can't be used here.",
+							run: () => testHomeAssistant(getValues("home_assistant_address") ?? "", typedHomeAssistantToken)
+						})
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(Card, {
+					title: "OpenHAB API",
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TextInput, {
+							name: "openhab_address",
+							label: "OpenHAB address"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(SecretInput, {
+							name: "openhab_token",
+							clearName: "clear_openhab_token",
+							label: "OpenHAB token",
+							isSet: settings.openhab_token_set
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TestButton, {
+							label: "Test OpenHAB",
+							disabledReason: typedOpenhabToken ? void 0 : "Enter a token to test the connection. For security, the saved token is never sent back to the browser, so it can't be used here.",
+							run: () => testOpenhab(getValues("openhab_address") ?? "", typedOpenhabToken)
+						})
+					]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex justify-end gap-2 mt-4 mb-4",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						type: "button",
+						className: "btn btn-ghost",
+						disabled: !isDirty || isSubmitting,
+						onClick: () => reset(),
+						children: "Discard changes"
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "submit",
+						className: "btn btn-success",
+						disabled: !isDirty || isSubmitting,
+						children: [isSubmitting && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "loading loading-spinner loading-sm" }), "Save"]
+					})]
+				})
+			]
+		})
+	});
+}
+function applyFieldErrors(errors, values, setError) {
+	const unplaced = [];
+	for (const [name, messages] of Object.entries(errors)) {
+		const message = Array.isArray(messages) ? messages.join(" ") : String(messages);
+		if (name in values) setError(name, {
+			type: "server",
+			message
+		});
+		else unplaced.push(name === "non_field_errors" ? message : `${name}: ${message}`);
+	}
+	return unplaced;
+}
+//#endregion
+export { SettingsPage as default };

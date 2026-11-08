@@ -1,4 +1,4 @@
-const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["MultiStep_AddEditEntity-DhYP6sFs.js","react-nplSxVHL.js","SettingsStore-DmaTxUXd.js","react-select.esm-A5TOH54f.js","NSPanelToastContainer-DSPf0tHH.js","proxy-Zg8qg2op.js","AnimatePresence-DPGfVlQC.js","EntitiesPagesView-AzzGInUv.js","NSPanelsView-CX1AFfQ1.js","StompStore-DpaJuWAg.js","EntityStore-C2CNqjtK.js","mdi-CjwmUKMr.js","InitialSetup-CDVw1tAm.js","Sidebar-ai1NtDin.js","Warnings-CMLRmX1R.js","Logs-8JCgv0He.js","RoomPage-JOLoJ_Ll.js"])))=>i.map(i=>d[i]);
+const __vite__mapDeps=(i,m=__vite__mapDeps,d=(m.f||(m.f=["MultiStep_AddEditEntity-g1oRaEQs.js","react-MZ9OtSYI.js","SettingsStore-NYYCtnGE.js","react-select.esm-DRKzrAjr.js","index.esm-BCRK0eoX.js","NSPanelToastContainer-63puWOSc.js","proxy-CZA5SpBy.js","AnimatePresence-BYNZTmYd.js","EntitiesPagesView-DOZVurul.js","NSPanelsView-ByyVDCBw.js","StompStore-DR7U3Vyv.js","EntityStore-BrKsXwyc.js","mdi-CSf8_ldF.js","InitialSetup-C1-TTSMk.js","Sidebar-u3B4vJ1q.js","Warnings-D54sbTvv.js","Logs-D_kbDOE0.js","RoomPage-CWyOowTR.js","SettingsPage-Bcy52nUX.js"])))=>i.map(i=>d[i]);
 //#region \0rolldown/runtime.js
 var __create = Object.create;
 var __defProp = Object.defineProperty;
@@ -10205,15 +10205,16 @@ var __vitePreload = function preload(baseModule, deps, importerUrl) {
 //#endregion
 //#region src/componentMap.tsx
 var componentMap = {
-	MultiStep_AddEditEntity: (0, import_react.lazy)(() => __vitePreload(() => import("./MultiStep_AddEditEntity-DhYP6sFs.js").then((n) => n.t), __vite__mapDeps([0,1,2,3,4,5,6]))),
-	EntitiesPagesView: (0, import_react.lazy)(() => __vitePreload(() => import("./EntitiesPagesView-AzzGInUv.js"), __vite__mapDeps([7,1,0,2,3,4,5,6]))),
-	NSPanelsIndexView: (0, import_react.lazy)(() => __vitePreload(() => import("./NSPanelsView-CX1AFfQ1.js"), __vite__mapDeps([8,3,4,5,9,1,10,11]))),
-	NSPanelToastContainer: (0, import_react.lazy)(() => __vitePreload(() => import("./NSPanelToastContainer-DSPf0tHH.js").then((n) => n.t), [])),
-	InitialSetup: (0, import_react.lazy)(() => __vitePreload(() => import("./InitialSetup-CDVw1tAm.js"), __vite__mapDeps([12,2,1,4,5,6,11]))),
-	NSPanelSideBar: (0, import_react.lazy)(() => __vitePreload(() => import("./Sidebar-ai1NtDin.js"), __vite__mapDeps([13,4,9,1,10,11]))),
-	NSPanelWarnings: (0, import_react.lazy)(() => __vitePreload(() => import("./Warnings-CMLRmX1R.js"), __vite__mapDeps([14,10,1,4,9,11]))),
-	NSPanelLogs: (0, import_react.lazy)(() => __vitePreload(() => import("./Logs-8JCgv0He.js"), __vite__mapDeps([15,2,1,9,4]))),
-	RoomPage: (0, import_react.lazy)(() => __vitePreload(() => import("./RoomPage-JOLoJ_Ll.js"), __vite__mapDeps([16,0,1,2,3,4,5,6,7,9,10,11])))
+	MultiStep_AddEditEntity: (0, import_react.lazy)(() => __vitePreload(() => import("./MultiStep_AddEditEntity-g1oRaEQs.js").then((n) => n.t), __vite__mapDeps([0,1,2,3,4,5,6,7]))),
+	EntitiesPagesView: (0, import_react.lazy)(() => __vitePreload(() => import("./EntitiesPagesView-DOZVurul.js"), __vite__mapDeps([8,1,0,2,3,4,5,6,7]))),
+	NSPanelsIndexView: (0, import_react.lazy)(() => __vitePreload(() => import("./NSPanelsView-ByyVDCBw.js"), __vite__mapDeps([9,3,5,6,10,1,11,12]))),
+	NSPanelToastContainer: (0, import_react.lazy)(() => __vitePreload(() => import("./NSPanelToastContainer-63puWOSc.js").then((n) => n.t), [])),
+	InitialSetup: (0, import_react.lazy)(() => __vitePreload(() => import("./InitialSetup-C1-TTSMk.js"), __vite__mapDeps([13,2,1,5,6,7,12]))),
+	NSPanelSideBar: (0, import_react.lazy)(() => __vitePreload(() => import("./Sidebar-u3B4vJ1q.js"), __vite__mapDeps([14,5,10,1,11,12]))),
+	NSPanelWarnings: (0, import_react.lazy)(() => __vitePreload(() => import("./Warnings-D54sbTvv.js"), __vite__mapDeps([15,11,1,5,10,12]))),
+	NSPanelLogs: (0, import_react.lazy)(() => __vitePreload(() => import("./Logs-D_kbDOE0.js"), __vite__mapDeps([16,2,1,10,5]))),
+	RoomPage: (0, import_react.lazy)(() => __vitePreload(() => import("./RoomPage-CWyOowTR.js"), __vite__mapDeps([17,0,1,2,3,4,5,6,7,8,10,11,12]))),
+	SettingsPage: (0, import_react.lazy)(() => __vitePreload(() => import("./SettingsPage-Bcy52nUX.js"), __vite__mapDeps([18,4,5])))
 };
 //#endregion
 //#region node_modules/react/cjs/react-jsx-runtime.production.js
