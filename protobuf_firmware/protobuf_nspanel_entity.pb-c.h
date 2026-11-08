@@ -22,6 +22,7 @@ typedef struct NSPanelEntityState__Thermostat__ThermostatOption NSPanelEntitySta
 typedef struct NSPanelEntityState__Thermostat__ThermostatOption__ThermostatOptionValue NSPanelEntityState__Thermostat__ThermostatOption__ThermostatOptionValue;
 typedef struct NSPanelEntityState__MediaPlayer NSPanelEntityState__MediaPlayer;
 typedef struct NSPanelEntityState__MediaPlayer__SourceSelection NSPanelEntityState__MediaPlayer__SourceSelection;
+typedef struct NSPanelEntityState__Cover NSPanelEntityState__Cover;
 
 
 /* --- enums --- */
@@ -41,6 +42,15 @@ typedef enum _NSPanelEntityState__MediaPlayer__PlaybackState {
   NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__BUFFERING = 6
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE)
 } NSPanelEntityState__MediaPlayer__PlaybackState;
+typedef enum _NSPanelEntityState__Cover__CoverState {
+  NSPANEL_ENTITY_STATE__COVER__COVER_STATE__UNKNOWN = 0,
+  NSPANEL_ENTITY_STATE__COVER__COVER_STATE__OPEN = 1,
+  NSPANEL_ENTITY_STATE__COVER__COVER_STATE__CLOSED = 2,
+  NSPANEL_ENTITY_STATE__COVER__COVER_STATE__OPENING = 3,
+  NSPANEL_ENTITY_STATE__COVER__COVER_STATE__CLOSING = 4,
+  NSPANEL_ENTITY_STATE__COVER__COVER_STATE__UNAVAILABLE = 5
+    PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_ENTITY_STATE__COVER__COVER_STATE)
+} NSPanelEntityState__Cover__CoverState;
 
 /* --- messages --- */
 
@@ -197,11 +207,51 @@ struct  NSPanelEntityState__MediaPlayer
     , 0, (char *)protobuf_c_empty_string, NSPANEL_ENTITY_STATE__MEDIA_PLAYER__PLAYBACK_STATE__UNKNOWN, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, 0, NULL, NULL, 0, 0, 0, 0 }
 
 
+struct  NSPanelEntityState__Cover
+{
+  ProtobufCMessage base;
+  int32_t cover_id;
+  char *name;
+  NSPanelEntityState__Cover__CoverState state;
+  /*
+   * The controller currently reports a position. Some covers accept a target
+   * position but do not report their current position, so this is separate
+   * from can_set_position.
+   */
+  protobuf_c_boolean has_position;
+  /*
+   * 0 = closed, 100 = open
+   */
+  int32_t position;
+  protobuf_c_boolean has_tilt_position;
+  /*
+   * 0-100
+   */
+  int32_t tilt_position;
+  protobuf_c_boolean can_open;
+  protobuf_c_boolean can_close;
+  protobuf_c_boolean can_stop;
+  protobuf_c_boolean can_set_position;
+  protobuf_c_boolean can_open_tilt;
+  protobuf_c_boolean can_close_tilt;
+  protobuf_c_boolean can_stop_tilt;
+  protobuf_c_boolean can_set_tilt_position;
+  /*
+   * Optional hint for the panel icon, for example "blind" or "garage".
+   */
+  char *device_class;
+};
+#define NSPANEL_ENTITY_STATE__COVER__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&nspanel_entity_state__cover__descriptor) \
+    , 0, (char *)protobuf_c_empty_string, NSPANEL_ENTITY_STATE__COVER__COVER_STATE__UNKNOWN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string }
+
+
 typedef enum {
   NSPANEL_ENTITY_STATE__ENTITY__NOT_SET = 0,
   NSPANEL_ENTITY_STATE__ENTITY_LIGHT = 1,
   NSPANEL_ENTITY_STATE__ENTITY_THERMOSTAT = 2,
-  NSPANEL_ENTITY_STATE__ENTITY_MEDIA_PLAYER = 3
+  NSPANEL_ENTITY_STATE__ENTITY_MEDIA_PLAYER = 3,
+  NSPANEL_ENTITY_STATE__ENTITY_COVER = 4
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_ENTITY_STATE__ENTITY__CASE)
 } NSPanelEntityState__EntityCase;
 
@@ -213,6 +263,7 @@ struct  NSPanelEntityState
     NSPanelEntityState__Light *light;
     NSPanelEntityState__Thermostat *thermostat;
     NSPanelEntityState__MediaPlayer *media_player;
+    NSPanelEntityState__Cover *cover;
   };
 };
 #define NSPANEL_ENTITY_STATE__INIT \
@@ -238,6 +289,9 @@ void   nspanel_entity_state__media_player__source_selection__init
 /* NSPanelEntityState__MediaPlayer methods */
 void   nspanel_entity_state__media_player__init
                      (NSPanelEntityState__MediaPlayer         *message);
+/* NSPanelEntityState__Cover methods */
+void   nspanel_entity_state__cover__init
+                     (NSPanelEntityState__Cover         *message);
 /* NSPanelEntityState methods */
 void   nspanel_entity_state__init
                      (NSPanelEntityState         *message);
@@ -277,6 +331,9 @@ typedef void (*NSPanelEntityState__MediaPlayer__SourceSelection_Closure)
 typedef void (*NSPanelEntityState__MediaPlayer_Closure)
                  (const NSPanelEntityState__MediaPlayer *message,
                   void *closure_data);
+typedef void (*NSPanelEntityState__Cover_Closure)
+                 (const NSPanelEntityState__Cover *message,
+                  void *closure_data);
 typedef void (*NSPanelEntityState_Closure)
                  (const NSPanelEntityState *message,
                   void *closure_data);
@@ -295,6 +352,8 @@ extern const ProtobufCMessageDescriptor nspanel_entity_state__thermostat__thermo
 extern const ProtobufCMessageDescriptor nspanel_entity_state__media_player__descriptor;
 extern const ProtobufCMessageDescriptor nspanel_entity_state__media_player__source_selection__descriptor;
 extern const ProtobufCEnumDescriptor    nspanel_entity_state__media_player__playback_state__descriptor;
+extern const ProtobufCMessageDescriptor nspanel_entity_state__cover__descriptor;
+extern const ProtobufCEnumDescriptor    nspanel_entity_state__cover__cover_state__descriptor;
 
 PROTOBUF_C__END_DECLS
 

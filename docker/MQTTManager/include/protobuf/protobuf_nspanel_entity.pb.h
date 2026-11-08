@@ -53,6 +53,9 @@ extern const ::google::protobuf::internal::DescriptorTable
 class NSPanelEntityState;
 struct NSPanelEntityStateDefaultTypeInternal;
 extern NSPanelEntityStateDefaultTypeInternal _NSPanelEntityState_default_instance_;
+class NSPanelEntityState_Cover;
+struct NSPanelEntityState_CoverDefaultTypeInternal;
+extern NSPanelEntityState_CoverDefaultTypeInternal _NSPanelEntityState_Cover_default_instance_;
 class NSPanelEntityState_Light;
 struct NSPanelEntityState_LightDefaultTypeInternal;
 extern NSPanelEntityState_LightDefaultTypeInternal _NSPanelEntityState_Light_default_instance_;
@@ -146,6 +149,43 @@ inline const std::string& NSPanelEntityState_MediaPlayer_PlaybackState_Name(NSPa
 inline bool NSPanelEntityState_MediaPlayer_PlaybackState_Parse(absl::string_view name, NSPanelEntityState_MediaPlayer_PlaybackState* value) {
   return ::google::protobuf::internal::ParseNamedEnum<NSPanelEntityState_MediaPlayer_PlaybackState>(
       NSPanelEntityState_MediaPlayer_PlaybackState_descriptor(), name, value);
+}
+enum NSPanelEntityState_Cover_CoverState : int {
+  NSPanelEntityState_Cover_CoverState_UNKNOWN = 0,
+  NSPanelEntityState_Cover_CoverState_OPEN = 1,
+  NSPanelEntityState_Cover_CoverState_CLOSED = 2,
+  NSPanelEntityState_Cover_CoverState_OPENING = 3,
+  NSPanelEntityState_Cover_CoverState_CLOSING = 4,
+  NSPanelEntityState_Cover_CoverState_UNAVAILABLE = 5,
+  NSPanelEntityState_Cover_CoverState_NSPanelEntityState_Cover_CoverState_INT_MIN_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::min(),
+  NSPanelEntityState_Cover_CoverState_NSPanelEntityState_Cover_CoverState_INT_MAX_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::max(),
+};
+
+bool NSPanelEntityState_Cover_CoverState_IsValid(int value);
+extern const uint32_t NSPanelEntityState_Cover_CoverState_internal_data_[];
+constexpr NSPanelEntityState_Cover_CoverState NSPanelEntityState_Cover_CoverState_CoverState_MIN = static_cast<NSPanelEntityState_Cover_CoverState>(0);
+constexpr NSPanelEntityState_Cover_CoverState NSPanelEntityState_Cover_CoverState_CoverState_MAX = static_cast<NSPanelEntityState_Cover_CoverState>(5);
+constexpr int NSPanelEntityState_Cover_CoverState_CoverState_ARRAYSIZE = 5 + 1;
+const ::google::protobuf::EnumDescriptor*
+NSPanelEntityState_Cover_CoverState_descriptor();
+template <typename T>
+const std::string& NSPanelEntityState_Cover_CoverState_Name(T value) {
+  static_assert(std::is_same<T, NSPanelEntityState_Cover_CoverState>::value ||
+                    std::is_integral<T>::value,
+                "Incorrect type passed to CoverState_Name().");
+  return NSPanelEntityState_Cover_CoverState_Name(static_cast<NSPanelEntityState_Cover_CoverState>(value));
+}
+template <>
+inline const std::string& NSPanelEntityState_Cover_CoverState_Name(NSPanelEntityState_Cover_CoverState value) {
+  return ::google::protobuf::internal::NameOfDenseEnum<NSPanelEntityState_Cover_CoverState_descriptor,
+                                                 0, 5>(
+      static_cast<int>(value));
+}
+inline bool NSPanelEntityState_Cover_CoverState_Parse(absl::string_view name, NSPanelEntityState_Cover_CoverState* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<NSPanelEntityState_Cover_CoverState>(
+      NSPanelEntityState_Cover_CoverState_descriptor(), name, value);
 }
 
 // ===================================================================
@@ -863,6 +903,392 @@ class NSPanelEntityState_Light final : public ::google::protobuf::Message
     bool can_color_;
     bool state_;
     int current_light_mode_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_protobuf_5fnspanel_5fentity_2eproto;
+};
+// -------------------------------------------------------------------
+
+class NSPanelEntityState_Cover final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:NSPanelEntityState.Cover) */ {
+ public:
+  inline NSPanelEntityState_Cover() : NSPanelEntityState_Cover(nullptr) {}
+  ~NSPanelEntityState_Cover() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR NSPanelEntityState_Cover(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline NSPanelEntityState_Cover(const NSPanelEntityState_Cover& from) : NSPanelEntityState_Cover(nullptr, from) {}
+  inline NSPanelEntityState_Cover(NSPanelEntityState_Cover&& from) noexcept
+      : NSPanelEntityState_Cover(nullptr, std::move(from)) {}
+  inline NSPanelEntityState_Cover& operator=(const NSPanelEntityState_Cover& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline NSPanelEntityState_Cover& operator=(NSPanelEntityState_Cover&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const NSPanelEntityState_Cover& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const NSPanelEntityState_Cover* internal_default_instance() {
+    return reinterpret_cast<const NSPanelEntityState_Cover*>(
+        &_NSPanelEntityState_Cover_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 6;
+  friend void swap(NSPanelEntityState_Cover& a, NSPanelEntityState_Cover& b) { a.Swap(&b); }
+  inline void Swap(NSPanelEntityState_Cover* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(NSPanelEntityState_Cover* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  NSPanelEntityState_Cover* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<NSPanelEntityState_Cover>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const NSPanelEntityState_Cover& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const NSPanelEntityState_Cover& from) { NSPanelEntityState_Cover::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(NSPanelEntityState_Cover* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "NSPanelEntityState.Cover"; }
+
+ protected:
+  explicit NSPanelEntityState_Cover(::google::protobuf::Arena* arena);
+  NSPanelEntityState_Cover(::google::protobuf::Arena* arena, const NSPanelEntityState_Cover& from);
+  NSPanelEntityState_Cover(::google::protobuf::Arena* arena, NSPanelEntityState_Cover&& from) noexcept
+      : NSPanelEntityState_Cover(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+  using CoverState = NSPanelEntityState_Cover_CoverState;
+  static constexpr CoverState UNKNOWN = NSPanelEntityState_Cover_CoverState_UNKNOWN;
+  static constexpr CoverState OPEN = NSPanelEntityState_Cover_CoverState_OPEN;
+  static constexpr CoverState CLOSED = NSPanelEntityState_Cover_CoverState_CLOSED;
+  static constexpr CoverState OPENING = NSPanelEntityState_Cover_CoverState_OPENING;
+  static constexpr CoverState CLOSING = NSPanelEntityState_Cover_CoverState_CLOSING;
+  static constexpr CoverState UNAVAILABLE = NSPanelEntityState_Cover_CoverState_UNAVAILABLE;
+  static inline bool CoverState_IsValid(int value) {
+    return NSPanelEntityState_Cover_CoverState_IsValid(value);
+  }
+  static constexpr CoverState CoverState_MIN = NSPanelEntityState_Cover_CoverState_CoverState_MIN;
+  static constexpr CoverState CoverState_MAX = NSPanelEntityState_Cover_CoverState_CoverState_MAX;
+  static constexpr int CoverState_ARRAYSIZE = NSPanelEntityState_Cover_CoverState_CoverState_ARRAYSIZE;
+  static inline const ::google::protobuf::EnumDescriptor* CoverState_descriptor() {
+    return NSPanelEntityState_Cover_CoverState_descriptor();
+  }
+  template <typename T>
+  static inline const std::string& CoverState_Name(T value) {
+    return NSPanelEntityState_Cover_CoverState_Name(value);
+  }
+  static inline bool CoverState_Parse(absl::string_view name, CoverState* value) {
+    return NSPanelEntityState_Cover_CoverState_Parse(name, value);
+  }
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kNameFieldNumber = 2,
+    kDeviceClassFieldNumber = 16,
+    kCoverIdFieldNumber = 1,
+    kStateFieldNumber = 3,
+    kPositionFieldNumber = 5,
+    kHasPositionFieldNumber = 4,
+    kHasTiltPositionFieldNumber = 6,
+    kCanOpenFieldNumber = 8,
+    kCanCloseFieldNumber = 9,
+    kTiltPositionFieldNumber = 7,
+    kCanStopFieldNumber = 10,
+    kCanSetPositionFieldNumber = 11,
+    kCanOpenTiltFieldNumber = 12,
+    kCanCloseTiltFieldNumber = 13,
+    kCanStopTiltFieldNumber = 14,
+    kCanSetTiltPositionFieldNumber = 15,
+  };
+  // string name = 2;
+  void clear_name() ;
+  const std::string& name() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_name(Arg_&& arg, Args_... args);
+  std::string* mutable_name();
+  PROTOBUF_NODISCARD std::string* release_name();
+  void set_allocated_name(std::string* value);
+
+  private:
+  const std::string& _internal_name() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_name(
+      const std::string& value);
+  std::string* _internal_mutable_name();
+
+  public:
+  // string device_class = 16;
+  void clear_device_class() ;
+  const std::string& device_class() const;
+  template <typename Arg_ = const std::string&, typename... Args_>
+  void set_device_class(Arg_&& arg, Args_... args);
+  std::string* mutable_device_class();
+  PROTOBUF_NODISCARD std::string* release_device_class();
+  void set_allocated_device_class(std::string* value);
+
+  private:
+  const std::string& _internal_device_class() const;
+  inline PROTOBUF_ALWAYS_INLINE void _internal_set_device_class(
+      const std::string& value);
+  std::string* _internal_mutable_device_class();
+
+  public:
+  // int32 cover_id = 1;
+  void clear_cover_id() ;
+  ::int32_t cover_id() const;
+  void set_cover_id(::int32_t value);
+
+  private:
+  ::int32_t _internal_cover_id() const;
+  void _internal_set_cover_id(::int32_t value);
+
+  public:
+  // .NSPanelEntityState.Cover.CoverState state = 3;
+  void clear_state() ;
+  ::NSPanelEntityState_Cover_CoverState state() const;
+  void set_state(::NSPanelEntityState_Cover_CoverState value);
+
+  private:
+  ::NSPanelEntityState_Cover_CoverState _internal_state() const;
+  void _internal_set_state(::NSPanelEntityState_Cover_CoverState value);
+
+  public:
+  // int32 position = 5;
+  void clear_position() ;
+  ::int32_t position() const;
+  void set_position(::int32_t value);
+
+  private:
+  ::int32_t _internal_position() const;
+  void _internal_set_position(::int32_t value);
+
+  public:
+  // bool has_position = 4;
+  void clear_has_position() ;
+  bool has_position() const;
+  void set_has_position(bool value);
+
+  private:
+  bool _internal_has_position() const;
+  void _internal_set_has_position(bool value);
+
+  public:
+  // bool has_tilt_position = 6;
+  void clear_has_tilt_position() ;
+  bool has_tilt_position() const;
+  void set_has_tilt_position(bool value);
+
+  private:
+  bool _internal_has_tilt_position() const;
+  void _internal_set_has_tilt_position(bool value);
+
+  public:
+  // bool can_open = 8;
+  void clear_can_open() ;
+  bool can_open() const;
+  void set_can_open(bool value);
+
+  private:
+  bool _internal_can_open() const;
+  void _internal_set_can_open(bool value);
+
+  public:
+  // bool can_close = 9;
+  void clear_can_close() ;
+  bool can_close() const;
+  void set_can_close(bool value);
+
+  private:
+  bool _internal_can_close() const;
+  void _internal_set_can_close(bool value);
+
+  public:
+  // int32 tilt_position = 7;
+  void clear_tilt_position() ;
+  ::int32_t tilt_position() const;
+  void set_tilt_position(::int32_t value);
+
+  private:
+  ::int32_t _internal_tilt_position() const;
+  void _internal_set_tilt_position(::int32_t value);
+
+  public:
+  // bool can_stop = 10;
+  void clear_can_stop() ;
+  bool can_stop() const;
+  void set_can_stop(bool value);
+
+  private:
+  bool _internal_can_stop() const;
+  void _internal_set_can_stop(bool value);
+
+  public:
+  // bool can_set_position = 11;
+  void clear_can_set_position() ;
+  bool can_set_position() const;
+  void set_can_set_position(bool value);
+
+  private:
+  bool _internal_can_set_position() const;
+  void _internal_set_can_set_position(bool value);
+
+  public:
+  // bool can_open_tilt = 12;
+  void clear_can_open_tilt() ;
+  bool can_open_tilt() const;
+  void set_can_open_tilt(bool value);
+
+  private:
+  bool _internal_can_open_tilt() const;
+  void _internal_set_can_open_tilt(bool value);
+
+  public:
+  // bool can_close_tilt = 13;
+  void clear_can_close_tilt() ;
+  bool can_close_tilt() const;
+  void set_can_close_tilt(bool value);
+
+  private:
+  bool _internal_can_close_tilt() const;
+  void _internal_set_can_close_tilt(bool value);
+
+  public:
+  // bool can_stop_tilt = 14;
+  void clear_can_stop_tilt() ;
+  bool can_stop_tilt() const;
+  void set_can_stop_tilt(bool value);
+
+  private:
+  bool _internal_can_stop_tilt() const;
+  void _internal_set_can_stop_tilt(bool value);
+
+  public:
+  // bool can_set_tilt_position = 15;
+  void clear_can_set_tilt_position() ;
+  bool can_set_tilt_position() const;
+  void set_can_set_tilt_position(bool value);
+
+  private:
+  bool _internal_can_set_tilt_position() const;
+  void _internal_set_can_set_tilt_position(bool value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:NSPanelEntityState.Cover)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      4, 16, 0,
+      65, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_NSPanelEntityState_Cover_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const NSPanelEntityState_Cover& from_msg);
+    ::google::protobuf::internal::ArenaStringPtr name_;
+    ::google::protobuf::internal::ArenaStringPtr device_class_;
+    ::int32_t cover_id_;
+    int state_;
+    ::int32_t position_;
+    bool has_position_;
+    bool has_tilt_position_;
+    bool can_open_;
+    bool can_close_;
+    ::int32_t tilt_position_;
+    bool can_stop_;
+    bool can_set_position_;
+    bool can_open_tilt_;
+    bool can_close_tilt_;
+    bool can_stop_tilt_;
+    bool can_set_tilt_position_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -1911,13 +2337,14 @@ class NSPanelEntityState final : public ::google::protobuf::Message
     kLight = 1,
     kThermostat = 2,
     kMediaPlayer = 3,
+    kCover = 4,
     ENTITY_NOT_SET = 0,
   };
   static inline const NSPanelEntityState* internal_default_instance() {
     return reinterpret_cast<const NSPanelEntityState*>(
         &_NSPanelEntityState_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 6;
+  static constexpr int kIndexInFileMessages = 7;
   friend void swap(NSPanelEntityState& a, NSPanelEntityState& b) { a.Swap(&b); }
   inline void Swap(NSPanelEntityState* other) {
     if (other == this) return;
@@ -1986,12 +2413,14 @@ class NSPanelEntityState final : public ::google::protobuf::Message
   using Light = NSPanelEntityState_Light;
   using Thermostat = NSPanelEntityState_Thermostat;
   using MediaPlayer = NSPanelEntityState_MediaPlayer;
+  using Cover = NSPanelEntityState_Cover;
 
   // accessors -------------------------------------------------------
   enum : int {
     kLightFieldNumber = 1,
     kThermostatFieldNumber = 2,
     kMediaPlayerFieldNumber = 3,
+    kCoverFieldNumber = 4,
   };
   // .NSPanelEntityState.Light light = 1;
   bool has_light() const;
@@ -2050,6 +2479,25 @@ class NSPanelEntityState final : public ::google::protobuf::Message
   ::NSPanelEntityState_MediaPlayer* _internal_mutable_media_player();
 
   public:
+  // .NSPanelEntityState.Cover cover = 4;
+  bool has_cover() const;
+  private:
+  bool _internal_has_cover() const;
+
+  public:
+  void clear_cover() ;
+  const ::NSPanelEntityState_Cover& cover() const;
+  PROTOBUF_NODISCARD ::NSPanelEntityState_Cover* release_cover();
+  ::NSPanelEntityState_Cover* mutable_cover();
+  void set_allocated_cover(::NSPanelEntityState_Cover* value);
+  void unsafe_arena_set_allocated_cover(::NSPanelEntityState_Cover* value);
+  ::NSPanelEntityState_Cover* unsafe_arena_release_cover();
+
+  private:
+  const ::NSPanelEntityState_Cover& _internal_cover() const;
+  ::NSPanelEntityState_Cover* _internal_mutable_cover();
+
+  public:
   void clear_entity();
   EntityCase entity_case() const;
   // @@protoc_insertion_point(class_scope:NSPanelEntityState)
@@ -2058,11 +2506,12 @@ class NSPanelEntityState final : public ::google::protobuf::Message
   void set_has_light();
   void set_has_thermostat();
   void set_has_media_player();
+  void set_has_cover();
   inline bool has_entity() const;
   inline void clear_has_entity();
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      0, 3, 3,
+      0, 4, 4,
       0, 2>
       _table_;
 
@@ -2089,6 +2538,7 @@ class NSPanelEntityState final : public ::google::protobuf::Message
       ::NSPanelEntityState_Light* light_;
       ::NSPanelEntityState_Thermostat* thermostat_;
       ::NSPanelEntityState_MediaPlayer* media_player_;
+      ::NSPanelEntityState_Cover* cover_;
     } entity_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     ::uint32_t _oneof_case_[1];
@@ -3832,6 +4282,418 @@ inline void NSPanelEntityState_MediaPlayer::_internal_set_media_duration(::int32
 
 // -------------------------------------------------------------------
 
+// NSPanelEntityState_Cover
+
+// int32 cover_id = 1;
+inline void NSPanelEntityState_Cover::clear_cover_id() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.cover_id_ = 0;
+}
+inline ::int32_t NSPanelEntityState_Cover::cover_id() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.cover_id)
+  return _internal_cover_id();
+}
+inline void NSPanelEntityState_Cover::set_cover_id(::int32_t value) {
+  _internal_set_cover_id(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.cover_id)
+}
+inline ::int32_t NSPanelEntityState_Cover::_internal_cover_id() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.cover_id_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_cover_id(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.cover_id_ = value;
+}
+
+// string name = 2;
+inline void NSPanelEntityState_Cover::clear_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.ClearToEmpty();
+}
+inline const std::string& NSPanelEntityState_Cover::name() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.name)
+  return _internal_name();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelEntityState_Cover::set_name(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.name)
+}
+inline std::string* NSPanelEntityState_Cover::mutable_name() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_name();
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.Cover.name)
+  return _s;
+}
+inline const std::string& NSPanelEntityState_Cover::_internal_name() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.name_.Get();
+}
+inline void NSPanelEntityState_Cover::_internal_set_name(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.Set(value, GetArena());
+}
+inline std::string* NSPanelEntityState_Cover::_internal_mutable_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.name_.Mutable( GetArena());
+}
+inline std::string* NSPanelEntityState_Cover::release_name() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelEntityState.Cover.name)
+  return _impl_.name_.Release();
+}
+inline void NSPanelEntityState_Cover::set_allocated_name(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.name_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.name_.IsDefault()) {
+          _impl_.name_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelEntityState.Cover.name)
+}
+
+// .NSPanelEntityState.Cover.CoverState state = 3;
+inline void NSPanelEntityState_Cover::clear_state() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.state_ = 0;
+}
+inline ::NSPanelEntityState_Cover_CoverState NSPanelEntityState_Cover::state() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.state)
+  return _internal_state();
+}
+inline void NSPanelEntityState_Cover::set_state(::NSPanelEntityState_Cover_CoverState value) {
+  _internal_set_state(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.state)
+}
+inline ::NSPanelEntityState_Cover_CoverState NSPanelEntityState_Cover::_internal_state() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelEntityState_Cover_CoverState>(_impl_.state_);
+}
+inline void NSPanelEntityState_Cover::_internal_set_state(::NSPanelEntityState_Cover_CoverState value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.state_ = value;
+}
+
+// bool has_position = 4;
+inline void NSPanelEntityState_Cover::clear_has_position() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_position_ = false;
+}
+inline bool NSPanelEntityState_Cover::has_position() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.has_position)
+  return _internal_has_position();
+}
+inline void NSPanelEntityState_Cover::set_has_position(bool value) {
+  _internal_set_has_position(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.has_position)
+}
+inline bool NSPanelEntityState_Cover::_internal_has_position() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.has_position_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_has_position(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_position_ = value;
+}
+
+// int32 position = 5;
+inline void NSPanelEntityState_Cover::clear_position() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.position_ = 0;
+}
+inline ::int32_t NSPanelEntityState_Cover::position() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.position)
+  return _internal_position();
+}
+inline void NSPanelEntityState_Cover::set_position(::int32_t value) {
+  _internal_set_position(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.position)
+}
+inline ::int32_t NSPanelEntityState_Cover::_internal_position() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.position_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_position(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.position_ = value;
+}
+
+// bool has_tilt_position = 6;
+inline void NSPanelEntityState_Cover::clear_has_tilt_position() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_tilt_position_ = false;
+}
+inline bool NSPanelEntityState_Cover::has_tilt_position() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.has_tilt_position)
+  return _internal_has_tilt_position();
+}
+inline void NSPanelEntityState_Cover::set_has_tilt_position(bool value) {
+  _internal_set_has_tilt_position(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.has_tilt_position)
+}
+inline bool NSPanelEntityState_Cover::_internal_has_tilt_position() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.has_tilt_position_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_has_tilt_position(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.has_tilt_position_ = value;
+}
+
+// int32 tilt_position = 7;
+inline void NSPanelEntityState_Cover::clear_tilt_position() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.tilt_position_ = 0;
+}
+inline ::int32_t NSPanelEntityState_Cover::tilt_position() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.tilt_position)
+  return _internal_tilt_position();
+}
+inline void NSPanelEntityState_Cover::set_tilt_position(::int32_t value) {
+  _internal_set_tilt_position(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.tilt_position)
+}
+inline ::int32_t NSPanelEntityState_Cover::_internal_tilt_position() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.tilt_position_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_tilt_position(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.tilt_position_ = value;
+}
+
+// bool can_open = 8;
+inline void NSPanelEntityState_Cover::clear_can_open() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_open_ = false;
+}
+inline bool NSPanelEntityState_Cover::can_open() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.can_open)
+  return _internal_can_open();
+}
+inline void NSPanelEntityState_Cover::set_can_open(bool value) {
+  _internal_set_can_open(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.can_open)
+}
+inline bool NSPanelEntityState_Cover::_internal_can_open() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.can_open_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_can_open(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_open_ = value;
+}
+
+// bool can_close = 9;
+inline void NSPanelEntityState_Cover::clear_can_close() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_close_ = false;
+}
+inline bool NSPanelEntityState_Cover::can_close() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.can_close)
+  return _internal_can_close();
+}
+inline void NSPanelEntityState_Cover::set_can_close(bool value) {
+  _internal_set_can_close(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.can_close)
+}
+inline bool NSPanelEntityState_Cover::_internal_can_close() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.can_close_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_can_close(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_close_ = value;
+}
+
+// bool can_stop = 10;
+inline void NSPanelEntityState_Cover::clear_can_stop() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_stop_ = false;
+}
+inline bool NSPanelEntityState_Cover::can_stop() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.can_stop)
+  return _internal_can_stop();
+}
+inline void NSPanelEntityState_Cover::set_can_stop(bool value) {
+  _internal_set_can_stop(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.can_stop)
+}
+inline bool NSPanelEntityState_Cover::_internal_can_stop() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.can_stop_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_can_stop(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_stop_ = value;
+}
+
+// bool can_set_position = 11;
+inline void NSPanelEntityState_Cover::clear_can_set_position() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_set_position_ = false;
+}
+inline bool NSPanelEntityState_Cover::can_set_position() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.can_set_position)
+  return _internal_can_set_position();
+}
+inline void NSPanelEntityState_Cover::set_can_set_position(bool value) {
+  _internal_set_can_set_position(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.can_set_position)
+}
+inline bool NSPanelEntityState_Cover::_internal_can_set_position() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.can_set_position_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_can_set_position(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_set_position_ = value;
+}
+
+// bool can_open_tilt = 12;
+inline void NSPanelEntityState_Cover::clear_can_open_tilt() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_open_tilt_ = false;
+}
+inline bool NSPanelEntityState_Cover::can_open_tilt() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.can_open_tilt)
+  return _internal_can_open_tilt();
+}
+inline void NSPanelEntityState_Cover::set_can_open_tilt(bool value) {
+  _internal_set_can_open_tilt(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.can_open_tilt)
+}
+inline bool NSPanelEntityState_Cover::_internal_can_open_tilt() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.can_open_tilt_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_can_open_tilt(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_open_tilt_ = value;
+}
+
+// bool can_close_tilt = 13;
+inline void NSPanelEntityState_Cover::clear_can_close_tilt() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_close_tilt_ = false;
+}
+inline bool NSPanelEntityState_Cover::can_close_tilt() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.can_close_tilt)
+  return _internal_can_close_tilt();
+}
+inline void NSPanelEntityState_Cover::set_can_close_tilt(bool value) {
+  _internal_set_can_close_tilt(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.can_close_tilt)
+}
+inline bool NSPanelEntityState_Cover::_internal_can_close_tilt() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.can_close_tilt_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_can_close_tilt(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_close_tilt_ = value;
+}
+
+// bool can_stop_tilt = 14;
+inline void NSPanelEntityState_Cover::clear_can_stop_tilt() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_stop_tilt_ = false;
+}
+inline bool NSPanelEntityState_Cover::can_stop_tilt() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.can_stop_tilt)
+  return _internal_can_stop_tilt();
+}
+inline void NSPanelEntityState_Cover::set_can_stop_tilt(bool value) {
+  _internal_set_can_stop_tilt(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.can_stop_tilt)
+}
+inline bool NSPanelEntityState_Cover::_internal_can_stop_tilt() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.can_stop_tilt_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_can_stop_tilt(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_stop_tilt_ = value;
+}
+
+// bool can_set_tilt_position = 15;
+inline void NSPanelEntityState_Cover::clear_can_set_tilt_position() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_set_tilt_position_ = false;
+}
+inline bool NSPanelEntityState_Cover::can_set_tilt_position() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.can_set_tilt_position)
+  return _internal_can_set_tilt_position();
+}
+inline void NSPanelEntityState_Cover::set_can_set_tilt_position(bool value) {
+  _internal_set_can_set_tilt_position(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.can_set_tilt_position)
+}
+inline bool NSPanelEntityState_Cover::_internal_can_set_tilt_position() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.can_set_tilt_position_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_can_set_tilt_position(bool value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.can_set_tilt_position_ = value;
+}
+
+// string device_class = 16;
+inline void NSPanelEntityState_Cover::clear_device_class() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.device_class_.ClearToEmpty();
+}
+inline const std::string& NSPanelEntityState_Cover::device_class() const
+    ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.device_class)
+  return _internal_device_class();
+}
+template <typename Arg_, typename... Args_>
+inline PROTOBUF_ALWAYS_INLINE void NSPanelEntityState_Cover::set_device_class(Arg_&& arg,
+                                                     Args_... args) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.device_class_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.device_class)
+}
+inline std::string* NSPanelEntityState_Cover::mutable_device_class() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  std::string* _s = _internal_mutable_device_class();
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.Cover.device_class)
+  return _s;
+}
+inline const std::string& NSPanelEntityState_Cover::_internal_device_class() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.device_class_.Get();
+}
+inline void NSPanelEntityState_Cover::_internal_set_device_class(const std::string& value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.device_class_.Set(value, GetArena());
+}
+inline std::string* NSPanelEntityState_Cover::_internal_mutable_device_class() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  return _impl_.device_class_.Mutable( GetArena());
+}
+inline std::string* NSPanelEntityState_Cover::release_device_class() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:NSPanelEntityState.Cover.device_class)
+  return _impl_.device_class_.Release();
+}
+inline void NSPanelEntityState_Cover::set_allocated_device_class(std::string* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.device_class_.SetAllocated(value, GetArena());
+  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
+        if (_impl_.device_class_.IsDefault()) {
+          _impl_.device_class_.Set("", GetArena());
+        }
+  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
+  // @@protoc_insertion_point(field_set_allocated:NSPanelEntityState.Cover.device_class)
+}
+
+// -------------------------------------------------------------------
+
 // NSPanelEntityState
 
 // .NSPanelEntityState.Light light = 1;
@@ -4071,6 +4933,85 @@ inline ::NSPanelEntityState_MediaPlayer* NSPanelEntityState::mutable_media_playe
   return _msg;
 }
 
+// .NSPanelEntityState.Cover cover = 4;
+inline bool NSPanelEntityState::has_cover() const {
+  return entity_case() == kCover;
+}
+inline bool NSPanelEntityState::_internal_has_cover() const {
+  return entity_case() == kCover;
+}
+inline void NSPanelEntityState::set_has_cover() {
+  _impl_._oneof_case_[0] = kCover;
+}
+inline void NSPanelEntityState::clear_cover() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (entity_case() == kCover) {
+    if (GetArena() == nullptr) {
+      delete _impl_.entity_.cover_;
+    } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.entity_.cover_);
+    }
+    clear_has_entity();
+  }
+}
+inline ::NSPanelEntityState_Cover* NSPanelEntityState::release_cover() {
+  // @@protoc_insertion_point(field_release:NSPanelEntityState.cover)
+  if (entity_case() == kCover) {
+    clear_has_entity();
+    auto* temp = _impl_.entity_.cover_;
+    if (GetArena() != nullptr) {
+      temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
+    }
+    _impl_.entity_.cover_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::NSPanelEntityState_Cover& NSPanelEntityState::_internal_cover() const {
+  return entity_case() == kCover ? *_impl_.entity_.cover_ : reinterpret_cast<::NSPanelEntityState_Cover&>(::_NSPanelEntityState_Cover_default_instance_);
+}
+inline const ::NSPanelEntityState_Cover& NSPanelEntityState::cover() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.cover)
+  return _internal_cover();
+}
+inline ::NSPanelEntityState_Cover* NSPanelEntityState::unsafe_arena_release_cover() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:NSPanelEntityState.cover)
+  if (entity_case() == kCover) {
+    clear_has_entity();
+    auto* temp = _impl_.entity_.cover_;
+    _impl_.entity_.cover_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void NSPanelEntityState::unsafe_arena_set_allocated_cover(::NSPanelEntityState_Cover* value) {
+  // We rely on the oneof clear method to free the earlier contents
+  // of this oneof. We can directly use the pointer we're given to
+  // set the new value.
+  clear_entity();
+  if (value) {
+    set_has_cover();
+    _impl_.entity_.cover_ = value;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:NSPanelEntityState.cover)
+}
+inline ::NSPanelEntityState_Cover* NSPanelEntityState::_internal_mutable_cover() {
+  if (entity_case() != kCover) {
+    clear_entity();
+    set_has_cover();
+    _impl_.entity_.cover_ =
+        ::google::protobuf::Message::DefaultConstruct<::NSPanelEntityState_Cover>(GetArena());
+  }
+  return _impl_.entity_.cover_;
+}
+inline ::NSPanelEntityState_Cover* NSPanelEntityState::mutable_cover() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::NSPanelEntityState_Cover* _msg = _internal_mutable_cover();
+  // @@protoc_insertion_point(field_mutable:NSPanelEntityState.cover)
+  return _msg;
+}
+
 inline bool NSPanelEntityState::has_entity() const {
   return entity_case() != ENTITY_NOT_SET;
 }
@@ -4101,6 +5042,12 @@ struct is_proto_enum<::NSPanelEntityState_MediaPlayer_PlaybackState> : std::true
 template <>
 inline const EnumDescriptor* GetEnumDescriptor<::NSPanelEntityState_MediaPlayer_PlaybackState>() {
   return ::NSPanelEntityState_MediaPlayer_PlaybackState_descriptor();
+}
+template <>
+struct is_proto_enum<::NSPanelEntityState_Cover_CoverState> : std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor<::NSPanelEntityState_Cover_CoverState>() {
+  return ::NSPanelEntityState_Cover_CoverState_descriptor();
 }
 
 }  // namespace protobuf

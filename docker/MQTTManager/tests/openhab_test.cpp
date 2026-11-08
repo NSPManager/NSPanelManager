@@ -1,5 +1,6 @@
 #include "fake_http_server.hpp"
 #include "test_helpers.hpp"
+#include <cover/openhab_cover.hpp>
 #include <gtest/gtest.h>
 #include <set>
 #include <protobuf_nspanel_entity.pb.h>
@@ -7,6 +8,7 @@
 #include <switch/openhab_switch.hpp>
 #include <thermostat/openhab_thermostat.hpp>
 
+using nspm_test::django_cover_data;
 using nspm_test::django_switch_data;
 using nspm_test::FakeHttpServer;
 using nspm_test::ScopedEntity;
@@ -110,6 +112,104 @@ TEST_F(OpenhabSwitchStateTest, non_optimistic_mode_waits_for_openhab) {
 
   OpenhabManager::test_process_websocket_message(item_state_changed("Fan_Switch", "OnOff", "ON"));
   EXPECT_TRUE(fan.get_state());
+}
+
+// ---------------------------------------------------------------------------------------------
+// Covers (OpenHAB Rollershutter items)
+
+class OpenhabCoverTest : public OpenhabTest {
+protected:
+  void create_cover(const std::string &initial_state = "0") {
+    server.respond("/rest/items/LivingRoom_Shutter", rest_item("LivingRoom_Shutter", "Rollershutter", initial_state));
+    row = std::make_unique<ScopedEntity>("cover", "Living room shutter", django_cover_data("openhab", "", "LivingRoom_Shutter"));
+    cover = std::make_unique<OpenhabCover>(row->id);
+  }
+
+  void TearDown() override {
+    cover.reset();
+    row.reset();
+    OpenhabTest::TearDown();
+  }
+
+  std::optional<NSPanelEntityState_Cover> last_published_state() {
+    auto messages = nspm_test::mqtt_published_to(cover->get_mqtt_state_topic());
+    if (messages.empty()) {
+      return std::nullopt;
+    }
+    NSPanelEntityState state;
+    EXPECT_TRUE(state.ParseFromString(messages.back().payload));
+    return state.cover();
+  }
+
+  std::unique_ptr<ScopedEntity> row;
+  std::unique_ptr<OpenhabCover> cover;
+};
+
+TEST_F(OpenhabCoverTest, fetches_initial_state_over_rest_and_inverts_the_position) {
+  create_cover("25");
+
+  EXPECT_EQ(cover->get_type(), MQTT_MANAGER_ENTITY_TYPE::COVER);
+  EXPECT_EQ(cover->get_controller(), MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB);
+  EXPECT_TRUE(cover->has_position());
+  EXPECT_EQ(cover->get_position(), 75);
+  EXPECT_TRUE(cover->can_open());
+  EXPECT_TRUE(cover->can_close());
+  EXPECT_TRUE(cover->can_stop());
+  EXPECT_TRUE(cover->can_set_position());
+
+  auto state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_EQ(state->state(), NSPanelEntityState_Cover_CoverState_OPEN);
+  EXPECT_EQ(state->position(), 75);
+}
+
+TEST_F(OpenhabCoverTest, follows_state_changes_from_openhab) {
+  create_cover("0");
+  last_published_state();
+
+  OpenhabManager::test_process_websocket_message(item_state_changed("LivingRoom_Shutter", "Percent", "100"));
+
+  auto state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_EQ(state->state(), NSPanelEntityState_Cover_CoverState_CLOSED);
+  EXPECT_EQ(state->position(), 0);
+}
+
+TEST_F(OpenhabCoverTest, null_state_becomes_unavailable) {
+  create_cover("0");
+
+  OpenhabManager::test_process_websocket_message(item_state_changed("LivingRoom_Shutter", "Percent", "NULL"));
+
+  auto state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_EQ(state->state(), NSPanelEntityState_Cover_CoverState_UNAVAILABLE);
+  EXPECT_FALSE(state->has_position());
+}
+
+TEST_F(OpenhabCoverTest, commands_use_rollershutter_percent_and_stop) {
+  create_cover("0");
+  item_commands(); // Drop the initial REST request's side effects, if any.
+
+  cover->open();
+  cover->close();
+  cover->stop();
+  cover->set_position(25);
+
+  auto commands = item_commands();
+  ASSERT_EQ(commands.size(), 4);
+  EXPECT_EQ(commands[0], std::make_pair(std::string("LivingRoom_Shutter"), nlohmann::json({{"type", "Percent"}, {"value", "0"}})));
+  EXPECT_EQ(commands[1], std::make_pair(std::string("LivingRoom_Shutter"), nlohmann::json({{"type", "Percent"}, {"value", "100"}})));
+  EXPECT_EQ(commands[2], std::make_pair(std::string("LivingRoom_Shutter"), nlohmann::json({{"type", "StopMove"}, {"value", "STOP"}})));
+  EXPECT_EQ(commands[3], std::make_pair(std::string("LivingRoom_Shutter"), nlohmann::json({{"type", "Percent"}, {"value", "75"}})));
+}
+
+TEST_F(OpenhabCoverTest, ignores_state_changes_for_other_items) {
+  create_cover("0");
+  last_published_state();
+
+  OpenhabManager::test_process_websocket_message(item_state_changed("Other_Shutter", "Percent", "100"));
+
+  EXPECT_FALSE(last_published_state().has_value());
 }
 
 // ---------------------------------------------------------------------------------------------

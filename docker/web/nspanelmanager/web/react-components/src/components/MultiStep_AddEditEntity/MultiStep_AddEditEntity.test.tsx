@@ -45,6 +45,26 @@ describe("add or edit entity wizard", () => {
     expect(await screen.findByText("OpenHAB")).toBeInTheDocument();
   });
 
+  it("offers both controllers for a cover", async () => {
+    const user = userEvent.setup();
+    renderWizard();
+
+    await user.click(screen.getByText("Cover / blind"));
+
+    expect(await screen.findByText("Home Assistant")).toBeInTheDocument();
+    expect(screen.getByText("OpenHAB")).toBeInTheDocument();
+  });
+
+  it("goes from the cover type to the cover form", async () => {
+    const user = userEvent.setup();
+    renderWizard();
+
+    await user.click(screen.getByText("Cover / blind"));
+    await user.click(await screen.findByText("Home Assistant"));
+
+    expect(await screen.findByText(/Covers are a beta feature/)).toBeInTheDocument();
+  });
+
   it("goes from the media player type to the media player form", async () => {
     const user = userEvent.setup();
     renderWizard();

@@ -112,9 +112,46 @@ message NSPanelEntityState {
     int32 media_duration = 23; // In seconds, 0 if unknown (for example a live stream)
   }
 
+  message Cover {
+    enum CoverState {
+      UNKNOWN = 0;
+      OPEN = 1;
+      CLOSED = 2;
+      OPENING = 3;
+      CLOSING = 4;
+      UNAVAILABLE = 5;
+    }
+
+    int32 cover_id = 1;
+    string name = 2;
+    CoverState state = 3;
+
+    // The controller currently reports a position. Some covers accept a target
+    // position but do not report their current position, so this is separate
+    // from can_set_position.
+    bool has_position = 4;
+    int32 position = 5; // 0 = closed, 100 = open
+
+    bool has_tilt_position = 6;
+    int32 tilt_position = 7; // 0-100
+
+    bool can_open = 8;
+    bool can_close = 9;
+    bool can_stop = 10;
+    bool can_set_position = 11;
+    bool can_open_tilt = 12;
+    bool can_close_tilt = 13;
+    bool can_stop_tilt = 14;
+    bool can_set_tilt_position = 15;
+
+    // Optional hint for the panel icon, for example "blind" or "garage".
+    string device_class = 16;
+  }
+
   oneof entity {
     Light light = 1;
     Thermostat thermostat = 2;
     MediaPlayer media_player = 3;
+    Cover cover = 4;
   }
 }

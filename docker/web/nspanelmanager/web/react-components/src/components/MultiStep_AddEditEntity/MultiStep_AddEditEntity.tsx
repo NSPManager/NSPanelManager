@@ -7,6 +7,7 @@ import MultiStep_AddEditEntity_Step3_Button from "./entity_types/step3_edit_butt
 import MultiStep_AddEditEntity_Step3_Thermostat from "./entity_types/step3_edit_thermostat";
 import MultiStep_AddEditEntity_Step3_Scene from "./entity_types/step3_edit_scene";
 import MultiStep_AddEditEntity_Step3_MediaPlayer from "./entity_types/step3_edit_media_player";
+import MultiStep_AddEditEntity_Step3_Cover from "./entity_types/step3_edit_cover";
 import { useAvailableEntitiesStore } from "../../stores/AvailableEntitiesStore";
 import { useEntitiesPagesStore } from "../../stores/EntitiesPagesStore";
 import { useSettingsStore } from "../../stores/SettingsStore";
@@ -272,6 +273,17 @@ const MultiStep_AddOrEditEntity = ({
                   case "media_player":
                     return (
                       <MultiStep_AddEditEntity_Step3_MediaPlayer
+                        controller={String(formData.controller)}
+                        room_id={room_id}
+                        id={id}
+                        entities_page_id={entities_page_id}
+                        room_view_position={room_view_position}
+                        onComplete={onComplete}
+                      />
+                    );
+                  case "cover":
+                    return (
+                      <MultiStep_AddEditEntity_Step3_Cover
                         controller={String(formData.controller)}
                         room_id={room_id}
                         id={id}

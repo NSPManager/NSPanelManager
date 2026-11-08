@@ -101,6 +101,44 @@ struct NSPanelEntityState_LightDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelEntityState_LightDefaultTypeInternal _NSPanelEntityState_Light_default_instance_;
 
+inline constexpr NSPanelEntityState_Cover::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : name_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        device_class_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        cover_id_{0},
+        state_{static_cast< ::NSPanelEntityState_Cover_CoverState >(0)},
+        position_{0},
+        has_position_{false},
+        has_tilt_position_{false},
+        can_open_{false},
+        can_close_{false},
+        tilt_position_{0},
+        can_stop_{false},
+        can_set_position_{false},
+        can_open_tilt_{false},
+        can_close_tilt_{false},
+        can_stop_tilt_{false},
+        can_set_tilt_position_{false},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR NSPanelEntityState_Cover::NSPanelEntityState_Cover(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct NSPanelEntityState_CoverDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR NSPanelEntityState_CoverDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~NSPanelEntityState_CoverDefaultTypeInternal() {}
+  union {
+    NSPanelEntityState_Cover _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelEntityState_CoverDefaultTypeInternal _NSPanelEntityState_Cover_default_instance_;
+
 inline constexpr NSPanelEntityState_Thermostat_ThermostatOption::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : options_{},
@@ -224,7 +262,7 @@ struct NSPanelEntityStateDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 NSPanelEntityStateDefaultTypeInternal _NSPanelEntityState_default_instance_;
-static const ::_pb::EnumDescriptor* file_level_enum_descriptors_protobuf_5fnspanel_5fentity_2eproto[2];
+static const ::_pb::EnumDescriptor* file_level_enum_descriptors_protobuf_5fnspanel_5fentity_2eproto[3];
 static constexpr const ::_pb::ServiceDescriptor**
     file_level_service_descriptors_protobuf_5fnspanel_5fentity_2eproto = nullptr;
 const ::uint32_t
@@ -351,6 +389,30 @@ const ::uint32_t
         ~0u,
         ~0u,
         ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.cover_id_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.name_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.state_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.has_position_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.position_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.has_tilt_position_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.tilt_position_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.can_open_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.can_close_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.can_stop_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.can_set_position_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.can_open_tilt_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.can_close_tilt_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.can_stop_tilt_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.can_set_tilt_position_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.device_class_),
+        ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState, _internal_metadata_),
         ~0u,  // no _extensions_
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState, _impl_._oneof_case_[0]),
@@ -358,6 +420,7 @@ const ::uint32_t
         ~0u,  // no _inlined_string_donated_
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
+        ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
@@ -372,7 +435,8 @@ static const ::_pbi::MigrationSchema
         {40, -1, -1, sizeof(::NSPanelEntityState_Thermostat)},
         {55, -1, -1, sizeof(::NSPanelEntityState_MediaPlayer_SourceSelection)},
         {66, 97, -1, sizeof(::NSPanelEntityState_MediaPlayer)},
-        {120, -1, -1, sizeof(::NSPanelEntityState)},
+        {120, -1, -1, sizeof(::NSPanelEntityState_Cover)},
+        {144, -1, -1, sizeof(::NSPanelEntityState)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelEntityState_Light_default_instance_._instance,
@@ -381,68 +445,82 @@ static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelEntityState_Thermostat_default_instance_._instance,
     &::_NSPanelEntityState_MediaPlayer_SourceSelection_default_instance_._instance,
     &::_NSPanelEntityState_MediaPlayer_default_instance_._instance,
+    &::_NSPanelEntityState_Cover_default_instance_._instance,
     &::_NSPanelEntityState_default_instance_._instance,
 };
 const char descriptor_table_protodef_protobuf_5fnspanel_5fentity_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\035protobuf_nspanel_entity.proto\"\347\r\n\022NSPa"
+    "\n\035protobuf_nspanel_entity.proto\"\364\021\n\022NSPa"
     "nelEntityState\022*\n\005light\030\001 \001(\0132\031.NSPanelE"
     "ntityState.LightH\000\0224\n\nthermostat\030\002 \001(\0132\036"
     ".NSPanelEntityState.ThermostatH\000\0227\n\014medi"
     "a_player\030\003 \001(\0132\037.NSPanelEntityState.Medi"
-    "aPlayerH\000\032\221\002\n\005Light\022\020\n\010light_id\030\001 \001(\005\022\014\n"
-    "\004name\030\002 \001(\t\022\022\n\nbrightness\030\003 \001(\005\022\022\n\ncolor"
-    "_temp\030\004 \001(\005\022\013\n\003hue\030\005 \001(\005\022\022\n\nsaturation\030\006"
-    " \001(\005\022\026\n\016can_color_temp\030\007 \001(\010\022\021\n\tcan_colo"
-    "r\030\010 \001(\010\022\?\n\022current_light_mode\030\t \001(\0162#.NS"
-    "PanelEntityState.Light.LightMode\022\r\n\005stat"
-    "e\030\n \001(\010\"$\n\tLightMode\022\016\n\nCOLOR_TEMP\020\000\022\007\n\003"
-    "RGB\020\001\032\273\003\n\nThermostat\022\025\n\rthermostat_id\030\001 "
-    "\001(\005\022\014\n\004name\030\002 \001(\t\022\033\n\023current_temperature"
-    "\030\003 \001(\002\022\037\n\027has_current_temperature\030\004 \001(\010\022"
-    "\027\n\017set_temperature\030\005 \001(\002\022\021\n\tstep_size\030\006 "
-    "\001(\002\022@\n\007options\030\007 \003(\0132/.NSPanelEntityStat"
-    "e.Thermostat.ThermostatOption\032\333\001\n\020Thermo"
-    "statOption\022\014\n\004name\030\001 \001(\t\022\025\n\rcurrent_valu"
-    "e\030\002 \001(\t\022\024\n\014current_icon\030\003 \001(\t\022V\n\007options"
-    "\030\004 \003(\0132E.NSPanelEntityState.Thermostat.T"
-    "hermostatOption.ThermostatOptionValue\0324\n"
-    "\025ThermostatOptionValue\022\r\n\005value\030\001 \001(\t\022\014\n"
-    "\004icon\030\002 \001(\t\032\331\006\n\013MediaPlayer\022\027\n\017media_pla"
-    "yer_id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022<\n\005state\030\003 \001("
-    "\0162-.NSPanelEntityState.MediaPlayer.Playb"
-    "ackState\022\023\n\013media_title\030\004 \001(\t\022\024\n\014media_a"
-    "rtist\030\005 \001(\t\022\016\n\006volume\030\006 \001(\005\022\020\n\010is_muted\030"
-    "\007 \001(\010\022\031\n\021has_source_volume\030\010 \001(\010\022\025\n\rsour"
-    "ce_volume\030\t \001(\005\022\020\n\010can_play\030\n \001(\010\022\021\n\tcan"
-    "_pause\030\013 \001(\010\022\026\n\016can_next_track\030\014 \001(\010\022\032\n\022"
-    "can_previous_track\030\r \001(\010\022\026\n\016can_set_volu"
-    "me\030\016 \001(\010\022\020\n\010can_mute\030\017 \001(\010\022\025\n\ralbum_art_"
-    "url\030\020 \001(\t\022\023\n\013volume_step\030\021 \001(\005\022G\n\016player"
-    "_sources\030\022 \001(\0132/.NSPanelEntityState.Medi"
-    "aPlayer.SourceSelection\022N\n\025source_player"
-    "_sources\030\023 \001(\0132/.NSPanelEntityState.Medi"
-    "aPlayer.SourceSelection\022\032\n\022has_media_pos"
-    "ition\030\024 \001(\010\022\026\n\016media_position\030\025 \001(\005\022!\n\031m"
-    "edia_position_updated_at\030\026 \001(\003\022\026\n\016media_"
-    "duration\030\027 \001(\005\032N\n\017SourceSelection\022\017\n\007sou"
-    "rces\030\001 \003(\t\022\026\n\016current_source\030\002 \001(\t\022\022\n\nca"
-    "n_select\030\003 \001(\010\"_\n\rPlaybackState\022\013\n\007UNKNO"
-    "WN\020\000\022\007\n\003OFF\020\001\022\006\n\002ON\020\002\022\010\n\004IDLE\020\003\022\013\n\007PLAYI"
-    "NG\020\004\022\n\n\006PAUSED\020\005\022\r\n\tBUFFERING\020\006B\010\n\006entit"
-    "yb\006proto3"
+    "aPlayerH\000\022*\n\005cover\030\004 \001(\0132\031.NSPanelEntity"
+    "State.CoverH\000\032\221\002\n\005Light\022\020\n\010light_id\030\001 \001("
+    "\005\022\014\n\004name\030\002 \001(\t\022\022\n\nbrightness\030\003 \001(\005\022\022\n\nc"
+    "olor_temp\030\004 \001(\005\022\013\n\003hue\030\005 \001(\005\022\022\n\nsaturati"
+    "on\030\006 \001(\005\022\026\n\016can_color_temp\030\007 \001(\010\022\021\n\tcan_"
+    "color\030\010 \001(\010\022\?\n\022current_light_mode\030\t \001(\0162"
+    "#.NSPanelEntityState.Light.LightMode\022\r\n\005"
+    "state\030\n \001(\010\"$\n\tLightMode\022\016\n\nCOLOR_TEMP\020\000"
+    "\022\007\n\003RGB\020\001\032\273\003\n\nThermostat\022\025\n\rthermostat_i"
+    "d\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022\033\n\023current_tempera"
+    "ture\030\003 \001(\002\022\037\n\027has_current_temperature\030\004 "
+    "\001(\010\022\027\n\017set_temperature\030\005 \001(\002\022\021\n\tstep_siz"
+    "e\030\006 \001(\002\022@\n\007options\030\007 \003(\0132/.NSPanelEntity"
+    "State.Thermostat.ThermostatOption\032\333\001\n\020Th"
+    "ermostatOption\022\014\n\004name\030\001 \001(\t\022\025\n\rcurrent_"
+    "value\030\002 \001(\t\022\024\n\014current_icon\030\003 \001(\t\022V\n\007opt"
+    "ions\030\004 \003(\0132E.NSPanelEntityState.Thermost"
+    "at.ThermostatOption.ThermostatOptionValu"
+    "e\0324\n\025ThermostatOptionValue\022\r\n\005value\030\001 \001("
+    "\t\022\014\n\004icon\030\002 \001(\t\032\331\006\n\013MediaPlayer\022\027\n\017media"
+    "_player_id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\022<\n\005state\030"
+    "\003 \001(\0162-.NSPanelEntityState.MediaPlayer.P"
+    "laybackState\022\023\n\013media_title\030\004 \001(\t\022\024\n\014med"
+    "ia_artist\030\005 \001(\t\022\016\n\006volume\030\006 \001(\005\022\020\n\010is_mu"
+    "ted\030\007 \001(\010\022\031\n\021has_source_volume\030\010 \001(\010\022\025\n\r"
+    "source_volume\030\t \001(\005\022\020\n\010can_play\030\n \001(\010\022\021\n"
+    "\tcan_pause\030\013 \001(\010\022\026\n\016can_next_track\030\014 \001(\010"
+    "\022\032\n\022can_previous_track\030\r \001(\010\022\026\n\016can_set_"
+    "volume\030\016 \001(\010\022\020\n\010can_mute\030\017 \001(\010\022\025\n\ralbum_"
+    "art_url\030\020 \001(\t\022\023\n\013volume_step\030\021 \001(\005\022G\n\016pl"
+    "ayer_sources\030\022 \001(\0132/.NSPanelEntityState."
+    "MediaPlayer.SourceSelection\022N\n\025source_pl"
+    "ayer_sources\030\023 \001(\0132/.NSPanelEntityState."
+    "MediaPlayer.SourceSelection\022\032\n\022has_media"
+    "_position\030\024 \001(\010\022\026\n\016media_position\030\025 \001(\005\022"
+    "!\n\031media_position_updated_at\030\026 \001(\003\022\026\n\016me"
+    "dia_duration\030\027 \001(\005\032N\n\017SourceSelection\022\017\n"
+    "\007sources\030\001 \003(\t\022\026\n\016current_source\030\002 \001(\t\022\022"
+    "\n\ncan_select\030\003 \001(\010\"_\n\rPlaybackState\022\013\n\007U"
+    "NKNOWN\020\000\022\007\n\003OFF\020\001\022\006\n\002ON\020\002\022\010\n\004IDLE\020\003\022\013\n\007P"
+    "LAYING\020\004\022\n\n\006PAUSED\020\005\022\r\n\tBUFFERING\020\006\032\336\003\n\005"
+    "Cover\022\020\n\010cover_id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\0223\n"
+    "\005state\030\003 \001(\0162$.NSPanelEntityState.Cover."
+    "CoverState\022\024\n\014has_position\030\004 \001(\010\022\020\n\010posi"
+    "tion\030\005 \001(\005\022\031\n\021has_tilt_position\030\006 \001(\010\022\025\n"
+    "\rtilt_position\030\007 \001(\005\022\020\n\010can_open\030\010 \001(\010\022\021"
+    "\n\tcan_close\030\t \001(\010\022\020\n\010can_stop\030\n \001(\010\022\030\n\020c"
+    "an_set_position\030\013 \001(\010\022\025\n\rcan_open_tilt\030\014"
+    " \001(\010\022\026\n\016can_close_tilt\030\r \001(\010\022\025\n\rcan_stop"
+    "_tilt\030\016 \001(\010\022\035\n\025can_set_tilt_position\030\017 \001"
+    "(\010\022\024\n\014device_class\030\020 \001(\t\"Z\n\nCoverState\022\013"
+    "\n\007UNKNOWN\020\000\022\010\n\004OPEN\020\001\022\n\n\006CLOSED\020\002\022\013\n\007OPE"
+    "NING\020\003\022\013\n\007CLOSING\020\004\022\017\n\013UNAVAILABLE\020\005B\010\n\006"
+    "entityb\006proto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_5fentity_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_5fentity_2eproto = {
     false,
     false,
-    1809,
+    2334,
     descriptor_table_protodef_protobuf_5fnspanel_5fentity_2eproto,
     "protobuf_nspanel_entity.proto",
     &descriptor_table_protobuf_5fnspanel_5fentity_2eproto_once,
     nullptr,
     0,
-    7,
+    8,
     schemas,
     file_default_instances,
     TableStruct_protobuf_5fnspanel_5fentity_2eproto::offsets,
@@ -491,6 +569,30 @@ constexpr NSPanelEntityState_MediaPlayer_PlaybackState NSPanelEntityState_MediaP
 constexpr NSPanelEntityState_MediaPlayer_PlaybackState NSPanelEntityState_MediaPlayer::PlaybackState_MIN;
 constexpr NSPanelEntityState_MediaPlayer_PlaybackState NSPanelEntityState_MediaPlayer::PlaybackState_MAX;
 constexpr int NSPanelEntityState_MediaPlayer::PlaybackState_ARRAYSIZE;
+
+#endif  // (__cplusplus < 201703) &&
+        // (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
+const ::google::protobuf::EnumDescriptor* NSPanelEntityState_Cover_CoverState_descriptor() {
+  ::google::protobuf::internal::AssignDescriptors(&descriptor_table_protobuf_5fnspanel_5fentity_2eproto);
+  return file_level_enum_descriptors_protobuf_5fnspanel_5fentity_2eproto[2];
+}
+PROTOBUF_CONSTINIT const uint32_t NSPanelEntityState_Cover_CoverState_internal_data_[] = {
+    393216u, 0u, };
+bool NSPanelEntityState_Cover_CoverState_IsValid(int value) {
+  return 0 <= value && value <= 5;
+}
+#if (__cplusplus < 201703) && \
+  (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
+
+constexpr NSPanelEntityState_Cover_CoverState NSPanelEntityState_Cover::UNKNOWN;
+constexpr NSPanelEntityState_Cover_CoverState NSPanelEntityState_Cover::OPEN;
+constexpr NSPanelEntityState_Cover_CoverState NSPanelEntityState_Cover::CLOSED;
+constexpr NSPanelEntityState_Cover_CoverState NSPanelEntityState_Cover::OPENING;
+constexpr NSPanelEntityState_Cover_CoverState NSPanelEntityState_Cover::CLOSING;
+constexpr NSPanelEntityState_Cover_CoverState NSPanelEntityState_Cover::UNAVAILABLE;
+constexpr NSPanelEntityState_Cover_CoverState NSPanelEntityState_Cover::CoverState_MIN;
+constexpr NSPanelEntityState_Cover_CoverState NSPanelEntityState_Cover::CoverState_MAX;
+constexpr int NSPanelEntityState_Cover::CoverState_ARRAYSIZE;
 
 #endif  // (__cplusplus < 201703) &&
         // (!defined(_MSC_VER) || (_MSC_VER >= 1900 && _MSC_VER < 1912))
@@ -2820,6 +2922,548 @@ void NSPanelEntityState_MediaPlayer::InternalSwap(NSPanelEntityState_MediaPlayer
 }
 // ===================================================================
 
+class NSPanelEntityState_Cover::_Internal {
+ public:
+};
+
+NSPanelEntityState_Cover::NSPanelEntityState_Cover(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:NSPanelEntityState.Cover)
+}
+inline PROTOBUF_NDEBUG_INLINE NSPanelEntityState_Cover::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::NSPanelEntityState_Cover& from_msg)
+      : name_(arena, from.name_),
+        device_class_(arena, from.device_class_),
+        _cached_size_{0} {}
+
+NSPanelEntityState_Cover::NSPanelEntityState_Cover(
+    ::google::protobuf::Arena* arena,
+    const NSPanelEntityState_Cover& from)
+    : ::google::protobuf::Message(arena) {
+  NSPanelEntityState_Cover* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, cover_id_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, cover_id_),
+           offsetof(Impl_, can_set_tilt_position_) -
+               offsetof(Impl_, cover_id_) +
+               sizeof(Impl_::can_set_tilt_position_));
+
+  // @@protoc_insertion_point(copy_constructor:NSPanelEntityState.Cover)
+}
+inline PROTOBUF_NDEBUG_INLINE NSPanelEntityState_Cover::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : name_(arena),
+        device_class_(arena),
+        _cached_size_{0} {}
+
+inline void NSPanelEntityState_Cover::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, cover_id_),
+           0,
+           offsetof(Impl_, can_set_tilt_position_) -
+               offsetof(Impl_, cover_id_) +
+               sizeof(Impl_::can_set_tilt_position_));
+}
+NSPanelEntityState_Cover::~NSPanelEntityState_Cover() {
+  // @@protoc_insertion_point(destructor:NSPanelEntityState.Cover)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void NSPanelEntityState_Cover::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.name_.Destroy();
+  _impl_.device_class_.Destroy();
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+NSPanelEntityState_Cover::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_._cached_size_),
+              false,
+          },
+          &NSPanelEntityState_Cover::MergeImpl,
+          &NSPanelEntityState_Cover::kDescriptorMethods,
+          &descriptor_table_protobuf_5fnspanel_5fentity_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<4, 16, 0, 65, 2> NSPanelEntityState_Cover::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    16, 120,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294901760,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    16,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    &_NSPanelEntityState_Cover_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::NSPanelEntityState_Cover>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // string device_class = 16;
+    {::_pbi::TcParser::FastUS2,
+     {386, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.device_class_)}},
+    // int32 cover_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelEntityState_Cover, _impl_.cover_id_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.cover_id_)}},
+    // string name = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.name_)}},
+    // .NSPanelEntityState.Cover.CoverState state = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelEntityState_Cover, _impl_.state_), 63>(),
+     {24, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.state_)}},
+    // bool has_position = 4;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelEntityState_Cover, _impl_.has_position_), 63>(),
+     {32, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.has_position_)}},
+    // int32 position = 5;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelEntityState_Cover, _impl_.position_), 63>(),
+     {40, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.position_)}},
+    // bool has_tilt_position = 6;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelEntityState_Cover, _impl_.has_tilt_position_), 63>(),
+     {48, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.has_tilt_position_)}},
+    // int32 tilt_position = 7;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelEntityState_Cover, _impl_.tilt_position_), 63>(),
+     {56, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.tilt_position_)}},
+    // bool can_open = 8;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelEntityState_Cover, _impl_.can_open_), 63>(),
+     {64, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_open_)}},
+    // bool can_close = 9;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelEntityState_Cover, _impl_.can_close_), 63>(),
+     {72, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_close_)}},
+    // bool can_stop = 10;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelEntityState_Cover, _impl_.can_stop_), 63>(),
+     {80, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_stop_)}},
+    // bool can_set_position = 11;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelEntityState_Cover, _impl_.can_set_position_), 63>(),
+     {88, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_set_position_)}},
+    // bool can_open_tilt = 12;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelEntityState_Cover, _impl_.can_open_tilt_), 63>(),
+     {96, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_open_tilt_)}},
+    // bool can_close_tilt = 13;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelEntityState_Cover, _impl_.can_close_tilt_), 63>(),
+     {104, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_close_tilt_)}},
+    // bool can_stop_tilt = 14;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelEntityState_Cover, _impl_.can_stop_tilt_), 63>(),
+     {112, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_stop_tilt_)}},
+    // bool can_set_tilt_position = 15;
+    {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelEntityState_Cover, _impl_.can_set_tilt_position_), 63>(),
+     {120, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_set_tilt_position_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // int32 cover_id = 1;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.cover_id_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // string name = 2;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.name_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // .NSPanelEntityState.Cover.CoverState state = 3;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.state_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
+    // bool has_position = 4;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.has_position_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // int32 position = 5;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.position_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // bool has_tilt_position = 6;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.has_tilt_position_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // int32 tilt_position = 7;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.tilt_position_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // bool can_open = 8;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_open_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // bool can_close = 9;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_close_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // bool can_stop = 10;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_stop_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // bool can_set_position = 11;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_set_position_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // bool can_open_tilt = 12;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_open_tilt_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // bool can_close_tilt = 13;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_close_tilt_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // bool can_stop_tilt = 14;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_stop_tilt_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // bool can_set_tilt_position = 15;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_set_tilt_position_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kBool)},
+    // string device_class = 16;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.device_class_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+  }},
+  // no aux_entries
+  {{
+    "\30\0\4\0\0\0\0\0\0\0\0\0\0\0\0\0\14\0\0\0\0\0\0\0"
+    "NSPanelEntityState.Cover"
+    "name"
+    "device_class"
+  }},
+};
+
+PROTOBUF_NOINLINE void NSPanelEntityState_Cover::Clear() {
+// @@protoc_insertion_point(message_clear_start:NSPanelEntityState.Cover)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.name_.ClearToEmpty();
+  _impl_.device_class_.ClearToEmpty();
+  ::memset(&_impl_.cover_id_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.can_set_tilt_position_) -
+      reinterpret_cast<char*>(&_impl_.cover_id_)) + sizeof(_impl_.can_set_tilt_position_));
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* NSPanelEntityState_Cover::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:NSPanelEntityState.Cover)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // int32 cover_id = 1;
+  if (this->_internal_cover_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<1>(
+            stream, this->_internal_cover_id(), target);
+  }
+
+  // string name = 2;
+  if (!this->_internal_name().empty()) {
+    const std::string& _s = this->_internal_name();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelEntityState.Cover.name");
+    target = stream->WriteStringMaybeAliased(2, _s, target);
+  }
+
+  // .NSPanelEntityState.Cover.CoverState state = 3;
+  if (this->_internal_state() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+        3, this->_internal_state(), target);
+  }
+
+  // bool has_position = 4;
+  if (this->_internal_has_position() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        4, this->_internal_has_position(), target);
+  }
+
+  // int32 position = 5;
+  if (this->_internal_position() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<5>(
+            stream, this->_internal_position(), target);
+  }
+
+  // bool has_tilt_position = 6;
+  if (this->_internal_has_tilt_position() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        6, this->_internal_has_tilt_position(), target);
+  }
+
+  // int32 tilt_position = 7;
+  if (this->_internal_tilt_position() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<7>(
+            stream, this->_internal_tilt_position(), target);
+  }
+
+  // bool can_open = 8;
+  if (this->_internal_can_open() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        8, this->_internal_can_open(), target);
+  }
+
+  // bool can_close = 9;
+  if (this->_internal_can_close() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        9, this->_internal_can_close(), target);
+  }
+
+  // bool can_stop = 10;
+  if (this->_internal_can_stop() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        10, this->_internal_can_stop(), target);
+  }
+
+  // bool can_set_position = 11;
+  if (this->_internal_can_set_position() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        11, this->_internal_can_set_position(), target);
+  }
+
+  // bool can_open_tilt = 12;
+  if (this->_internal_can_open_tilt() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        12, this->_internal_can_open_tilt(), target);
+  }
+
+  // bool can_close_tilt = 13;
+  if (this->_internal_can_close_tilt() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        13, this->_internal_can_close_tilt(), target);
+  }
+
+  // bool can_stop_tilt = 14;
+  if (this->_internal_can_stop_tilt() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        14, this->_internal_can_stop_tilt(), target);
+  }
+
+  // bool can_set_tilt_position = 15;
+  if (this->_internal_can_set_tilt_position() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteBoolToArray(
+        15, this->_internal_can_set_tilt_position(), target);
+  }
+
+  // string device_class = 16;
+  if (!this->_internal_device_class().empty()) {
+    const std::string& _s = this->_internal_device_class();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "NSPanelEntityState.Cover.device_class");
+    target = stream->WriteStringMaybeAliased(16, _s, target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:NSPanelEntityState.Cover)
+  return target;
+}
+
+::size_t NSPanelEntityState_Cover::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:NSPanelEntityState.Cover)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // string name = 2;
+  if (!this->_internal_name().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_name());
+  }
+
+  // string device_class = 16;
+  if (!this->_internal_device_class().empty()) {
+    total_size += 2 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_device_class());
+  }
+
+  // int32 cover_id = 1;
+  if (this->_internal_cover_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_cover_id());
+  }
+
+  // .NSPanelEntityState.Cover.CoverState state = 3;
+  if (this->_internal_state() != 0) {
+    total_size += 1 +
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_state());
+  }
+
+  // int32 position = 5;
+  if (this->_internal_position() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_position());
+  }
+
+  // bool has_position = 4;
+  if (this->_internal_has_position() != 0) {
+    total_size += 2;
+  }
+
+  // bool has_tilt_position = 6;
+  if (this->_internal_has_tilt_position() != 0) {
+    total_size += 2;
+  }
+
+  // bool can_open = 8;
+  if (this->_internal_can_open() != 0) {
+    total_size += 2;
+  }
+
+  // bool can_close = 9;
+  if (this->_internal_can_close() != 0) {
+    total_size += 2;
+  }
+
+  // int32 tilt_position = 7;
+  if (this->_internal_tilt_position() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_tilt_position());
+  }
+
+  // bool can_stop = 10;
+  if (this->_internal_can_stop() != 0) {
+    total_size += 2;
+  }
+
+  // bool can_set_position = 11;
+  if (this->_internal_can_set_position() != 0) {
+    total_size += 2;
+  }
+
+  // bool can_open_tilt = 12;
+  if (this->_internal_can_open_tilt() != 0) {
+    total_size += 2;
+  }
+
+  // bool can_close_tilt = 13;
+  if (this->_internal_can_close_tilt() != 0) {
+    total_size += 2;
+  }
+
+  // bool can_stop_tilt = 14;
+  if (this->_internal_can_stop_tilt() != 0) {
+    total_size += 2;
+  }
+
+  // bool can_set_tilt_position = 15;
+  if (this->_internal_can_set_tilt_position() != 0) {
+    total_size += 2;
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void NSPanelEntityState_Cover::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<NSPanelEntityState_Cover*>(&to_msg);
+  auto& from = static_cast<const NSPanelEntityState_Cover&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:NSPanelEntityState.Cover)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (!from._internal_name().empty()) {
+    _this->_internal_set_name(from._internal_name());
+  }
+  if (!from._internal_device_class().empty()) {
+    _this->_internal_set_device_class(from._internal_device_class());
+  }
+  if (from._internal_cover_id() != 0) {
+    _this->_impl_.cover_id_ = from._impl_.cover_id_;
+  }
+  if (from._internal_state() != 0) {
+    _this->_impl_.state_ = from._impl_.state_;
+  }
+  if (from._internal_position() != 0) {
+    _this->_impl_.position_ = from._impl_.position_;
+  }
+  if (from._internal_has_position() != 0) {
+    _this->_impl_.has_position_ = from._impl_.has_position_;
+  }
+  if (from._internal_has_tilt_position() != 0) {
+    _this->_impl_.has_tilt_position_ = from._impl_.has_tilt_position_;
+  }
+  if (from._internal_can_open() != 0) {
+    _this->_impl_.can_open_ = from._impl_.can_open_;
+  }
+  if (from._internal_can_close() != 0) {
+    _this->_impl_.can_close_ = from._impl_.can_close_;
+  }
+  if (from._internal_tilt_position() != 0) {
+    _this->_impl_.tilt_position_ = from._impl_.tilt_position_;
+  }
+  if (from._internal_can_stop() != 0) {
+    _this->_impl_.can_stop_ = from._impl_.can_stop_;
+  }
+  if (from._internal_can_set_position() != 0) {
+    _this->_impl_.can_set_position_ = from._impl_.can_set_position_;
+  }
+  if (from._internal_can_open_tilt() != 0) {
+    _this->_impl_.can_open_tilt_ = from._impl_.can_open_tilt_;
+  }
+  if (from._internal_can_close_tilt() != 0) {
+    _this->_impl_.can_close_tilt_ = from._impl_.can_close_tilt_;
+  }
+  if (from._internal_can_stop_tilt() != 0) {
+    _this->_impl_.can_stop_tilt_ = from._impl_.can_stop_tilt_;
+  }
+  if (from._internal_can_set_tilt_position() != 0) {
+    _this->_impl_.can_set_tilt_position_ = from._impl_.can_set_tilt_position_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void NSPanelEntityState_Cover::CopyFrom(const NSPanelEntityState_Cover& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:NSPanelEntityState.Cover)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void NSPanelEntityState_Cover::InternalSwap(NSPanelEntityState_Cover* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.device_class_, &other->_impl_.device_class_, arena);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_set_tilt_position_)
+      + sizeof(NSPanelEntityState_Cover::_impl_.can_set_tilt_position_)
+      - PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.cover_id_)>(
+          reinterpret_cast<char*>(&_impl_.cover_id_),
+          reinterpret_cast<char*>(&other->_impl_.cover_id_));
+}
+
+::google::protobuf::Metadata NSPanelEntityState_Cover::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
 class NSPanelEntityState::_Internal {
  public:
   static constexpr ::int32_t kOneofCaseOffset =
@@ -2865,6 +3509,19 @@ void NSPanelEntityState::set_allocated_media_player(::NSPanelEntityState_MediaPl
   }
   // @@protoc_insertion_point(field_set_allocated:NSPanelEntityState.media_player)
 }
+void NSPanelEntityState::set_allocated_cover(::NSPanelEntityState_Cover* cover) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  clear_entity();
+  if (cover) {
+    ::google::protobuf::Arena* submessage_arena = cover->GetArena();
+    if (message_arena != submessage_arena) {
+      cover = ::google::protobuf::internal::GetOwnedMessage(message_arena, cover, submessage_arena);
+    }
+    set_has_cover();
+    _impl_.entity_.cover_ = cover;
+  }
+  // @@protoc_insertion_point(field_set_allocated:NSPanelEntityState.cover)
+}
 NSPanelEntityState::NSPanelEntityState(::google::protobuf::Arena* arena)
     : ::google::protobuf::Message(arena) {
   SharedCtor(arena);
@@ -2897,6 +3554,9 @@ NSPanelEntityState::NSPanelEntityState(
         break;
       case kMediaPlayer:
         _impl_.entity_.media_player_ = ::google::protobuf::Message::CopyConstruct<::NSPanelEntityState_MediaPlayer>(arena, *from._impl_.entity_.media_player_);
+        break;
+      case kCover:
+        _impl_.entity_.cover_ = ::google::protobuf::Message::CopyConstruct<::NSPanelEntityState_Cover>(arena, *from._impl_.entity_.cover_);
         break;
   }
 
@@ -2953,6 +3613,14 @@ void NSPanelEntityState::clear_entity() {
       }
       break;
     }
+    case kCover: {
+      if (GetArena() == nullptr) {
+        delete _impl_.entity_.cover_;
+      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.entity_.cover_);
+      }
+      break;
+    }
     case ENTITY_NOT_SET: {
       break;
     }
@@ -2982,16 +3650,16 @@ NSPanelEntityState::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 3, 3, 0, 2> NSPanelEntityState::_table_ = {
+const ::_pbi::TcParseTable<0, 4, 4, 0, 2> NSPanelEntityState::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    3, 0,  // max_field_number, fast_idx_mask
+    4, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967288,  // skipmap
+    4294967280,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    3,  // num_field_entries
-    3,  // num_aux_entries
+    4,  // num_field_entries
+    4,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_NSPanelEntityState_default_instance_._instance,
     nullptr,  // post_loop_handler
@@ -3013,10 +3681,14 @@ const ::_pbi::TcParseTable<0, 3, 3, 0, 2> NSPanelEntityState::_table_ = {
     // .NSPanelEntityState.MediaPlayer media_player = 3;
     {PROTOBUF_FIELD_OFFSET(NSPanelEntityState, _impl_.entity_.media_player_), _Internal::kOneofCaseOffset + 0, 2,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .NSPanelEntityState.Cover cover = 4;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState, _impl_.entity_.cover_), _Internal::kOneofCaseOffset + 0, 3,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
     {::_pbi::TcParser::GetTable<::NSPanelEntityState_Light>()},
     {::_pbi::TcParser::GetTable<::NSPanelEntityState_Thermostat>()},
     {::_pbi::TcParser::GetTable<::NSPanelEntityState_MediaPlayer>()},
+    {::_pbi::TcParser::GetTable<::NSPanelEntityState_Cover>()},
   }}, {{
   }},
 };
@@ -3053,6 +3725,11 @@ PROTOBUF_NOINLINE void NSPanelEntityState::Clear() {
     case kMediaPlayer: {
       target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
           3, *_impl_.entity_.media_player_, _impl_.entity_.media_player_->GetCachedSize(), target, stream);
+      break;
+    }
+    case kCover: {
+      target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+          4, *_impl_.entity_.cover_, _impl_.entity_.cover_->GetCachedSize(), target, stream);
       break;
     }
     default:
@@ -3092,6 +3769,12 @@ PROTOBUF_NOINLINE void NSPanelEntityState::Clear() {
     case kMediaPlayer: {
       total_size +=
           1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.entity_.media_player_);
+      break;
+    }
+    // .NSPanelEntityState.Cover cover = 4;
+    case kCover: {
+      total_size +=
+          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.entity_.cover_);
       break;
     }
     case ENTITY_NOT_SET: {
@@ -3146,6 +3829,15 @@ void NSPanelEntityState::MergeImpl(::google::protobuf::MessageLite& to_msg, cons
               ::google::protobuf::Message::CopyConstruct<::NSPanelEntityState_MediaPlayer>(arena, *from._impl_.entity_.media_player_);
         } else {
           _this->_impl_.entity_.media_player_->MergeFrom(from._internal_media_player());
+        }
+        break;
+      }
+      case kCover: {
+        if (oneof_needs_init) {
+          _this->_impl_.entity_.cover_ =
+              ::google::protobuf::Message::CopyConstruct<::NSPanelEntityState_Cover>(arena, *from._impl_.entity_.cover_);
+        } else {
+          _this->_impl_.entity_.cover_->MergeFrom(from._internal_cover());
         }
         break;
       }
