@@ -1,0 +1,58 @@
+#!/bin/bash
+# Runs the NSPanelManager dev stack. See README.md.
+#
+#   nspm-dev up               build the image if needed and start the stack
+#   nspm-dev down             stop the stack (keeps the database and builds)
+#   nspm-dev reset            stop the stack and delete its database, so it is seeded afresh
+#   nspm-dev rebuild [--full] rebuild MQTTManager and restart it
+#   nspm-dev watch            rebuild MQTTManager whenever its sources change
+#   nspm-dev logs [service]   follow logs (nspm, mosquitto)
+#   nspm-dev shell            bash in the NSPanelManager container
+#   nspm-dev compose ...      any other docker compose command
+
+cd "$(dirname "$0")" || exit 1
+
+compose() {
+  docker compose "$@"
+}
+
+case "$1" in
+up)
+  # Built with plain docker build, which uses the daemon's own BuildKit. docker compose build
+  # would use the current buildx builder, which may be a separate container builder (older
+  # buildx releases fail with "http: invalid Host header" there).
+  # The image is the devel target of ../Dockerfile, the same one docker-build_and_run_dev.sh
+  # builds, so the two share their cached layers.
+  DOCKER_BUILDKIT=1 docker build --target devel --build-arg WEB_UI_REF="${NSPM_DEV_WEB_UI_REF:-main}" -t nspanelmanager-dev .. &&
+    compose up -d || exit 1
+  echo
+  echo "NSPanelManager: http://localhost:${NSPM_DEV_PORT:-8010}"
+  echo "MQTT broker:    $(compose port mosquitto 1883)"
+  echo "The first start builds MQTTManager, which takes a while. Follow it with: $0 logs nspm"
+  ;;
+down)
+  compose down
+  ;;
+reset)
+  compose down && docker volume rm nspm-dev_nspm-dev-data
+  ;;
+rebuild)
+  compose exec nspm bash /dev-stack/rebuild-manager.sh "${@:2}"
+  ;;
+watch)
+  compose exec nspm bash /dev-stack/rebuild-manager.sh --watch
+  ;;
+logs)
+  compose logs -f --tail=100 "${@:2}"
+  ;;
+shell)
+  compose exec nspm bash
+  ;;
+compose)
+  compose "${@:2}"
+  ;;
+*)
+  sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'
+  exit 1
+  ;;
+esac
