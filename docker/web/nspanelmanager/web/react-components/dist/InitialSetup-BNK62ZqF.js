@@ -1,9 +1,9 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-D932VXe-.js";
-import { t as useSettingsStore } from "./SettingsStore-9dsWVwUb.js";
-import { n as Notify } from "./NSPanelToastContainer-BtKVQVmS.js";
-import { t as motion } from "./proxy-C2iKEG5f.js";
-import { t as AnimatePresence } from "./AnimatePresence-DiA3ejE1.js";
-import { b as require_Icon, i as mdiInformationOutline } from "./mdi-OHXZPNcy.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-BYMetvRG.js";
+import { t as useSettingsStore } from "./SettingsStore-D1xTGsZn.js";
+import { n as Notify } from "./NSPanelToastContainer-IQT17CG7.js";
+import { t as motion } from "./proxy-D5KUi63d.js";
+import { t as AnimatePresence } from "./AnimatePresence-CIKiROzz.js";
+import { i as mdiInformationOutline, x as require_Icon } from "./mdi-DocwAJIe.js";
 //#region src/components/InitialSetup/Step1_Welcome.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_jsx_runtime = require_jsx_runtime();

@@ -7738,6 +7738,9 @@
   .bg-base-300 {
     background-color: var(--color-base-300);
   }
+  .bg-base-300\/0\.75 {
+    background-color: color-mix(in oklab, var(--color-base-300) 0.75%, transparent);
+  }
   .bg-base-content {
     background-color: var(--color-base-content);
   }

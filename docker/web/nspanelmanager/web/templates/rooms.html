@@ -1,4 +1,6 @@
 {% extends 'base.html' %} {% block content %}
+{% load react_tags %}
+
 <dialog id="create_new_room_modal" class="modal">
     <div class="modal-box">
         <!-- Upper right close button -->
@@ -33,14 +35,5 @@
     </form>
 </dialog>
 
-<div class="md:flex md:flex-wrap md:justify-between items-center mb-4">
-    <h2 class="font-medium text-2xl" id="nspanel_name">Rooms</h2>
-    <button type="button" class="btn btn-info" onclick="create_new_room_modal.showModal(); document.getElementById('friendly_name').focus(); document.getElementById('friendly_name').select();">
-        Add new room
-    </button>
-</div>
-
-<div class="p-4 bg-base-100 rounded-md shadow-lg w-full">
-    {% component "rooms_list" %}{% endcomponent %}
-</div>
+{% RC "RoomsView" %}
 {% endblock %}
