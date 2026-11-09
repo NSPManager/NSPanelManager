@@ -22,7 +22,7 @@ Rename or retype a serializer field and, once the files are regenerated, every U
 ### After changing a serializer or a view
 
 1. Install `docker/web/requirements-dev.txt` and run `docker/web/generate_api.sh`. It needs Node/npm, and rewrites `openapi.yaml` and `schema.d.ts`.
-2. Fix whatever `npx tsc -b` in `react-components/` now reports.
+2. Fix whatever `npx tsc -b` in `docker/web/nspanelmanager/web/react-components/` now reports.
 3. Commit both generated files with your change.
 
 CI fails if you skip step 1:
