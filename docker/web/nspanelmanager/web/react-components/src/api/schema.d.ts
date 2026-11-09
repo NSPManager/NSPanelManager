@@ -4,6 +4,43 @@
  */
 
 export interface paths {
+    "/rest/v2/rooms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description An APIView whose errors are {"status": "error", "message": ...} instead of {"detail": ...}. */
+        get: operations["rooms_list"];
+        put?: never;
+        /** @description An APIView whose errors are {"status": "error", "message": ...} instead of {"detail": ...}. */
+        post: operations["rooms_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/rest/v2/rooms/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description An APIView whose errors are {"status": "error", "message": ...} instead of {"detail": ...}. */
+        get: operations["rooms_retrieve"];
+        put?: never;
+        post?: never;
+        /** @description An APIView whose errors are {"status": "error", "message": ...} instead of {"detail": ...}. */
+        delete: operations["rooms_destroy"];
+        options?: never;
+        head?: never;
+        /** @description An APIView whose errors are {"status": "error", "message": ...} instead of {"detail": ...}. */
+        patch: operations["rooms_partial_update"];
+        trace?: never;
+    };
     "/rest/v2/settings": {
         parameters: {
             query?: never;
@@ -53,6 +90,16 @@ export interface components {
          * @enum {string}
          */
         OutsideTempSensorProviderEnum: "home_assistant" | "openhab";
+        /** @description A room, for reading and (with partial=True) for PATCH. */
+        PatchedRoomRequest: {
+            /** @description Leading and trailing whitespace is removed. */
+            friendly_name?: string;
+            displayOrder?: number;
+            /** @description Leading and trailing whitespace is removed. */
+            room_temp_provider?: string;
+            /** @description Leading and trailing whitespace is removed. */
+            room_temp_sensor?: string;
+        };
         /** @description A PATCH /rest/v2/settings body. Send only the settings that change. */
         PatchedSettingsUpdateRequest: {
             /** @description Leading and trailing whitespace is removed. */
@@ -125,6 +172,41 @@ export interface components {
             openhab_address?: string;
             /** @description Leading and trailing whitespace is removed. Blank clears the token. */
             openhab_token?: string;
+        };
+        /** @description A room, for reading and (with partial=True) for PATCH. */
+        Room: {
+            readonly id: number;
+            /** @description Leading and trailing whitespace is removed. */
+            friendly_name: string;
+            displayOrder?: number;
+            /** @description Leading and trailing whitespace is removed. */
+            room_temp_provider?: string;
+            /** @description Leading and trailing whitespace is removed. */
+            room_temp_sensor?: string;
+        };
+        /** @description DRF's error body for a request it rejects before validation, e.g. invalid JSON or a failed CSRF check. */
+        RoomDetail: {
+            detail: string;
+        };
+        /** @description A 400 from POST/PATCH: error messages by field name. Maps onto react-hook-form's setError(). */
+        RoomErrors: {
+            id?: string[];
+            friendly_name?: string[];
+            displayOrder?: string[];
+            room_temp_provider?: string[];
+            room_temp_sensor?: string[];
+            non_field_errors?: string[];
+            detail?: string;
+        };
+        /** @description A room, for reading and (with partial=True) for PATCH. */
+        RoomRequest: {
+            /** @description Leading and trailing whitespace is removed. */
+            friendly_name: string;
+            displayOrder?: number;
+            /** @description Leading and trailing whitespace is removed. */
+            room_temp_provider?: string;
+            /** @description Leading and trailing whitespace is removed. */
+            room_temp_sensor?: string;
         };
         /**
          * @description * `with_background` - with_background
@@ -277,6 +359,186 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    rooms_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Room"][];
+                };
+            };
+        };
+    };
+    rooms_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RoomRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Room"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoomErrors"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoomDetail"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoomDetail"];
+                };
+            };
+        };
+    };
+    rooms_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Room"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoomDetail"];
+                };
+            };
+        };
+    };
+    rooms_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoomDetail"];
+                };
+            };
+        };
+    };
+    rooms_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedRoomRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Room"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoomErrors"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoomDetail"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoomDetail"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoomDetail"];
+                };
+            };
+        };
+    };
     settings_retrieve: {
         parameters: {
             query?: never;

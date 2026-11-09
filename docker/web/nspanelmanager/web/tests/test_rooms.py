@@ -1,5 +1,6 @@
 import json
 
+from django.test import Client, TestCase
 from django.urls import reverse
 
 from web.models import Entity, NSPanel, Room, RoomEntitiesPage, Scene
@@ -73,50 +74,52 @@ class RoomRESTTests(NSPMTestCase):
     """The /rest/rooms JSON API used by external tools."""
 
     def test_create_room(self):
-        response = self.post_json(reverse("rest_rooms_create"), {"name": "Office"})
+        response = self.post_json(reverse("rest_v2_rooms"), {"friendly_name": "Office"})
 
-        self.assertEqual(response.status_code, 200)
-        room_id = response.json()["room_id"]
+        self.assertEqual(response.status_code, 201)
+        room_id = response.json()["id"]
         self.assertEqual(Room.objects.get(id=room_id).friendly_name, "Office")
 
     def test_create_room_rejects_bad_payloads(self):
-        for body in ({}, {"friendly_name": "wrong key"}, "not json"):
+        print("BAD PAYLOADS")
+        for body in ({}, {"name": "wrong key"}, "not json"):
             with self.subTest(body=body):
-                response = self.post_json(reverse("rest_rooms_create"), body)
-                self.assertEqual(response.status_code, 500)
+                print(f"Testing: {body}")
+                response = self.post_json(reverse("rest_v2_rooms"), body)
+                print(response.json())
+                self.assertEqual(response.status_code, 400)
                 self.assertEqual(response.json()["status"], "error")
         self.assertFalse(Room.objects.exists())
+        print("END BAD PAYLOADS")
 
     def test_rooms_endpoint_rejects_unsupported_methods(self):
-        self.assertEqual(self.client.delete(reverse("rest_rooms_create")).status_code, 405)
-        room = self.make_room()
-        self.assertEqual(self.client.get(reverse("rest_room_delete", kwargs={"room_id": room.id})).status_code, 405)
+        self.assertEqual(self.client.delete(reverse("rest_v2_rooms")).status_code, 405)
+        # room = self.make_room()
+        # self.assertEqual(self.client.get(reverse("rest_v2_rooms", kwargs={"room_id": room.id})).status_code, 405)
 
     def test_delete_room(self):
         room = self.make_room("Office")
+        self.make_room("Livingroom")
         self.make_light(room)
 
-        response = self.client.delete(reverse("rest_room_delete", kwargs={"room_id": room.id}))
+        response = self.client.delete(reverse("rest_v2_rooms_detail", kwargs={"pk": room.id}))
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(Room.objects.count(), 1)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), {"status": "ok", "room_id": room.id})
-        self.assertFalse(Room.objects.exists())
-        self.assertFalse(Entity.objects.exists())
-
-    def test_delete_last_room_without_panels(self):
+    def test_delete_last_room_without_panels_is_rejected(self):
         room = self.make_room("Office")
 
-        response = self.client.delete(reverse("rest_room_delete", kwargs={"room_id": room.id}))
+        response = self.client.delete(reverse("rest_v2_rooms_detail", kwargs={"pk": room.id}))
 
-        self.assertEqual(response.status_code, 200)
-        self.assertFalse(Room.objects.exists())
-        self.assertManagerReloaded(times=1)
+        self.assertEqual(response.status_code, 400)
+        self.assertTrue(Room.objects.exists())
+        self.assertManagerReloaded(times=0)
 
     def test_delete_last_room_with_panels_is_rejected(self):
         room = self.make_room("Office")
         panel = self.make_panel(room)
 
-        response = self.client.delete(reverse("rest_room_delete", kwargs={"room_id": room.id}))
+        response = self.client.delete(reverse("rest_v2_rooms_detail", kwargs={"pk": room.id}))
 
         self.assertEqual(response.status_code, 400)
         self.assertTrue(Room.objects.filter(id=room.id).exists())
@@ -126,7 +129,7 @@ class RoomRESTTests(NSPMTestCase):
     def test_delete_unknown_room_is_rejected(self):
         room = self.make_room("Office")
 
-        response = self.client.delete(reverse("rest_room_delete", kwargs={"room_id": room.id + 100}))
+        response = self.client.delete(reverse("rest_v2_rooms_detail", kwargs={"pk": room.id + 100}))
 
         self.assertRejected(response)
         self.assertTrue(Room.objects.filter(id=room.id).exists())
@@ -135,24 +138,24 @@ class RoomRESTTests(NSPMTestCase):
         office = self.make_room("Office")
         lounge = self.make_room("Lounge")
 
-        response = self.client.get(reverse("rest_rooms_create"))
+        response = self.client.get(reverse("rest_v2_rooms"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual([(r["id"], r["friendly_name"]) for r in response.json()["rooms"]], [(office.id, "Office"), (lounge.id, "Lounge")])
-        self.assertEqual(set(response.json()["rooms"][0]), {"id", "friendly_name", "display_order", "room_temp_provider", "room_temp_sensor"})
+        self.assertEqual([(r["id"], r["friendly_name"]) for r in response.json()], [(office.id, "Office"), (lounge.id, "Lounge")])
+        self.assertEqual(set(response.json()[0]), {"id", "friendly_name", "displayOrder", "room_temp_provider", "room_temp_sensor"})
 
     def test_get_single_room(self):
         self.make_room("Office")
         lounge = self.make_room("Lounge")
 
-        response = self.client.get(reverse("rest_rooms_create"), {"id": lounge.id})
+        response = self.client.get(reverse("rest_v2_rooms_detail", kwargs={"pk": lounge.id}))
 
-        self.assertEqual([(r["id"], r["friendly_name"]) for r in response.json()["rooms"]], [(lounge.id, "Lounge")])
+        self.assertEqual([(response.json()["id"], response.json()["friendly_name"])], [(lounge.id, "Lounge")])
 
     def test_update_room(self):
         room = self.make_room("Office")
 
-        response = self.put_json(reverse("rest_rooms_create"), {"id": room.id, "friendly_name": "Study", "room_temp_provider": "home_assistant", "room_temp_sensor": "sensor.study"})
+        response = self.patch_json(reverse("rest_v2_rooms_detail", kwargs={"pk": room.id}), {"friendly_name": "Study", "room_temp_provider": "home_assistant", "room_temp_sensor": "sensor.study"})
 
         self.assertEqual(response.status_code, 200)
         room.refresh_from_db()
@@ -163,7 +166,7 @@ class RoomRESTTests(NSPMTestCase):
         # display_order is the key GET /rest/rooms returns. room_put used to check for "displayOrder" instead, so it was ignored.
         room = self.make_room("Office")
 
-        response = self.put_json(reverse("rest_rooms_create"), {"id": room.id, "display_order": 7})
+        response = self.patch_json(reverse("rest_v2_rooms_detail", kwargs={"pk": room.id}), {"displayOrder": 7})
 
         self.assertEqual(response.status_code, 200)
         room.refresh_from_db()
@@ -173,7 +176,7 @@ class RoomRESTTests(NSPMTestCase):
         room = self.make_room("Office")
         self.make_room("Lounge")
 
-        self.client.delete(reverse("rest_room_delete", kwargs={"room_id": room.id}))
+        self.client.delete(reverse("rest_v2_rooms_detail", kwargs={"pk": room.id}))
 
         self.assertManagerReloaded(times=1)
 
@@ -184,7 +187,7 @@ class RoomRESTTests(NSPMTestCase):
         self.make_light(kitchen)
         self.make_scene(kitchen)
 
-        self.client.delete(reverse("rest_room_delete", kwargs={"room_id": kitchen.id}))
+        self.client.delete(reverse("rest_v2_rooms_detail", kwargs={"pk": kitchen.id}))
 
         self.assertFalse(Room.objects.filter(id=kitchen.id).exists())
         self.assertFalse(Entity.objects.exists())
@@ -196,13 +199,14 @@ class RoomRESTTests(NSPMTestCase):
         self.assertManagerReloaded(times=1)
 
     def test_created_room_has_entity_pages(self):
-        response = self.post_json(reverse("rest_rooms_create"), {"name": "Office"})
+        response = self.post_json(reverse("rest_v2_rooms"), {"friendly_name": "Office"})
+        self.assertEqual(response.status_code, 201)
 
-        room_id = response.json()["room_id"]
+        room_id = response.json()["id"]
         self.assertEqual(RoomEntitiesPage.objects.filter(room_id=room_id).count(), 2)
 
     def test_create_room_rejects_overlong_name(self):
-        response = self.post_json(reverse("rest_rooms_create"), {"name": "x" * 100})
+        response = self.post_json(reverse("rest_v2_rooms"), {"friendly_name": "x" * 100})
 
         self.assertRejected(response)
         self.assertFalse(Room.objects.exists())
