@@ -575,6 +575,80 @@
 	;MAKE BACKGROUND PAGE INVISIBLE TO PREPARE FOR NEXT ROOM
 	(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "ENTITY_THERMOSTAT")) 0)
 
+		;;------------------------------------------------------------------------------------------------------------------------
+;; BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE
+
+	;MAKE BACKGROUND PAGE VISIBLE
+	(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "ENTITY_BLINDS")) 1)
+	;Prepare depress picture
+	(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "entity_blinds_back")) 1)
+	(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "entity_blinds_buttons_depress")) 1)
+	(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "entity_blinds_buttons_press")) 0)
+
+	(let*
+	((newImage (car (gimp-image-duplicate image))))
+		(gimp-image-merge-visible-layers newImage 1)
+		(let*
+		((activeLayer (car (gimp-image-get-active-layer newImage))))
+		(gimp-file-save RUN-NONINTERACTIVE image activeLayer "pictures_tft1/181_blinds_depress.bmp" "pictures_tft1/181_blinds_depress.bmp")
+		)
+	(gimp-image-delete newImage)
+	)
+
+	;prepare press picture
+	(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "entity_blinds_buttons_press")) 1)
+
+	(let*
+	((newImage (car (gimp-image-duplicate image))))
+		(gimp-image-merge-visible-layers newImage 1)
+		(let*
+		((activeLayer (car (gimp-image-get-active-layer newImage))))
+		(gimp-file-save RUN-NONINTERACTIVE image activeLayer "pictures_tft1/182_blinds_press.bmp" "pictures_tft1/182_blinds_press.bmp")
+		)
+	(gimp-image-delete newImage)
+	)
+
+
+	;MAKE ENTITY_BLINDS INVISIBLE TO PREPARE FOR NEXT ROOM
+	(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "ENTITY_BLINDS")) 0)
+
+		;;------------------------------------------------------------------------------------------------------------------------
+;; BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE
+
+	;MAKE BACKGROUND PAGE VISIBLE
+	(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "ENTITY_BLINDS")) 1)
+	;Prepare depress picture
+	(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "entity_blinds_back")) 1)
+	(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "entity_blinds_buttons_depress")) 1)
+	(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "entity_blinds_buttons_press")) 0)
+
+	(let*
+	((newImage (car (gimp-image-duplicate image))))
+		(gimp-image-merge-visible-layers newImage 1)
+		(let*
+		((activeLayer (car (gimp-image-get-active-layer newImage))))
+		(gimp-file-save RUN-NONINTERACTIVE image activeLayer "pictures_tft1/181_blinds_depress.bmp" "pictures_tft1/181_blinds_depress.bmp")
+		)
+	(gimp-image-delete newImage)
+	)
+
+	;prepare press picture
+	(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "entity_blinds_buttons_press")) 1)
+
+	(let*
+	((newImage (car (gimp-image-duplicate image))))
+		(gimp-image-merge-visible-layers newImage 1)
+		(let*
+		((activeLayer (car (gimp-image-get-active-layer newImage))))
+		(gimp-file-save RUN-NONINTERACTIVE image activeLayer "pictures_tft1/182_blinds_press.bmp" "pictures_tft1/182_blinds_press.bmp")
+		)
+	(gimp-image-delete newImage)
+	)
+
+
+	;MAKE ENTITY_BLINDS INVISIBLE TO PREPARE FOR NEXT ROOM
+	(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "ENTITY_BLINDS")) 0)
+
 ;;---------------------------------------------------------------------------------------------------------
 	(gimp-image-delete image)
 	)
