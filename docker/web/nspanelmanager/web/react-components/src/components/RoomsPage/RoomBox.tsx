@@ -68,7 +68,7 @@ const StatusHeader = ({ room }: { room: Room }) => {
 };
 
 const RoomBoxContent = ({ room, setHandle }: { room: Room; setHandle: React.Dispatch<React.SetStateAction<Element | null>> }) => {
-  const boxRef = useRef<HTMLLIElement>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -125,7 +125,7 @@ const RoomBoxContent = ({ room, setHandle }: { room: Room; setHandle: React.Disp
 
   return (
     <>
-      <div className="relative h-full group/box">
+      <div className="relative h-full group/box" ref={boxRef}>
         <motion.div
           style={{ WebkitMaskImage: clipPath, maskImage: clipPath, pointerEvents: "none" }}
           className="absolute tile-background w-full h-full group overflow-hidden mb-1 opacity-0 group-hover/box:opacity-5"

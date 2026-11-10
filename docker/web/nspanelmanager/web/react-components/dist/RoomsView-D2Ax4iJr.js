@@ -1,12 +1,12 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-2HtbJIdj.js";
-import { r as DragDropProvider, t as useSortable } from "./sortable-BQjqvTKl.js";
-import { n as FormProvider, s as useForm } from "./index.esm-QFBIAhJI.js";
-import { n as Notify } from "./NSPanelToastContainer-0TOVgnPE.js";
-import { t as motion } from "./proxy-C3AeBDbu.js";
-import { n as useMotionTemplate, r as useMotionValue, t as useSpring } from "./use-spring-DgFnloJ5.js";
-import { t as useEntityStatesStore } from "./EntityStore-CC59Fqn-.js";
-import { o as mdiMenu, x as require_Icon } from "./mdi-FwvGNUOi.js";
-import { c as TextInput, l as api, t as Alert } from "./layout-CJwUXh-n.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-mOYBphAK.js";
+import { r as DragDropProvider, t as useSortable } from "./sortable-BKjAn1vo.js";
+import { n as FormProvider, s as useForm } from "./index.esm-DmNSZ3cO.js";
+import { n as Notify } from "./NSPanelToastContainer-BGH79mEK.js";
+import { t as motion } from "./proxy-BoTppwE5.js";
+import { n as useMotionTemplate, r as useMotionValue, t as useSpring } from "./use-spring-C3rlGbQn.js";
+import { t as useEntityStatesStore } from "./EntityStore-DJeSjlwW.js";
+import { o as mdiMenu, x as require_Icon } from "./mdi-DHNNQcID.js";
+import { c as TextInput, l as api, t as Alert } from "./layout-CuyiwCEx.js";
 //#region src/components/RoomsPage/RoomBox.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_Icon = require_Icon();
@@ -99,6 +99,7 @@ var RoomBoxContent = ({ room, setHandle }) => {
 	else if (room_nspanels.length > 0 && number_panels_online <= 0) bg_class = "bg-error";
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "relative h-full group/box",
+		ref: boxRef,
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 			style: {
 				WebkitMaskImage: clipPath,
