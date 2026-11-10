@@ -114,6 +114,7 @@ class LightTests(EntityRESTCommonTests, EntityRESTTestCase):
             "is_ceiling_light": True,
             "openhab_item_color_temp": "",
             "openhab_item_dimmer": "",
+            "openhab_item_switch": "",
             "openhab_item_rgb": "",
         }
         return {"values": values | overrides}

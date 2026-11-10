@@ -853,6 +853,7 @@ def put_light_entity(request):
             "is_ceiling_light",
             "openhab_item_color_temp",
             "openhab_item_dimmer",
+            "openhab_item_switch",
             "openhab_item_rgb",
         ]
         data = json.loads(request.body)["values"]
@@ -869,6 +870,7 @@ def put_light_entity(request):
             "home_assistant_name": data.get("home_assistant_name", ""),
             "openhab_control_mode": "dimmer" if data.get("can_dim", False) else "switch",
             "openhab_item_dimmer": data.get("openhab_item_dimmer", ""),
+            "openhab_item_switch": data.get("openhab_item_switch", ""),
             "openhab_item_color_temp": data.get("openhab_item_color_temp", ""),
             "openhab_item_rgb": data.get("openhab_item_rgb", ""),
             "can_dim": str(data["can_dim"]).lower() == "true",

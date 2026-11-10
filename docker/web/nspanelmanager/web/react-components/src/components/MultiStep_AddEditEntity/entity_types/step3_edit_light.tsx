@@ -26,6 +26,7 @@ const schema = z.object({
   is_ceiling_light: z.boolean().optional(),
   openhab_item_color_temp: z.string().optional(),
   openhab_item_dimmer: z.string().optional(),
+  openhab_item_switch: z.string().optional(),
   openhab_item_rgb: z.string().optional(),
 });
 export type LightFormData = z.infer<typeof schema>;
@@ -87,6 +88,7 @@ const MultiStep_AddEditEntity_Step3_Light = ({
       home_assistant_name: "",
       openhab_item_color_temp: "",
       openhab_item_dimmer: "",
+      openhab_item_switch: "",
       openhab_item_rgb: "",
     },
   });
@@ -335,7 +337,11 @@ const MultiStep_AddEditEntity_Step3_Light = ({
             <Select<IOptionType>
               options={useAvailableEntitiesStore.getState().openhab_options}
               classNames={classNames}
-              onChange={(newValue) => setValue("openhab_item_dimmer", newValue ? newValue.value : "", { shouldValidate: true, shouldDirty: true })}
+              onChange={(newValue) => {
+                // Configure both items. Control mode (ie. can_dim) controls what field gets loaded in MQTTManager.
+                setValue("openhab_item_dimmer", newValue ? newValue.value : "", { shouldValidate: true, shouldDirty: true });
+                setValue("openhab_item_switch", newValue ? newValue.value : "", { shouldValidate: true, shouldDirty: true });
+              }}
               value={useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_item_dimmer"))}
               unstyled
               components={select_components}
