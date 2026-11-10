@@ -1,16 +1,18 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import RoomBox from "./RoomBox.tsx";
 import { Notify } from "../NSPanelToastContainer.tsx";
 import { api, type Room } from "../../api/client";
 import { DragDropProvider } from "@dnd-kit/react";
 import { move } from "@dnd-kit/helpers";
 import { useEntityStatesStore } from "../../stores/EntityStore.ts";
+import NewRoomDialog from "./NewRoomDialog.tsx";
 
 type LoadState = { status: "loading" } | { status: "error"; message: string } | { status: "loaded"; rooms: Room[] };
 
 const RoomsView = () => {
   const [state, setState] = useState<LoadState>({ status: "loading" });
   const { status: entityStatesStatus, fetchData } = useEntityStatesStore();
+  const newRoomDialogRef = useRef<HTMLDialogElement>(null);
 
   // Sets the state only once the request finishes.
   const fetchSettings = useCallback(() => {
@@ -30,6 +32,8 @@ const RoomsView = () => {
 
   return (
     <div>
+      <NewRoomDialog dialogRef={newRoomDialogRef} onCreated={fetchSettings} />
+
       <div className="flex items-center justify-between">
         <div className="flex items-center justify-start gap-1">
           <span className="text-2xl">Rooms</span>
@@ -41,7 +45,9 @@ const RoomsView = () => {
           })()}
         </div>
         <div>
-          <button className="btn btn-info font-medium">New room</button>
+          <button className="btn btn-info font-medium" onClick={() => newRoomDialogRef.current?.showModal()}>
+            New room
+          </button>
         </div>
       </div>
       <div>

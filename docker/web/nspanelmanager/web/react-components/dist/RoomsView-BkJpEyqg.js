@@ -1,11 +1,12 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-Dy3GGdj2.js";
-import { r as DragDropProvider, t as useSortable } from "./sortable-D3xLrU_d.js";
-import { n as Notify } from "./NSPanelToastContainer-BaXI002I.js";
-import { t as motion } from "./proxy-CGs1Q21I.js";
-import { n as useMotionTemplate, r as useMotionValue, t as useSpring } from "./use-spring-B1vASAd2.js";
-import { t as useEntityStatesStore } from "./EntityStore-DcWSsHBt.js";
-import { o as mdiMenu, x as require_Icon } from "./mdi-BZ7LC2p3.js";
-import { t as api } from "./client-CRfCe5X7.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-2HtbJIdj.js";
+import { r as DragDropProvider, t as useSortable } from "./sortable-BQjqvTKl.js";
+import { n as FormProvider, s as useForm } from "./index.esm-QFBIAhJI.js";
+import { n as Notify } from "./NSPanelToastContainer-0TOVgnPE.js";
+import { t as motion } from "./proxy-C3AeBDbu.js";
+import { n as useMotionTemplate, r as useMotionValue, t as useSpring } from "./use-spring-DgFnloJ5.js";
+import { t as useEntityStatesStore } from "./EntityStore-CC59Fqn-.js";
+import { o as mdiMenu, x as require_Icon } from "./mdi-FwvGNUOi.js";
+import { c as TextInput, l as api, t as Alert } from "./layout-CJwUXh-n.js";
 //#region src/components/RoomsPage/RoomBox.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_Icon = require_Icon();
@@ -358,10 +359,89 @@ function move(items, event) {
 	return mutate(items, event, arrayMove);
 }
 //#endregion
+//#region src/components/RoomsPage/NewRoomDialog.tsx
+var NewRoomDialog = ({ dialogRef, onCreated }) => {
+	const [errorMessage, setErrorMessage] = (0, import_react.useState)(null);
+	const form = useForm({ defaultValues: { friendly_name: "" } });
+	const { handleSubmit, reset: formReset, formState: { isSubmitting } } = form;
+	const reset = () => {
+		setErrorMessage(null);
+		formReset();
+	};
+	const onSubmit = async (values) => {
+		setErrorMessage(null);
+		try {
+			const { data, error, response } = await api.POST("/rest/v2/rooms", { body: { friendly_name: values.friendly_name.trim() } });
+			if (data) {
+				dialogRef.current?.close();
+				Notify({
+					message: `Room "${data.friendly_name}" created`,
+					level: "success",
+					duration: 3e3
+				});
+				onCreated();
+				return;
+			}
+			console.log("Failed to create room, error: ", error);
+			setErrorMessage(`Failed to create room (HTTP ${response.status})`);
+		} catch (failure) {
+			setErrorMessage(failure instanceof Error ? failure.message : String(failure));
+		}
+	};
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dialog", {
+		ref: dialogRef,
+		className: "modal",
+		onClose: reset,
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "modal-box",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+				className: "text-lg font-bold",
+				children: "New room"
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(FormProvider, {
+				...form,
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+					onSubmit: (event) => void handleSubmit(onSubmit)(event),
+					noValidate: true,
+					children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(TextInput, {
+							name: "friendly_name",
+							label: "Name"
+						}),
+						errorMessage && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Alert, {
+							level: "error",
+							children: errorMessage
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "modal-action",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								type: "button",
+								className: "btn",
+								disabled: isSubmitting,
+								onClick: () => dialogRef.current?.close(),
+								children: "Cancel"
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+								type: "submit",
+								className: "btn btn-info",
+								disabled: isSubmitting,
+								children: [isSubmitting && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "loading loading-spinner loading-xs" }), "Create"]
+							})]
+						})
+					]
+				})
+			})]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("form", {
+			method: "dialog",
+			className: "modal-backdrop",
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { children: "close" })
+		})]
+	});
+};
+//#endregion
 //#region src/components/RoomsPage/RoomsView.tsx
 var RoomsView = () => {
 	const [state, setState] = (0, import_react.useState)({ status: "loading" });
 	const { status: entityStatesStatus, fetchData } = useEntityStatesStore();
+	const newRoomDialogRef = (0, import_react.useRef)(null);
 	const fetchSettings = (0, import_react.useCallback)(() => {
 		api.GET("/rest/v2/rooms").then(({ data, response }) => setState(data ? {
 			status: "loaded",
@@ -378,96 +458,104 @@ var RoomsView = () => {
 		if (entityStatesStatus === "none") fetchData();
 	}, [entityStatesStatus, fetchData]);
 	(0, import_react.useEffect)(fetchSettings, [fetchSettings]);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-		className: "flex items-center justify-between",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "flex items-center justify-start gap-1",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-				className: "text-2xl",
-				children: "Rooms"
-			}), (() => {
-				if (entityStatesStatus != "loaded") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "loading loading-spinner loading-sm mr-2" });
-				return null;
-			})()]
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-			className: "btn btn-info font-medium",
-			children: "New room"
-		}) })]
-	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: (() => {
-		if (state.status != "loaded") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "flex w-full items-center justify-center text-2xl",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "loading loading-spinner loading-sm mr-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-				className: "font-medium",
-				children: "Loading rooms..."
-			})]
-		});
-		if (state.status == "loaded" && state.rooms.length > 0) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DragDropProvider, {
-			onDragStart: (event) => {
-				console.log("Drag start: ", event);
-			},
-			onDragEnd: (event) => {
-				if (event.canceled) return;
-				const previousState = state;
-				const reordered = move(state.rooms, event).map((room, index) => ({
-					...room,
-					displayOrder: index
-				}));
-				api.PATCH("/rest/v2/rooms", { body: { rooms: reordered.map((room, index) => ({
-					id: room.id,
-					displayOrder: index + 1
-				})) } }).then(({ data, error, response }) => {
-					if (data) {
-						setState({
-							status: "loaded",
-							rooms: data
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(NewRoomDialog, {
+			dialogRef: newRoomDialogRef,
+			onCreated: fetchSettings
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "flex items-center justify-between",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex items-center justify-start gap-1",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "text-2xl",
+					children: "Rooms"
+				}), (() => {
+					if (entityStatesStatus != "loaded") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "loading loading-spinner loading-sm mr-2" });
+					return null;
+				})()]
+			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+				className: "btn btn-info font-medium",
+				onClick: () => newRoomDialogRef.current?.showModal(),
+				children: "New room"
+			}) })]
+		}),
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: (() => {
+			if (state.status != "loaded") return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "flex w-full items-center justify-center text-2xl",
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "loading loading-spinner loading-sm mr-2" }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "font-medium",
+					children: "Loading rooms..."
+				})]
+			});
+			if (state.status == "loaded" && state.rooms.length > 0) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DragDropProvider, {
+				onDragStart: (event) => {
+					console.log("Drag start: ", event);
+				},
+				onDragEnd: (event) => {
+					if (event.canceled) return;
+					const previousState = state;
+					const reordered = move(state.rooms, event).map((room, index) => ({
+						...room,
+						displayOrder: index
+					}));
+					api.PATCH("/rest/v2/rooms", { body: { rooms: reordered.map((room, index) => ({
+						id: room.id,
+						displayOrder: index + 1
+					})) } }).then(({ data, error, response }) => {
+						if (data) {
+							setState({
+								status: "loaded",
+								rooms: data
+							});
+							return;
+						}
+						setState(previousState);
+						console.error("Failed to save room", error);
+						Notify({
+							message: `Failed to save room order (HTTP ${response.status})`,
+							level: "error",
+							duration: 5e3
 						});
-						return;
-					}
-					setState(previousState);
-					console.error("Failed to save room", error);
-					Notify({
-						message: `Failed to save room order (HTTP ${response.status})`,
-						level: "error",
-						duration: 5e3
+					}).catch((error) => {
+						setState(previousState);
+						Notify({
+							message: error instanceof Error ? error.message : String(error),
+							level: "error",
+							duration: 5e3
+						});
 					});
-				}).catch((error) => {
-					setState(previousState);
-					Notify({
-						message: error instanceof Error ? error.message : String(error),
-						level: "error",
-						duration: 5e3
-					});
-				});
-			},
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
-				className: "grid md:grid-cols-3 gap-4 mt-4 items-stretch",
-				id: "rooms_container",
-				children: state.rooms.map((room, index) => {
-					return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RoomBox, {
-						room,
-						index
-					}, `room-id-${room.id}`);
-				})
-			})
-		});
-		else return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "grid md:grid-cols-3 gap-4 mt-4 items-start",
-			id: "rooms_container",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-				className: "col-span-3 w-full text-center text-xl text-base-content",
-				children: [
-					"No Rooms found. Getting started?",
-					" ",
-					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
-						href: "https://nspanelmanager.com/docs/getting-started/flash-nspanel",
-						target: "_blank",
-						className: "text-accent",
-						children: "Read the documentation."
+				},
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
+					className: "grid md:grid-cols-3 gap-4 mt-4 items-stretch",
+					id: "rooms_container",
+					children: state.rooms.map((room, index) => {
+						return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RoomBox, {
+							room,
+							index
+						}, `room-id-${room.id}`);
 					})
-				]
-			})
-		});
-	})() })] });
+				})
+			});
+			else return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+				className: "grid md:grid-cols-3 gap-4 mt-4 items-start",
+				id: "rooms_container",
+				children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "col-span-3 w-full text-center text-xl text-base-content",
+					children: [
+						"No Rooms found. Getting started?",
+						" ",
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+							href: "https://nspanelmanager.com/docs/getting-started/flash-nspanel",
+							target: "_blank",
+							className: "text-accent",
+							children: "Read the documentation."
+						})
+					]
+				})
+			});
+		})() })
+	] });
 };
 //#endregion
 export { RoomsView as default };
