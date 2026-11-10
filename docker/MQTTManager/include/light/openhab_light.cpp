@@ -1,10 +1,8 @@
 #include "openhab_light.hpp"
 #include "database_manager/database_manager.hpp"
 #include "light/light.hpp"
-#include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "openhab_manager/openhab_manager.hpp"
-#include "protobuf_general.pb.h"
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/bind.hpp>
@@ -61,12 +59,6 @@ OpenhabLight::OpenhabLight(uint32_t light_id) : Light(light_id) {
 
   auto light = database_manager::database.get<database_manager::Entity>(this->_id);
   nlohmann::json entity_data = light.get_entity_data_json();
-
-  if (entity_data.contains("openhab_name")) {
-    this->_openhab_name = entity_data["openhab_name"];
-  } else {
-    SPDLOG_ERROR("No openhab_name defined for light {}::{}", this->_id, this->_name);
-  }
 
   if (entity_data.contains("openhab_control_mode")) {
     std::string openhab_control_mode = entity_data["openhab_control_mode"];
@@ -603,19 +595,20 @@ protected:
     light_entity.friendly_name = "Unit test OH light (light)";
     light_entity.room_id = 1;
     light_entity.room_view_position = 2;
-    light_entity.set_entity_data_json({{"can_color_temperature", true},
-                                       {"can_dim", true},
-                                       {"can_rgb", true},
-                                       {"controlled_by_nspanel_main_page", true},
-                                       {"controller", "openhab"},
-                                       {"home_assistant_name", ""},
-                                       {"is_ceiling_light", true},
-                                       {"openhab_control_mode", "dimmer"},
-                                       {"openhab_item_color_temp", "oh_item_color_temp"},
-                                       {"openhab_item_dimmer", "oh_item_dimmer"},
-                                       {"openhab_item_rgb", "oh_item_hsb"},
-                                       {"openhab_item_switch", ""},
-                                       {"openhab_name", "oh_name"}});
+    light_entity.set_entity_data_json({
+        {"can_color_temperature", true},
+        {"can_dim", true},
+        {"can_rgb", true},
+        {"controlled_by_nspanel_main_page", true},
+        {"controller", "openhab"},
+        {"home_assistant_name", ""},
+        {"is_ceiling_light", true},
+        {"openhab_control_mode", "dimmer"},
+        {"openhab_item_color_temp", "oh_item_color_temp"},
+        {"openhab_item_dimmer", "oh_item_dimmer"},
+        {"openhab_item_rgb", "oh_item_hsb"},
+        {"openhab_item_switch", ""},
+    });
     oh_light_id = database_manager::database.insert(light_entity);
     // light_entity = database_manager::database.get<database_manager::Entity>(ha_light_id);
 

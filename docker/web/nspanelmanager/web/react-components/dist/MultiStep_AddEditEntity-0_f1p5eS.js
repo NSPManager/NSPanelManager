@@ -1,11 +1,11 @@
-import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-mOYBphAK.js";
-import { t as create } from "./react-lUH8vfhy.js";
-import { t as useSettingsStore } from "./SettingsStore-8S97Q1iZ.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-BEYdwMx6.js";
-import { a as set, i as get, o as useFieldArray, r as appendErrors, s as useForm } from "./index.esm-DmNSZ3cO.js";
-import { n as Notify } from "./NSPanelToastContainer-BGH79mEK.js";
-import { t as motion } from "./proxy-BoTppwE5.js";
-import { t as AnimatePresence } from "./AnimatePresence-rh2KhGhQ.js";
+import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-Ce1xTlTP.js";
+import { t as create } from "./react-BZEnDPAj.js";
+import { t as useSettingsStore } from "./SettingsStore-Bhq0N_Vz.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-BOOv53_-.js";
+import { a as set, i as get, o as useFieldArray, r as appendErrors, s as useForm } from "./index.esm-mYyDCATx.js";
+import { n as Notify } from "./NSPanelToastContainer-KbJyV6eL.js";
+import { t as motion } from "./proxy-CM7hds_Z.js";
+import { t as AnimatePresence } from "./AnimatePresence-T1u1JdBO.js";
 //#region src/stores/EntitiesPagesStore.ts
 function getCookie$1(name) {
 	let cookieValue = "";
@@ -5545,6 +5545,7 @@ var schema$6 = object({
 	is_ceiling_light: boolean().optional(),
 	openhab_item_color_temp: string().optional(),
 	openhab_item_dimmer: string().optional(),
+	openhab_item_switch: string().optional(),
 	openhab_item_rgb: string().optional()
 });
 var CustomOption$6 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
@@ -5575,6 +5576,7 @@ var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_
 			home_assistant_name: "",
 			openhab_item_color_temp: "",
 			openhab_item_dimmer: "",
+			openhab_item_switch: "",
 			openhab_item_rgb: ""
 		}
 	});
@@ -5859,10 +5861,16 @@ var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_
 					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StateManagedSelect$1, {
 						options: useAvailableEntitiesStore.getState().openhab_options,
 						classNames,
-						onChange: (newValue) => setValue("openhab_item_dimmer", newValue ? newValue.value : "", {
-							shouldValidate: true,
-							shouldDirty: true
-						}),
+						onChange: (newValue) => {
+							setValue("openhab_item_dimmer", newValue ? newValue.value : "", {
+								shouldValidate: true,
+								shouldDirty: true
+							});
+							setValue("openhab_item_switch", newValue ? newValue.value : "", {
+								shouldValidate: true,
+								shouldDirty: true
+							});
+						},
 						value: useAvailableEntitiesStore.getState().openhab_options.find((option) => option.value === getValues("openhab_item_dimmer")),
 						unstyled: true,
 						components: select_components$6,
