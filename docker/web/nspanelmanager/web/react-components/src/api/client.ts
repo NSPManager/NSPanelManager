@@ -33,9 +33,17 @@ const csrf: Middleware = {
 // browser (e.g. under Vitest). The origin gives the same "/rest/..." URLs the rest of the UI fetches.
 // fetch is looked up per request (openapi-fetch would otherwise keep the one present at import), so
 // tests can stub it.
-export const api = createClient<paths>({ baseUrl: globalThis.location?.origin ?? "", credentials: "same-origin", fetch: (request) => globalThis.fetch(request) });
+export const api = createClient<paths>({
+  baseUrl: globalThis.location?.origin ?? "",
+  credentials: "same-origin",
+  fetch: (request) => globalThis.fetch(request),
+});
 api.use(csrf);
 
 export type Settings = components["schemas"]["Settings"];
 export type SettingsUpdateRequest = components["schemas"]["PatchedSettingsUpdateRequest"];
 export type SettingsErrors = components["schemas"]["SettingsErrors"];
+
+export type Room = components["schemas"]["Room"];
+export type RoomUpdateRequest = components["schemas"]["PatchedRoomRequest"];
+export type RoomErrors = components["schemas"]["RoomErrors"];

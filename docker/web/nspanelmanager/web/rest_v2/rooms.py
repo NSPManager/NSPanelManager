@@ -153,8 +153,30 @@ class JsonErrorAPIView(APIView):
         return error_exception_handler
 
 
+class RoomOrderItemSerializer(serializers.Serializer):
+    id = StrictIntegerField()
+    displayOrder = StrictIntegerField(min_value=0, max_value=65535)
+
+
+class RoomOrderSerializer(serializers.Serializer):
+    # Wrapping in an object leaves room to add fields later,
+    # but you could also use many=True directly on RoomOrderItemSerializer.
+    rooms = RoomOrderItemSerializer(many=True, allow_empty=False)
+
+    def validate_rooms(self, items):
+        ids = [item["id"] for item in items]
+        if len(ids) != len(set(ids)):
+            raise serializers.ValidationError("Duplicate room ids in request.")
+
+        existing = set(Room.objects.filter(id__in=ids).values_list("id", flat=True))
+        missing = set(ids) - existing
+        if missing:
+            raise serializers.ValidationError(f"Unknown room ids: {sorted(missing)}")
+        return items
+
+
 class RoomListView(JsonErrorAPIView):
-    http_method_names = ["get", "post", "head"]
+    http_method_names = ["get", "post", "head", "patch"]
 
     @extend_schema(responses=RoomSerializer(many=True))
     def get(self, request):
@@ -177,6 +199,25 @@ class RoomListView(JsonErrorAPIView):
 
         send_mqttmanager_reload_command()
         return Response(RoomSerializer(room).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(request=RoomOrderSerializer, responses={200: RoomSerializer(many=True), 400: RoomErrorsSerializer, 403: RoomDetailSerializer, 415: RoomDetailSerializer}, operation_id="reorder_rooms")
+    def patch(self, request):
+        serializer = RoomOrderSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        new_orders = {item["id"]: item["displayOrder"] for item in serializer.validated_data["rooms"]}
+
+        with transaction.atomic():
+            rooms = list(Room.objects.select_for_update().filter(id__in=new_orders))
+            for room in rooms:
+                room.displayOrder = new_orders[room.id]
+            Room.objects.bulk_update(rooms, ["displayOrder"])
+
+        logger.info("Room display order updated for ids: %s", sorted(new_orders))
+        send_mqttmanager_reload_command()
+
+        rooms = Room.objects.order_by("displayOrder", "id")
+        return Response(RoomSerializer(rooms, many=True).data)
 
 
 class RoomDetailView(JsonErrorAPIView):

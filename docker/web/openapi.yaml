@@ -62,6 +62,46 @@ paths:
               schema:
                 $ref: '#/components/schemas/RoomDetail'
           description: ''
+    patch:
+      operationId: reorder_rooms
+      description: 'An APIView whose errors are {"status": "error", "message": ...}
+        instead of {"detail": ...}.'
+      tags:
+      - rooms
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRoomOrderRequest'
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Room'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomErrors'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomDetail'
+          description: ''
+        '415':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoomDetail'
+          description: ''
   /rest/v2/rooms/{id}:
     get:
       operationId: rooms_retrieve
@@ -260,6 +300,13 @@ components:
       description: |-
         * `home_assistant` - home_assistant
         * `openhab` - openhab
+    PatchedRoomOrderRequest:
+      type: object
+      properties:
+        rooms:
+          type: array
+          items:
+            $ref: '#/components/schemas/RoomOrderItemRequest'
     PatchedRoomRequest:
       type: object
       description: A room, for reading and (with partial=True) for PATCH.
@@ -536,6 +583,18 @@ components:
             type: string
         detail:
           type: string
+    RoomOrderItemRequest:
+      type: object
+      properties:
+        id:
+          type: integer
+        displayOrder:
+          type: integer
+          maximum: 65535
+          minimum: 0
+      required:
+      - displayOrder
+      - id
     RoomRequest:
       type: object
       description: A room, for reading and (with partial=True) for PATCH.

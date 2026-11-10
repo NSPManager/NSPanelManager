@@ -19,7 +19,8 @@ export interface paths {
         delete?: never;
         options?: never;
         head?: never;
-        patch?: never;
+        /** @description An APIView whose errors are {"status": "error", "message": ...} instead of {"detail": ...}. */
+        patch: operations["reorder_rooms"];
         trace?: never;
     };
     "/rest/v2/rooms/{id}": {
@@ -90,6 +91,9 @@ export interface components {
          * @enum {string}
          */
         OutsideTempSensorProviderEnum: "home_assistant" | "openhab";
+        PatchedRoomOrderRequest: {
+            rooms?: components["schemas"]["RoomOrderItemRequest"][];
+        };
         /** @description A room, for reading and (with partial=True) for PATCH. */
         PatchedRoomRequest: {
             /** @description Leading and trailing whitespace is removed. */
@@ -197,6 +201,10 @@ export interface components {
             room_temp_sensor?: string[];
             non_field_errors?: string[];
             detail?: string;
+        };
+        RoomOrderItemRequest: {
+            id: number;
+            displayOrder: number;
         };
         /** @description A room, for reading and (with partial=True) for PATCH. */
         RoomRequest: {
@@ -397,6 +405,53 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Room"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoomErrors"];
+                };
+            };
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoomDetail"];
+                };
+            };
+            415: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoomDetail"];
+                };
+            };
+        };
+    };
+    reorder_rooms: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedRoomOrderRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Room"][];
                 };
             };
             400: {

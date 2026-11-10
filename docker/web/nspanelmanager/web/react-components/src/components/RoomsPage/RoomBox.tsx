@@ -1,96 +1,10 @@
-import Select, { type OptionProps } from "react-select";
-import { type ClassNamesConfig, type GroupBase } from "react-select";
-import { useEntityStatesStore, type INSPanelStatusData, type INSPanelWarningData } from "../../stores/EntityStore.ts";
-import { useRef, useState, useEffect, forwardRef } from "react";
-import { Notify } from "../NSPanelToastContainer.tsx";
-import { useStompStore } from "../../stores/StompStore.tsx";
+import { useEntityStatesStore, type INSPanelStatusData } from "../../stores/EntityStore.ts";
+import { useRef, useEffect, useState } from "react";
 import { motion, useMotionValue, useSpring, useMotionTemplate } from "framer-motion";
 import { Icon } from "@mdi/react";
-import { api, type Room } from "../../api/client";
-import {
-  mdiAlertCircle,
-  mdiGauge,
-  mdiCog,
-  mdiMemory,
-  mdiMinusCircle,
-  mdiRestart,
-  mdiTableArrowUp,
-  mdiThermometer,
-  mdiUpload,
-  mdiWaterPercent,
-  mdiWeb,
-  mdiWifiStrength1Alert,
-  mdiWifiStrength2,
-  mdiWifiStrength3,
-  mdiWifiStrength4,
-  mdiWifiStrengthAlertOutline,
-  mdiMenu,
-} from "@mdi/js";
-import { number } from "zod/v3";
-
-function getCookie(name: string) {
-  let cookieValue = "";
-  if (document.cookie && document.cookie !== "") {
-    const cookies = document.cookie.split(";");
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      if (cookie.substring(0, name.length + 1) === name + "=") {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
-    }
-  }
-  return cookieValue;
-}
-
-const delete_room = (nspanel_id: number) => {
-  fetch(`/rest/nspanel/${nspanel_id}`, { method: "DELETE", headers: { "X-CSRFToken": getCookie("csrftoken") } })
-    .then((response) => {
-      console.log(response);
-    })
-    .catch((error) => {
-      Notify({ message: `Failed to delete NSPanel: ${error}`, level: "error", duration: 10000 });
-    });
-};
-
-const DeleteRoomConfirmDialog = forwardRef(
-  (
-    {
-      status,
-      delete_nspanel_dialog_ref,
-    }: {
-      status: INSPanelStatusData;
-      delete_nspanel_dialog_ref: React.RefObject<HTMLDialogElement | null>;
-    },
-    ref: React.Ref<HTMLDialogElement>,
-  ) => {
-    return (
-      <dialog ref={ref} className="modal">
-        <div className="modal-box">
-          <h3 className="text-lg font-bold">Delete Room</h3>
-          <p className="py-4">Are you sure you want to delete Room '{status.name}'?</p>
-          <div className="flex justify-end join">
-            <button onClick={() => delete_nspanel_dialog_ref.current?.close()} className="btn btn-neutral join-item">
-              Cancel
-            </button>
-            <button
-              onClick={() => {
-                delete_nspanel_dialog_ref.current?.close();
-                delete_room(status.id);
-              }}
-              className="btn btn-error join-item"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-        <form method="dialog" className="modal-backdrop">
-          <button>close</button>
-        </form>
-      </dialog>
-    );
-  },
-);
+import { type Room } from "../../api/client";
+import { mdiMenu } from "@mdi/js";
+import { useSortable } from "@dnd-kit/react/sortable";
 
 const NSPanelBox = ({ nspanel }: { nspanel: INSPanelStatusData }) => {
   const state = nspanel.state;
@@ -152,10 +66,9 @@ const StatusHeader = ({ room }: { room: Room }) => {
     return <div className="min-h-1 overflow-hidden w-full transition-all ease-linear duration-300 bg-base-100 rounded-t-field" id="panel_header-${id}"></div>;
   }
 };
-const RoomBoxContent = ({ room }: { room: Room }) => {
-  const popoverRef = useRef<HTMLUListElement>(null);
-  const boxRef = useRef<HTMLDivElement>(null);
-  const delete_nspanel_dialog_ref = useRef<HTMLDialogElement>(null);
+
+const RoomBoxContent = ({ room, setHandle }: { room: Room; setHandle: React.Dispatch<React.SetStateAction<Element | null>> }) => {
+  const boxRef = useRef<HTMLLIElement>(null);
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -185,7 +98,7 @@ const RoomBoxContent = ({ room }: { room: Room }) => {
     }
   }, [status, fetchData]);
 
-  const room_nspanels = [];
+  const room_nspanels: INSPanelStatusData[] = [];
   let number_panels_online = 0;
   let bg_class = "bg-base-100";
   Object.values(nspanels).forEach((nspanel) => {
@@ -212,7 +125,7 @@ const RoomBoxContent = ({ room }: { room: Room }) => {
 
   return (
     <>
-      <div className="relative h-full group/box" ref={boxRef}>
+      <div className="relative h-full group/box">
         <motion.div
           style={{ WebkitMaskImage: clipPath, maskImage: clipPath, pointerEvents: "none" }}
           className="absolute tile-background w-full h-full group overflow-hidden mb-1 opacity-0 group-hover/box:opacity-5"
@@ -293,14 +206,18 @@ const RoomBoxContent = ({ room }: { room: Room }) => {
         </motion.div>
         <div className="p-2 h-full">
           <div className="flex justify-between mx-auto">
-            <a href={`/rooms/${room.id}`} className="font-medium text-lg flex items-center">
-              <Icon path={mdiMenu} className="w-5 h-5 inline-block me-1"></Icon>
-              {room.friendly_name}
-            </a>
+            <div className="flex items-center">
+              <div ref={setHandle} className="flex">
+                <Icon path={mdiMenu} className="w-5 h-5 inline-block me-1 cursor-grab"></Icon>
+              </div>
+              <a href={`/rooms/${room.id}`} className="font-medium text-lg flex items-center">
+                {room.friendly_name}
+              </a>
+            </div>
             <div className="flex items-center justify-end">
               {(() => {
                 if (room_nspanels.length <= 0) {
-                  return <span className="flex items-end justify-end text-right italic font-light text-sm">No nspanels</span>;
+                  return <span className="flex items-end justify-end text-right italic font-light text-sm">No panels</span>;
                 } else {
                   return (
                     <span className="flex items-end justify-end text-right italic font-light text-xs">
@@ -323,16 +240,29 @@ const RoomBoxContent = ({ room }: { room: Room }) => {
   );
 };
 
-const RoomBox = ({ room: room }: { room: Room }) => {
-  // const nspanel_status = useEntityStatesStore.getState().nspanels[mac];
+const RoomBox = ({ room: room, index: index }: { room: Room; index: number }) => {
+  const id = room.id;
+
+  // Sortable entity page vars
+  const [handle, setHandle] = useState<Element | null>(null);
+  const { ref } = useSortable({
+    id,
+    index: index,
+    data: { type: "room", room: room },
+    handle: handle,
+    disabled: false,
+  });
 
   return (
-    <div className="text-base-content rounded-b-box rounded-t-field nspanel-box bg-base-200 hover:bg-base-100 transition-all duration-200 shadow-xl shadow-neutral/3 hover:shadow-neutral/10 overflow-visible h-34">
+    <li
+      ref={ref}
+      className="text-base-content rounded-b-box rounded-t-field nspanel-box bg-base-200 hover:bg-base-100 transition-all duration-200 shadow-xl shadow-neutral/3 hover:shadow-neutral/10 overflow-visible h-34"
+    >
       <div className="overflow-hidden">
         <StatusHeader room={room} />
       </div>
-      <RoomBoxContent room={room}></RoomBoxContent>
-    </div>
+      <RoomBoxContent room={room} setHandle={setHandle}></RoomBoxContent>
+    </li>
   );
 };
 

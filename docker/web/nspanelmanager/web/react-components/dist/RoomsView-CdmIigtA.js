@@ -1,85 +1,15 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-BYMetvRG.js";
-import { n as Notify } from "./NSPanelToastContainer-IQT17CG7.js";
-import { t as motion } from "./proxy-D5KUi63d.js";
-import { n as useMotionTemplate, r as useMotionValue, t as useSpring } from "./use-spring-DJAd9Qe2.js";
-import "./StompStore-BCdW0Jty.js";
-import { t as useEntityStatesStore } from "./EntityStore-wGiBVZVW.js";
-import { o as mdiMenu, x as require_Icon } from "./mdi-DocwAJIe.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-Dy3GGdj2.js";
+import { r as DragDropProvider, t as useSortable } from "./sortable-D3xLrU_d.js";
+import { n as Notify } from "./NSPanelToastContainer-BaXI002I.js";
+import { t as motion } from "./proxy-CGs1Q21I.js";
+import { n as useMotionTemplate, r as useMotionValue, t as useSpring } from "./use-spring-B1vASAd2.js";
+import { t as useEntityStatesStore } from "./EntityStore-DcWSsHBt.js";
+import { o as mdiMenu, x as require_Icon } from "./mdi-BZ7LC2p3.js";
 import { t as api } from "./client-CRfCe5X7.js";
 //#region src/components/RoomsPage/RoomBox.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_Icon = require_Icon();
 var import_jsx_runtime = require_jsx_runtime();
-function getCookie(name) {
-	let cookieValue = "";
-	if (document.cookie && document.cookie !== "") {
-		const cookies = document.cookie.split(";");
-		for (let i = 0; i < cookies.length; i++) {
-			const cookie = cookies[i].trim();
-			if (cookie.substring(0, name.length + 1) === name + "=") {
-				cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-				break;
-			}
-		}
-	}
-	return cookieValue;
-}
-var delete_room = (nspanel_id) => {
-	fetch(`/rest/nspanel/${nspanel_id}`, {
-		method: "DELETE",
-		headers: { "X-CSRFToken": getCookie("csrftoken") }
-	}).then((response) => {
-		console.log(response);
-	}).catch((error) => {
-		Notify({
-			message: `Failed to delete NSPanel: ${error}`,
-			level: "error",
-			duration: 1e4
-		});
-	});
-};
-(0, import_react.forwardRef)(({ status, delete_nspanel_dialog_ref }, ref) => {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("dialog", {
-		ref,
-		className: "modal",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "modal-box",
-			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
-					className: "text-lg font-bold",
-					children: "Delete Room"
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
-					className: "py-4",
-					children: [
-						"Are you sure you want to delete Room '",
-						status.name,
-						"'?"
-					]
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-					className: "flex justify-end join",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: () => delete_nspanel_dialog_ref.current?.close(),
-						className: "btn btn-neutral join-item",
-						children: "Cancel"
-					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-						onClick: () => {
-							delete_nspanel_dialog_ref.current?.close();
-							delete_room(status.id);
-						},
-						className: "btn btn-error join-item",
-						children: "Delete"
-					})]
-				})
-			]
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("form", {
-			method: "dialog",
-			className: "modal-backdrop",
-			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", { children: "close" })
-		})]
-	});
-});
 var NSPanelBox = ({ nspanel }) => {
 	const state = nspanel.state;
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
@@ -126,10 +56,8 @@ var StatusHeader = ({ room }) => {
 		id: "panel_header-${id}"
 	});
 };
-var RoomBoxContent = ({ room }) => {
-	(0, import_react.useRef)(null);
+var RoomBoxContent = ({ room, setHandle }) => {
 	const boxRef = (0, import_react.useRef)(null);
-	(0, import_react.useRef)(null);
 	const mouseX = useMotionValue(0);
 	const mouseY = useMotionValue(0);
 	const springX = useSpring(mouseX, {
@@ -170,7 +98,6 @@ var RoomBoxContent = ({ room }) => {
 	else if (room_nspanels.length > 0 && number_panels_online <= 0) bg_class = "bg-error";
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "relative h-full group/box",
-		ref: boxRef,
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)(motion.div, {
 			style: {
 				WebkitMaskImage: clipPath,
@@ -218,19 +145,26 @@ var RoomBoxContent = ({ room }) => {
 			className: "p-2 h-full",
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "flex justify-between mx-auto",
-				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("a", {
-					href: `/rooms/${room.id}`,
-					className: "font-medium text-lg flex items-center",
-					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_Icon.Icon, {
-						path: mdiMenu,
-						className: "w-5 h-5 inline-block me-1"
-					}), room.friendly_name]
+				children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					className: "flex items-center",
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						ref: setHandle,
+						className: "flex",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_Icon.Icon, {
+							path: mdiMenu,
+							className: "w-5 h-5 inline-block me-1 cursor-grab"
+						})
+					}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("a", {
+						href: `/rooms/${room.id}`,
+						className: "font-medium text-lg flex items-center",
+						children: room.friendly_name
+					})]
 				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 					className: "flex items-center justify-end",
 					children: (() => {
 						if (room_nspanels.length <= 0) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "flex items-end justify-end text-right italic font-light text-sm",
-							children: "No nspanels"
+							children: "No panels"
 						});
 						else return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 							className: "flex items-end justify-end text-right italic font-light text-xs",
@@ -250,20 +184,184 @@ var RoomBoxContent = ({ room }) => {
 		})]
 	}) });
 };
-var RoomBox = ({ room }) => {
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+var RoomBox = ({ room, index }) => {
+	const id = room.id;
+	const [handle, setHandle] = (0, import_react.useState)(null);
+	const { ref } = useSortable({
+		id,
+		index,
+		data: {
+			type: "room",
+			room
+		},
+		handle,
+		disabled: false
+	});
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("li", {
+		ref,
 		className: "text-base-content rounded-b-box rounded-t-field nspanel-box bg-base-200 hover:bg-base-100 transition-all duration-200 shadow-xl shadow-neutral/3 hover:shadow-neutral/10 overflow-visible h-34",
 		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 			className: "overflow-hidden",
 			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(StatusHeader, { room })
-		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RoomBoxContent, { room })]
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RoomBoxContent, {
+			room,
+			setHandle
+		})]
 	});
 };
 //#endregion
+//#region node_modules/@dnd-kit/helpers/dist/index.js
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, {
+	enumerable: true,
+	configurable: true,
+	writable: true,
+	value
+}) : obj[key] = value;
+var __spreadValues = (a, b) => {
+	for (var prop in b || (b = {})) if (__hasOwnProp.call(b, prop)) __defNormalProp(a, prop, b[prop]);
+	if (__getOwnPropSymbols) {
+		for (var prop of __getOwnPropSymbols(b)) if (__propIsEnum.call(b, prop)) __defNormalProp(a, prop, b[prop]);
+	}
+	return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+function arrayMove(array, from, to) {
+	if (from === to) return array;
+	const newArray = array.slice();
+	newArray.splice(to, 0, newArray.splice(from, 1)[0]);
+	return newArray;
+}
+function hasSortableIndices(source) {
+	return "initialIndex" in source && typeof source.initialIndex === "number" && "index" in source && typeof source.index === "number";
+}
+function mutate(items, event, mutation) {
+	var _a, _b, _c;
+	const { source, target, canceled } = event.operation;
+	if (!source || !target || canceled) {
+		if ("preventDefault" in event) event.preventDefault();
+		return items;
+	}
+	const findIndex = (item, id) => item === id || typeof item === "object" && "id" in item && item.id === id;
+	if (Array.isArray(items)) {
+		const sourceIndex2 = items.findIndex((item) => findIndex(item, source.id));
+		const targetIndex2 = items.findIndex((item) => findIndex(item, target.id));
+		if (sourceIndex2 === -1 || targetIndex2 === -1) {
+			if (hasSortableIndices(source)) {
+				const from = source.initialIndex;
+				const to = source.index;
+				if (from === to || from < 0 || from >= items.length) {
+					if ("preventDefault" in event) event.preventDefault();
+					return items;
+				}
+				return mutation(items, from, to);
+			}
+			return items;
+		}
+		if (!canceled && "index" in source && typeof source.index === "number") {
+			const projectedSourceIndex = source.index;
+			if (projectedSourceIndex !== sourceIndex2) return mutation(items, sourceIndex2, projectedSourceIndex);
+		}
+		return mutation(items, sourceIndex2, targetIndex2);
+	}
+	const entries = Object.entries(items);
+	let sourceIndex = -1;
+	let sourceParent;
+	let targetIndex = -1;
+	let targetParent;
+	for (const [id, children] of entries) {
+		if (sourceIndex === -1) {
+			sourceIndex = children.findIndex((item) => findIndex(item, source.id));
+			if (sourceIndex !== -1) sourceParent = id;
+		}
+		if (targetIndex === -1) {
+			targetIndex = children.findIndex((item) => findIndex(item, target.id));
+			if (targetIndex !== -1) targetParent = id;
+		}
+		if (sourceIndex !== -1 && targetIndex !== -1) break;
+	}
+	if (sourceIndex === -1 && hasSortableIndices(source)) {
+		const srcParent = source.initialGroup;
+		const srcIndex = source.initialIndex;
+		const tgtParent = source.group;
+		const tgtIndex = source.index;
+		if (srcParent == null || tgtParent == null || !(srcParent in items) || !(tgtParent in items)) {
+			if ("preventDefault" in event) event.preventDefault();
+			return items;
+		}
+		if (srcParent === tgtParent && srcIndex === tgtIndex) {
+			if ("preventDefault" in event) event.preventDefault();
+			return items;
+		}
+		if (srcParent === tgtParent) return __spreadProps(__spreadValues({}, items), { [srcParent]: mutation(items[srcParent], srcIndex, tgtIndex) });
+		const sourceItem2 = items[srcParent][srcIndex];
+		return __spreadProps(__spreadValues({}, items), {
+			[srcParent]: [...items[srcParent].slice(0, srcIndex), ...items[srcParent].slice(srcIndex + 1)],
+			[tgtParent]: [
+				...items[tgtParent].slice(0, tgtIndex),
+				sourceItem2,
+				...items[tgtParent].slice(tgtIndex)
+			]
+		});
+	}
+	if (!source.manager) return items;
+	const { dragOperation } = source.manager;
+	const position = (_b = (_a = dragOperation.shape) == null ? void 0 : _a.current.center) != null ? _b : dragOperation.position.current;
+	if (targetParent == null) {
+		if (target.id in items) {
+			const insertionIndex = target.shape && position.y > target.shape.center.y ? items[target.id].length : 0;
+			targetParent = target.id;
+			targetIndex = insertionIndex;
+		}
+	}
+	if (sourceParent == null || targetParent == null || sourceParent === targetParent && sourceIndex === targetIndex) {
+		if (sourceParent != null && sourceParent === targetParent && sourceIndex === targetIndex && hasSortableIndices(source)) {
+			const hasGroupChanged = source.group != null && source.group !== sourceParent;
+			const hasIndexChanged = source.index !== sourceIndex;
+			if (hasGroupChanged || hasIndexChanged) {
+				const reconciledTargetParent = (_c = source.group) != null ? _c : sourceParent;
+				if (reconciledTargetParent in items) {
+					if (sourceParent === reconciledTargetParent) return __spreadProps(__spreadValues({}, items), { [sourceParent]: mutation(items[sourceParent], sourceIndex, source.index) });
+					const sourceItem2 = items[sourceParent][sourceIndex];
+					return __spreadProps(__spreadValues({}, items), {
+						[sourceParent]: [...items[sourceParent].slice(0, sourceIndex), ...items[sourceParent].slice(sourceIndex + 1)],
+						[reconciledTargetParent]: [
+							...items[reconciledTargetParent].slice(0, source.index),
+							sourceItem2,
+							...items[reconciledTargetParent].slice(source.index)
+						]
+					});
+				}
+			}
+		}
+		if ("preventDefault" in event) event.preventDefault();
+		return items;
+	}
+	if (sourceParent === targetParent) return __spreadProps(__spreadValues({}, items), { [sourceParent]: mutation(items[sourceParent], sourceIndex, targetIndex) });
+	const modifier = target.shape && Math.round(position.y) > Math.round(target.shape.center.y) ? 1 : 0;
+	const sourceItem = items[sourceParent][sourceIndex];
+	return __spreadProps(__spreadValues({}, items), {
+		[sourceParent]: [...items[sourceParent].slice(0, sourceIndex), ...items[sourceParent].slice(sourceIndex + 1)],
+		[targetParent]: [
+			...items[targetParent].slice(0, targetIndex + modifier),
+			sourceItem,
+			...items[targetParent].slice(targetIndex + modifier)
+		]
+	});
+}
+function move(items, event) {
+	return mutate(items, event, arrayMove);
+}
+//#endregion
 //#region src/components/RoomsPage/RoomsView.tsx
 var RoomsView = () => {
-	(0, import_react.useRef)(null);
 	const [state, setState] = (0, import_react.useState)({ status: "loading" });
+	const { status: entityStatesStatus, fetchData } = useEntityStatesStore();
 	const fetchSettings = (0, import_react.useCallback)(() => {
 		api.GET("/rest/v2/rooms").then(({ data, response }) => setState(data ? {
 			status: "loaded",
@@ -276,12 +374,21 @@ var RoomsView = () => {
 			message: error instanceof Error ? error.message : String(error)
 		}));
 	}, []);
+	(0, import_react.useEffect)(() => {
+		if (entityStatesStatus === "none") fetchData();
+	}, [entityStatesStatus, fetchData]);
 	(0, import_react.useEffect)(fetchSettings, [fetchSettings]);
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 		className: "flex items-center justify-between",
-		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-			className: "text-2xl",
-			children: "Rooms"
+		children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "flex items-center justify-start gap-1",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				className: "text-2xl",
+				children: "Rooms"
+			}), (() => {
+				if (entityStatesStatus != "loaded") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "loading loading-spinner loading-sm mr-2" });
+				return null;
+			})()]
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 			className: "btn btn-info font-medium",
 			children: "New room"
@@ -294,11 +401,53 @@ var RoomsView = () => {
 				children: "Loading rooms..."
 			})]
 		});
-		if (state.status == "loaded" && state.rooms.length > 0) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-			className: "grid md:grid-cols-3 gap-4 mt-4 items-stretch",
-			id: "rooms_container",
-			children: state.rooms.map((room) => {
-				return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RoomBox, { room });
+		if (state.status == "loaded" && state.rooms.length > 0) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(DragDropProvider, {
+			onDragStart: (event) => {
+				console.log("Drag start: ", event);
+			},
+			onDragEnd: (event) => {
+				if (event.canceled) return;
+				const previousState = state;
+				const reordered = move(state.rooms, event).map((room, index) => ({
+					...room,
+					displayOrder: index
+				}));
+				api.PATCH("/rest/v2/rooms", { body: { rooms: reordered.map((room, index) => ({
+					id: room.id,
+					displayOrder: index + 1
+				})) } }).then(({ data, error, response }) => {
+					if (data) {
+						setState({
+							status: "loaded",
+							rooms: data
+						});
+						return;
+					}
+					setState(previousState);
+					console.error("Failed to save room", error);
+					Notify({
+						message: `Failed to save room order (HTTP ${response.status})`,
+						level: "error",
+						duration: 5e3
+					});
+				}).catch((error) => {
+					setState(previousState);
+					Notify({
+						message: error instanceof Error ? error.message : String(error),
+						level: "error",
+						duration: 5e3
+					});
+				});
+			},
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("ul", {
+				className: "grid md:grid-cols-3 gap-4 mt-4 items-stretch",
+				id: "rooms_container",
+				children: state.rooms.map((room, index) => {
+					return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(RoomBox, {
+						room,
+						index
+					}, `room-id-${room.id}`);
+				})
 			})
 		});
 		else return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {

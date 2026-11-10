@@ -1,17 +1,16 @@
-import { useEffect, useRef, useState, useCallback } from "react";
-import { useEntityStatesStore } from "../../stores/EntityStore.ts";
+import { useEffect, useState, useCallback } from "react";
 import RoomBox from "./RoomBox.tsx";
-import { useStompStore } from "../../stores/StompStore.tsx";
 import { Notify } from "../NSPanelToastContainer.tsx";
-import { Icon } from "@mdi/react";
-import { mdiMenuDownOutline, mdiRestart, mdiTableArrowUp, mdiUpload } from "@mdi/js";
 import { api, type Room } from "../../api/client";
+import { DragDropProvider } from "@dnd-kit/react";
+import { move } from "@dnd-kit/helpers";
+import { useEntityStatesStore } from "../../stores/EntityStore.ts";
 
 type LoadState = { status: "loading" } | { status: "error"; message: string } | { status: "loaded"; rooms: Room[] };
 
 const RoomsView = () => {
-  const popoverRef = useRef<HTMLUListElement>(null);
   const [state, setState] = useState<LoadState>({ status: "loading" });
+  const { status: entityStatesStatus, fetchData } = useEntityStatesStore();
 
   // Sets the state only once the request finishes.
   const fetchSettings = useCallback(() => {
@@ -21,12 +20,26 @@ const RoomsView = () => {
       .catch((error) => setState({ status: "error", message: error instanceof Error ? error.message : String(error) }));
   }, []);
 
+  useEffect(() => {
+    if (entityStatesStatus === "none") {
+      fetchData();
+    }
+  }, [entityStatesStatus, fetchData]);
+
   useEffect(fetchSettings, [fetchSettings]);
 
   return (
     <div>
       <div className="flex items-center justify-between">
-        <span className="text-2xl">Rooms</span>
+        <div className="flex items-center justify-start gap-1">
+          <span className="text-2xl">Rooms</span>
+          {(() => {
+            if (entityStatesStatus != "loaded") {
+              return <span className="loading loading-spinner loading-sm mr-2"></span>;
+            }
+            return null;
+          })()}
+        </div>
         <div>
           <button className="btn btn-info font-medium">New room</button>
         </div>
@@ -44,11 +57,60 @@ const RoomsView = () => {
 
           if (state.status == "loaded" && state.rooms.length > 0) {
             return (
-              <div className="grid md:grid-cols-3 gap-4 mt-4 items-stretch" id="rooms_container">
-                {state.rooms.map((room) => {
-                  return <RoomBox room={room}></RoomBox>;
-                })}
-              </div>
+              <DragDropProvider
+                onDragStart={(event) => {
+                  console.log("Drag start: ", event);
+                }}
+                onDragEnd={(event) => {
+                  if (event.canceled) return;
+                  const previousState = state;
+
+                  const reordered = move(state.rooms, event).map((room, index) => ({
+                    ...room,
+                    displayOrder: index, // use index + 1 if your backend is 1-based
+                  }));
+
+                  api
+                    .PATCH("/rest/v2/rooms", {
+                      body: {
+                        rooms: reordered.map((room, index) => ({
+                          id: room.id,
+                          displayOrder: index + 1, // your serializer's min_value is 1
+                        })),
+                      },
+                    })
+                    .then(({ data, error, response }) => {
+                      if (data) {
+                        setState({ status: "loaded", rooms: data });
+                        return;
+                      }
+
+                      // HTTP error (400, 403, 415, ...)
+                      setState(previousState);
+                      console.error("Failed to save room", error);
+                      Notify({
+                        message: `Failed to save room order (HTTP ${response.status})`,
+                        level: "error",
+                        duration: 5000,
+                      });
+                    })
+                    .catch((error) => {
+                      // Network failure
+                      setState(previousState);
+                      Notify({
+                        message: error instanceof Error ? error.message : String(error),
+                        level: "error",
+                        duration: 5000,
+                      });
+                    });
+                }}
+              >
+                <ul className="grid md:grid-cols-3 gap-4 mt-4 items-stretch" id="rooms_container">
+                  {state.rooms.map((room, index) => {
+                    return <RoomBox key={`room-id-${room.id}`} room={room} index={index}></RoomBox>;
+                  })}
+                </ul>
+              </DragDropProvider>
             );
           } else {
             return (
