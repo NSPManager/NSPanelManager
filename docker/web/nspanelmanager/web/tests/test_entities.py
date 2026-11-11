@@ -462,6 +462,8 @@ class CoverTests(EntityRESTCommonTests, EntityRESTTestCase):
             "friendly_name": "Living room blind",
             "home_assistant_name": "cover.living_room_blind",
             "openhab_item": "",
+            "openhab_tilt_item": "",
+            "invert_positions": "False",
         } | overrides
 
     def form_payload(self, **overrides):

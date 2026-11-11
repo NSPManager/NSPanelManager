@@ -5,6 +5,7 @@
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include <algorithm>
+#include <boost/algorithm/string/case_conv.hpp>
 #include <boost/bind.hpp>
 #include <fmt/format.h>
 #include <google/protobuf/util/message_differencer.h>
@@ -28,6 +29,32 @@ void CoverEntity::_load_common_config() {
   this->_entity_page_slot = cover.room_view_position;
 
   nlohmann::json entity_data = cover.get_entity_data_json();
+  if (entity_data.contains("invert_positions") && entity_data["invert_positions"].is_string()) {
+    std::string invert = entity_data["invert_positions"];
+    boost::algorithm::to_lower(invert);
+    this->_invert_positions = invert.compare("true") == 0;
+  }
+
+  if (entity_data.contains("position_preset1") && entity_data["position_preset1"].is_number()) {
+    this->_position_preset1 = entity_data["position_preset1"];
+  }
+  if (entity_data.contains("position_preset2") && entity_data["position_preset2"].is_number()) {
+    this->_position_preset2 = entity_data["position_preset2"];
+  }
+  if (entity_data.contains("position_preset3") && entity_data["position_preset3"].is_number()) {
+    this->_position_preset3 = entity_data["position_preset3"];
+  }
+
+  if (entity_data.contains("tilt_preset1") && entity_data["tilt_preset1"].is_number()) {
+    this->_tilt_preset1 = entity_data["tilt_preset1"];
+  }
+  if (entity_data.contains("tilt_preset2") && entity_data["tilt_preset2"].is_number()) {
+    this->_tilt_preset2 = entity_data["tilt_preset2"];
+  }
+  if (entity_data.contains("tilt_preset3") && entity_data["tilt_preset3"].is_number()) {
+    this->_tilt_preset3 = entity_data["tilt_preset3"];
+  }
+
   if (entity_data.contains("controller") && entity_data["controller"].is_string()) {
     std::string controller = entity_data["controller"];
     if (controller.compare("home_assistant") == 0) {
@@ -117,15 +144,25 @@ std::string CoverEntity::get_device_class() {
 }
 
 void CoverEntity::send_state_update_to_nspanel() {
+  int position = this->_position;
+  if (this->_invert_positions) {
+    position = 100 - this->_position;
+  }
+
+  int tilt_position = this->_tilt_position;
+  if (this->_invert_positions) {
+    tilt_position = 100 - this->_tilt_position;
+  }
+
   NSPanelEntityState state;
   NSPanelEntityState_Cover *cover_state = state.mutable_cover();
   cover_state->set_cover_id(this->_id);
   cover_state->set_name(this->_name);
   cover_state->set_state(this->_state);
   cover_state->set_has_position(this->_has_position);
-  cover_state->set_position(this->_has_position ? this->_position : 0);
+  cover_state->set_position(this->_has_position ? position : 0);
   cover_state->set_has_tilt_position(this->_has_tilt_position);
-  cover_state->set_tilt_position(this->_has_tilt_position ? this->_tilt_position : 0);
+  cover_state->set_tilt_position(this->_has_tilt_position ? tilt_position : 0);
   cover_state->set_can_open(this->_can_open);
   cover_state->set_can_close(this->_can_close);
   cover_state->set_can_stop(this->_can_stop);
@@ -135,6 +172,14 @@ void CoverEntity::send_state_update_to_nspanel() {
   cover_state->set_can_stop_tilt(this->_can_stop_tilt);
   cover_state->set_can_set_tilt_position(this->_can_set_tilt_position);
   cover_state->set_device_class(this->_device_class);
+
+  cover_state->set_position_preset1(this->_position_preset1);
+  cover_state->set_position_preset2(this->_position_preset2);
+  cover_state->set_position_preset3(this->_position_preset3);
+
+  cover_state->set_tilt_preset1(this->_tilt_preset1);
+  cover_state->set_tilt_preset2(this->_tilt_preset2);
+  cover_state->set_tilt_preset3(this->_tilt_preset3);
 
   google::protobuf::util::MessageDifferencer differencer;
   if (!differencer.Equals(this->_last_cover_state, state)) {
@@ -182,10 +227,20 @@ void CoverEntity::command_callback(NSPanelMQTTManagerCommand &command) {
   }
 
   if (cover_command.has_position()) {
-    this->set_position(static_cast<uint8_t>(std::clamp(cover_command.position(), 0, 100)));
+    int requested_pos = std::clamp(cover_command.position(), 0, 100);
+    if (this->_invert_positions) {
+      requested_pos = 100 - std::clamp(cover_command.position(), 0, 100);
+    }
+
+    this->set_position(static_cast<uint8_t>(requested_pos));
   }
   if (cover_command.has_tilt_position()) {
-    this->set_tilt_position(static_cast<uint8_t>(std::clamp(cover_command.tilt_position(), 0, 100)));
+    int requested_pos = std::clamp(cover_command.tilt_position(), 0, 100);
+    if (this->_invert_positions) {
+      requested_pos = 100 - std::clamp(cover_command.tilt_position(), 0, 100);
+    }
+
+    this->set_tilt_position(requested_pos);
   }
 }
 
@@ -220,9 +275,7 @@ void CoverEntity::toggle() {
 }
 
 std::string_view CoverEntity::get_icon() {
-  bool open = this->_state != NSPanelEntityState_Cover_CoverState_UNAVAILABLE && this->_state != NSPanelEntityState_Cover_CoverState_UNKNOWN &&
-              (this->_has_position ? this->_position > 0 : this->_state == NSPanelEntityState_Cover_CoverState_OPEN);
-  return open ? EntityIcons::entity_icon_cover_open : EntityIcons::entity_icon_cover_closed;
+  return EntityIcons::entity_icon_blinds;
 }
 
 uint16_t CoverEntity::get_icon_color() {

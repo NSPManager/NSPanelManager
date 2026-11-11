@@ -57,10 +57,15 @@ void OpenhabCover::reload_config() {
   CoverEntity::reload_config();
 
   std::string previous_item = this->_openhab_item;
+  std::string previous_tilt_item = this->_openhab_tilt_item;
   if (!this->_load_openhab_config()) {
     if (!previous_item.empty()) {
       OpenhabManager::detach_event_observer(previous_item, boost::bind(&OpenhabCover::openhab_event_callback, this, _1));
     }
+    if (!previous_tilt_item.empty()) {
+      OpenhabManager::detach_event_observer(previous_tilt_item, boost::bind(&OpenhabCover::openhab_tilt_event_callback, this, _1));
+    }
+
     this->send_state_update_to_nspanel();
     return;
   }
@@ -69,7 +74,14 @@ void OpenhabCover::reload_config() {
     if (!previous_item.empty()) {
       OpenhabManager::detach_event_observer(previous_item, boost::bind(&OpenhabCover::openhab_event_callback, this, _1));
     }
-    OpenhabManager::attach_event_observer(this->_openhab_item, boost::bind(&OpenhabCover::openhab_event_callback, this, _1));
+    OpenhabManager::attach_event_observer(this->_openhab_item, boost::bind(&OpenhabCover::openhab_tilt_event_callback, this, _1));
+  }
+
+  if (previous_tilt_item != this->_openhab_tilt_item) {
+    if (!previous_tilt_item.empty()) {
+      OpenhabManager::detach_event_observer(previous_tilt_item, boost::bind(&OpenhabCover::openhab_event_callback, this, _1));
+    }
+    OpenhabManager::attach_event_observer(this->_openhab_tilt_item, boost::bind(&OpenhabCover::openhab_tilt_event_callback, this, _1));
   }
 
   this->send_state_update_to_nspanel();
@@ -128,7 +140,6 @@ void OpenhabCover::_update_from_state(const nlohmann::json &state) {
     if (value.compare("NULL") == 0 || value.compare("UNDEF") == 0) {
       this->_state = NSPanelEntityState_Cover_CoverState_UNAVAILABLE;
       this->_has_position = false;
-      this->_has_tilt_position = false;
       this->send_state_update_to_nspanel();
       if (previous_icon_color != this->get_icon_color()) {
         this->_signal_entity_changed();
@@ -154,10 +165,6 @@ void OpenhabCover::_update_from_state(const nlohmann::json &state) {
       this->_can_close = true;
       this->_can_stop = true;
       this->_can_set_position = true;
-      this->_can_open_tilt = false;
-      this->_can_close_tilt = false;
-      this->_can_stop_tilt = false;
-      this->_can_set_tilt_position = false;
       this->_device_class = "shutter";
     } catch (std::exception &e) {
       SPDLOG_ERROR("Could not parse OpenHAB cover state '{}' for {}::{}: {}", value, this->_id, this->_name, e.what());
@@ -177,7 +184,87 @@ void OpenhabCover::_update_from_state(const nlohmann::json &state) {
   }
 }
 
+void OpenhabCover::_update_from_tilt_state(const nlohmann::json &state) {
+
+  if (state.is_string()) {
+    std::string value = state;
+    if (value.compare("NULL") == 0 || value.compare("UNDEF") == 0) {
+      this->_state = NSPanelEntityState_Cover_CoverState_UNAVAILABLE;
+      this->_has_tilt_position = false;
+      this->send_state_update_to_nspanel();
+      return;
+    }
+
+    try {
+      double percentage = std::stod(value);
+      percentage = std::clamp(percentage, 0.0, 100.0);
+      uint8_t openness = static_cast<uint8_t>(std::clamp<long>(std::lround(100.0 - percentage), 0, 100));
+
+      this->_has_tilt_position = true;
+      this->_tilt_position = openness;
+      if (percentage <= 0.0) {
+        this->_tilt_state = NSPanelEntityState_Cover_CoverState_OPEN;
+      } else if (percentage >= 100.0) {
+        this->_tilt_state = NSPanelEntityState_Cover_CoverState_CLOSED;
+      } else {
+        this->_tilt_state = NSPanelEntityState_Cover_CoverState_OPEN;
+      }
+      this->_can_open_tilt = true;
+      this->_can_close_tilt = true;
+      this->_can_stop_tilt = true;
+      this->_can_set_tilt_position = true;
+    } catch (std::exception &e) {
+      SPDLOG_ERROR("Could not parse OpenHAB cover state '{}' for {}::{}: {}", value, this->_id, this->_name, e.what());
+      return;
+    }
+  } else if (state.is_number()) {
+    this->_update_from_state(nlohmann::json(std::to_string(state.get<double>())));
+    return;
+  } else {
+    SPDLOG_WARN("Unsupported OpenHAB cover state for {}::{}: {}", this->_id, this->_name, state.dump());
+    return;
+  }
+
+  this->send_state_update_to_nspanel();
+}
+
 void OpenhabCover::openhab_event_callback(nlohmann::json data) {
+  if (!data.contains("type")) {
+    return;
+  }
+
+  std::string type = data["type"];
+  if (type.compare("ItemStateChangedEvent") == 0) {
+    if (!data.contains("topic") || !data.contains("payload")) {
+      return;
+    }
+    std::string topic = data["topic"];
+    std::vector<std::string> topic_parts;
+    boost::split(topic_parts, topic, boost::is_any_of("/"));
+    if (topic_parts.size() < 3 || topic_parts[2].compare(this->_openhab_item) != 0) {
+      return;
+    }
+
+    try {
+      nlohmann::json payload = nlohmann::json::parse(std::string(data["payload"]));
+      if (payload.contains("value")) {
+        this->_update_from_state(payload["value"]);
+      }
+    } catch (std::exception &e) {
+      SPDLOG_ERROR("Could not parse OpenHAB state event for cover {}::{}: {}", this->_id, this->_name, e.what());
+    }
+  } else if (type.compare("ItemStateFetched") == 0) {
+    if (!data.contains("payload") || !data["payload"].contains("name") || !data["payload"].contains("state")) {
+      return;
+    }
+    if (std::string(data["payload"]["name"]).compare(this->_openhab_item) != 0) {
+      return;
+    }
+    this->_update_from_state(data["payload"]["state"]);
+  }
+}
+
+void OpenhabCover::openhab_tilt_event_callback(nlohmann::json data) {
   if (!data.contains("type")) {
     return;
   }

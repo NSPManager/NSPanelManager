@@ -103,6 +103,7 @@ protected:
   uint8_t _entity_page_slot;
 
   NSPanelEntityState_Cover_CoverState _state = NSPanelEntityState_Cover_CoverState_UNKNOWN;
+  NSPanelEntityState_Cover_CoverState _tilt_state = NSPanelEntityState_Cover_CoverState_UNKNOWN;
   bool _has_position = false;
   uint8_t _position = 0;
   bool _has_tilt_position = false;
@@ -116,6 +117,14 @@ protected:
   bool _can_close_tilt = false;
   bool _can_stop_tilt = false;
   bool _can_set_tilt_position = false;
+  bool _invert_positions = false;
+
+  int32_t _position_preset1 = 0;
+  int32_t _position_preset2 = 0;
+  int32_t _position_preset3 = 0;
+  int32_t _tilt_preset1 = 0;
+  int32_t _tilt_preset2 = 0;
+  int32_t _tilt_preset3 = 0;
 
   std::string _device_class;
 
