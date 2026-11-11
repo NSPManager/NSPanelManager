@@ -146,6 +146,14 @@ message NSPanelEntityState {
 
     // Optional hint for the panel icon, for example "blind" or "garage".
     string device_class = 16;
+
+    // Preset position numbers.
+    int32 position_preset1 = 17;
+    int32 position_preset2 = 18;
+    int32 position_preset3 = 19;
+    int32 tilt_preset1 = 20;
+    int32 tilt_preset2 = 21;
+    int32 tilt_preset3 = 22;
   }
 
   oneof entity {

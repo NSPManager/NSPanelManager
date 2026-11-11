@@ -1074,6 +1074,12 @@ class NSPanelEntityState_Cover final : public ::google::protobuf::Message
     kCanCloseTiltFieldNumber = 13,
     kCanStopTiltFieldNumber = 14,
     kCanSetTiltPositionFieldNumber = 15,
+    kPositionPreset1FieldNumber = 17,
+    kPositionPreset2FieldNumber = 18,
+    kPositionPreset3FieldNumber = 19,
+    kTiltPreset1FieldNumber = 20,
+    kTiltPreset2FieldNumber = 21,
+    kTiltPreset3FieldNumber = 22,
   };
   // string name = 2;
   void clear_name() ;
@@ -1247,12 +1253,72 @@ class NSPanelEntityState_Cover final : public ::google::protobuf::Message
   void _internal_set_can_set_tilt_position(bool value);
 
   public:
+  // int32 position_preset1 = 17;
+  void clear_position_preset1() ;
+  ::int32_t position_preset1() const;
+  void set_position_preset1(::int32_t value);
+
+  private:
+  ::int32_t _internal_position_preset1() const;
+  void _internal_set_position_preset1(::int32_t value);
+
+  public:
+  // int32 position_preset2 = 18;
+  void clear_position_preset2() ;
+  ::int32_t position_preset2() const;
+  void set_position_preset2(::int32_t value);
+
+  private:
+  ::int32_t _internal_position_preset2() const;
+  void _internal_set_position_preset2(::int32_t value);
+
+  public:
+  // int32 position_preset3 = 19;
+  void clear_position_preset3() ;
+  ::int32_t position_preset3() const;
+  void set_position_preset3(::int32_t value);
+
+  private:
+  ::int32_t _internal_position_preset3() const;
+  void _internal_set_position_preset3(::int32_t value);
+
+  public:
+  // int32 tilt_preset1 = 20;
+  void clear_tilt_preset1() ;
+  ::int32_t tilt_preset1() const;
+  void set_tilt_preset1(::int32_t value);
+
+  private:
+  ::int32_t _internal_tilt_preset1() const;
+  void _internal_set_tilt_preset1(::int32_t value);
+
+  public:
+  // int32 tilt_preset2 = 21;
+  void clear_tilt_preset2() ;
+  ::int32_t tilt_preset2() const;
+  void set_tilt_preset2(::int32_t value);
+
+  private:
+  ::int32_t _internal_tilt_preset2() const;
+  void _internal_set_tilt_preset2(::int32_t value);
+
+  public:
+  // int32 tilt_preset3 = 22;
+  void clear_tilt_preset3() ;
+  ::int32_t tilt_preset3() const;
+  void set_tilt_preset3(::int32_t value);
+
+  private:
+  ::int32_t _internal_tilt_preset3() const;
+  void _internal_set_tilt_preset3(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:NSPanelEntityState.Cover)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      4, 16, 0,
+      5, 22, 0,
       65, 2>
       _table_;
 
@@ -1289,6 +1355,12 @@ class NSPanelEntityState_Cover final : public ::google::protobuf::Message
     bool can_close_tilt_;
     bool can_stop_tilt_;
     bool can_set_tilt_position_;
+    ::int32_t position_preset1_;
+    ::int32_t position_preset2_;
+    ::int32_t position_preset3_;
+    ::int32_t tilt_preset1_;
+    ::int32_t tilt_preset2_;
+    ::int32_t tilt_preset3_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -4690,6 +4762,138 @@ inline void NSPanelEntityState_Cover::set_allocated_device_class(std::string* va
         }
   #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:NSPanelEntityState.Cover.device_class)
+}
+
+// int32 position_preset1 = 17;
+inline void NSPanelEntityState_Cover::clear_position_preset1() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.position_preset1_ = 0;
+}
+inline ::int32_t NSPanelEntityState_Cover::position_preset1() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.position_preset1)
+  return _internal_position_preset1();
+}
+inline void NSPanelEntityState_Cover::set_position_preset1(::int32_t value) {
+  _internal_set_position_preset1(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.position_preset1)
+}
+inline ::int32_t NSPanelEntityState_Cover::_internal_position_preset1() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.position_preset1_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_position_preset1(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.position_preset1_ = value;
+}
+
+// int32 position_preset2 = 18;
+inline void NSPanelEntityState_Cover::clear_position_preset2() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.position_preset2_ = 0;
+}
+inline ::int32_t NSPanelEntityState_Cover::position_preset2() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.position_preset2)
+  return _internal_position_preset2();
+}
+inline void NSPanelEntityState_Cover::set_position_preset2(::int32_t value) {
+  _internal_set_position_preset2(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.position_preset2)
+}
+inline ::int32_t NSPanelEntityState_Cover::_internal_position_preset2() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.position_preset2_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_position_preset2(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.position_preset2_ = value;
+}
+
+// int32 position_preset3 = 19;
+inline void NSPanelEntityState_Cover::clear_position_preset3() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.position_preset3_ = 0;
+}
+inline ::int32_t NSPanelEntityState_Cover::position_preset3() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.position_preset3)
+  return _internal_position_preset3();
+}
+inline void NSPanelEntityState_Cover::set_position_preset3(::int32_t value) {
+  _internal_set_position_preset3(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.position_preset3)
+}
+inline ::int32_t NSPanelEntityState_Cover::_internal_position_preset3() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.position_preset3_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_position_preset3(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.position_preset3_ = value;
+}
+
+// int32 tilt_preset1 = 20;
+inline void NSPanelEntityState_Cover::clear_tilt_preset1() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.tilt_preset1_ = 0;
+}
+inline ::int32_t NSPanelEntityState_Cover::tilt_preset1() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.tilt_preset1)
+  return _internal_tilt_preset1();
+}
+inline void NSPanelEntityState_Cover::set_tilt_preset1(::int32_t value) {
+  _internal_set_tilt_preset1(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.tilt_preset1)
+}
+inline ::int32_t NSPanelEntityState_Cover::_internal_tilt_preset1() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.tilt_preset1_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_tilt_preset1(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.tilt_preset1_ = value;
+}
+
+// int32 tilt_preset2 = 21;
+inline void NSPanelEntityState_Cover::clear_tilt_preset2() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.tilt_preset2_ = 0;
+}
+inline ::int32_t NSPanelEntityState_Cover::tilt_preset2() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.tilt_preset2)
+  return _internal_tilt_preset2();
+}
+inline void NSPanelEntityState_Cover::set_tilt_preset2(::int32_t value) {
+  _internal_set_tilt_preset2(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.tilt_preset2)
+}
+inline ::int32_t NSPanelEntityState_Cover::_internal_tilt_preset2() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.tilt_preset2_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_tilt_preset2(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.tilt_preset2_ = value;
+}
+
+// int32 tilt_preset3 = 22;
+inline void NSPanelEntityState_Cover::clear_tilt_preset3() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.tilt_preset3_ = 0;
+}
+inline ::int32_t NSPanelEntityState_Cover::tilt_preset3() const {
+  // @@protoc_insertion_point(field_get:NSPanelEntityState.Cover.tilt_preset3)
+  return _internal_tilt_preset3();
+}
+inline void NSPanelEntityState_Cover::set_tilt_preset3(::int32_t value) {
+  _internal_set_tilt_preset3(value);
+  // @@protoc_insertion_point(field_set:NSPanelEntityState.Cover.tilt_preset3)
+}
+inline ::int32_t NSPanelEntityState_Cover::_internal_tilt_preset3() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.tilt_preset3_;
+}
+inline void NSPanelEntityState_Cover::_internal_set_tilt_preset3(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.tilt_preset3_ = value;
 }
 
 // -------------------------------------------------------------------
