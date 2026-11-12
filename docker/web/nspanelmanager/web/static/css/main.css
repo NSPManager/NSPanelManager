@@ -80,7 +80,6 @@
     --font-weight-medium: 500;
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
-    --tracking-wide: 0.025em;
     --radius-sm: 0.25rem;
     --radius-md: 0.375rem;
     --radius-lg: 0.5rem;
@@ -5227,9 +5226,6 @@
   .ml-2 {
     margin-left: calc(var(--spacing) * 2);
   }
-  .ml-4 {
-    margin-left: calc(var(--spacing) * 4);
-  }
   .carousel-item {
     box-sizing: content-box;
     display: flex;
@@ -5819,14 +5815,6 @@
     padding-inline: calc(0.25rem * 0);
     width: var(--size);
     height: var(--size);
-  }
-  .size-10 {
-    width: calc(var(--spacing) * 10);
-    height: calc(var(--spacing) * 10);
-  }
-  .size-\[1\.2em\] {
-    width: 1.2em;
-    height: 1.2em;
   }
   .size-auto {
     width: auto;
@@ -6792,6 +6780,9 @@
   .gap-2 {
     gap: calc(var(--spacing) * 2);
   }
+  .gap-3 {
+    gap: calc(var(--spacing) * 3);
+  }
   .gap-4 {
     gap: calc(var(--spacing) * 4);
   }
@@ -6870,11 +6861,6 @@
   .divide-y-reverse {
     :where(& > :not(:last-child)) {
       --tw-divide-y-reverse: 1;
-    }
-  }
-  .divide-accent {
-    :where(& > :not(:last-child)) {
-      border-color: var(--color-accent);
     }
   }
   .divide-neutral {
@@ -7377,6 +7363,10 @@
     border-inline-style: var(--tw-border-style);
     border-inline-width: 0px;
   }
+  .border-x-2 {
+    border-inline-style: var(--tw-border-style);
+    border-inline-width: 2px;
+  }
   .border-y {
     border-block-style: var(--tw-border-style);
     border-block-width: 1px;
@@ -7396,26 +7386,6 @@
   .border-t-0 {
     border-top-style: var(--tw-border-style);
     border-top-width: 0px;
-  }
-  .border-t-1 {
-    border-top-style: var(--tw-border-style);
-    border-top-width: 1px;
-  }
-  .border-t-2 {
-    border-top-style: var(--tw-border-style);
-    border-top-width: 2px;
-  }
-  .border-t-3 {
-    border-top-style: var(--tw-border-style);
-    border-top-width: 3px;
-  }
-  .border-t-\[0\.25rem\] {
-    border-top-style: var(--tw-border-style);
-    border-top-width: 0.25rem;
-  }
-  .border-t-\[3px\] {
-    border-top-style: var(--tw-border-style);
-    border-top-width: 3px;
   }
   .border-r {
     border-right-style: var(--tw-border-style);
@@ -7591,9 +7561,6 @@
   .border-gray-700 {
     border-color: var(--color-gray-700);
   }
-  .border-info {
-    border-color: var(--color-info);
-  }
   .border-neutral {
     border-color: var(--color-neutral);
   }
@@ -7605,9 +7572,6 @@
   }
   .border-primary {
     border-color: var(--color-primary);
-  }
-  .border-success {
-    border-color: var(--color-success);
   }
   .border-transparent {
     border-color: transparent;
@@ -7737,9 +7701,6 @@
   }
   .bg-base-300 {
     background-color: var(--color-base-300);
-  }
-  .bg-base-300\/0\.75 {
-    background-color: color-mix(in oklab, var(--color-base-300) 0.75%, transparent);
   }
   .bg-base-content {
     background-color: var(--color-base-content);
@@ -8321,9 +8282,6 @@
   .pb-1 {
     padding-bottom: calc(var(--spacing) * 1);
   }
-  .pb-2 {
-    padding-bottom: calc(var(--spacing) * 2);
-  }
   .pb-4 {
     padding-bottom: calc(var(--spacing) * 4);
   }
@@ -8571,10 +8529,6 @@
   .font-thin {
     --tw-font-weight: var(--font-weight-thin);
     font-weight: var(--font-weight-thin);
-  }
-  .tracking-wide {
-    --tw-tracking: var(--tracking-wide);
-    letter-spacing: var(--tracking-wide);
   }
   .text-balance {
     text-wrap: balance;
@@ -9212,14 +9166,8 @@
   .opacity-0 {
     opacity: 0%;
   }
-  .opacity-50 {
-    opacity: 50%;
-  }
   .opacity-60 {
     opacity: 60%;
-  }
-  .opacity-75 {
-    opacity: 75%;
   }
   .opacity-80 {
     opacity: 80%;
@@ -10464,6 +10412,23 @@
       content: var(--tw-content);
       --tw-content: '';
       content: var(--tw-content);
+    }
+  }
+  .first\:rounded-l-md {
+    &:first-child {
+      border-top-left-radius: var(--radius-md);
+      border-bottom-left-radius: var(--radius-md);
+    }
+  }
+  .last\:rounded-md {
+    &:last-child {
+      border-radius: var(--radius-md);
+    }
+  }
+  .last\:rounded-r-md {
+    &:last-child {
+      border-top-right-radius: var(--radius-md);
+      border-bottom-right-radius: var(--radius-md);
     }
   }
   .checked\:bg-success {
@@ -12856,10 +12821,6 @@
   inherits: false;
 }
 @property --tw-font-weight {
-  syntax: "*";
-  inherits: false;
-}
-@property --tw-tracking {
   syntax: "*";
   inherits: false;
 }
