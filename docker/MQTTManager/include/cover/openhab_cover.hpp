@@ -35,6 +35,11 @@ private:
   void _send_command(const std::string &type, const std::string &value);
 
   /**
+   * Send an ItemCommandEvent to OpenHAB.
+   */
+  void _send_tilt_command(const std::string &type, const std::string &value);
+
+  /**
    * Update the panel state from a Rollershutter percentage state.
    */
   void _update_from_state(const nlohmann::json &state);

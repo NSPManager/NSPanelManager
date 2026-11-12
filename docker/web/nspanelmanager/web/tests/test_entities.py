@@ -463,7 +463,13 @@ class CoverTests(EntityRESTCommonTests, EntityRESTTestCase):
             "home_assistant_name": "cover.living_room_blind",
             "openhab_item": "",
             "openhab_tilt_item": "",
-            "invert_positions": "False",
+            "invert_positions": False,
+            "position_preset1": 25,
+            "position_preset2": 30,
+            "position_preset3": 35,
+            "tilt_preset1": 50,
+            "tilt_preset2": 55,
+            "tilt_preset3": 60,
         } | overrides
 
     def form_payload(self, **overrides):
@@ -483,13 +489,21 @@ class CoverTests(EntityRESTCommonTests, EntityRESTTestCase):
                 "controller": "home_assistant",
                 "home_assistant_name": "cover.living_room_blind",
                 "openhab_item": "",
+                "openhab_tilt_item": "",
+                "invert_positions": False,
+                "position_preset1": 25,
+                "position_preset2": 30,
+                "position_preset3": 35,
+                "tilt_preset1": 50,
+                "tilt_preset2": 55,
+                "tilt_preset3": 60,
             },
         )
         self.assertLoadableByManager(cover)
         self.assertManagerReloaded(times=1)
 
     def test_add_openhab_cover(self):
-        response = self.save(self.payload(controller="openhab", home_assistant_name="", openhab_item="LivingRoom_Shutter"))
+        response = self.save(self.payload(controller="openhab", home_assistant_name="", openhab_item="LivingRoom_Shutter", openhab_tilt_item="LivingRoom_Tilt_Shutter"))
 
         self.assertEqual(response.status_code, 200)
         cover = Entity.objects.get()
@@ -499,6 +513,14 @@ class CoverTests(EntityRESTCommonTests, EntityRESTTestCase):
                 "controller": "openhab",
                 "home_assistant_name": "",
                 "openhab_item": "LivingRoom_Shutter",
+                "openhab_tilt_item": "LivingRoom_Tilt_Shutter",
+                "invert_positions": False,
+                "position_preset1": 25,
+                "position_preset2": 30,
+                "position_preset3": 35,
+                "tilt_preset1": 50,
+                "tilt_preset2": 55,
+                "tilt_preset3": 60,
             },
         )
         self.assertLoadableByManager(cover)

@@ -108,13 +108,23 @@ void OpenhabCover::_send_command(const std::string &type, const std::string &val
   OpenhabManager::send_json(event_data);
 }
 
+void OpenhabCover::_send_tilt_command(const std::string &type, const std::string &value) {
+  nlohmann::json event_data;
+  event_data["type"] = "ItemCommandEvent";
+  event_data["topic"] = fmt::format("openhab/items/{}/command", this->_openhab_tilt_item);
+  nlohmann::json payload;
+  payload["type"] = type;
+  payload["value"] = value;
+  event_data["payload"] = payload.dump();
+  OpenhabManager::send_json(event_data);
+}
+
 void OpenhabCover::open() {
-  // OpenHAB Rollershutter percentages run from 0 (open) to 100 (closed).
-  this->_send_command("Percent", "0");
+  this->_send_command("UpDown", "UP");
 }
 
 void OpenhabCover::close() {
-  this->_send_command("Percent", "100");
+  this->_send_command("UpDown", "DOWN");
 }
 
 void OpenhabCover::stop() {
@@ -127,19 +137,20 @@ void OpenhabCover::set_position(uint8_t position) {
 }
 
 void OpenhabCover::open_tilt() {
-  SPDLOG_WARN("OpenHAB cover {}::{} does not support tilt.", this->_id, this->_name);
+  this->_send_tilt_command("UpDown", "UP");
 }
 
 void OpenhabCover::close_tilt() {
-  SPDLOG_WARN("OpenHAB cover {}::{} does not support tilt.", this->_id, this->_name);
+  this->_send_tilt_command("UpDown", "DOWN");
 }
 
 void OpenhabCover::stop_tilt() {
-  SPDLOG_WARN("OpenHAB cover {}::{} does not support tilt.", this->_id, this->_name);
+  this->_send_tilt_command("StopMove", "STOP");
 }
 
 void OpenhabCover::set_tilt_position(uint8_t position) {
   SPDLOG_WARN("OpenHAB cover {}::{} does not support tilt.", this->_id, this->_name);
+  this->_send_tilt_command("Percent", std::to_string(100 - position));
 }
 
 void OpenhabCover::_update_from_state(const nlohmann::json &state) {
