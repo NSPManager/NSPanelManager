@@ -1,249 +1,249 @@
 {
-  "_AnimatePresence-D5PBn6tV.js": {
-    "file": "AnimatePresence-D5PBn6tV.js",
+  "_AnimatePresence-Dqu00Wbg.js": {
+    "file": "AnimatePresence-Dqu00Wbg.js",
     "name": "AnimatePresence",
     "imports": [
       "src/main.tsx",
-      "_proxy-B-g0RB5K.js"
+      "_proxy-DUfbqFkY.js"
     ]
   },
-  "_EntityStore-BPIOk3F5.js": {
-    "file": "EntityStore-BPIOk3F5.js",
+  "_EntityStore-BkKCiqU6.js": {
+    "file": "EntityStore-BkKCiqU6.js",
     "name": "EntityStore",
     "imports": [
-      "_react-jDj2we1G.js",
-      "_NSPanelToastContainer-C5bG-HE7.js",
-      "_StompStore-CCPkSY50.js"
+      "_react-Dmrhcfpd.js",
+      "_NSPanelToastContainer-DX4VftN1.js",
+      "_StompStore-YH4Dqjwd.js"
     ]
   },
-  "_MultiStep_AddEditEntity-HVJB5aM-.js": {
-    "file": "MultiStep_AddEditEntity-HVJB5aM-.js",
+  "_MultiStep_AddEditEntity-KDtbEBBY.js": {
+    "file": "MultiStep_AddEditEntity-KDtbEBBY.js",
     "name": "MultiStep_AddEditEntity",
     "imports": [
       "src/main.tsx",
-      "_react-jDj2we1G.js",
-      "_SettingsStore-BPqODjm3.js",
-      "_react-select.esm-CAhct777.js",
-      "_index.esm-DPVzwn4-.js",
-      "_NSPanelToastContainer-C5bG-HE7.js",
-      "_proxy-B-g0RB5K.js",
-      "_AnimatePresence-D5PBn6tV.js"
+      "_react-Dmrhcfpd.js",
+      "_SettingsStore-B_b5mu_f.js",
+      "_react-select.esm-DIB_MQU9.js",
+      "_index.esm-OPyB-aE8.js",
+      "_NSPanelToastContainer-DX4VftN1.js",
+      "_proxy-DUfbqFkY.js",
+      "_AnimatePresence-Dqu00Wbg.js"
     ]
   },
-  "_NSPanelToastContainer-C5bG-HE7.js": {
-    "file": "NSPanelToastContainer-C5bG-HE7.js",
+  "_NSPanelToastContainer-DX4VftN1.js": {
+    "file": "NSPanelToastContainer-DX4VftN1.js",
     "name": "NSPanelToastContainer",
     "imports": [
       "src/main.tsx"
     ]
   },
-  "_SettingsStore-BPqODjm3.js": {
-    "file": "SettingsStore-BPqODjm3.js",
+  "_SettingsStore-B_b5mu_f.js": {
+    "file": "SettingsStore-B_b5mu_f.js",
     "name": "SettingsStore",
     "imports": [
-      "_react-jDj2we1G.js"
+      "_react-Dmrhcfpd.js"
     ]
   },
-  "_StompStore-CCPkSY50.js": {
-    "file": "StompStore-CCPkSY50.js",
+  "_StompStore-YH4Dqjwd.js": {
+    "file": "StompStore-YH4Dqjwd.js",
     "name": "StompStore",
     "imports": [
       "src/main.tsx",
-      "_react-jDj2we1G.js",
-      "_NSPanelToastContainer-C5bG-HE7.js"
+      "_react-Dmrhcfpd.js",
+      "_NSPanelToastContainer-DX4VftN1.js"
     ]
   },
-  "_index.esm-DPVzwn4-.js": {
-    "file": "index.esm-DPVzwn4-.js",
+  "_index.esm-OPyB-aE8.js": {
+    "file": "index.esm-OPyB-aE8.js",
     "name": "index.esm",
     "imports": [
       "src/main.tsx"
     ]
   },
-  "_layout-Dripk3i1.js": {
-    "file": "layout-Dripk3i1.js",
+  "_layout-MHz_8kDh.js": {
+    "file": "layout-MHz_8kDh.js",
     "name": "layout",
     "imports": [
       "src/main.tsx",
-      "_index.esm-DPVzwn4-.js"
+      "_index.esm-OPyB-aE8.js"
     ]
   },
-  "_mdi-DUDdnyqW.js": {
-    "file": "mdi-DUDdnyqW.js",
+  "_mdi-gqrDBoHO.js": {
+    "file": "mdi-gqrDBoHO.js",
     "name": "mdi",
     "imports": [
       "src/main.tsx"
     ]
   },
-  "_proxy-B-g0RB5K.js": {
-    "file": "proxy-B-g0RB5K.js",
+  "_proxy-DUfbqFkY.js": {
+    "file": "proxy-DUfbqFkY.js",
     "name": "proxy",
     "imports": [
       "src/main.tsx"
     ]
   },
-  "_react-jDj2we1G.js": {
-    "file": "react-jDj2we1G.js",
+  "_react-Dmrhcfpd.js": {
+    "file": "react-Dmrhcfpd.js",
     "name": "react",
     "imports": [
       "src/main.tsx"
     ]
   },
-  "_react-select.esm-CAhct777.js": {
-    "file": "react-select.esm-CAhct777.js",
+  "_react-select.esm-DIB_MQU9.js": {
+    "file": "react-select.esm-DIB_MQU9.js",
     "name": "react-select.esm",
     "imports": [
       "src/main.tsx"
     ]
   },
-  "_sortable-DrORjK7f.js": {
-    "file": "sortable-DrORjK7f.js",
+  "_sortable-DCj6uSpL.js": {
+    "file": "sortable-DCj6uSpL.js",
     "name": "sortable",
     "imports": [
       "src/main.tsx"
     ]
   },
-  "_use-spring-CgJo9Qk2.js": {
-    "file": "use-spring-CgJo9Qk2.js",
+  "_use-spring-BVI2O33U.js": {
+    "file": "use-spring-BVI2O33U.js",
     "name": "use-spring",
     "imports": [
       "src/main.tsx",
-      "_proxy-B-g0RB5K.js"
+      "_proxy-DUfbqFkY.js"
     ]
   },
   "src/components/EntitiesPage/EntitiesPagesView.tsx": {
-    "file": "EntitiesPagesView-BmqGPnsy.js",
+    "file": "EntitiesPagesView-s7wQbHCc.js",
     "name": "EntitiesPagesView",
     "src": "src/components/EntitiesPage/EntitiesPagesView.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_sortable-DrORjK7f.js",
-      "_react-jDj2we1G.js",
-      "_MultiStep_AddEditEntity-HVJB5aM-.js"
+      "_sortable-DCj6uSpL.js",
+      "_react-Dmrhcfpd.js",
+      "_MultiStep_AddEditEntity-KDtbEBBY.js"
     ]
   },
   "src/components/IndexPage/NSPanelsView.tsx": {
-    "file": "NSPanelsView-BWg-4Qm7.js",
+    "file": "NSPanelsView-CVnckJ-l.js",
     "name": "NSPanelsView",
     "src": "src/components/IndexPage/NSPanelsView.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_react-select.esm-CAhct777.js",
-      "_NSPanelToastContainer-C5bG-HE7.js",
-      "_proxy-B-g0RB5K.js",
-      "_use-spring-CgJo9Qk2.js",
-      "_StompStore-CCPkSY50.js",
-      "_EntityStore-BPIOk3F5.js",
-      "_mdi-DUDdnyqW.js"
+      "_react-select.esm-DIB_MQU9.js",
+      "_NSPanelToastContainer-DX4VftN1.js",
+      "_proxy-DUfbqFkY.js",
+      "_use-spring-BVI2O33U.js",
+      "_StompStore-YH4Dqjwd.js",
+      "_EntityStore-BkKCiqU6.js",
+      "_mdi-gqrDBoHO.js"
     ]
   },
   "src/components/InitialSetup/InitialSetup.tsx": {
-    "file": "InitialSetup-WOLudNOP.js",
+    "file": "InitialSetup-qFecaEyr.js",
     "name": "InitialSetup",
     "src": "src/components/InitialSetup/InitialSetup.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_SettingsStore-BPqODjm3.js",
-      "_NSPanelToastContainer-C5bG-HE7.js",
-      "_proxy-B-g0RB5K.js",
-      "_AnimatePresence-D5PBn6tV.js",
-      "_mdi-DUDdnyqW.js"
+      "_SettingsStore-B_b5mu_f.js",
+      "_NSPanelToastContainer-DX4VftN1.js",
+      "_proxy-DUfbqFkY.js",
+      "_AnimatePresence-Dqu00Wbg.js",
+      "_mdi-gqrDBoHO.js"
     ]
   },
   "src/components/NSPanelPage/Logs.tsx": {
-    "file": "Logs-Dww09Frw.js",
+    "file": "Logs-fyKfGB-i.js",
     "name": "Logs",
     "src": "src/components/NSPanelPage/Logs.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_SettingsStore-BPqODjm3.js",
-      "_StompStore-CCPkSY50.js"
+      "_SettingsStore-B_b5mu_f.js",
+      "_StompStore-YH4Dqjwd.js"
     ]
   },
   "src/components/NSPanelPage/Sidebar.tsx": {
-    "file": "Sidebar-Cfo74j31.js",
+    "file": "Sidebar-Ck5FumSR.js",
     "name": "Sidebar",
     "src": "src/components/NSPanelPage/Sidebar.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_NSPanelToastContainer-C5bG-HE7.js",
-      "_StompStore-CCPkSY50.js",
-      "_EntityStore-BPIOk3F5.js",
-      "_mdi-DUDdnyqW.js"
+      "_NSPanelToastContainer-DX4VftN1.js",
+      "_StompStore-YH4Dqjwd.js",
+      "_EntityStore-BkKCiqU6.js",
+      "_mdi-gqrDBoHO.js"
     ]
   },
   "src/components/NSPanelPage/Warnings.tsx": {
-    "file": "Warnings-DddZxKUD.js",
+    "file": "Warnings-B4Wyiqy9.js",
     "name": "Warnings",
     "src": "src/components/NSPanelPage/Warnings.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_EntityStore-BPIOk3F5.js",
-      "_mdi-DUDdnyqW.js"
+      "_EntityStore-BkKCiqU6.js",
+      "_mdi-gqrDBoHO.js"
     ]
   },
   "src/components/RoomPage/RoomPage.tsx": {
-    "file": "RoomPage-COAJIRmb.js",
+    "file": "RoomPage-DatvtqhE.js",
     "name": "RoomPage",
     "src": "src/components/RoomPage/RoomPage.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_MultiStep_AddEditEntity-HVJB5aM-.js",
-      "_react-select.esm-CAhct777.js",
-      "_index.esm-DPVzwn4-.js",
-      "_NSPanelToastContainer-C5bG-HE7.js",
+      "_MultiStep_AddEditEntity-KDtbEBBY.js",
+      "_react-select.esm-DIB_MQU9.js",
+      "_index.esm-OPyB-aE8.js",
+      "_NSPanelToastContainer-DX4VftN1.js",
       "src/components/EntitiesPage/EntitiesPagesView.tsx",
-      "_StompStore-CCPkSY50.js",
-      "_EntityStore-BPIOk3F5.js",
-      "_mdi-DUDdnyqW.js"
+      "_StompStore-YH4Dqjwd.js",
+      "_EntityStore-BkKCiqU6.js",
+      "_mdi-gqrDBoHO.js"
     ]
   },
   "src/components/RoomsPage/RoomsView.tsx": {
-    "file": "RoomsView-924RBWVQ.js",
+    "file": "RoomsView-CmYCbfLH.js",
     "name": "RoomsView",
     "src": "src/components/RoomsPage/RoomsView.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_sortable-DrORjK7f.js",
-      "_index.esm-DPVzwn4-.js",
-      "_NSPanelToastContainer-C5bG-HE7.js",
-      "_proxy-B-g0RB5K.js",
-      "_use-spring-CgJo9Qk2.js",
-      "_EntityStore-BPIOk3F5.js",
-      "_mdi-DUDdnyqW.js",
-      "_layout-Dripk3i1.js"
+      "_sortable-DCj6uSpL.js",
+      "_index.esm-OPyB-aE8.js",
+      "_NSPanelToastContainer-DX4VftN1.js",
+      "_proxy-DUfbqFkY.js",
+      "_use-spring-BVI2O33U.js",
+      "_EntityStore-BkKCiqU6.js",
+      "_mdi-gqrDBoHO.js",
+      "_layout-MHz_8kDh.js"
     ]
   },
   "src/components/SettingsPage/SettingsPage.tsx": {
-    "file": "SettingsPage-C3Q9B0-1.js",
+    "file": "SettingsPage-DP7xWhAz.js",
     "name": "SettingsPage",
     "src": "src/components/SettingsPage/SettingsPage.tsx",
     "isDynamicEntry": true,
     "imports": [
       "src/main.tsx",
-      "_index.esm-DPVzwn4-.js",
-      "_NSPanelToastContainer-C5bG-HE7.js",
-      "_layout-Dripk3i1.js"
+      "_index.esm-OPyB-aE8.js",
+      "_NSPanelToastContainer-DX4VftN1.js",
+      "_layout-MHz_8kDh.js"
     ]
   },
   "src/main.tsx": {
-    "file": "main-Ch9M0YMQ.js",
+    "file": "main-GTPFHy3s.js",
     "name": "main",
     "src": "src/main.tsx",
     "isEntry": true,
     "dynamicImports": [
-      "_MultiStep_AddEditEntity-HVJB5aM-.js",
+      "_MultiStep_AddEditEntity-KDtbEBBY.js",
       "src/components/EntitiesPage/EntitiesPagesView.tsx",
       "src/components/IndexPage/NSPanelsView.tsx",
-      "_NSPanelToastContainer-C5bG-HE7.js",
+      "_NSPanelToastContainer-DX4VftN1.js",
       "src/components/InitialSetup/InitialSetup.tsx",
       "src/components/NSPanelPage/Sidebar.tsx",
       "src/components/NSPanelPage/Warnings.tsx",

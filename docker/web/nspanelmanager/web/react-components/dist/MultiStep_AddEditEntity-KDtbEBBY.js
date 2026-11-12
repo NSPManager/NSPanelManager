@@ -1,11 +1,11 @@
-import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-Ch9M0YMQ.js";
-import { t as create } from "./react-jDj2we1G.js";
-import { t as useSettingsStore } from "./SettingsStore-BPqODjm3.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-CAhct777.js";
-import { a as set, i as get, o as useFieldArray, r as appendErrors, s as useForm } from "./index.esm-DPVzwn4-.js";
-import { n as Notify } from "./NSPanelToastContainer-C5bG-HE7.js";
-import { t as motion } from "./proxy-B-g0RB5K.js";
-import { t as AnimatePresence } from "./AnimatePresence-D5PBn6tV.js";
+import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-GTPFHy3s.js";
+import { t as create } from "./react-Dmrhcfpd.js";
+import { t as useSettingsStore } from "./SettingsStore-B_b5mu_f.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-DIB_MQU9.js";
+import { a as set, i as get, o as useFieldArray, r as appendErrors, s as useForm } from "./index.esm-OPyB-aE8.js";
+import { n as Notify } from "./NSPanelToastContainer-DX4VftN1.js";
+import { t as motion } from "./proxy-DUfbqFkY.js";
+import { t as AnimatePresence } from "./AnimatePresence-Dqu00Wbg.js";
 //#region src/stores/EntitiesPagesStore.ts
 function getCookie$1(name) {
 	let cookieValue = "";
@@ -8140,7 +8140,7 @@ var schema = object({
 	home_assistant_name: string(),
 	openhab_item: string(),
 	openhab_tilt_item: string(),
-	invert_positions: boolean().optional().nullable(),
+	invert_positions: boolean().optional(),
 	position_preset1: number(),
 	position_preset2: number(),
 	position_preset3: number(),
@@ -8215,7 +8215,6 @@ var MultiStep_AddEditEntity_Step3_Cover = ({ controller, room_id, entities_page_
 	const home_assistant_name = watch("home_assistant_name");
 	const openhab_item = watch("openhab_item");
 	const openhab_tilt_item = watch("openhab_tilt_item");
-	const invert_positions = watch("invert_positions");
 	watch("position_preset1");
 	watch("position_preset2");
 	watch("position_preset3");
@@ -8411,8 +8410,7 @@ var MultiStep_AddEditEntity_Step3_Cover = ({ controller, room_id, entities_page_
 							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
 								type: "checkbox",
 								className: "checkbox checkbox-sm checkbox-accent",
-								checked: invert_positions,
-								onChange: (e) => setValue("invert_positions", e.target.checked)
+								...register("invert_positions")
 							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 								className: "label-text",
 								children: "Invert positions"

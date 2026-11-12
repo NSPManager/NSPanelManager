@@ -22,7 +22,7 @@ const schema = z
     home_assistant_name: z.string(),
     openhab_item: z.string(),
     openhab_tilt_item: z.string(),
-    invert_positions: z.boolean().optional().nullable(),
+    invert_positions: z.boolean().optional(),
 
     position_preset1: z.number(),
     position_preset2: z.number(),
@@ -131,7 +131,6 @@ const MultiStep_AddEditEntity_Step3_Cover = ({
   const home_assistant_name = watch("home_assistant_name");
   const openhab_item = watch("openhab_item");
   const openhab_tilt_item = watch("openhab_tilt_item");
-  const invert_positions = watch("invert_positions");
   watch("position_preset1");
   watch("position_preset2");
   watch("position_preset3");
@@ -278,12 +277,7 @@ const MultiStep_AddEditEntity_Step3_Cover = ({
 
         <div className="form-control mt-4">
           <label className="label cursor-pointer justify-start gap-2">
-            <input
-              type="checkbox"
-              className="checkbox checkbox-sm checkbox-accent"
-              checked={invert_positions}
-              onChange={(e) => setValue("invert_positions", e.target.checked)}
-            />
+            <input type="checkbox" className="checkbox checkbox-sm checkbox-accent" {...register("invert_positions")} />
             <span className="label-text">Invert positions</span>
           </label>
         </div>

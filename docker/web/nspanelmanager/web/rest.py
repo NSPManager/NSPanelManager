@@ -1328,7 +1328,7 @@ def put_cover_entity(request):
         home_assistant_name = data["home_assistant_name"].strip()
         openhab_item = data["openhab_item"].strip()
         openhab_tilt_item = data["openhab_tilt_item"].strip()
-        invert_positions = "true" if "invert_positions" in data else "false"
+        invert_positions = data["invert_positions"] if "invert_positions" in data else False
         if data["controller"] == "home_assistant":
             if not home_assistant_name:
                 return JsonResponse({"status": "error", "message": "home_assistant_name is required for a Home Assistant cover."}, status=400)
@@ -1377,7 +1377,7 @@ def put_cover_entity(request):
             "home_assistant_name": home_assistant_name,
             "openhab_item": openhab_item,
             "openhab_tilt_item": openhab_tilt_item,
-            "invert_positions": str(invert_positions),
+            "invert_positions": invert_positions,
             "position_preset1": int(data["position_preset1"]),
             "position_preset2": int(data["position_preset2"]),
             "position_preset3": int(data["position_preset3"]),

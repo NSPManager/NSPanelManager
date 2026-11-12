@@ -29,10 +29,8 @@ void CoverEntity::_load_common_config() {
   this->_entity_page_slot = cover.room_view_position;
 
   nlohmann::json entity_data = cover.get_entity_data_json();
-  if (entity_data.contains("invert_positions") && entity_data["invert_positions"].is_string()) {
-    std::string invert = entity_data["invert_positions"];
-    boost::algorithm::to_lower(invert);
-    this->_invert_positions = invert.compare("true") == 0;
+  if (entity_data.contains("invert_positions") && entity_data["invert_positions"].is_boolean()) {
+    this->_invert_positions = entity_data["invert_positions"];
   }
 
   if (entity_data.contains("position_preset1") && entity_data["position_preset1"].is_number()) {
