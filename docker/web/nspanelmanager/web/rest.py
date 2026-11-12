@@ -1301,6 +1301,7 @@ def put_cover_entity(request):
             "room_view_position",
             "controller",
             "friendly_name",
+            "invert_positions",
             "home_assistant_name",
             "openhab_item",
             "openhab_tilt_item",
