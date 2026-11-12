@@ -21,6 +21,16 @@ OpenhabCover::OpenhabCover(uint32_t cover_id) : CoverEntity(cover_id) {
     return;
   }
 
+  this->_can_open = !this->_openhab_item.empty();
+  this->_can_close = !this->_openhab_item.empty();
+  this->_can_stop = !this->_openhab_item.empty();
+  this->_has_position = !this->_openhab_item.empty();
+
+  this->_can_open_tilt = !this->_openhab_tilt_item.empty();
+  this->_can_close_tilt = !this->_openhab_tilt_item.empty();
+  this->_can_stop_tilt = !this->_openhab_tilt_item.empty();     //
+  this->_has_tilt_position = !this->_openhab_tilt_item.empty(); //
+
   SPDLOG_DEBUG("Loaded cover {}::{}, OpenHAB item: {}", this->_id, this->_name, this->_openhab_item);
   OpenhabManager::attach_event_observer(this->_openhab_item, boost::bind(&OpenhabCover::openhab_event_callback, this, _1));
 
@@ -161,8 +171,6 @@ void OpenhabCover::_update_from_state(const nlohmann::json &state) {
       } else {
         this->_state = NSPanelEntityState_Cover_CoverState_OPEN;
       }
-      this->_can_open = true;
-      this->_can_close = true;
       this->_can_stop = true;
       this->_can_set_position = true;
       this->_device_class = "shutter";
@@ -209,16 +217,13 @@ void OpenhabCover::_update_from_tilt_state(const nlohmann::json &state) {
       } else {
         this->_tilt_state = NSPanelEntityState_Cover_CoverState_OPEN;
       }
-      this->_can_open_tilt = true;
-      this->_can_close_tilt = true;
-      this->_can_stop_tilt = true;
       this->_can_set_tilt_position = true;
     } catch (std::exception &e) {
       SPDLOG_ERROR("Could not parse OpenHAB cover state '{}' for {}::{}: {}", value, this->_id, this->_name, e.what());
       return;
     }
   } else if (state.is_number()) {
-    this->_update_from_state(nlohmann::json(std::to_string(state.get<double>())));
+    this->_update_from_tilt_state(nlohmann::json(std::to_string(state.get<double>())));
     return;
   } else {
     SPDLOG_WARN("Unsupported OpenHAB cover state for {}::{}: {}", this->_id, this->_name, state.dump());
