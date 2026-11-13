@@ -37,6 +37,13 @@ const openhab_items = [
   {
     type: "openhab",
     openhab_type: "item",
+    label: "Living room tilt",
+    item_id: "LivingRoom_Tilt",
+    item: { name: "LivingRoom_Tilt", type: "Rollershutter", state: "0" },
+  },
+  {
+    type: "openhab",
+    openhab_type: "item",
     label: "Kitchen light",
     item_id: "Kitchen_Light",
     item: { name: "Kitchen_Light", type: "Switch", state: "OFF" },
@@ -78,7 +85,12 @@ beforeEach(() => {
   useAvailableEntitiesStore.setState({
     status: "loaded",
     home_assistant_entities: home_assistant_entities,
-    home_assistant_options: home_assistant_entities.map((entity) => ({ value: entity.item_id, label: entity.label, icon: "mdi-window-shutter", type: entity.type })),
+    home_assistant_options: home_assistant_entities.map((entity) => ({
+      value: entity.item_id,
+      label: entity.label,
+      icon: "mdi-window-shutter",
+      type: entity.type,
+    })),
     openhab_items: openhab_items,
     openhab_options: openhab_items.map((item) => ({ value: item.item_id, label: item.label, icon: "mdi-window-shutter", type: item.type })),
   });
@@ -146,7 +158,15 @@ describe("cover form", () => {
       room_view_position: 3,
       friendly_name: "Living room blind",
       home_assistant_name: "cover.living_room_blind",
+      invert_positions: false,
       openhab_item: "",
+      openhab_tilt_item: "",
+      position_preset1: 0,
+      position_preset2: 0,
+      position_preset3: 0,
+      tilt_preset1: 0,
+      tilt_preset2: 0,
+      tilt_preset3: 0,
     });
   });
 
@@ -156,18 +176,38 @@ describe("cover form", () => {
     renderForm({ controller: "openhab", onComplete });
 
     await user.type(screen.getByLabelText("Name"), "Living room shutter");
-    await user.click(screen.getByRole("combobox"));
+    await user.click(screen.getAllByRole("combobox")[0]);
     expect(await screen.findByText("Living room shutter")).toBeInTheDocument();
     expect(screen.queryByText("Kitchen light")).not.toBeInTheDocument();
     await user.click(screen.getByText("Living room shutter"));
+    console.log(screen.getAllByRole("combobox")[1]);
+    await user.click(screen.getAllByRole("combobox")[1]);
+    expect(await screen.findByText("Living room tilt")).toBeInTheDocument();
+    expect(screen.queryByText("Kitchen light")).not.toBeInTheDocument();
+    await user.click(screen.getByText("Living room tilt"));
     await waitFor(() => expect(saveButton()).toBeEnabled());
     await user.click(saveButton());
 
     await waitFor(() => expect(onComplete).toHaveBeenCalled());
     expect(sentBody()).toMatchObject({
+      id: null,
+      type: "entity",
+      entity_type: "cover",
       controller: "openhab",
+      room_id: 1,
+      entities_page_id: 2,
+      room_view_position: 3,
+      friendly_name: "Living room shutter",
       home_assistant_name: "",
+      invert_positions: false,
       openhab_item: "LivingRoom_Shutter",
+      openhab_tilt_item: "LivingRoom_Tilt",
+      position_preset1: 0,
+      position_preset2: 0,
+      position_preset3: 0,
+      tilt_preset1: 0,
+      tilt_preset2: 0,
+      tilt_preset3: 0,
     });
   });
 

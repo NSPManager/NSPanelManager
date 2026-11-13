@@ -983,7 +983,7 @@ const ProtobufCEnumDescriptor nspanel_entity_state__cover__cover_state__descript
   nspanel_entity_state__cover__cover_state__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor nspanel_entity_state__cover__field_descriptors[16] =
+static const ProtobufCFieldDescriptor nspanel_entity_state__cover__field_descriptors[22] =
 {
   {
     "cover_id",
@@ -1177,6 +1177,78 @@ static const ProtobufCFieldDescriptor nspanel_entity_state__cover__field_descrip
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "position_preset1",
+    17,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__Cover, position_preset1),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "position_preset2",
+    18,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__Cover, position_preset2),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "position_preset3",
+    19,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__Cover, position_preset3),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "tilt_preset1",
+    20,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__Cover, tilt_preset1),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "tilt_preset2",
+    21,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__Cover, tilt_preset2),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "tilt_preset3",
+    22,
+    PROTOBUF_C_LABEL_NONE,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    offsetof(NSPanelEntityState__Cover, tilt_preset3),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned nspanel_entity_state__cover__field_indices_by_name[] = {
   8,   /* field[8] = can_close */
@@ -1193,13 +1265,19 @@ static const unsigned nspanel_entity_state__cover__field_indices_by_name[] = {
   5,   /* field[5] = has_tilt_position */
   1,   /* field[1] = name */
   4,   /* field[4] = position */
+  16,   /* field[16] = position_preset1 */
+  17,   /* field[17] = position_preset2 */
+  18,   /* field[18] = position_preset3 */
   2,   /* field[2] = state */
   6,   /* field[6] = tilt_position */
+  19,   /* field[19] = tilt_preset1 */
+  20,   /* field[20] = tilt_preset2 */
+  21,   /* field[21] = tilt_preset3 */
 };
 static const ProtobufCIntRange nspanel_entity_state__cover__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 16 }
+  { 0, 22 }
 };
 const ProtobufCMessageDescriptor nspanel_entity_state__cover__descriptor =
 {
@@ -1209,7 +1287,7 @@ const ProtobufCMessageDescriptor nspanel_entity_state__cover__descriptor =
   "NSPanelEntityState__Cover",
   "",
   sizeof(NSPanelEntityState__Cover),
-  16,
+  22,
   nspanel_entity_state__cover__field_descriptors,
   nspanel_entity_state__cover__field_indices_by_name,
   1,  nspanel_entity_state__cover__number_ranges,

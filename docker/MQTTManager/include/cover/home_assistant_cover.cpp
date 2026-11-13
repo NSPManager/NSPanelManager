@@ -115,6 +115,7 @@ void HomeAssistantCover::set_position(uint8_t position) {
     SPDLOG_WARN("Asked to set position of cover {}::{} but Home Assistant does not report the set position feature.", this->_id, this->_name);
     return;
   }
+  SPDLOG_DEBUG("Setting cover {}::{} to position {}%", this->_id, this->_name, position);
   this->_call_service("set_cover_position", {{"position", position}});
 }
 
@@ -147,6 +148,7 @@ void HomeAssistantCover::set_tilt_position(uint8_t position) {
     SPDLOG_WARN("Asked to set tilt position of cover {}::{} but Home Assistant does not report the set tilt position feature.", this->_id, this->_name);
     return;
   }
+  SPDLOG_DEBUG("Setting cover {}::{} to tilt {}%", this->_id, this->_name, position);
   this->_call_service("set_cover_tilt_position", {{"tilt_position", position}});
 }
 

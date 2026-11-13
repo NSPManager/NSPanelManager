@@ -240,10 +240,19 @@ struct  NSPanelEntityState__Cover
    * Optional hint for the panel icon, for example "blind" or "garage".
    */
   char *device_class;
+  /*
+   * Preset position numbers.
+   */
+  int32_t position_preset1;
+  int32_t position_preset2;
+  int32_t position_preset3;
+  int32_t tilt_preset1;
+  int32_t tilt_preset2;
+  int32_t tilt_preset3;
 };
 #define NSPANEL_ENTITY_STATE__COVER__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_entity_state__cover__descriptor) \
-    , 0, (char *)protobuf_c_empty_string, NSPANEL_ENTITY_STATE__COVER__COVER_STATE__UNKNOWN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string }
+    , 0, (char *)protobuf_c_empty_string, NSPANEL_ENTITY_STATE__COVER__COVER_STATE__UNKNOWN, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0, 0 }
 
 
 typedef enum {

@@ -1,11 +1,11 @@
-import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-Ce1xTlTP.js";
-import { t as create } from "./react-BZEnDPAj.js";
-import { t as useSettingsStore } from "./SettingsStore-Bhq0N_Vz.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-BOOv53_-.js";
-import { a as set, i as get, o as useFieldArray, r as appendErrors, s as useForm } from "./index.esm-mYyDCATx.js";
-import { n as Notify } from "./NSPanelToastContainer-KbJyV6eL.js";
-import { t as motion } from "./proxy-CM7hds_Z.js";
-import { t as AnimatePresence } from "./AnimatePresence-T1u1JdBO.js";
+import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-GTPFHy3s.js";
+import { t as create } from "./react-Dmrhcfpd.js";
+import { t as useSettingsStore } from "./SettingsStore-B_b5mu_f.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-DIB_MQU9.js";
+import { a as set, i as get, o as useFieldArray, r as appendErrors, s as useForm } from "./index.esm-OPyB-aE8.js";
+import { n as Notify } from "./NSPanelToastContainer-DX4VftN1.js";
+import { t as motion } from "./proxy-DUfbqFkY.js";
+import { t as AnimatePresence } from "./AnimatePresence-Dqu00Wbg.js";
 //#region src/stores/EntitiesPagesStore.ts
 function getCookie$1(name) {
 	let cookieValue = "";
@@ -8138,7 +8138,15 @@ var schema = object({
 	friendly_name: string().min(1),
 	controller: string(),
 	home_assistant_name: string(),
-	openhab_item: string()
+	openhab_item: string(),
+	openhab_tilt_item: string(),
+	invert_positions: boolean().optional(),
+	position_preset1: number(),
+	position_preset2: number(),
+	position_preset3: number(),
+	tilt_preset1: number(),
+	tilt_preset2: number(),
+	tilt_preset3: number()
 }).superRefine((data, ctx) => {
 	if (data.controller == "home_assistant") {
 		if (!data.home_assistant_name.startsWith("cover.")) ctx.addIssue({
@@ -8189,7 +8197,15 @@ var MultiStep_AddEditEntity_Step3_Cover = ({ controller, room_id, entities_page_
 		entities_page_id,
 		room_view_position,
 		home_assistant_name: "",
-		openhab_item: ""
+		openhab_item: "",
+		openhab_tilt_item: "",
+		invert_positions: false,
+		position_preset1: 0,
+		position_preset2: 0,
+		position_preset3: 0,
+		tilt_preset1: 0,
+		tilt_preset2: 0,
+		tilt_preset3: 0
 	};
 	const { handleSubmit, register, reset, setValue, watch, formState: { isValid, errors } } = useForm({
 		resolver: u(schema),
@@ -8198,6 +8214,13 @@ var MultiStep_AddEditEntity_Step3_Cover = ({ controller, room_id, entities_page_
 	});
 	const home_assistant_name = watch("home_assistant_name");
 	const openhab_item = watch("openhab_item");
+	const openhab_tilt_item = watch("openhab_tilt_item");
+	watch("position_preset1");
+	watch("position_preset2");
+	watch("position_preset3");
+	watch("tilt_preset1");
+	watch("tilt_preset2");
+	watch("tilt_preset3");
 	function getCookie(name) {
 		let cookieValue = "";
 		if (document.cookie && document.cookie !== "") {
@@ -8212,15 +8235,14 @@ var MultiStep_AddEditEntity_Step3_Cover = ({ controller, room_id, entities_page_
 		}
 		return cookieValue;
 	}
+	const entity = useEntitiesPagesStore((s) => s.entities.find((e) => e.id == id));
 	(0, import_react.useEffect)(() => {
-		if (id != null) {
-			const entityData = useEntitiesPagesStore.getState().entities.find((entity) => entity.id == id);
-			reset({
-				...defaultValues,
-				...entityData
-			});
-		}
-	}, [id, useEntitiesPagesStore.getState().entities]);
+		if (!entity) return;
+		reset({
+			...defaultValues,
+			...entity
+		});
+	}, [entity?.id]);
 	function saveEntity(data) {
 		fetch("/rest/entities/covers", {
 			credentials: "same-origin",
@@ -8261,7 +8283,7 @@ var MultiStep_AddEditEntity_Step3_Cover = ({ controller, room_id, entities_page_
 		menu: () => "bg-base-300 p-2.5 rounded-box",
 		option: (state) => `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`
 	};
-	const text_input_class = "outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5";
+	const text_input_class = "outline-none bg-base-300 border-neutral first:rounded-l-md last:rounded-r-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5";
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
 		onSubmit: handleSubmit(saveEntity),
 		children: [
@@ -8362,8 +8384,103 @@ var MultiStep_AddEditEntity_Step3_Cover = ({ controller, room_id, entities_page_
 						errors.openhab_item && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
 							className: "block mt-1 text-xs text-error",
 							children: "Select an OpenHAB Rollershutter item."
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "block mb-2 text-sm font-medium",
+							children: "OpenHAB Tilt item"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StateManagedSelect$1, {
+							options: openhab_cover_options,
+							classNames,
+							onChange: (newValue) => setValue("openhab_tilt_item", newValue ? newValue.value : "", { shouldValidate: true }),
+							unstyled: true,
+							components: select_components,
+							value: openhab_cover_options.find((option) => option.value === openhab_tilt_item) ?? null,
+							styles: selectStyles
+						}),
+						errors.openhab_tilt_item && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "block mt-1 text-xs text-error",
+							children: "Select an OpenHAB Rollershutter item."
 						})
-					] })
+					] }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "form-control mt-4",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+							className: "label cursor-pointer justify-start gap-2",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								type: "checkbox",
+								className: "checkbox checkbox-sm checkbox-accent",
+								...register("invert_positions")
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+								className: "label-text",
+								children: "Invert positions"
+							})]
+						})
+					}),
+					(controller == "home_assistant" && supports_position || controller == "openhab") && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mt-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "label",
+							children: "Position presets"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "join w-full",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "number",
+									...register("position_preset1", { valueAsNumber: true }),
+									min: 0,
+									max: 100,
+									className: `join-item ${text_input_class}`
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "number",
+									...register("position_preset2", { valueAsNumber: true }),
+									min: 0,
+									max: 100,
+									className: `join-item ${text_input_class}`
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "number",
+									...register("position_preset3", { valueAsNumber: true }),
+									min: 0,
+									max: 100,
+									className: `join-item ${text_input_class}`
+								})
+							]
+						})]
+					}),
+					(controller == "home_assistant" && supports_tilt || controller == "openhab" && openhab_tilt_item != "") && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "mt-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "label",
+							children: "Tilt presets"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "join w-full",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "number",
+									...register("tilt_preset1", { valueAsNumber: true }),
+									min: 0,
+									max: 100,
+									className: `join-item ${text_input_class}`
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "number",
+									...register("tilt_preset2", { valueAsNumber: true }),
+									min: 0,
+									max: 100,
+									className: `join-item ${text_input_class}`
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "number",
+									...register("tilt_preset3", { valueAsNumber: true }),
+									min: 0,
+									max: 100,
+									className: `join-item ${text_input_class}`
+								})
+							]
+						})]
+					})
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {

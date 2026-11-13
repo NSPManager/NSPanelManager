@@ -123,6 +123,12 @@ inline constexpr NSPanelEntityState_Cover::Impl_::Impl_(
         can_close_tilt_{false},
         can_stop_tilt_{false},
         can_set_tilt_position_{false},
+        position_preset1_{0},
+        position_preset2_{0},
+        position_preset3_{0},
+        tilt_preset1_{0},
+        tilt_preset2_{0},
+        tilt_preset3_{0},
         _cached_size_{0} {}
 
 template <typename>
@@ -412,6 +418,12 @@ const ::uint32_t
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.can_stop_tilt_),
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.can_set_tilt_position_),
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.device_class_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.position_preset1_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.position_preset2_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.position_preset3_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.tilt_preset1_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.tilt_preset2_),
+        PROTOBUF_FIELD_OFFSET(::NSPanelEntityState_Cover, _impl_.tilt_preset3_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::NSPanelEntityState, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -436,7 +448,7 @@ static const ::_pbi::MigrationSchema
         {55, -1, -1, sizeof(::NSPanelEntityState_MediaPlayer_SourceSelection)},
         {66, 97, -1, sizeof(::NSPanelEntityState_MediaPlayer)},
         {120, -1, -1, sizeof(::NSPanelEntityState_Cover)},
-        {144, -1, -1, sizeof(::NSPanelEntityState)},
+        {150, -1, -1, sizeof(::NSPanelEntityState)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::_NSPanelEntityState_Light_default_instance_._instance,
@@ -450,7 +462,7 @@ static const ::_pb::Message* const file_default_instances[] = {
 };
 const char descriptor_table_protodef_protobuf_5fnspanel_5fentity_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\035protobuf_nspanel_entity.proto\"\364\021\n\022NSPa"
+    "\n\035protobuf_nspanel_entity.proto\"\204\023\n\022NSPa"
     "nelEntityState\022*\n\005light\030\001 \001(\0132\031.NSPanelE"
     "ntityState.LightH\000\0224\n\nthermostat\030\002 \001(\0132\036"
     ".NSPanelEntityState.ThermostatH\000\0227\n\014medi"
@@ -495,7 +507,7 @@ const char descriptor_table_protodef_protobuf_5fnspanel_5fentity_2eproto[] ABSL_
     "\007sources\030\001 \003(\t\022\026\n\016current_source\030\002 \001(\t\022\022"
     "\n\ncan_select\030\003 \001(\010\"_\n\rPlaybackState\022\013\n\007U"
     "NKNOWN\020\000\022\007\n\003OFF\020\001\022\006\n\002ON\020\002\022\010\n\004IDLE\020\003\022\013\n\007P"
-    "LAYING\020\004\022\n\n\006PAUSED\020\005\022\r\n\tBUFFERING\020\006\032\336\003\n\005"
+    "LAYING\020\004\022\n\n\006PAUSED\020\005\022\r\n\tBUFFERING\020\006\032\356\004\n\005"
     "Cover\022\020\n\010cover_id\030\001 \001(\005\022\014\n\004name\030\002 \001(\t\0223\n"
     "\005state\030\003 \001(\0162$.NSPanelEntityState.Cover."
     "CoverState\022\024\n\014has_position\030\004 \001(\010\022\020\n\010posi"
@@ -505,16 +517,19 @@ const char descriptor_table_protodef_protobuf_5fnspanel_5fentity_2eproto[] ABSL_
     "an_set_position\030\013 \001(\010\022\025\n\rcan_open_tilt\030\014"
     " \001(\010\022\026\n\016can_close_tilt\030\r \001(\010\022\025\n\rcan_stop"
     "_tilt\030\016 \001(\010\022\035\n\025can_set_tilt_position\030\017 \001"
-    "(\010\022\024\n\014device_class\030\020 \001(\t\"Z\n\nCoverState\022\013"
-    "\n\007UNKNOWN\020\000\022\010\n\004OPEN\020\001\022\n\n\006CLOSED\020\002\022\013\n\007OPE"
-    "NING\020\003\022\013\n\007CLOSING\020\004\022\017\n\013UNAVAILABLE\020\005B\010\n\006"
-    "entityb\006proto3"
+    "(\010\022\024\n\014device_class\030\020 \001(\t\022\030\n\020position_pre"
+    "set1\030\021 \001(\005\022\030\n\020position_preset2\030\022 \001(\005\022\030\n\020"
+    "position_preset3\030\023 \001(\005\022\024\n\014tilt_preset1\030\024"
+    " \001(\005\022\024\n\014tilt_preset2\030\025 \001(\005\022\024\n\014tilt_prese"
+    "t3\030\026 \001(\005\"Z\n\nCoverState\022\013\n\007UNKNOWN\020\000\022\010\n\004O"
+    "PEN\020\001\022\n\n\006CLOSED\020\002\022\013\n\007OPENING\020\003\022\013\n\007CLOSIN"
+    "G\020\004\022\017\n\013UNAVAILABLE\020\005B\010\n\006entityb\006proto3"
 };
 static ::absl::once_flag descriptor_table_protobuf_5fnspanel_5fentity_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_protobuf_5fnspanel_5fentity_2eproto = {
     false,
     false,
-    2334,
+    2478,
     descriptor_table_protodef_protobuf_5fnspanel_5fentity_2eproto,
     "protobuf_nspanel_entity.proto",
     &descriptor_table_protobuf_5fnspanel_5fentity_2eproto_once,
@@ -2951,9 +2966,9 @@ NSPanelEntityState_Cover::NSPanelEntityState_Cover(
                offsetof(Impl_, cover_id_),
            reinterpret_cast<const char *>(&from._impl_) +
                offsetof(Impl_, cover_id_),
-           offsetof(Impl_, can_set_tilt_position_) -
+           offsetof(Impl_, tilt_preset3_) -
                offsetof(Impl_, cover_id_) +
-               sizeof(Impl_::can_set_tilt_position_));
+               sizeof(Impl_::tilt_preset3_));
 
   // @@protoc_insertion_point(copy_constructor:NSPanelEntityState.Cover)
 }
@@ -2969,9 +2984,9 @@ inline void NSPanelEntityState_Cover::SharedCtor(::_pb::Arena* arena) {
   ::memset(reinterpret_cast<char *>(&_impl_) +
                offsetof(Impl_, cover_id_),
            0,
-           offsetof(Impl_, can_set_tilt_position_) -
+           offsetof(Impl_, tilt_preset3_) -
                offsetof(Impl_, cover_id_) +
-               sizeof(Impl_::can_set_tilt_position_));
+               sizeof(Impl_::tilt_preset3_));
 }
 NSPanelEntityState_Cover::~NSPanelEntityState_Cover() {
   // @@protoc_insertion_point(destructor:NSPanelEntityState.Cover)
@@ -3006,15 +3021,15 @@ NSPanelEntityState_Cover::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<4, 16, 0, 65, 2> NSPanelEntityState_Cover::_table_ = {
+const ::_pbi::TcParseTable<5, 22, 0, 65, 2> NSPanelEntityState_Cover::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    16, 120,  // max_field_number, fast_idx_mask
+    22, 248,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294901760,  // skipmap
+    4290772992,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    16,  // num_field_entries
+    22,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     &_NSPanelEntityState_Cover_default_instance_._instance,
@@ -3024,9 +3039,7 @@ const ::_pbi::TcParseTable<4, 16, 0, 65, 2> NSPanelEntityState_Cover::_table_ = 
     ::_pbi::TcParser::GetTable<::NSPanelEntityState_Cover>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // string device_class = 16;
-    {::_pbi::TcParser::FastUS2,
-     {386, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.device_class_)}},
+    {::_pbi::TcParser::MiniParse, {}},
     // int32 cover_id = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(NSPanelEntityState_Cover, _impl_.cover_id_), 63>(),
      {8, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.cover_id_)}},
@@ -3072,6 +3085,36 @@ const ::_pbi::TcParseTable<4, 16, 0, 65, 2> NSPanelEntityState_Cover::_table_ = 
     // bool can_set_tilt_position = 15;
     {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(NSPanelEntityState_Cover, _impl_.can_set_tilt_position_), 63>(),
      {120, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_set_tilt_position_)}},
+    // string device_class = 16;
+    {::_pbi::TcParser::FastUS2,
+     {386, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.device_class_)}},
+    // int32 position_preset1 = 17;
+    {::_pbi::TcParser::FastV32S2,
+     {392, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.position_preset1_)}},
+    // int32 position_preset2 = 18;
+    {::_pbi::TcParser::FastV32S2,
+     {400, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.position_preset2_)}},
+    // int32 position_preset3 = 19;
+    {::_pbi::TcParser::FastV32S2,
+     {408, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.position_preset3_)}},
+    // int32 tilt_preset1 = 20;
+    {::_pbi::TcParser::FastV32S2,
+     {416, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.tilt_preset1_)}},
+    // int32 tilt_preset2 = 21;
+    {::_pbi::TcParser::FastV32S2,
+     {424, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.tilt_preset2_)}},
+    // int32 tilt_preset3 = 22;
+    {::_pbi::TcParser::FastV32S2,
+     {432, 63, 0, PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.tilt_preset3_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
+    {::_pbi::TcParser::MiniParse, {}},
   }}, {{
     65535, 65535
   }}, {{
@@ -3123,6 +3166,24 @@ const ::_pbi::TcParseTable<4, 16, 0, 65, 2> NSPanelEntityState_Cover::_table_ = 
     // string device_class = 16;
     {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.device_class_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
+    // int32 position_preset1 = 17;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.position_preset1_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 position_preset2 = 18;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.position_preset2_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 position_preset3 = 19;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.position_preset3_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 tilt_preset1 = 20;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.tilt_preset1_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 tilt_preset2 = 21;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.tilt_preset2_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 tilt_preset3 = 22;
+    {PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.tilt_preset3_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
   }},
   // no aux_entries
   {{
@@ -3143,8 +3204,8 @@ PROTOBUF_NOINLINE void NSPanelEntityState_Cover::Clear() {
   _impl_.name_.ClearToEmpty();
   _impl_.device_class_.ClearToEmpty();
   ::memset(&_impl_.cover_id_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.can_set_tilt_position_) -
-      reinterpret_cast<char*>(&_impl_.cover_id_)) + sizeof(_impl_.can_set_tilt_position_));
+      reinterpret_cast<char*>(&_impl_.tilt_preset3_) -
+      reinterpret_cast<char*>(&_impl_.cover_id_)) + sizeof(_impl_.tilt_preset3_));
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -3269,6 +3330,48 @@ PROTOBUF_NOINLINE void NSPanelEntityState_Cover::Clear() {
     target = stream->WriteStringMaybeAliased(16, _s, target);
   }
 
+  // int32 position_preset1 = 17;
+  if (this->_internal_position_preset1() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        17, this->_internal_position_preset1(), target);
+  }
+
+  // int32 position_preset2 = 18;
+  if (this->_internal_position_preset2() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        18, this->_internal_position_preset2(), target);
+  }
+
+  // int32 position_preset3 = 19;
+  if (this->_internal_position_preset3() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        19, this->_internal_position_preset3(), target);
+  }
+
+  // int32 tilt_preset1 = 20;
+  if (this->_internal_tilt_preset1() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        20, this->_internal_tilt_preset1(), target);
+  }
+
+  // int32 tilt_preset2 = 21;
+  if (this->_internal_tilt_preset2() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        21, this->_internal_tilt_preset2(), target);
+  }
+
+  // int32 tilt_preset3 = 22;
+  if (this->_internal_tilt_preset3() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteInt32ToArray(
+        22, this->_internal_tilt_preset3(), target);
+  }
+
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
     target =
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
@@ -3373,6 +3476,42 @@ PROTOBUF_NOINLINE void NSPanelEntityState_Cover::Clear() {
     total_size += 2;
   }
 
+  // int32 position_preset1 = 17;
+  if (this->_internal_position_preset1() != 0) {
+    total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                    this->_internal_position_preset1());
+  }
+
+  // int32 position_preset2 = 18;
+  if (this->_internal_position_preset2() != 0) {
+    total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                    this->_internal_position_preset2());
+  }
+
+  // int32 position_preset3 = 19;
+  if (this->_internal_position_preset3() != 0) {
+    total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                    this->_internal_position_preset3());
+  }
+
+  // int32 tilt_preset1 = 20;
+  if (this->_internal_tilt_preset1() != 0) {
+    total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                    this->_internal_tilt_preset1());
+  }
+
+  // int32 tilt_preset2 = 21;
+  if (this->_internal_tilt_preset2() != 0) {
+    total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                    this->_internal_tilt_preset2());
+  }
+
+  // int32 tilt_preset3 = 22;
+  if (this->_internal_tilt_preset3() != 0) {
+    total_size += 2 + ::_pbi::WireFormatLite::Int32Size(
+                                    this->_internal_tilt_preset3());
+  }
+
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
@@ -3433,6 +3572,24 @@ void NSPanelEntityState_Cover::MergeImpl(::google::protobuf::MessageLite& to_msg
   if (from._internal_can_set_tilt_position() != 0) {
     _this->_impl_.can_set_tilt_position_ = from._impl_.can_set_tilt_position_;
   }
+  if (from._internal_position_preset1() != 0) {
+    _this->_impl_.position_preset1_ = from._impl_.position_preset1_;
+  }
+  if (from._internal_position_preset2() != 0) {
+    _this->_impl_.position_preset2_ = from._impl_.position_preset2_;
+  }
+  if (from._internal_position_preset3() != 0) {
+    _this->_impl_.position_preset3_ = from._impl_.position_preset3_;
+  }
+  if (from._internal_tilt_preset1() != 0) {
+    _this->_impl_.tilt_preset1_ = from._impl_.tilt_preset1_;
+  }
+  if (from._internal_tilt_preset2() != 0) {
+    _this->_impl_.tilt_preset2_ = from._impl_.tilt_preset2_;
+  }
+  if (from._internal_tilt_preset3() != 0) {
+    _this->_impl_.tilt_preset3_ = from._impl_.tilt_preset3_;
+  }
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
@@ -3452,8 +3609,8 @@ void NSPanelEntityState_Cover::InternalSwap(NSPanelEntityState_Cover* PROTOBUF_R
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.name_, &other->_impl_.name_, arena);
   ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.device_class_, &other->_impl_.device_class_, arena);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.can_set_tilt_position_)
-      + sizeof(NSPanelEntityState_Cover::_impl_.can_set_tilt_position_)
+      PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.tilt_preset3_)
+      + sizeof(NSPanelEntityState_Cover::_impl_.tilt_preset3_)
       - PROTOBUF_FIELD_OFFSET(NSPanelEntityState_Cover, _impl_.cover_id_)>(
           reinterpret_cast<char*>(&_impl_.cover_id_),
           reinterpret_cast<char*>(&other->_impl_.cover_id_));

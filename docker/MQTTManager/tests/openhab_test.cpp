@@ -2,9 +2,9 @@
 #include "test_helpers.hpp"
 #include <cover/openhab_cover.hpp>
 #include <gtest/gtest.h>
-#include <set>
 #include <protobuf_nspanel_entity.pb.h>
 #include <scenes/openhab_scene.hpp>
+#include <set>
 #include <switch/openhab_switch.hpp>
 #include <thermostat/openhab_thermostat.hpp>
 
@@ -35,8 +35,8 @@ static std::vector<std::pair<std::string, nlohmann::json>> item_commands() {
   std::vector<std::pair<std::string, nlohmann::json>> commands;
   for (auto &message : OpenhabManager::test_take_sent_messages()) {
     if (message.value("type", "") == "ItemCommandEvent") {
-      std::string topic = message["topic"];                                    // openhab/items/<item>/command
-      std::string item = topic.substr(14, topic.size() - 14 - 8);              // Strip "openhab/items/" and "/command".
+      std::string topic = message["topic"];                       // openhab/items/<item>/command
+      std::string item = topic.substr(14, topic.size() - 14 - 8); // Strip "openhab/items/" and "/command".
       commands.emplace_back(item, nlohmann::json::parse(std::string(message["payload"])));
     }
   }
@@ -197,8 +197,8 @@ TEST_F(OpenhabCoverTest, commands_use_rollershutter_percent_and_stop) {
 
   auto commands = item_commands();
   ASSERT_EQ(commands.size(), 4);
-  EXPECT_EQ(commands[0], std::make_pair(std::string("LivingRoom_Shutter"), nlohmann::json({{"type", "Percent"}, {"value", "0"}})));
-  EXPECT_EQ(commands[1], std::make_pair(std::string("LivingRoom_Shutter"), nlohmann::json({{"type", "Percent"}, {"value", "100"}})));
+  EXPECT_EQ(commands[0], std::make_pair(std::string("LivingRoom_Shutter"), nlohmann::json({{"type", "UpDown"}, {"value", "UP"}})));
+  EXPECT_EQ(commands[1], std::make_pair(std::string("LivingRoom_Shutter"), nlohmann::json({{"type", "UpDown"}, {"value", "DOWN"}})));
   EXPECT_EQ(commands[2], std::make_pair(std::string("LivingRoom_Shutter"), nlohmann::json({{"type", "StopMove"}, {"value", "STOP"}})));
   EXPECT_EQ(commands[3], std::make_pair(std::string("LivingRoom_Shutter"), nlohmann::json({{"type", "Percent"}, {"value", "75"}})));
 }
