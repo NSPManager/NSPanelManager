@@ -1,10 +1,10 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-2GKhVwa3.js";
-import { s as useForm } from "./index.esm-CyxbWRtN.js";
-import { n as Notify } from "./NSPanelToastContainer-CdQdRrsL.js";
-import { t as motion } from "./proxy-BJsAbzcZ.js";
-import { t as AnimatePresence } from "./AnimatePresence-CuLSycWM.js";
-import { i as mdiInformationOutline, x as require_Icon } from "./mdi-CeE3u6rn.js";
-import { i as api, t as Alert } from "./layout-SvH9qeCO.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-DsrUEgTV.js";
+import { s as useForm } from "./index.esm-D2iT7jTM.js";
+import { n as Notify } from "./NSPanelToastContainer-BeaDvrjv.js";
+import { t as motion } from "./proxy-7sw4PveN.js";
+import { t as AnimatePresence } from "./AnimatePresence-C5DU0GhE.js";
+import { i as mdiInformationOutline, x as require_Icon } from "./mdi-Bo7fQ2tR.js";
+import { i as api, t as Alert } from "./layout-CEwTn_qs.js";
 //#region src/components/InitialSetup/Step1_Welcome.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_jsx_runtime = require_jsx_runtime();
@@ -220,9 +220,27 @@ var Step3_ManagerSettings = ({ setValue, getValues, register, nextStep, prevStep
 		});
 	};
 	const testManagerAddressAndPort = () => {
+		const address = getValues("manager_address");
+		const port = getValues("manager_port");
+		if (address == null) {
+			Notify({
+				message: "Manager address is required to test the connection",
+				level: "error",
+				duration: 5e3
+			});
+			return;
+		}
+		if (port == null) {
+			Notify({
+				message: "Manager port is required to test the connection",
+				level: "error",
+				duration: 5e3
+			});
+			return;
+		}
 		const params = {
-			address: getValues("manager_address"),
-			port: getValues("manager_port").toString()
+			address,
+			port: port.toString()
 		};
 		const queryString = new URLSearchParams(params).toString();
 		fetch("/rest/mqttmanager/test?" + queryString, {
@@ -326,8 +344,10 @@ var Step3_ManagerSettings = ({ setValue, getValues, register, nextStep, prevStep
 //#endregion
 //#region src/components/InitialSetup/Step4_MqttSettings.tsx
 var import_Icon = require_Icon();
-var Step4_MqttSettings = ({ setValue, getValues, register, nextStep, prevStep }) => {
+var Step4_MqttSettings = ({ setValue, getValues, register, watch, nextStep, prevStep }) => {
 	const [noLogin, setNoLogin] = (0, import_react.useState)(getValues("mqtt_username") == "" && getValues("mqtt_password") == "");
+	const address = watch("mqtt_server");
+	const port = watch("mqtt_port");
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [
 		/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "alert alert-info my-4",
@@ -457,7 +477,7 @@ var Step4_MqttSettings = ({ setValue, getValues, register, nextStep, prevStep })
 				type: "button",
 				className: "btn btn-primary",
 				onClick: nextStep,
-				disabled: getValues("mqtt_server") == "" || getValues("mqtt_port") < 1 || getValues("mqtt_port") > 65535,
+				disabled: address == "" || port == null || port < 1 || port > 65535,
 				children: "Next"
 			})]
 		})
@@ -467,11 +487,28 @@ var Step4_MqttSettings = ({ setValue, getValues, register, nextStep, prevStep })
 //#region src/components/InitialSetup/Step5_HomeAssistantSettings.tsx
 var Step5_HomeAssistantSettings = ({ getValues, register, isHomeAssistantAddon, nextStep, prevStep }) => {
 	const testHomeAssistant = () => {
-		const params = {
-			address: getValues("home_assistant_address"),
-			token: getValues("home_assistant_token")
-		};
-		const queryString = new URLSearchParams(params).toString();
+		const address = getValues("home_assistant_address");
+		const token = getValues("home_assistant_token");
+		if (address == null) {
+			Notify({
+				message: "Home Assistant address is required to test the connection",
+				level: "error",
+				duration: 5e3
+			});
+			return;
+		}
+		if (token == null) {
+			Notify({
+				message: "Home Assistant token is required to test the connection",
+				level: "error",
+				duration: 5e3
+			});
+			return;
+		}
+		const queryString = new URLSearchParams({
+			address,
+			token
+		}).toString();
 		fetch("/rest/home_assistant/test?" + queryString, { method: "GET" }).then((response) => {
 			if (response.ok) Notify({
 				message: "Home Assistant address and token are valid.",
@@ -591,11 +628,28 @@ var Step5_HomeAssistantSettings = ({ getValues, register, isHomeAssistantAddon, 
 //#region src/components/InitialSetup/Step6_OpenhabSettings.tsx
 var Step6_OpenhabSettings = ({ getValues, register, nextStep, prevStep }) => {
 	const testOpenhab = () => {
-		const params = {
-			address: getValues("openhab_address"),
-			token: getValues("openhab_token")
-		};
-		const queryString = new URLSearchParams(params).toString();
+		const address = getValues("openhab_address");
+		const token = getValues("openhab_token");
+		if (address == null) {
+			Notify({
+				message: "OpenHAB address is required to test the connection",
+				level: "error",
+				duration: 5e3
+			});
+			return;
+		}
+		if (token == null) {
+			Notify({
+				message: "OpenHAB token is required to test the connection",
+				level: "error",
+				duration: 5e3
+			});
+			return;
+		}
+		const queryString = new URLSearchParams({
+			address,
+			token
+		}).toString();
 		fetch("/rest/openhab/test?" + queryString, { method: "GET" }).then((response) => {
 			if (response.ok) Notify({
 				message: "OpenHAB address and token are valid.",
@@ -887,7 +941,7 @@ var InitialSetup = ({ opened, isHomeAssistantAddon }) => {
 				onClick: retry,
 				children: "Retry"
 			})] }),
-			state.status === "loaded" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InitialSetupForm, {
+			state.status === "loaded" && dialogRef != null && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(InitialSetupForm, {
 				settings: state.settings,
 				dialogRef,
 				isHomeAssistantAddon
@@ -1017,6 +1071,7 @@ var InitialSetupForm = ({ dialogRef, isHomeAssistantAddon, settings }) => {
 						setValue,
 						getValues,
 						register,
+						watch,
 						nextStep,
 						prevStep
 					});
