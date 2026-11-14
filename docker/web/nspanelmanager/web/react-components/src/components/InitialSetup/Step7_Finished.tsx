@@ -72,6 +72,7 @@ const Step7_Finished = ({
         <p className="mt-2 text-center">
           Initial setup is now finished. If you have any NSPanels already flashed and connected to the same MQTT broker they should show up automatically. In
           case they do not, there is the documentation and also a discord where you can get help. There is also the Github page where you can report issues and
+          contribute.
         </p>
         <p className="my-2 text-center font-bold">Thank you for your support and trust. Have fun and enjoy!</p>
 

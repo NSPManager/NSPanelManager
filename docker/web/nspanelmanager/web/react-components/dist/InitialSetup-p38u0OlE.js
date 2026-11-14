@@ -1,10 +1,10 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-DArmUgNn.js";
-import { s as useForm } from "./index.esm-k48P7boK.js";
-import { n as Notify } from "./NSPanelToastContainer-DqBiCYgm.js";
-import { t as motion } from "./proxy-BZTzkADl.js";
-import { t as AnimatePresence } from "./AnimatePresence-BrcXqfjQ.js";
-import { i as mdiInformationOutline, x as require_Icon } from "./mdi-C7m9AGig.js";
-import { i as api, t as Alert } from "./layout-UB6ft_05.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-FKp56mKw.js";
+import { s as useForm } from "./index.esm-CnTf2rLv.js";
+import { n as Notify } from "./NSPanelToastContainer-D677tDZJ.js";
+import { t as motion } from "./proxy-BQYsYRjY.js";
+import { t as AnimatePresence } from "./AnimatePresence-CpnHckGS.js";
+import { i as mdiInformationOutline, x as require_Icon } from "./mdi-Cr6PIsRR.js";
+import { i as api, t as Alert } from "./layout-HS0oHCMJ.js";
 //#region src/components/InitialSetup/Step1_Welcome.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_jsx_runtime = require_jsx_runtime();
@@ -820,7 +820,7 @@ var Step7_Finished = ({ form, prevStep, isHomeAssistantAddon, dialogRef }) => {
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "mt-2 text-center",
-				children: "Initial setup is now finished. If you have any NSPanels already flashed and connected to the same MQTT broker they should show up automatically. In case they do not, there is the documentation and also a discord where you can get help. There is also the Github page where you can report issues and"
+				children: "Initial setup is now finished. If you have any NSPanels already flashed and connected to the same MQTT broker they should show up automatically. In case they do not, there is the documentation and also a discord where you can get help. There is also the Github page where you can report issues and contribute."
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
 				className: "my-2 text-center font-bold",

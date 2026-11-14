@@ -1,6 +1,6 @@
 import type { Settings, SettingsUpdateRequest } from "../../api/client";
 
-// The settings this page edits. Weather and time, and the theme, are edited elsewhere.
+// The settings this initial setup guide edits.
 export const INITIAL_SETUP_FIELDS = [
   "manager_address",
   "manager_port",
