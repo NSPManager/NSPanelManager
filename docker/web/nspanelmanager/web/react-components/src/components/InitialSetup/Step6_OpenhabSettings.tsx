@@ -1,23 +1,37 @@
-import { type formDataType } from "./InitialSetup";
 import { Icon } from "@mdi/react";
 import { mdiInformationOutline } from "@mdi/js";
 import { Notify } from "../NSPanelToastContainer";
+import { type UseFormGetValues, type UseFormRegister } from "react-hook-form";
+import { type InitialSetupFormValues } from "./form";
 
 const Step6_OpenhabSettings = ({
-  formData,
-  setFormData,
+  getValues,
+  register,
   nextStep,
   prevStep,
 }: {
-  formData: formDataType;
-  setFormData: (data: formDataType) => void;
+  getValues: UseFormGetValues<InitialSetupFormValues>;
+  register: UseFormRegister<InitialSetupFormValues>;
   nextStep: () => void;
   prevStep: () => void;
 }) => {
   const testOpenhab = () => {
+    const address = getValues("openhab_address");
+    const token = getValues("openhab_token");
+
+    if (address == null) {
+      Notify({ message: "OpenHAB address is required to test the connection", level: "error", duration: 5000 });
+      return;
+    }
+
+    if (token == null) {
+      Notify({ message: "OpenHAB token is required to test the connection", level: "error", duration: 5000 });
+      return;
+    }
+
     const params = {
-      address: formData.openhab_address,
-      token: formData.openhab_token,
+      address: address,
+      token: token,
     };
     const queryString = new URLSearchParams(params).toString();
 
@@ -62,8 +76,7 @@ const Step6_OpenhabSettings = ({
               <input
                 className="outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
                 type="text"
-                onChange={(e) => setFormData({ ...formData, openhab_address: e.target.value })}
-                value={formData.openhab_address}
+                {...register("openhab_address")}
                 required
               />
             </div>
@@ -79,8 +92,7 @@ const Step6_OpenhabSettings = ({
               <input
                 className="outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
                 type="password"
-                onChange={(e) => setFormData({ ...formData, openhab_token: e.target.value })}
-                value={formData.openhab_token}
+                {...register("openhab_token")}
                 required
               />
             </div>

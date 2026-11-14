@@ -50,6 +50,7 @@ def get_base_data(request):
             "default": "Default",
             "light": "Light",
             "dark": "Dark",
+            "nspmwip": "NSPanel Manager (dark, WIP)",
             "cupcake": "Cupcake",
             "bumblebee": "Bumblebee",
             "emerald": "Emerald",
@@ -80,7 +81,6 @@ def get_base_data(request):
             "dim": "Dim",
             "nord": "Nord",
             "sunset": "Sunset",
-            "nspmwip": "NSPanel Manager (dark, WIP)",
         },
         "theme": get_setting_with_default("theme"),
         "version": "%version%",  # This value get's replaced during build
