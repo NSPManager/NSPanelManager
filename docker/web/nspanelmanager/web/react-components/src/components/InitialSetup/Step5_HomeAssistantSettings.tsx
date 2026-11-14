@@ -1,25 +1,39 @@
-import { type formDataType } from "./InitialSetup";
 import { Icon } from "@mdi/react";
 import { mdiInformationOutline } from "@mdi/js";
 import { Notify } from "../NSPanelToastContainer";
+import { type UseFormGetValues, type UseFormRegister } from "react-hook-form";
+import { type InitialSetupFormValues } from "./form";
 
 const Step5_HomeAssistantSettings = ({
-  formData,
-  setFormData,
+  getValues,
+  register,
+  isHomeAssistantAddon,
   nextStep,
   prevStep,
-  isHomeAssistantAddon,
 }: {
-  formData: formDataType;
-  setFormData: (data: formDataType) => void;
+  getValues: UseFormGetValues<InitialSetupFormValues>;
+  register: UseFormRegister<InitialSetupFormValues>;
+  isHomeAssistantAddon: boolean;
   nextStep: () => void;
   prevStep: () => void;
-  isHomeAssistantAddon: boolean;
 }) => {
   const testHomeAssistant = () => {
+    const address = getValues("home_assistant_address");
+    const token = getValues("home_assistant_token");
+
+    if (address == null) {
+      Notify({ message: "Home Assistant address is required to test the connection", level: "error", duration: 5000 });
+      return;
+    }
+
+    if (token == null) {
+      Notify({ message: "Home Assistant token is required to test the connection", level: "error", duration: 5000 });
+      return;
+    }
+
     const params = {
-      address: formData.home_assistant_address,
-      token: formData.home_assistant_token,
+      address: address,
+      token: token,
     };
     const queryString = new URLSearchParams(params).toString();
 
@@ -48,9 +62,7 @@ const Step5_HomeAssistantSettings = ({
       </div>
       <div className="alert alert-info my-4" hidden={!isHomeAssistantAddon}>
         <Icon path={mdiInformationOutline} className="w-6" />
-        <span>
-          You are running NSPanel Manager as a Home Assistant add on. These settings are managed for you by Home Assistant. Simply press next to continue.
-        </span>
+        <span>You are running NSPanel Manager as a Home Assistant add on. These settings are managed for you by Home Assistant.</span>
       </div>
       <div className="alert alert-info my-4" hidden={isHomeAssistantAddon}>
         <Icon path={mdiInformationOutline} className="w-6" />
@@ -59,7 +71,7 @@ const Step5_HomeAssistantSettings = ({
           <span className="italic">http(s)://address:port/</span>
         </div>
       </div>
-      <div className="w-full">
+      <div className="w-full" hidden={isHomeAssistantAddon}>
         <div className="flex justify-center mb-4 duration-500 transition-transform ease-linear">
           {/* Name */}
           <div className="w-full">
@@ -70,15 +82,14 @@ const Step5_HomeAssistantSettings = ({
               <input
                 className="outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
                 type="text"
-                onChange={(e) => setFormData({ ...formData, home_assistant_address: e.target.value })}
-                value={formData.home_assistant_address}
+                {...register("home_assistant_address")}
                 disabled={isHomeAssistantAddon}
                 required
               />
             </div>
           </div>
         </div>
-        <div className="flex justify-center mb-4 duration-500 transition-transform ease-linear">
+        <div className="flex justify-center mb-4 duration-500 transition-transform ease-linear" hidden={isHomeAssistantAddon}>
           {/* Port */}
           <div className="w-full">
             <label htmlFor="manager_port" className="block mb-2 text-sm font-medium">
@@ -88,8 +99,7 @@ const Step5_HomeAssistantSettings = ({
               <input
                 className="outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
                 type="password"
-                onChange={(e) => setFormData({ ...formData, home_assistant_token: e.target.value })}
-                value={formData.home_assistant_token}
+                {...register("home_assistant_token")}
                 disabled={isHomeAssistantAddon}
                 required
               />
@@ -97,7 +107,7 @@ const Step5_HomeAssistantSettings = ({
           </div>
         </div>
       </div>
-      <button className="btn btn-accent w-full" onClick={testHomeAssistant}>
+      <button className="btn btn-accent w-full" onClick={testHomeAssistant} hidden={isHomeAssistantAddon}>
         Test settings
       </button>
       <div className="flex gap-2 justify-end mt-8">

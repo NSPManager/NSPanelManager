@@ -1,20 +1,28 @@
-import { type formDataType } from "./InitialSetup";
 import { Icon } from "@mdi/react";
 import { mdiInformationOutline } from "@mdi/js";
 import { useState } from "react";
 
+import { type UseFormSetValue, type UseFormGetValues, type UseFormRegister, type UseFormWatch } from "react-hook-form";
+import { type InitialSetupFormValues } from "./form";
+
 const Step4_MqttSettings = ({
-  formData,
-  setFormData,
+  setValue,
+  getValues,
+  register,
+  watch,
   nextStep,
   prevStep,
 }: {
-  formData: formDataType;
-  setFormData: (data: formDataType) => void;
+  setValue: UseFormSetValue<InitialSetupFormValues>;
+  getValues: UseFormGetValues<InitialSetupFormValues>;
+  register: UseFormRegister<InitialSetupFormValues>;
+  watch: UseFormWatch<InitialSetupFormValues>;
   nextStep: () => void;
   prevStep: () => void;
 }) => {
-  const [anonymousLogin, setAnonymousLogin] = useState(formData.mqtt_username === "");
+  const [noLogin, setNoLogin] = useState(getValues("mqtt_username") == "" && getValues("mqtt_password") == "");
+  const address = watch("mqtt_server");
+  const port = watch("mqtt_port");
 
   return (
     <div>
@@ -36,8 +44,7 @@ const Step4_MqttSettings = ({
               <input
                 className="outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
                 type="text"
-                onChange={(e) => setFormData({ ...formData, mqtt_server: e.target.value })}
-                value={formData.mqtt_server}
+                {...register("mqtt_server")}
                 required
               />
             </div>
@@ -53,8 +60,7 @@ const Step4_MqttSettings = ({
               <input
                 className="outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
                 type="number"
-                onChange={(e) => setFormData({ ...formData, mqtt_port: parseInt(e.target.value) })}
-                value={formData.mqtt_port}
+                {...register("mqtt_port", { valueAsNumber: true })}
                 required
               />
             </div>
@@ -66,16 +72,22 @@ const Step4_MqttSettings = ({
             <input
               type="checkbox"
               className="checkbox checkbox-sm checkbox-primary"
-              checked={anonymousLogin}
-              onChange={() => {
-                setAnonymousLogin(!anonymousLogin);
-                setFormData({ ...formData, mqtt_username: "", mqtt_password: "" });
+              checked={noLogin}
+              onChange={(e) => {
+                if (e.currentTarget.checked) {
+                  setValue("mqtt_username", "");
+                  setValue("mqtt_password", "");
+                  setValue("clear_mqtt_password", true);
+                  setNoLogin(true);
+                } else {
+                  setNoLogin(false);
+                }
               }}
             />
             Anonymous login
           </label>
 
-          <div className="flex justify-center my-4 duration-500 transition-transform ease-linear" hidden={anonymousLogin}>
+          <div className="flex justify-center my-4 duration-500 transition-transform ease-linear" hidden={noLogin}>
             {/* Username */}
             <div className="w-full">
               <label htmlFor="mqtt_username" className="block mb-2 text-sm font-medium">
@@ -86,16 +98,14 @@ const Step4_MqttSettings = ({
                   className="outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
                   type="text"
                   id="mqtt_username"
-                  onChange={(e) => setFormData({ ...formData, mqtt_username: e.target.value })}
-                  value={formData.mqtt_username}
-                  disabled={anonymousLogin}
+                  {...register("mqtt_username")}
                   required
                 />
               </div>
             </div>
           </div>
 
-          <div className="flex justify-center mb-4 duration-500 transition-transform ease-linear" hidden={anonymousLogin}>
+          <div className="flex justify-center mb-4 duration-500 transition-transform ease-linear" hidden={noLogin == true}>
             {/* Password */}
             <div className="w-full">
               <label htmlFor="mqtt_password" className="block mb-2 text-sm font-medium">
@@ -106,9 +116,7 @@ const Step4_MqttSettings = ({
                   className="outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
                   type="password"
                   id="mqtt_password"
-                  onChange={(e) => setFormData({ ...formData, mqtt_password: e.target.value })}
-                  value={formData.mqtt_password}
-                  disabled={anonymousLogin}
+                  {...register("mqtt_password")}
                   required
                 />
               </div>
@@ -117,10 +125,10 @@ const Step4_MqttSettings = ({
         </fieldset>
       </div>
       <div className="flex gap-2 justify-end mt-8">
-        <button type="submit" className="btn btn-neutral" onClick={prevStep}>
+        <button type="button" className="btn btn-neutral" onClick={prevStep}>
           Back
         </button>
-        <button type="submit" className="btn btn-primary" onClick={nextStep} disabled={!formData.mqtt_server || !formData.mqtt_port}>
+        <button type="button" className="btn btn-primary" onClick={nextStep} disabled={address == "" || port == null || port < 1 || port > 65535}>
           Next
         </button>
       </div>

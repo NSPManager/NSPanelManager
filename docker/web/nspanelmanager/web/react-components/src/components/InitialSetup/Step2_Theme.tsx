@@ -1,18 +1,17 @@
-import { useState } from "react";
-import { type formDataType } from "./InitialSetup";
+import { type UseFormSetValue, type UseFormWatch } from "react-hook-form";
+import { type InitialSetupFormValues } from "./form";
 
 const Step2_Theme = ({
-  setFormData,
-  formData,
+  setValue,
   nextStep,
   prevStep,
+  watch,
 }: {
-  setFormData: (data: formDataType) => void;
-  formData: formDataType;
+  setValue: UseFormSetValue<InitialSetupFormValues>;
   nextStep: () => void;
   prevStep: () => void;
+  watch: UseFormWatch<InitialSetupFormValues>;
 }) => {
-  const [selectedTheme, setSelectedTheme] = useState("default");
   const themes = {
     default: "Default",
     light: "Light",
@@ -49,6 +48,7 @@ const Step2_Theme = ({
     nord: "Nord",
     sunset: "Sunset",
   };
+  const selectedTheme = watch("theme");
 
   return (
     <div>
@@ -58,8 +58,7 @@ const Step2_Theme = ({
             className="bg-neutral text-neutral-content grid grid-cols-3 w-full h-20 rounded-box overflow-hidden cursor-pointer"
             data-theme={theme_option}
             onClick={() => {
-              setSelectedTheme(theme_option);
-              setFormData({ ...formData, theme: theme_option });
+              setValue("theme", theme_option);
             }}
           >
             <div className="">
@@ -74,7 +73,7 @@ const Step2_Theme = ({
                   name="theme-dropdown"
                   className="theme-controller radio radio-xs radio-accent p-0 m-0 absolute top-1 right-1"
                   value={theme_option}
-                  checked={theme_option === selectedTheme}
+                  checked={theme_option == selectedTheme}
                 />
                 <span className="label-text justify-start w-full ml-2 text-wrap">{display_name}</span>
               </label>
@@ -90,10 +89,10 @@ const Step2_Theme = ({
         ))}
       </div>
       <div className="flex gap-2 justify-end mt-8">
-        <button type="submit" className="btn btn-neutral" onClick={prevStep}>
+        <button type="button" className="btn btn-neutral" onClick={prevStep}>
           Back
         </button>
-        <button type="submit" className="btn btn-primary" onClick={nextStep}>
+        <button type="button" className="btn btn-primary" onClick={nextStep}>
           Next
         </button>
       </div>

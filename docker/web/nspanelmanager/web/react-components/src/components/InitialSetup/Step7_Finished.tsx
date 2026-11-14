@@ -1,44 +1,59 @@
-import { type formDataType } from "./InitialSetup";
 import { Notify } from "../NSPanelToastContainer";
+import { type UseFormReturn } from "react-hook-form";
+import { type InitialSetupFormValues, buildPatch, toFormValues } from "./form";
+import { api } from "../../api/client";
 
-const Step7_Finished = ({ formData, prevStep }: { formData: formDataType; prevStep: () => void }) => {
-  function getCookie(name: string) {
-    let cookieValue = "";
-    if (document.cookie && document.cookie !== "") {
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.substring(0, name.length + 1) === name + "=") {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
+const Step7_Finished = ({
+  form,
+  prevStep,
+  isHomeAssistantAddon,
+  dialogRef,
+}: {
+  form: UseFormReturn<InitialSetupFormValues>;
+  prevStep: () => void;
+  isHomeAssistantAddon: boolean;
+  dialogRef: React.RefObject<HTMLDialogElement | null>;
+}) => {
+  const saveSettings = async () => {
+    const {
+      getValues,
+      reset,
+      formState: { dirtyFields },
+    } = form;
+
+    const body = buildPatch(getValues(), dirtyFields, isHomeAssistantAddon);
+    try {
+      const { data, error, response } = await api.PATCH("/rest/v2/settings", { body });
+      if (data) {
+        reset(toFormValues(data));
+        Notify({ message: "Settings saved.", level: "success", duration: 5000 });
+        dialogRef.current?.close();
+        return;
       }
-    }
-    return cookieValue;
-  }
+      if (response.status === 400 && error && !("detail" in error && error.detail)) {
+        console.error("Got error ", error);
 
-  const saveSettings = () => {
-    fetch("/rest/settings", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-CSRFToken": getCookie("csrftoken"),
-      },
-      body: JSON.stringify({ settings: formData }),
-    })
-      .then((response) => {
-        if (response.ok) {
-          Notify({ message: "Settings saved successfully.", level: "success", duration: 5000 });
-          window.location.reload();
-        } else {
-          response.json().then((data) => {
-            Notify({ message: "Failed to save settings. Error: " + data.message, level: "error", duration: 5000 });
-          });
+        const fieldErrors = Object.entries(error as Record<string, string[] | string>);
+        if (fieldErrors.length === 0) {
+          Notify({ message: "Nothing was saved.", level: "error", duration: 8000 });
         }
-      })
-      .catch((error) => {
-        Notify({ message: "Failed to save settings. Error: " + error.message, level: "error", duration: 5000 });
-      });
+
+        for (const [field, messages] of fieldErrors) {
+          for (const message of Array.isArray(messages) ? messages : [messages]) {
+            Notify({
+              message: `${field}: ${message}`,
+              level: "error",
+              duration: 8000,
+            });
+          }
+        }
+      } else {
+        const detail = error && "detail" in error ? error.detail : `HTTP ${response.status}`;
+        Notify({ message: `Couldn't save the settings: ${detail}`, level: "error" });
+      }
+    } catch (failure) {
+      Notify({ message: `Couldn't save the settings: ${failure instanceof Error ? failure.message : String(failure)}`, level: "error" });
+    }
   };
 
   return (
@@ -57,9 +72,8 @@ const Step7_Finished = ({ formData, prevStep }: { formData: formDataType; prevSt
         <p className="mt-2 text-center">
           Initial setup is now finished. If you have any NSPanels already flashed and connected to the same MQTT broker they should show up automatically. In
           case they do not, there is the documentation and also a discord where you can get help. There is also the Github page where you can report issues and
-          contribute.
         </p>
-        <p className="my-2 text-center font-bold">Thank you for your support and trust and have fun!</p>
+        <p className="my-2 text-center font-bold">Thank you for your support and trust. Have fun and enjoy!</p>
 
         <div id="about_links" className="join join-vertical w-full">
           <a className="join-item btn btn-link" href="https://nspanelmanager.com" target="_blank">
@@ -79,10 +93,10 @@ const Step7_Finished = ({ formData, prevStep }: { formData: formDataType; prevSt
         </div>
 
         <div className="flex gap-2 justify-end mt-8">
-          <button type="submit" className="btn btn-neutral" onClick={prevStep}>
+          <button type="button" className="btn btn-neutral" onClick={prevStep}>
             Back
           </button>
-          <button type="submit" className="btn btn-primary" onClick={saveSettings}>
+          <button type="button" className="btn btn-primary" onClick={saveSettings}>
             Save
           </button>
         </div>
