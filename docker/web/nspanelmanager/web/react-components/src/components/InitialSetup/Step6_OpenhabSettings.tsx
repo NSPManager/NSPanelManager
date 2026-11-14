@@ -1,23 +1,24 @@
-import { type formDataType } from "./InitialSetup";
 import { Icon } from "@mdi/react";
 import { mdiInformationOutline } from "@mdi/js";
 import { Notify } from "../NSPanelToastContainer";
+import { type UseFormGetValues, type UseFormRegister } from "react-hook-form";
+import { type InitialSetupFormValues } from "./form";
 
 const Step6_OpenhabSettings = ({
-  formData,
-  setFormData,
+  getValues,
+  register,
   nextStep,
   prevStep,
 }: {
-  formData: formDataType;
-  setFormData: (data: formDataType) => void;
+  getValues: UseFormGetValues<InitialSetupFormValues>;
+  register: UseFormRegister<InitialSetupFormValues>;
   nextStep: () => void;
   prevStep: () => void;
 }) => {
   const testOpenhab = () => {
     const params = {
-      address: formData.openhab_address,
-      token: formData.openhab_token,
+      address: getValues("openhab_address"),
+      token: getValues("openhab_token"),
     };
     const queryString = new URLSearchParams(params).toString();
 
@@ -62,8 +63,7 @@ const Step6_OpenhabSettings = ({
               <input
                 className="outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
                 type="text"
-                onChange={(e) => setFormData({ ...formData, openhab_address: e.target.value })}
-                value={formData.openhab_address}
+                {...register("openhab_address")}
                 required
               />
             </div>
@@ -79,8 +79,7 @@ const Step6_OpenhabSettings = ({
               <input
                 className="outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5"
                 type="password"
-                onChange={(e) => setFormData({ ...formData, openhab_token: e.target.value })}
-                value={formData.openhab_token}
+                {...register("openhab_token")}
                 required
               />
             </div>

@@ -1,21 +1,20 @@
-import { useRef } from "react";
-import { type formDataType } from "./InitialSetup";
 import { Notify } from "../NSPanelToastContainer";
+import { type UseFormSetValue, type UseFormGetValues, type UseFormRegister } from "react-hook-form";
+import { type InitialSetupFormValues } from "./form";
 
 const Step3_ManagerSettings = ({
-  formData,
-  setFormData,
+  setValue,
+  getValues,
+  register,
   nextStep,
   prevStep,
 }: {
-  formData: formDataType;
-  setFormData: (data: formDataType) => void;
+  setValue: UseFormSetValue<InitialSetupFormValues>;
+  getValues: UseFormGetValues<InitialSetupFormValues>;
+  register: UseFormRegister<InitialSetupFormValues>;
   nextStep: () => void;
   prevStep: () => void;
 }) => {
-  const managerAddressRef = useRef<HTMLInputElement>(null);
-  const managerPortRef = useRef<HTMLInputElement>(null);
-
   const getIPFromURL = () => {
     fetch("/rest/get_ip_by_hostname", {
       method: "POST",
@@ -27,10 +26,7 @@ const Step3_ManagerSettings = ({
       .then((response) => response.json())
       .then((data) => {
         if (data.ip) {
-          if (managerAddressRef.current) {
-            managerAddressRef.current.value = data.ip;
-            setFormData({ ...formData, manager_address: data.ip });
-          }
+          setValue("manager_address", data.ip);
         } else {
           Notify({ message: 'Failed to get IP from URL. No "ip" field in response.', level: "error" });
         }
@@ -42,13 +38,14 @@ const Step3_ManagerSettings = ({
 
   const testManagerAddressAndPort = () => {
     const params = {
-      address: formData.manager_address,
-      port: formData.manager_port.toString(),
+      address: getValues("manager_address"),
+      port: getValues("manager_port").toString(),
     };
     const queryString = new URLSearchParams(params).toString();
 
     fetch("/rest/mqttmanager/test?" + queryString, {
       method: "GET",
+      signal: AbortSignal.timeout(2000),
     })
       .then((response) => {
         if (response.ok) {
@@ -77,10 +74,8 @@ const Step3_ManagerSettings = ({
               <input
                 className="outline-none bg-base-300 border-neutral rounded-md rounded-r-none border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
                 type="text"
-                onChange={(e) => setFormData({ ...formData, manager_address: e.target.value })}
-                value={formData.manager_address}
+                {...register("manager_address")}
                 required
-                ref={managerAddressRef}
               />
               <button type="button" className="btn btn-info rounded-l-none h-auto" onClick={() => getIPFromURL()}>
                 Load from URL
@@ -98,19 +93,15 @@ const Step3_ManagerSettings = ({
               <input
                 className="outline-none bg-base-300 border-neutral rounded-md rounded-r-none border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5 peer/search_text"
                 type="number"
-                onChange={(e) => setFormData({ ...formData, manager_port: parseInt(e.target.value) })}
-                value={formData.manager_port}
+                {...register("manager_port", { valueAsNumber: true })}
                 required
-                ref={managerPortRef}
               />
               <button
                 type="button"
                 className="btn btn-info rounded-l-none h-auto"
-                onClick={() =>
-                  managerPortRef.current &&
-                  (managerPortRef.current.value = window.location.port) &&
-                  setFormData({ ...formData, manager_port: parseInt(window.location.port) })
-                }
+                onClick={() => {
+                  setValue("manager_port", parseInt(window.location.port));
+                }}
               >
                 Load from URL
               </button>
@@ -122,10 +113,10 @@ const Step3_ManagerSettings = ({
         </button>
       </div>
       <div className="flex gap-2 justify-end mt-8">
-        <button type="submit" className="btn btn-neutral" onClick={prevStep}>
+        <button type="button" className="btn btn-neutral" onClick={prevStep}>
           Back
         </button>
-        <button type="submit" className="btn btn-primary" onClick={nextStep} disabled={!formData.manager_address || !formData.manager_port}>
+        <button type="button" className="btn btn-primary" onClick={nextStep}>
           Next
         </button>
       </div>
