@@ -37,9 +37,22 @@ const Step3_ManagerSettings = ({
   };
 
   const testManagerAddressAndPort = () => {
+    const address = getValues("manager_address");
+    const port = getValues("manager_port");
+
+    if (address == null) {
+      Notify({ message: "Manager address is required to test the connection", level: "error", duration: 5000 });
+      return;
+    }
+
+    if (port == null) {
+      Notify({ message: "Manager port is required to test the connection", level: "error", duration: 5000 });
+      return;
+    }
+
     const params = {
-      address: getValues("manager_address"),
-      port: getValues("manager_port").toString(),
+      address: address,
+      port: port.toString(),
     };
     const queryString = new URLSearchParams(params).toString();
 

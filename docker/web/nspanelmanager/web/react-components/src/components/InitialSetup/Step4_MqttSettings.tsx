@@ -2,23 +2,27 @@ import { Icon } from "@mdi/react";
 import { mdiInformationOutline } from "@mdi/js";
 import { useState } from "react";
 
-import { type UseFormSetValue, type UseFormGetValues, type UseFormRegister } from "react-hook-form";
+import { type UseFormSetValue, type UseFormGetValues, type UseFormRegister, type UseFormWatch } from "react-hook-form";
 import { type InitialSetupFormValues } from "./form";
 
 const Step4_MqttSettings = ({
   setValue,
   getValues,
   register,
+  watch,
   nextStep,
   prevStep,
 }: {
   setValue: UseFormSetValue<InitialSetupFormValues>;
   getValues: UseFormGetValues<InitialSetupFormValues>;
   register: UseFormRegister<InitialSetupFormValues>;
+  watch: UseFormWatch<InitialSetupFormValues>;
   nextStep: () => void;
   prevStep: () => void;
 }) => {
   const [noLogin, setNoLogin] = useState(getValues("mqtt_username") == "" && getValues("mqtt_password") == "");
+  const address = watch("mqtt_server");
+  const port = watch("mqtt_port");
 
   return (
     <div>
@@ -124,12 +128,7 @@ const Step4_MqttSettings = ({
         <button type="button" className="btn btn-neutral" onClick={prevStep}>
           Back
         </button>
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={nextStep}
-          disabled={getValues("mqtt_server") == "" || getValues("mqtt_port") < 1 || getValues("mqtt_port") > 65535}
-        >
+        <button type="button" className="btn btn-primary" onClick={nextStep} disabled={address == "" || port == null || port < 1 || port > 65535}>
           Next
         </button>
       </div>

@@ -94,7 +94,9 @@ const InitialSetup = ({
           </button>
         </>
       )}
-      {state.status === "loaded" && <InitialSetupForm settings={state.settings} dialogRef={dialogRef} isHomeAssistantAddon={isHomeAssistantAddon} />}
+      {state.status === "loaded" && dialogRef != null && (
+        <InitialSetupForm settings={state.settings} dialogRef={dialogRef} isHomeAssistantAddon={isHomeAssistantAddon} />
+      )}
 
       <div className="modal-backdrop"></div>
     </dialog>
@@ -106,7 +108,7 @@ const InitialSetupForm = ({
   isHomeAssistantAddon,
   settings,
 }: {
-  dialogRef: React.RefObject<HTMLDialogElement>;
+  dialogRef: React.RefObject<HTMLDialogElement | null>;
   isHomeAssistantAddon: boolean;
   settings: Settings;
 }) => {
@@ -230,7 +232,9 @@ const InitialSetupForm = ({
               } else if (step == 3) {
                 return <Step3_ManagerSettings setValue={setValue} getValues={getValues} register={register} nextStep={nextStep} prevStep={prevStep} />;
               } else if (step == 4) {
-                return <Step4_MqttSettings setValue={setValue} getValues={getValues} register={register} nextStep={nextStep} prevStep={prevStep} />;
+                return (
+                  <Step4_MqttSettings setValue={setValue} getValues={getValues} register={register} watch={watch} nextStep={nextStep} prevStep={prevStep} />
+                );
               } else if (step == 5) {
                 return (
                   <Step5_HomeAssistantSettings

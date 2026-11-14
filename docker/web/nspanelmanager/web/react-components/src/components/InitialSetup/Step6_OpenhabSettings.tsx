@@ -16,9 +16,22 @@ const Step6_OpenhabSettings = ({
   prevStep: () => void;
 }) => {
   const testOpenhab = () => {
+    const address = getValues("openhab_address");
+    const token = getValues("openhab_token");
+
+    if (address == null) {
+      Notify({ message: "OpenHAB address is required to test the connection", level: "error", duration: 5000 });
+      return;
+    }
+
+    if (token == null) {
+      Notify({ message: "OpenHAB token is required to test the connection", level: "error", duration: 5000 });
+      return;
+    }
+
     const params = {
-      address: getValues("openhab_address"),
-      token: getValues("openhab_token"),
+      address: address,
+      token: token,
     };
     const queryString = new URLSearchParams(params).toString();
 

@@ -18,9 +18,22 @@ const Step5_HomeAssistantSettings = ({
   prevStep: () => void;
 }) => {
   const testHomeAssistant = () => {
+    const address = getValues("home_assistant_address");
+    const token = getValues("home_assistant_token");
+
+    if (address == null) {
+      Notify({ message: "Home Assistant address is required to test the connection", level: "error", duration: 5000 });
+      return;
+    }
+
+    if (token == null) {
+      Notify({ message: "Home Assistant token is required to test the connection", level: "error", duration: 5000 });
+      return;
+    }
+
     const params = {
-      address: getValues("home_assistant_address"),
-      token: getValues("home_assistant_token"),
+      address: address,
+      token: token,
     };
     const queryString = new URLSearchParams(params).toString();
 

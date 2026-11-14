@@ -12,7 +12,7 @@ const Step7_Finished = ({
   form: UseFormReturn<InitialSetupFormValues>;
   prevStep: () => void;
   isHomeAssistantAddon: boolean;
-  dialogRef: React.RefObject<HTMLDialogElement>;
+  dialogRef: React.RefObject<HTMLDialogElement | null>;
 }) => {
   const saveSettings = async () => {
     const {
