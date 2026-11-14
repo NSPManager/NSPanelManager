@@ -75,9 +75,9 @@ const Step4_MqttSettings = ({
               checked={noLogin}
               onChange={(e) => {
                 if (e.currentTarget.checked) {
-                  setValue("mqtt_username", "");
-                  setValue("mqtt_password", "");
-                  setValue("clear_mqtt_password", true);
+                  setValue("mqtt_username", "", { shouldDirty: true });
+                  setValue("mqtt_password", "", { shouldDirty: true });
+                  setValue("clear_mqtt_password", true, { shouldDirty: true });
                   setNoLogin(true);
                 } else {
                   setNoLogin(false);

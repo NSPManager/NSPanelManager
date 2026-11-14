@@ -58,7 +58,11 @@ const Step2_Theme = ({
             className="bg-neutral text-neutral-content grid grid-cols-3 w-full h-20 rounded-box overflow-hidden cursor-pointer"
             data-theme={theme_option}
             onClick={() => {
-              setValue("theme", theme_option);
+              setValue("theme", theme_option, { shouldDirty: true });
+
+              // Update the navbar theme selector as to keep the theme when pressing the next button.
+              const radio = document.querySelector<HTMLInputElement>(`#theme-radio-${CSS.escape(theme_option)}`);
+              if (radio) radio.checked = true;
             }}
           >
             <div className="">

@@ -1,10 +1,10 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-DsrUEgTV.js";
-import { s as useForm } from "./index.esm-D2iT7jTM.js";
-import { n as Notify } from "./NSPanelToastContainer-BeaDvrjv.js";
-import { t as motion } from "./proxy-7sw4PveN.js";
-import { t as AnimatePresence } from "./AnimatePresence-C5DU0GhE.js";
-import { i as mdiInformationOutline, x as require_Icon } from "./mdi-Bo7fQ2tR.js";
-import { i as api, t as Alert } from "./layout-CEwTn_qs.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-DArmUgNn.js";
+import { s as useForm } from "./index.esm-k48P7boK.js";
+import { n as Notify } from "./NSPanelToastContainer-DqBiCYgm.js";
+import { t as motion } from "./proxy-BZTzkADl.js";
+import { t as AnimatePresence } from "./AnimatePresence-BrcXqfjQ.js";
+import { i as mdiInformationOutline, x as require_Icon } from "./mdi-C7m9AGig.js";
+import { i as api, t as Alert } from "./layout-UB6ft_05.js";
 //#region src/components/InitialSetup/Step1_Welcome.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_jsx_runtime = require_jsx_runtime();
@@ -133,7 +133,9 @@ var Step2_Theme = ({ setValue, nextStep, prevStep, watch }) => {
 			className: "bg-neutral text-neutral-content grid grid-cols-3 w-full h-20 rounded-box overflow-hidden cursor-pointer",
 			"data-theme": theme_option,
 			onClick: () => {
-				setValue("theme", theme_option);
+				setValue("theme", theme_option, { shouldDirty: true });
+				const radio = document.querySelector(`#theme-radio-${CSS.escape(theme_option)}`);
+				if (radio) radio.checked = true;
 			},
 			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 				className: "",
@@ -207,7 +209,7 @@ var Step3_ManagerSettings = ({ setValue, getValues, register, nextStep, prevStep
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ hostname: window.location.hostname })
 		}).then((response) => response.json()).then((data) => {
-			if (data.ip) setValue("manager_address", data.ip);
+			if (data.ip) setValue("manager_address", data.ip, { shouldDirty: true });
 			else Notify({
 				message: "Failed to get IP from URL. No \"ip\" field in response.",
 				level: "error"
@@ -313,7 +315,7 @@ var Step3_ManagerSettings = ({ setValue, getValues, register, nextStep, prevStep
 							type: "button",
 							className: "btn btn-info rounded-l-none h-auto",
 							onClick: () => {
-								setValue("manager_port", parseInt(window.location.port));
+								setValue("manager_port", parseInt(window.location.port), { shouldDirty: true });
 							},
 							children: "Load from URL"
 						})]
@@ -412,9 +414,9 @@ var Step4_MqttSettings = ({ setValue, getValues, register, watch, nextStep, prev
 								checked: noLogin,
 								onChange: (e) => {
 									if (e.currentTarget.checked) {
-										setValue("mqtt_username", "");
-										setValue("mqtt_password", "");
-										setValue("clear_mqtt_password", true);
+										setValue("mqtt_username", "", { shouldDirty: true });
+										setValue("mqtt_password", "", { shouldDirty: true });
+										setValue("clear_mqtt_password", true, { shouldDirty: true });
 										setNoLogin(true);
 									} else setNoLogin(false);
 								}

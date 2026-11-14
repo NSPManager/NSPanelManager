@@ -26,7 +26,7 @@ const Step3_ManagerSettings = ({
       .then((response) => response.json())
       .then((data) => {
         if (data.ip) {
-          setValue("manager_address", data.ip);
+          setValue("manager_address", data.ip, { shouldDirty: true });
         } else {
           Notify({ message: 'Failed to get IP from URL. No "ip" field in response.', level: "error" });
         }
@@ -113,7 +113,7 @@ const Step3_ManagerSettings = ({
                 type="button"
                 className="btn btn-info rounded-l-none h-auto"
                 onClick={() => {
-                  setValue("manager_port", parseInt(window.location.port));
+                  setValue("manager_port", parseInt(window.location.port), { shouldDirty: true });
                 }}
               >
                 Load from URL
