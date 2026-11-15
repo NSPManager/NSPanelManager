@@ -2,8 +2,8 @@
 #include <algorithm>
 #include <command_manager/command_manager.hpp>
 #include <functional>
-#include <iterator>
 #include <gtest/gtest.h>
+#include <iterator>
 #include <media_player/media_player.hpp>
 #include <nspanel/nspanel.hpp>
 #include <protobuf_nspanel.pb.h>
@@ -756,10 +756,10 @@ TEST_F(NSPanelTest, panel_not_yet_accepted_is_awaiting_accept) {
   EXPECT_EQ(panel->get_state(), MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT);
 }
 
-TEST_F(NSPanelTest, accepted_panel_is_loaded_as_waiting) {
+TEST_F(NSPanelTest, accepted_panel_is_loaded_as_offline) {
   load_panel();
 
-  EXPECT_EQ(panel->get_state(), MQTT_MANAGER_NSPANEL_STATE::WAITING);
+  EXPECT_EQ(panel->get_state(), MQTT_MANAGER_NSPANEL_STATE::OFFLINE);
 }
 
 // Accepting in the web interface sets accepted and reloads the manager. The panel must leave
