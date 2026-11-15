@@ -170,7 +170,6 @@ void EntityManager::load_nspanels() {
     auto existing_nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
     if (existing_nspanel) [[likely]] {
       (*existing_nspanel)->reload_config();
-      (*existing_nspanel)->send_config();
     } else {
       std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
       auto panel = std::shared_ptr<NSPanel>(new NSPanel(nspanel_id));
@@ -368,7 +367,7 @@ void EntityManager::load_media_players() {
 
 void EntityManager::load_covers() {
   auto cover_ids = database_manager::database.select(&database_manager::Entity::id, sqlite_orm::from<database_manager::Entity>(),
-                                                      sqlite_orm::where(sqlite_orm::glob(&database_manager::Entity::entity_type, "cover")));
+                                                     sqlite_orm::where(sqlite_orm::glob(&database_manager::Entity::entity_type, "cover")));
   SPDLOG_INFO("Loading {} covers.", cover_ids.size());
 
   // Check if any existing cover has been removed.
@@ -489,7 +488,7 @@ void EntityManager::load_scenes() {
           SPDLOG_INFO("Scene {}::{} was found in database but not in config. Creating scene.", scene->get_id(), scene->get_name());
           std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
           EntityManager::_entities.push_back(scene);
-        } else if (scene_settings.scene_type.compare("nspm_scene") == 0) {
+        } else if (scene_settings.scene_type.compare("nspm_scene") == 0 || scene_settings.scene_type.compare("nspm") == 0) {
           std::shared_ptr<NSPMScene> scene = std::shared_ptr<NSPMScene>(new NSPMScene(scene_settings.id));
           SPDLOG_INFO("Scene {}::{} was found in database but not in config. Creating scene.", scene->get_id(), scene->get_name());
           std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);

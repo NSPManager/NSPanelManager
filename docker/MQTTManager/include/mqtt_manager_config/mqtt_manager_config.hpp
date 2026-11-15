@@ -1,14 +1,17 @@
 #ifndef MQTTMANAGER_CONFIG_HPP
 #define MQTTMANAGER_CONFIG_HPP
-#include "light/light.hpp"
+#include "filesystem"
 #include <boost/algorithm/string.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/signals2.hpp>
+#include <cstdint>
 #include <database_manager/database_manager.hpp>
 #include <expected>
+#include <filesystem>
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
+#include <optional>
 #include <protobuf/protobuf_mqttmanager.pb.h>
 #include <spdlog/spdlog.h>
 #include <string>
@@ -167,24 +170,24 @@ private:
 
   static inline LightTurnOnBehaviour _light_turn_on_behaviour = LightTurnOnBehaviour::COLOR_TEMPERATURE;
 
-  static std::optional<std::string> _get_file_md5_checksum(std::string file_path);
-  static inline std::mutex _md5_checksum_files_mutex;
-  static inline std::string _md5_checksum_firmware_sonoff;
-  static inline std::string _md5_checksum_firmware_custom;
-  static inline std::string _md5_checksum_littlefs_sonoff;
-  static inline std::string _md5_checksum_littlefs_custom;
-  static inline std::string _md5_checksum_eu_tft1;
-  static inline std::string _md5_checksum_eu_tft2;
-  static inline std::string _md5_checksum_eu_tft3;
-  static inline std::string _md5_checksum_eu_tft4;
-  static inline std::string _md5_checksum_us_tft1;
-  static inline std::string _md5_checksum_us_tft2;
-  static inline std::string _md5_checksum_us_tft3;
-  static inline std::string _md5_checksum_us_tft4;
-  static inline std::string _md5_checksum_us_horizontal_mirrored_tft1;
-  static inline std::string _md5_checksum_us_horizontal_mirrored_tft2;
-  static inline std::string _md5_checksum_us_horizontal_mirrored_tft3;
-  static inline std::string _md5_checksum_us_horizontal_mirrored_tft4;
+  // A struct of values needed to cache and hold checksums for files. Stored with an unordered map
+  // where the key of the map is the path to the file.
+  struct _CachedChecksum {
+    std::optional<std::filesystem::file_time_type> mtime;
+    std::string checksum;
+  };
+
+  // Map of cached checksums. Key = file path.
+  static inline std::unordered_map<std::string, _CachedChecksum> _checksums;
+
+  // Mutex for _checksums map
+  static inline std::mutex _checksums_mutex;
+
+  // Get a checksum for a given file. Return error string in case of failure.
+  static std::expected<std::string, std::string> _get_file_md5_checksum(std::string file_path);
+
+  // Get the mtime (modified time) from a given file. Return error string in case of failure.
+  static std::expected<std::filesystem::file_time_type, std::string> _get_file_mtime(std::string file_path);
 
   static inline std::unordered_map<MQTT_MANAGER_SETTING, std::string> _settings_values_cache;
 
