@@ -31,6 +31,7 @@
 #include <exception>
 #include <fmt/chrono.h>
 #include <fmt/core.h>
+#include <google/protobuf/util/message_differencer.h>
 #include <iomanip>
 #include <ixwebsocket/IXWebSocketSendInfo.h>
 #include <light/light.hpp>
@@ -61,10 +62,6 @@ NSPanel::NSPanel(uint32_t id) {
   this->_id = id;
   SPDLOG_INFO("Loading new NSPanel with ID {}.", id);
   this->reload_config();
-  if (!this->_mqtt_config_topic.empty() && this->_state != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
-    SPDLOG_INFO("Loaded accepted NSPanel {}::{}.", this->_id, this->_name);
-    this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
-  }
 
   CommandManager::attach_callback(boost::bind(&NSPanel::command_callback, this, _1));
   WebsocketServer::attach_stomp_callback(fmt::format("nspanel/{}/command", this->_mac), boost::bind(&NSPanel::handle_stomp_command_callback, this, _1));
@@ -143,7 +140,7 @@ void NSPanel::reload_config() {
     } else if (panel_settings.model.compare("web") == 0) {
       this->_model = MQTT_MANAGER_NSPANEL_MODEL::WEB;
     } else {
-      SPDLOG_ERROR("Failed to prase panel model for NSPanel {}::{}. Got value '{}'. Will assume sonoff.", panel_settings.id, panel_settings.friendly_name, panel_settings.model);
+      SPDLOG_ERROR("Failed to parse panel model for NSPanel {}::{}. Got value '{}'. Will assume sonoff.", panel_settings.id, panel_settings.friendly_name, panel_settings.model);
       this->_model = MQTT_MANAGER_NSPANEL_MODEL::SONOFF;
     }
 
@@ -199,7 +196,7 @@ void NSPanel::reload_config() {
     if (!panel_settings.denied && !panel_settings.accepted) {
       // No decission has been made on wether ot accept or deny panel. It is therefore awaiting_accept
       this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
-    } else if (this->_state == MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT || this->_state == MQTT_MANAGER_NSPANEL_STATE::DENIED) {
+    } else if (panel_settings.accepted && (this->_state == MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT || this->_state == MQTT_MANAGER_NSPANEL_STATE::DENIED)) {
       // The panel has just been accepted. Wait for it to register again.
       this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
     }
@@ -522,8 +519,13 @@ void NSPanel::send_config() {
     }
   }
 
-  SPDLOG_DEBUG("Sending updated NSPanelConfig to panel {}::{} over MQTT.", this->_id, this->_name);
-  MQTT_Manager::publish_protobuf(this->_mqtt_config_topic, config, true);
+  google::protobuf::util::MessageDifferencer differencer;
+  if (!differencer.Equals(this->_last_send_config, config)) {
+    SPDLOG_DEBUG("Sending updated NSPanelConfig to panel {}::{} over MQTT.", this->_id, this->_name);
+    MQTT_Manager::publish_protobuf(this->_mqtt_config_topic, config, true);
+  } else {
+    SPDLOG_DEBUG("Not sending updated config for NSPanel {}::{} as no config change has occured from last sent config.");
+  }
 }
 
 NSPanel::~NSPanel() {

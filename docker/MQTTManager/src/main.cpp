@@ -39,8 +39,8 @@
 
 void sigusr1_handler(int signal) {
   if (signal == SIGUSR1) {
-    SPDLOG_INFO("Reloading config from manager. Will wait 50ms for other processing to complete before proceeding with config reload.");
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+    SPDLOG_INFO("Reloading config from manager.");
+    // std::this_thread::sleep_for(std::chrono::milliseconds(50));
 
     MqttManagerConfig::load();
     MQTT_Manager::reload_config();
