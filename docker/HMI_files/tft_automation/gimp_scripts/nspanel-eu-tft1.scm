@@ -580,7 +580,7 @@
 	;MAKE BACKGROUND PAGE INVISIBLE TO PREPARE FOR NEXT ROOM
 	(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "ENTITY_THERMOSTAT")) 0)
 
-	;;------------------------------------------------------------------------------------------------------------------------
+;;------------------------------------------------------------------------------------------------------------------------
 ;; BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE
 
 	;MAKE BACKGROUND PAGE VISIBLE
