@@ -1,0 +1,5246 @@
+# Generated from the .HMI next to this file by docker/HMI_files/hmi_inventory.py. Do not edit.
+# Regenerate with: uv run docker/HMI_files/hmi_inventory.py --write
+direction 270
+
+## fonts
+0  hamlin18_latA 18
+1  replace_h23bold_id_1 23
+2  timeandtemp 80
+3  replace_h22_id_3 22
+4  nd_icons 40
+5  replace_weather_30 30
+6  weather-current-96240104 96
+7  tinyiconsweather20 20
+8  weather_temp_replace 72
+9  newfont9 50
+10  stuvwxyz50NEW 50
+11  stuvwxyz40 40
+12  timeandtemp30 30
+13  arrows25 25
+14  arrows30 30
+15  arrows40 40
+16  thermostat30NEW 30
+
+## Program.s
+    //The following code is only run once when power on, and is generally used for global variable definition and power on initialization data
+    int sys0=0,sys1=0,sys2=0     //At present, the definition of global variable only supports 4-byte signed integer (int), and other types of global quantity declaration are not supported. If you want to use string type, you can use variable control in the page to implement
+    int tmp=0
+    int gest_time=0,gest_type=0
+    int x=0,y=0,ny=0,dx=0,dy=0,dsq=0,tmp1=0,tmp2=0  //ONLY for testing ALTERNATIVE GESUTRES
+    baud=115200
+    //thsp=15
+    //thup=1
+    //wup=2
+    lcd_dev fffb 0002 0000 0020
+    //printh 00 00 00 ff ff ff 88 ff ff ff//Output power on information to serial port
+    page 0                       //Power on start page 0
+    //thsp=15
+    //thup=1
+    //wup=2
+
+## page 0 page0
+[0] page0  page
+    sta = 1
+    up = 255
+    down = 255
+    left = 255
+    right = 255
+    pic = none
+    bco = 0
+    on load:
+        printh 4e 53 50 4d ff ff ff
+
+## page 1 bootscreen
+[0] bootscreen  page
+    sta = 1
+    up = 255
+    down = 255
+    left = 255
+    right = 255
+    pic = none
+    bco = 0
+    on load:
+        //dim=0
+        vis t_loading,0
+        vis t_ip,0
+        vis p_light,0
+    on loadend:
+        //for(sys0=0;sys0<5000;sys0++)
+        //{
+        //  dim=sys0/50
+        //}
+[1] p_animation  picture
+    at 0,0  455x320
+    pic = 0 (455x320)
+[2] tm_animation  timer
+    en = 1
+    tim = 50
+    on timer:
+        if(p_animation.pic<46)
+        {
+          p_animation.pic=p_animation.pic+1
+          if(p_animation.pic==46)
+          {
+            vis p_light,1
+            vis t_loading,1
+            vis t_ip,1
+          }
+        }else
+        {
+          if(va_up.val==1)
+          {
+            if(p_light.pic==56)
+            {
+              p_light.pic=55
+              va_up.val=0
+            }else
+            {
+              p_light.pic=p_light.pic+1
+            }
+          }else if(va_up.val==0)
+          {
+            if(p_light.pic==50)
+            {
+              p_light.pic=51
+              va_up.val=1
+            }else
+            {
+              p_light.pic=p_light.pic-1
+            }
+          }
+        }
+[3] t_loading  text  global
+    at 79,205  367x30
+    sta = 1
+    txt = ''
+    txt_maxl = 50
+    style = 0
+    font = 3 (replace_h22_id_3 22)
+    pic = none
+    picc = 57 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[4] p_light  picture
+    at 342,136  36x57
+    pic = 48 (36x57)
+[5] va_up  variable
+    sta = 0
+    val = 1
+    txt = 'newtxt'
+    txt_maxl = 10
+[6] t_ip  text  global
+    at 79,231  367x30
+    sta = 1
+    txt = ''
+    txt_maxl = 30
+    style = 0
+    font = 3 (replace_h22_id_3 22)
+    pic = none
+    picc = 57 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+
+## page 2 home
+[0] home  page
+    sta = 2
+    up = 255
+    down = 255
+    left = 255
+    right = 255
+    pic = 57 (455x320)
+    bco = 0
+    on load:
+        vis p_lockceiling,0
+        vis p_locktable,0
+[1] s_kelvin  slider  global  sendkey=release
+    at 340,55  105x210
+    sta = 0
+    val = 0
+    minval = 0
+    maxval = 100
+    dis = 100
+    mode = 1
+    wid = 89
+    hig = 4
+    pic = none
+    pic1 = none
+    pic2 = 75 (455x320)
+    picc = 57 (455x320)
+    picc1 = 58 (455x320)
+    bco = 30175
+    bco1 = 65504
+    pco = 65535
+    on slide:
+        tm0.en=0
+[2] s_brightness  slider  global  sendkey=release
+    at 229,55  105x210
+    sta = 0
+    val = 0
+    minval = 0
+    maxval = 100
+    dis = 100
+    mode = 1
+    wid = 89
+    hig = 4
+    pic = none
+    pic1 = none
+    pic2 = 75 (455x320)
+    picc = 57 (455x320)
+    picc1 = 58 (455x320)
+    bco = 30175
+    bco1 = 65504
+    pco = 65535
+    on slide:
+        tm0.en=0
+[3] b_ceiling  dual-state button  global  sendkey=press+release
+    at 20,132  77x63
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 57 (455x320)
+    picc2 = 58 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[4] b_table  dual-state button  global  sendkey=press+release
+    at 132,133  76x56
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 57 (455x320)
+    picc2 = 58 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[5] room  button  global  sendkey=release
+    at 54,266  172x54
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 15
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 57 (455x320)
+    picc2 = 58 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[6] mode  button  global  sendkey=release
+    at 226,266  228x54
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 15
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 57 (455x320)
+    picc2 = 58 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[7] t_time  text  global  sendkey=release
+    at 350,3  97x47
+    sta = 0
+    txt = ''
+    txt_maxl = 10
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 57 (455x320)
+    bco = 65535
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[8] n_ceiling  number  global
+    at 9,203  100x25
+    sta = 0
+    val = 0
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 57 (455x320)
+    bco = 65535
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 1
+[9] n_table  number  global
+    at 120,203  100x25
+    sta = 0
+    val = 0
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 57 (455x320)
+    bco = 65535
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 1
+[10] b_nextroom  button  sendkey=release
+    at 0,265  54x55
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 57 (455x320)
+    picc2 = 58 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[11] sleep_display  timer  global
+    en = 1
+    tim = 30000
+    on timer:
+        printh 92 FF FF FF
+[12] tc0  touchcap
+    val = 0
+    on down:
+        va1.val=tch1
+        tm0.en=1
+    on up:
+        //dim=100
+        //vis wake_up_button,0
+        sleep_display.en=1 //screensaver timer
+        //Swipedetection
+        tm0.en=0
+        if(tch1==0)
+        // When this is zero we can interpret that as the real end of the drag event
+        {
+          if(va2.val!=0)
+          {
+            va0.val=va1.val-va2.val
+            if(va0.val>20)
+            {
+              //Up swipe
+              //page partytime
+            }else if(va0.val<-20)
+            {
+              //Down swipe"
+              page dropdown
+            }
+            va2.val=0
+          }
+        }
+[13] tm0  timer
+    en = 0
+    tim = 100
+    on timer:
+        if(tch1!=0)
+        {
+          va2.val=tch1
+        }
+        tm0.en=0
+[14] va0  variable
+    sta = 0
+    val = 0
+    txt = 'newtxt'
+    txt_maxl = 10
+[15] va1  variable
+    sta = 0
+    val = 0
+    txt = 'newtxt'
+    txt_maxl = 10
+[16] va2  variable
+    sta = 0
+    val = 0
+    txt = 'newtxt'
+    txt_maxl = 10
+[17] b_scenes  button  global  sendkey=release
+    at 0,0  112x49
+    sta = 2
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = 59 (112x49)
+    pic2 = 60 (112x49)
+    picc = 57 (455x320)
+    picc2 = 58 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[18] tc1  touchcap
+    val = 0
+[19] p_lockceiling  picture
+    at 31,125  56x4
+    pic = 84 (56x4)
+[20] p_locktable  picture
+    at 142,194  56x4
+    pic = 84 (56x4)
+[21] h_table  hotspot  sendkey=press+release
+    at 118,55  105x210
+[22] h_ceiling  hotspot  sendkey=press+release
+    at 7,55  105x210
+
+## page 3 screensaver
+[0] screensaver  page  global
+    sta = 2
+    up = 255
+    down = 255
+    left = 255
+    right = 255
+    pic = 63 (455x320)
+    bco = 0
+    on load:
+        //Make sure this is only done first time screensaver page is loaded
+        //if(firstview.val==1)
+        //{
+        //  firstview.val=0
+        //ssBackgroud is changed from NspanelManager depending on user background preferences
+        if(screensaver.ssBackground.val==0)
+        {
+          screensaver.pic=0
+          curTempIcon.picc=0
+          curTemp.picc=0
+          curMaxmin.picc=0
+          curRain.picc=0
+          curWind.picc=0
+          curTime.picc=0
+          curAMPM.picc=0
+          curSunrise.picc=0
+          curSunset.picc=0
+          roomTemp.picc=0
+          roomTempIcon.picc=0
+          curDay.picc=0
+          forDay1.picc=0
+          forDay2.picc=0
+          forDay3.picc=0
+          forDay4.picc=0
+          forDay5.picc=0
+          forIcon1.picc=0
+          forIcon2.picc=0
+          forIcon3.picc=0
+          forIcon4.picc=0
+          forIcon5.picc=0
+          forMaxmin1.picc=0
+          forMaxmin2.picc=0
+          forMaxmin3.picc=0
+          forMaxmin4.picc=0
+          forMaxmin5.picc=0
+          forRain1.picc=0
+          forRain2.picc=0
+          forRain3.picc=0
+          forRain4.picc=0
+          forRain5.picc=0
+          forWind1.picc=0
+          forWind2.picc=0
+          forWind3.picc=0
+          forWind4.picc=0
+          forWind5.picc=0
+          t0.picc=0
+          t1.picc=0
+          t2.picc=0
+          t3.picc=0
+          t4.picc=0
+          t5.picc=0
+          t6.picc=0
+        }else if(screensaver.ssBackground.val==1)
+        {
+          screensaver.pic=63
+          curTempIcon.picc=63
+          curTemp.picc=63
+          curMaxmin.picc=63
+          curRain.picc=63
+          curWind.picc=63
+          curTime.picc=63
+          curAMPM.picc=63
+          curSunrise.picc=63
+          curSunset.picc=63
+          roomTemp.picc=63
+          roomTempIcon.picc=63
+          curDay.picc=63
+          forDay1.picc=63
+          forDay2.picc=63
+          forDay3.picc=63
+          forDay4.picc=63
+          forDay5.picc=63
+          forIcon1.picc=63
+          forIcon2.picc=63
+          forIcon3.picc=63
+          forIcon4.picc=63
+          forIcon5.picc=63
+          forMaxmin1.picc=63
+          forMaxmin2.picc=63
+          forMaxmin3.picc=63
+          forMaxmin4.picc=63
+          forMaxmin5.picc=63
+          forRain1.picc=63
+          forRain2.picc=63
+          forRain3.picc=63
+          forRain4.picc=63
+          forRain5.picc=63
+          forWind1.picc=63
+          forWind2.picc=63
+          forWind3.picc=63
+          forWind4.picc=63
+          forWind5.picc=63
+          t0.picc=63
+          t1.picc=63
+          t2.picc=63
+          t3.picc=63
+          t4.picc=63
+          t5.picc=63
+          t6.picc=63
+        }
+        //}
+[1] forDay1  text  global
+    at 38,166  75x33
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[2] forDay2  text  global
+    at 113,166  75x33
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[3] forDay3  text  global
+    at 188,166  75x33
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[4] forDay4  text  global
+    at 263,166  75x33
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[5] forDay5  text  global
+    at 338,166  75x33
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[6] forIcon1  text  global
+    at 38,199  75x30
+    sta = 0
+    txt = 'U'
+    txt_maxl = 32
+    style = 0
+    font = 5 (replace_weather_30 30)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[7] forIcon2  text  global
+    at 113,199  75x30
+    sta = 0
+    txt = 'U'
+    txt_maxl = 32
+    style = 0
+    font = 5 (replace_weather_30 30)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[8] forIcon3  text  global
+    at 188,199  75x30
+    sta = 0
+    txt = 'U'
+    txt_maxl = 32
+    style = 0
+    font = 5 (replace_weather_30 30)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[9] forIcon4  text  global
+    at 263,199  75x30
+    sta = 0
+    txt = 'U'
+    txt_maxl = 32
+    style = 0
+    font = 5 (replace_weather_30 30)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[10] forIcon5  text  global
+    at 338,199  75x30
+    sta = 0
+    txt = 'U'
+    txt_maxl = 32
+    style = 0
+    font = 5 (replace_weather_30 30)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[11] forMaxmin1  text  global
+    at 38,228  75x34
+    sta = 0
+    txt = '-'
+    txt_maxl = 12
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[12] forMaxmin2  text  global
+    at 113,228  75x34
+    sta = 0
+    txt = '-'
+    txt_maxl = 12
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[13] forMaxmin3  text  global
+    at 188,228  75x34
+    sta = 0
+    txt = '-'
+    txt_maxl = 12
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[14] forMaxmin4  text  global
+    at 263,228  75x34
+    sta = 0
+    txt = '-'
+    txt_maxl = 12
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[15] forMaxmin5  text  global
+    at 338,228  75x34
+    sta = 0
+    txt = '-'
+    txt_maxl = 12
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[16] forRain1  text  global
+    at 38,254  75x31
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[17] forRain2  text  global
+    at 113,254  75x31
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[18] forRain3  text  global
+    at 188,254  75x31
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[19] forRain4  text  global
+    at 263,254  75x31
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[20] forRain5  text  global
+    at 338,254  75x31
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[21] forWind1  text  global
+    at 38,279  75x31
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[22] forWind2  text  global
+    at 113,279  75x31
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[23] forWind3  text  global
+    at 188,279  75x31
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[24] forWind4  text  global
+    at 263,279  75x31
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[25] forWind5  text  global
+    at 338,279  75x31
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 1 (replace_h23bold_id_1 23)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[26] t5  text  global
+    at 8,258  25x25
+    sta = 0
+    txt = 'W'
+    txt_maxl = 32
+    style = 0
+    font = 7 (tinyiconsweather20 20)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[27] t6  text  global
+    at 8,283  25x25
+    sta = 0
+    txt = 'T'
+    txt_maxl = 32
+    style = 0
+    font = 7 (tinyiconsweather20 20)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[28] curTempIcon  text  global
+    at 6,12  99x96
+    sta = 0
+    txt = 'U'
+    txt_maxl = 32
+    style = 0
+    font = 6 (weather-current-96240104 96)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[29] curTemp  text  global
+    at 105,8  96x60
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 8 (weather_temp_replace 72)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[30] curMaxmin  text  global
+    at 105,72  99x24
+    sta = 0
+    txt = '-'
+    txt_maxl = 12
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[31] t1  text  global
+    at 10,122  25x32
+    sta = 0
+    txt = 'W'
+    txt_maxl = 32
+    style = 0
+    font = 7 (tinyiconsweather20 20)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[32] curRain  text  global
+    at 32,130  70x16
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[33] t2  text  global
+    at 106,122  25x32
+    sta = 0
+    txt = 'T'
+    txt_maxl = 32
+    style = 0
+    font = 7 (tinyiconsweather20 20)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[34] curWind  text  global
+    at 130,130  70x16
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[35] curTime  text  global
+    at 211,53  235x66
+    sta = 0
+    txt = '--:--'
+    txt_maxl = 5
+    style = 0
+    font = 2 (timeandtemp 80)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 2
+    ycen = 0
+    isbr = 0
+[36] curAMPM  text  global
+    at 397,36  41x15
+    sta = 0
+    txt = ''
+    txt_maxl = 2
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 2
+    ycen = 2
+    isbr = 0
+[37] t3  text  global
+    at 212,122  25x32
+    sta = 0
+    txt = 'Y'
+    txt_maxl = 32
+    style = 0
+    font = 7 (tinyiconsweather20 20)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[38] curSunrise  text  global
+    at 238,130  91x16
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[39] t4  text  global
+    at 329,122  25x32
+    sta = 0
+    txt = 'X'
+    txt_maxl = 32
+    style = 0
+    font = 7 (tinyiconsweather20 20)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[40] curSunset  text  global
+    at 355,130  87x16
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[41] vaFunctions  variable  global
+    sta = 1
+    val = 0
+    txt = ''
+    txt_maxl = 15
+[42] tc0  touchcap  global
+    val = 0
+    on up:
+        printh 93 FF FF FF
+[43] firstview  variable  global
+    sta = 0
+    val = 1
+    txt = 'newtxt'
+    txt_maxl = 10
+[44] curDay  text  global
+    at 281,12  158x18
+    sta = 0
+    txt = '-'
+    txt_maxl = 20
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 2
+    ycen = 2
+    isbr = 0
+[45] roomTempIcon  text  global
+    at 213,7  25x22
+    sta = 0
+    txt = 'l'
+    txt_maxl = 32
+    style = 0
+    font = 7 (tinyiconsweather20 20)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 2
+    isbr = 0
+[46] roomTemp  text  global
+    at 239,12  43x18
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 0
+    ycen = 2
+    isbr = 0
+[47] ssBackground  variable  global
+    sta = 0
+    val = 1
+    txt = 'newtxt'
+    txt_maxl = 10
+[48] t0  text  global
+    at 7,233  25x25
+    sta = 0
+    txt = 'm'
+    txt_maxl = 32
+    style = 0
+    font = 7 (tinyiconsweather20 20)
+    pic = none
+    picc = 63 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+
+## page 4 cover
+[0] cover  page
+    sta = 2
+    up = 255
+    down = 255
+    left = 255
+    right = 255
+    pic = 180 (455x320)
+    bco = 0
+[1] home  button  sendkey=press
+    at 0,0  59x49
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[2] current  button
+    at 160,6  300x40
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 180 (455x320)
+    picc2 = 67 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[3] state  text
+    at 160,55  300x30
+    sta = 0
+    txt = '                                                                                                                                                                                                                                                                                                                                                                 '
+    txt_maxl = 353
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 180 (455x320)
+    bco = 65535
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[4] pos  slider  sendkey=release
+    at 10,70  140x230
+    sta = 2
+    val = 0
+    minval = 0
+    maxval = 100
+    dis = 100
+    mode = 1
+    wid = 124
+    hig = 4
+    pic = 76 (142x260)
+    pic1 = 77 (142x260)
+    pic2 = 75 (455x320)
+    picc = 78 (142x260)
+    picc1 = 79 (142x260)
+    bco = 30175
+    bco1 = 65504
+    pco = 65535
+[5] b_open  button  sendkey=press
+    at 160,140  140x50
+    sta = 1
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = none
+    picc2 = none
+    bco = 50712
+    bco2 = 50712
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[6] b_stop  button  sendkey=press
+    at 310,140  140x50
+    sta = 1
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = none
+    picc2 = none
+    bco = 50712
+    bco2 = 50712
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[7] b_close  button  sendkey=press
+    at 160,200  290x50
+    sta = 1
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = none
+    picc2 = none
+    bco = 50712
+    bco2 = 50712
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[8] va_up  variable
+    sta = 0
+    val = 1
+    txt = 'newtxt'
+    txt_maxl = 10
+[9] s0  variable
+    sta = 1
+    val = 0
+    txt = ''
+    txt_maxl = 5
+[10] n0  variable
+    sta = 0
+    val = 0
+    txt = 'newtxt'
+    txt_maxl = 10
+[11] setTempVal  variable
+    sta = 1
+    val = 0
+    txt = ''
+    txt_maxl = 10
+
+## page 5 dropdown
+[0] dropdown  page
+    sta = 2
+    up = 255
+    down = 255
+    left = 255
+    right = 255
+    pic = 64 (455x320)
+    bco = 0
+    on load:
+        sleep_display.tim=home.sleep_display.tim
+[1] i1_button  dual-state button
+    at 26,94  102x50
+    sta = 0
+    val = 1
+    txt = 'a'
+    txt_maxl = 10
+    style = 4
+    font = 9 (newfont9 50)
+    pic = none
+    pic2 = none
+    picc = 64 (455x320)
+    picc2 = 64 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[2] i2_button  dual-state button
+    at 174,94  102x50
+    sta = 0
+    val = 1
+    txt = 'b'
+    txt_maxl = 10
+    style = 4
+    font = 9 (newfont9 50)
+    pic = none
+    pic2 = none
+    picc = 64 (455x320)
+    picc2 = 64 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[3] i3_button  dual-state button
+    at 322,94  102x50
+    sta = 0
+    val = 0
+    txt = 'c'
+    txt_maxl = 10
+    style = 4
+    font = 9 (newfont9 50)
+    pic = none
+    pic2 = none
+    picc = 64 (455x320)
+    picc2 = 64 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[4] i4_button  dual-state button
+    at 26,227  102x50
+    sta = 0
+    val = 0
+    txt = '0'
+    txt_maxl = 10
+    style = 4
+    font = 9 (newfont9 50)
+    pic = none
+    pic2 = none
+    picc = 64 (455x320)
+    picc2 = 64 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[5] i5_button  dual-state button
+    at 174,227  102x50
+    sta = 0
+    val = 0
+    txt = 'g'
+    txt_maxl = 10
+    style = 4
+    font = 9 (newfont9 50)
+    pic = none
+    pic2 = none
+    picc = 64 (455x320)
+    picc2 = 64 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[6] i6_button  dual-state button
+    at 322,227  102x50
+    sta = 0
+    val = 0
+    txt = 'h'
+    txt_maxl = 10
+    style = 4
+    font = 9 (newfont9 50)
+    pic = none
+    pic2 = none
+    picc = 64 (455x320)
+    picc2 = 64 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[7] i1_label  text
+    at 8,144  138x30
+    sta = 0
+    txt = 'ON'
+    txt_maxl = 10
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 64 (455x320)
+    bco = 65535
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[8] i2_label  text
+    at 156,144  138x30
+    sta = 0
+    txt = 'ON'
+    txt_maxl = 10
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 64 (455x320)
+    bco = 65535
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[9] i3_label  text
+    at 304,144  138x30
+    sta = 0
+    txt = 'Disarmed'
+    txt_maxl = 10
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 64 (455x320)
+    bco = 65535
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[10] i4_label  text
+    at 8,280  138x30
+    sta = 0
+    txt = ''
+    txt_maxl = 15
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 64 (455x320)
+    bco = 65535
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[11] i5_label  text
+    at 156,280  138x30
+    sta = 0
+    txt = 'Clean screen'
+    txt_maxl = 15
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 64 (455x320)
+    bco = 65535
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[12] i6_label  text
+    at 304,280  138x30
+    sta = 0
+    txt = 'Reboot'
+    txt_maxl = 15
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 64 (455x320)
+    bco = 65535
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[13] i1_hotspot  hotspot
+    at 7,55  142x127
+[14] i2_hotspot  hotspot
+    at 155,55  142x127
+[15] i3_hotspot  hotspot
+    at 303,55  142x127
+[16] i4_hotspot  hotspot
+    at 7,188  142x127
+[17] i5_hotspot  hotspot
+    at 155,188  142x127
+[18] i6_hotspot  hotspot
+    at 303,188  142x127
+[19] sleep_display  timer  global
+    en = 1
+    tim = 30000
+    on timer:
+        printh 92 FF FF FF
+[20] tc0  touchcap
+    val = 0
+    on down:
+        sleep_display.en=1
+        //~~~~~~boilerplate~~~~ v0.5.04
+        // GESTURES
+        //~~~~~~~~~~~~~~~~~~~~~
+        // tc (Touch Controller) for initiating GESTURE processing.
+        // (can only have ONE tcx component - lowest id number takes precedence, others ignored).
+        // Event checking is done 'live' in GESTURE (or custom) timer.
+        // Raise this componet to id 1 (highest precendence rank order).
+        // All other UI Events need to be 'Touch Release Events'
+        // (OR components need to be added to Exclusions below.)
+        // Uses Global variables (in [Program.s] tab):
+        //   int x=0,y=0,dx=0,dy=0,dsq=0,gest_time=0,gest_type=0
+        //
+        gest_time=0  // reset counter for press duration
+        //
+        // Set UI components to EXCLUDE from gestures (Sliders)
+        // tc0.val -> component ID; b[tc0.val].type -> component type
+        if(b[tc0.val].type==1)  // Sliders have component type == 1
+        {
+          gest_type=-1 // excluded component
+        }else if(b[tc0.val].type==98&&b[tc0.val].font==10)  // Buttons have component type == 98
+        {
+          gest_type=-1 // excluded component
+        }else
+        {
+          //NORMAL GESTURE processing
+          GESTURE.en=1
+        }
+    on up:
+        //~~~~~~boilerplate~~~~ v0.5.04
+        // GESTURES
+        //~~~~~~~~~~~~~~~~~~~~~
+        GESTURE.en=0
+        //
+        //<- CUSTOM*** add generic long press release actions here
+        if(gest_type==3)
+        {
+          //Down
+          page home
+        }else if(gest_type>=91)
+        {
+          if(tc0.val==21)
+          {
+            page home
+          }else if(tc0.val==17)
+          {
+            page cleanscreen
+          }else if(tc0.val==18)
+          {
+            page thermostat
+          }
+        }
+[21] home  button
+    at 0,0  58x49
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[22] prev  button
+    at 58,3  58x46
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[23] next  button
+    at 392,3  55x46
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[24] current  button
+    at 125,6  253x40
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 67 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[25] GESTURE  timer
+    en = 0
+    tim = 50
+    on timer:
+        //~~~~~~ boilerplate~~~~ v0.5.004 ***DEMO/DEBUG mods
+        // GESTURE intpreter (press duration & swipes) (timer).
+        //~~~~~~~~~~~~~~~~~~~~~
+        //*** CUSTOMIZE immediate (before realease) actions below for each page ***
+        // Works with tc0 to continually poll gesture x,y,distance,duration
+        // while a touch gesture is occurring (BEFORE Touch Release Event).
+        // Gestures are decoded below 'live' and can be used to either:
+        //  * execute an immediate action (before Touch Release Events), or
+        //  * use `gest_type` as a condition/modifier in Touch Release Events.
+        //---------------------
+        //GESTURE list (returned in `gest_type` Global variable):
+        //  -1: excluded UI component - sliders (+ custom***)
+        //   0: invalid gesture (movement, but too short for swipe)
+        //   1: right swipe
+        //   2: left swipe
+        //   3: down swipe
+        //   4: up swipe
+        //  91: short press (>90 => Press without x,y movement)
+        //  92: long press
+        //  93: very long press
+        //---------------------
+        //
+        if(tch0>0)  //Skip last timer cycle where stroke ends (tch0=0) BEFORE tc0 stops this timer.
+        {
+          //
+          // Monitor duration of gesture (using count of cycles of this timer)
+          gest_time++
+          //
+          // Monitor distance of gesture movement (in pixels squared)
+          dx=tch0-tch2
+          dy=tch1-tch3
+          dsq=dx*dx
+          tmp=dy*dy
+          dsq+=tmp  // easier to work with square of distance - no need to sqrt
+          //
+          //
+          // Gesture interpretation
+          gest_type=0  // not a valid gesture (yet)
+          // Movement < 10px => PRESS(click) component
+          if(dsq<100)
+          {
+            if(gest_time<10)
+            {
+              // o
+              gest_type=91 // short press
+              //t1.txt="o" // ***DEGBUG/DEMO
+            }else if(gest_time<30)
+            {
+              // oo
+              gest_type=92 // long press
+              //t1.txt="oo" // ***DEGBUG/DEMO
+            }else
+            {
+              // ooo
+              gest_type=93 // vlong press
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="ooo" // ***DEGBUG/DEMO
+              if(gest_time==30)
+              {
+                //dim=0
+                //dim=100
+                //dim=dim_default
+              }
+            }
+          }
+          //
+          // Movement > 100px => SWIPE
+          if(dsq>10000)
+          {
+            if(dx>100)
+            {
+              //>>
+              gest_type=1 // right
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt=">>" // ***DEGBUG/DEMO
+            }else if(dx<-100)
+            {
+              //<<
+              gest_type=2 // left
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="<<" // ***DEGBUG/DEMO
+            }else if(dy>100)
+            {
+              //vv
+              gest_type=3 // down
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="vv" // ***DEGBUG/DEMO
+            }else if(dy<-100)
+            {
+              //^^
+              gest_type=4 // up
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="^^" // ***DEGBUG/DEMO
+            }
+          }
+          //
+          //
+          //
+          //
+          //DEBUG/DEMO display of live (pre-release) gesture internal data updates
+          //n0.val=gest_time
+          //n1.val=tch0
+          //n2.val=dx
+          //n3.val=tch1
+          //n4.val=dy
+          //n5.val=tc0.val  //component ID
+          //n5.val=b[tc0.val].type // component type
+          //n6.val=gest_type
+          if(gest_type==0)
+          {
+            //Ambiguous/incomplete gesture - ignore
+            //t1.txt="X" // ***DEGBUG/DEMO
+          }
+        }
+[26] t0  text
+    at 12,60  130x30
+    sta = 0
+    txt = 'Coming soon...'
+    txt_maxl = 15
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 64 (455x320)
+    bco = 65535
+    pco = 63488
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[27] t1  text
+    at 160,60  130x30
+    sta = 0
+    txt = 'Coming soon...'
+    txt_maxl = 15
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 64 (455x320)
+    bco = 65535
+    pco = 63488
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[28] t2  text
+    at 307,60  130x30
+    sta = 0
+    txt = 'Coming soon...'
+    txt_maxl = 15
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 64 (455x320)
+    bco = 65535
+    pco = 63488
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[29] t3  text
+    at 307,192  130x30
+    sta = 0
+    txt = 'Coming soon...'
+    txt_maxl = 15
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 64 (455x320)
+    bco = 65535
+    pco = 63488
+    xcen = 1
+    ycen = 1
+    isbr = 0
+
+## page 6 items4
+[0] items4  page
+    sta = 2
+    up = 255
+    down = 255
+    left = 255
+    right = 255
+    pic = 67 (455x320)
+    bco = 0
+    on load:
+        sleep_display.tim=home.sleep_display.tim
+        vis slider_save,0
+        vis i1_label,0
+        vis i2_label,0
+        vis i3_label,0
+        vis i4_label,0
+        vis i1_button,0
+        vis i2_button,0
+        vis i3_button,0
+        vis i4_button,0
+[1] i1_label  button
+    at 7,117  218x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[2] i2_label  button
+    at 227,117  218x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[3] i3_label  button
+    at 7,251  218x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[4] i4_label  button
+    at 227,251  218x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[5] i1_button  button  sendkey=press+release
+    at 7,51  218x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 10 (stuvwxyz50NEW 50)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[6] i2_button  button  sendkey=press+release
+    at 227,51  218x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 10 (stuvwxyz50NEW 50)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[7] i3_button  button  sendkey=press+release
+    at 7,184  218x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 10 (stuvwxyz50NEW 50)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[8] i4_button  button  sendkey=press+release
+    at 227,184  218x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 10 (stuvwxyz50NEW 50)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[9] slider_save  progress bar
+    at 134,43  236x4
+    sta = 1
+    val = 0
+    dis = 25
+    bpic = 73 (236x3)
+    ppic = 74 (236x3)
+    bco = 0
+    pco = 65024
+[10] home  button
+    at 0,0  59x49
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[11] prev  button
+    at 59,3  56x46
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[12] current  button
+    at 124,6  253x40
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 67 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[13] next  button
+    at 392,3  55x46
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[14] sleep_display  timer
+    en = 1
+    tim = 30000
+    on timer:
+        printh 92 FF FF FF
+[15] tc0  touchcap
+    val = 0
+    on down:
+        sleep_display.en=1
+        //~~~~~~boilerplate~~~~ v0.5.04
+        // GESTURES
+        //~~~~~~~~~~~~~~~~~~~~~
+        // tc (Touch Controller) for initiating GESTURE processing.
+        // (can only have ONE tcx component - lowest id number takes precedence, others ignored).
+        // Event checking is done 'live' in GESTURE (or custom) timer.
+        // Raise this componet to id 1 (highest precendence rank order).
+        // All other UI Events need to be 'Touch Release Events'
+        // (OR components need to be added to Exclusions below.)
+        // Uses Global variables (in [Program.s] tab):
+        //   int x=0,y=0,dx=0,dy=0,dsq=0,gest_time=0,gest_type=0
+        //
+        gest_time=0  // reset counter for press duration
+        //
+        // Set UI components to EXCLUDE from gestures (Sliders)
+        // tc0.val -> component ID; b[tc0.val].type -> component type
+        if(b[tc0.val].type==1)  // Sliders have component type == 1
+        {
+          gest_type=-1 // excluded component
+        }else if(b[tc0.val].type==98&&b[tc0.val].font==10)  // Buttons have component type == 98
+        {
+          gest_type=-1 // excluded component
+        }else
+        {
+          //NORMAL GESTURE processing
+          GESTURE.en=1
+        }
+    on up:
+        //~~~~~~boilerplate~~~~ v0.5.04
+        // GESTURES
+        //~~~~~~~~~~~~~~~~~~~~~
+        GESTURE.en=0
+        //
+        //<- CUSTOM*** add generic long press release actions here
+        if(gest_type==1)
+        {
+          //Right
+          printh 65 06 0B 01 FF FF FF
+        }else if(gest_type==2)
+        {
+          //Left
+          printh 65 06 0D 01 FF FF FF
+        }else if(gest_type==3)
+        {
+          //Down
+          printh 65 06 0A 01 FF FF FF
+        }else if(gest_type>=91)
+        {
+          if(tc0.val==1)
+          {
+            printh 65 06 01 01 FF FF FF
+          }else if(tc0.val==2)
+          {
+            printh 65 06 02 01 FF FF FF
+          }else if(tc0.val==3)
+          {
+            printh 65 06 03 01 FF FF FF
+          }else if(tc0.val==4)
+          {
+            printh 65 06 04 01 FF FF FF
+          }else if(tc0.val==10)
+          {
+            printh 65 06 0A 01 FF FF FF
+          }else if(tc0.val==11)
+          {
+            printh 65 06 0B 01 FF FF FF
+          }else if(tc0.val==13)
+          {
+            printh 65 06 0D 01 FF FF FF
+          }
+        }
+[16] GESTURE  timer
+    en = 0
+    tim = 50
+    on timer:
+        //~~~~~~ boilerplate~~~~ v0.5.004 ***DEMO/DEBUG mods
+        // GESTURE intpreter (press duration & swipes) (timer).
+        //~~~~~~~~~~~~~~~~~~~~~
+        //*** CUSTOMIZE immediate (before realease) actions below for each page ***
+        // Works with tc0 to continually poll gesture x,y,distance,duration
+        // while a touch gesture is occurring (BEFORE Touch Release Event).
+        // Gestures are decoded below 'live' and can be used to either:
+        //  * execute an immediate action (before Touch Release Events), or
+        //  * use `gest_type` as a condition/modifier in Touch Release Events.
+        //---------------------
+        //GESTURE list (returned in `gest_type` Global variable):
+        //  -1: excluded UI component - sliders (+ custom***)
+        //   0: invalid gesture (movement, but too short for swipe)
+        //   1: right swipe
+        //   2: left swipe
+        //   3: down swipe
+        //   4: up swipe
+        //  91: short press (>90 => Press without x,y movement)
+        //  92: long press
+        //  93: very long press
+        //---------------------
+        //
+        if(tch0>0)  //Skip last timer cycle where stroke ends (tch0=0) BEFORE tc0 stops this timer.
+        {
+          //
+          // Monitor duration of gesture (using count of cycles of this timer)
+          gest_time++
+          //
+          // Monitor distance of gesture movement (in pixels squared)
+          dx=tch0-tch2
+          dy=tch1-tch3
+          dsq=dx*dx
+          tmp=dy*dy
+          dsq+=tmp  // easier to work with square of distance - no need to sqrt
+          //
+          //
+          // Gesture interpretation
+          gest_type=0  // not a valid gesture (yet)
+          // Movement < 10px => PRESS(click) component
+          if(dsq<100)
+          {
+            if(gest_time<10)
+            {
+              // o
+              gest_type=91 // short press
+              //t1.txt="o" // ***DEGBUG/DEMO
+            }else if(gest_time<30)
+            {
+              // oo
+              gest_type=92 // long press
+              //t1.txt="oo" // ***DEGBUG/DEMO
+            }else
+            {
+              // ooo
+              gest_type=93 // vlong press
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="ooo" // ***DEGBUG/DEMO
+              if(gest_time==30)
+              {
+                //dim=0
+                //dim=100
+                //dim=dim_default
+              }
+            }
+          }
+          //
+          // Movement > 100px => SWIPE
+          if(dsq>10000)
+          {
+            if(dx>100)
+            {
+              //>>
+              gest_type=1 // right
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt=">>" // ***DEGBUG/DEMO
+            }else if(dx<-100)
+            {
+              //<<
+              gest_type=2 // left
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="<<" // ***DEGBUG/DEMO
+            }else if(dy>100)
+            {
+              //vv
+              gest_type=3 // down
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="vv" // ***DEGBUG/DEMO
+            }else if(dy<-100)
+            {
+              //^^
+              gest_type=4 // up
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="^^" // ***DEGBUG/DEMO
+            }
+          }
+          //
+          //
+          //
+          //
+          //DEBUG/DEMO display of live (pre-release) gesture internal data updates
+          //n0.val=gest_time
+          //n1.val=tch0
+          //n2.val=dx
+          //n3.val=tch1
+          //n4.val=dy
+          //n5.val=tc0.val  //component ID
+          //n5.val=b[tc0.val].type // component type
+          //n6.val=gest_type
+          if(gest_type==0)
+          {
+            //Ambiguous/incomplete gesture - ignore
+            //t1.txt="X" // ***DEGBUG/DEMO
+          }
+        }
+
+## page 7 items8
+[0] items8  page
+    sta = 2
+    up = 255
+    down = 255
+    left = 255
+    right = 255
+    pic = 69 (455x320)
+    bco = 0
+    on load:
+        sleep_display.tim=home.sleep_display.tim
+        vis slider_save,0
+        vis i1_label,0
+        vis i2_label,0
+        vis i3_label,0
+        vis i4_label,0
+        vis i5_label,0
+        vis i6_label,0
+        vis i7_label,0
+        vis i8_label,0
+        vis i1_button,0
+        vis i2_button,0
+        vis i3_button,0
+        vis i4_button,0
+        vis i5_button,0
+        vis i6_button,0
+        vis i7_button,0
+        vis i8_button,0
+[1] i1_label  button
+    at 7,51  156x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[2] i2_label  button
+    at 227,51  156x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[3] i3_label  button
+    at 7,118  156x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[4] i4_label  button
+    at 227,118  156x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[5] i5_label  button
+    at 7,185  156x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[6] i6_label  button
+    at 227,185  156x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[7] i7_label  button
+    at 7,252  156x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[8] i8_label  button
+    at 227,252  156x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[9] i1_button  button  sendkey=press+release
+    at 163,51  62x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 10 (stuvwxyz50NEW 50)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[10] i2_button  button  sendkey=press+release
+    at 383,51  62x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 10 (stuvwxyz50NEW 50)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[11] i3_button  button  sendkey=press+release
+    at 163,118  62x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 10 (stuvwxyz50NEW 50)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[12] i4_button  button  sendkey=press+release
+    at 383,118  62x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 10 (stuvwxyz50NEW 50)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[13] i5_button  button  sendkey=press+release
+    at 163,185  62x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 10 (stuvwxyz50NEW 50)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[14] i6_button  button  sendkey=press+release
+    at 383,185  62x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 10 (stuvwxyz50NEW 50)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[15] i7_button  button  sendkey=press+release
+    at 163,252  62x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 10 (stuvwxyz50NEW 50)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[16] i8_button  button  sendkey=press+release
+    at 383,252  62x65
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 10 (stuvwxyz50NEW 50)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[17] slider_save  progress bar
+    at 134,43  236x4
+    sta = 1
+    val = 0
+    dis = 25
+    bpic = 73 (236x3)
+    ppic = 74 (236x3)
+    bco = 0
+    pco = 65024
+[18] home  button
+    at 0,0  59x49
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[19] prev  button
+    at 59,3  56x46
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[20] current  button
+    at 125,6  253x40
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 69 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[21] next  button
+    at 392,3  55x46
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 69 (455x320)
+    picc2 = 70 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[22] sleep_display  timer
+    en = 1
+    tim = 30000
+    on timer:
+        printh 92 FF FF FF
+[23] tc0  touchcap
+    val = 0
+    on down:
+        sleep_display.en=1
+        //~~~~~~boilerplate~~~~ v0.5.04
+        // GESTURES
+        //~~~~~~~~~~~~~~~~~~~~~
+        // tc (Touch Controller) for initiating GESTURE processing.
+        // (can only have ONE tcx component - lowest id number takes precedence, others ignored).
+        // Event checking is done 'live' in GESTURE (or custom) timer.
+        // Raise this componet to id 1 (highest precendence rank order).
+        // All other UI Events need to be 'Touch Release Events'
+        // (OR components need to be added to Exclusions below.)
+        // Uses Global variables (in [Program.s] tab):
+        //   int x=0,y=0,dx=0,dy=0,dsq=0,gest_time=0,gest_type=0
+        //
+        gest_time=0  // reset counter for press duration
+        //
+        // Set UI components to EXCLUDE from gestures (Sliders)
+        // tc0.val -> component ID; b[tc0.val].type -> component type
+        if(b[tc0.val].type==1)  // Sliders have component type == 1
+        {
+          gest_type=-1 // excluded component
+        }else if(b[tc0.val].type==98&&b[tc0.val].font==10)  // Buttons have component type == 98
+        {
+          gest_type=-1 // excluded component
+        }else
+        {
+          //NORMAL GESTURE processing
+          GESTURE.en=1
+        }
+    on up:
+        //~~~~~~boilerplate~~~~ v0.5.04
+        // GESTURES
+        //~~~~~~~~~~~~~~~~~~~~~
+        GESTURE.en=0
+        //
+        //<- CUSTOM*** add generic long press release actions here
+        if(gest_type==1)
+        {
+          //Right
+          printh 65 07 13 01 FF FF FF
+        }else if(gest_type==2)
+        {
+          //Left
+          printh 65 07 15 01 FF FF FF
+        }else if(gest_type==3)
+        {
+          //Down
+          printh 65 07 12 01 FF FF FF
+        }else if(gest_type>=91)
+        {
+          if(tc0.val==1)
+          {
+            printh 65 07 01 01 FF FF FF
+          }else if(tc0.val==2)
+          {
+            printh 65 07 02 01 FF FF FF
+          }else if(tc0.val==3)
+          {
+            printh 65 07 03 01 FF FF FF
+          }else if(tc0.val==4)
+          {
+            printh 65 07 04 01 FF FF FF
+          }else if(tc0.val==5)
+          {
+            printh 65 07 05 01 FF FF FF
+          }else if(tc0.val==6)
+          {
+            printh 65 07 06 01 FF FF FF
+          }else if(tc0.val==7)
+          {
+            printh 65 07 07 01 FF FF FF
+          }else if(tc0.val==8)
+          {
+            printh 65 07 08 01 FF FF FF
+          }else if(tc0.val==18)
+          {
+            printh 65 07 12 01 FF FF FF
+          }else if(tc0.val==19)
+          {
+            printh 65 07 13 01 FF FF FF
+          }else if(tc0.val==21)
+          {
+            printh 65 07 15 01 FF FF FF
+          }
+        }
+[24] GESTURE  timer
+    en = 0
+    tim = 50
+    on timer:
+        //~~~~~~ boilerplate~~~~ v0.5.004 ***DEMO/DEBUG mods
+        // GESTURE intpreter (press duration & swipes) (timer).
+        //~~~~~~~~~~~~~~~~~~~~~
+        //*** CUSTOMIZE immediate (before realease) actions below for each page ***
+        // Works with tc0 to continually poll gesture x,y,distance,duration
+        // while a touch gesture is occurring (BEFORE Touch Release Event).
+        // Gestures are decoded below 'live' and can be used to either:
+        //  * execute an immediate action (before Touch Release Events), or
+        //  * use `gest_type` as a condition/modifier in Touch Release Events.
+        //---------------------
+        //GESTURE list (returned in `gest_type` Global variable):
+        //  -1: excluded UI component - sliders (+ custom***)
+        //   0: invalid gesture (movement, but too short for swipe)
+        //   1: right swipe
+        //   2: left swipe
+        //   3: down swipe
+        //   4: up swipe
+        //  91: short press (>90 => Press without x,y movement)
+        //  92: long press
+        //  93: very long press
+        //---------------------
+        //
+        if(tch0>0)  //Skip last timer cycle where stroke ends (tch0=0) BEFORE tc0 stops this timer.
+        {
+          //
+          // Monitor duration of gesture (using count of cycles of this timer)
+          gest_time++
+          //
+          // Monitor distance of gesture movement (in pixels squared)
+          dx=tch0-tch2
+          dy=tch1-tch3
+          dsq=dx*dx
+          tmp=dy*dy
+          dsq+=tmp  // easier to work with square of distance - no need to sqrt
+          //
+          //
+          // Gesture interpretation
+          gest_type=0  // not a valid gesture (yet)
+          // Movement < 10px => PRESS(click) component
+          if(dsq<100)
+          {
+            if(gest_time<10)
+            {
+              // o
+              gest_type=91 // short press
+              //t1.txt="o" // ***DEGBUG/DEMO
+            }else if(gest_time<30)
+            {
+              // oo
+              gest_type=92 // long press
+              //t1.txt="oo" // ***DEGBUG/DEMO
+            }else
+            {
+              // ooo
+              gest_type=93 // vlong press
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="ooo" // ***DEGBUG/DEMO
+              if(gest_time==30)
+              {
+                //dim=0
+                //dim=100
+                //dim=dim_default
+              }
+            }
+          }
+          //
+          // Movement > 100px => SWIPE
+          if(dsq>10000)
+          {
+            if(dx>100)
+            {
+              //>>
+              gest_type=1 // right
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt=">>" // ***DEGBUG/DEMO
+            }else if(dx<-100)
+            {
+              //<<
+              gest_type=2 // left
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="<<" // ***DEGBUG/DEMO
+            }else if(dy>100)
+            {
+              //vv
+              gest_type=3 // down
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="vv" // ***DEGBUG/DEMO
+            }else if(dy<-100)
+            {
+              //^^
+              gest_type=4 // up
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="^^" // ***DEGBUG/DEMO
+            }
+          }
+          //
+          //
+          //
+          //
+          //DEBUG/DEMO display of live (pre-release) gesture internal data updates
+          //n0.val=gest_time
+          //n1.val=tch0
+          //n2.val=dx
+          //n3.val=tch1
+          //n4.val=dy
+          //n5.val=tc0.val  //component ID
+          //n5.val=b[tc0.val].type // component type
+          //n6.val=gest_type
+          if(gest_type==0)
+          {
+            //Ambiguous/incomplete gesture - ignore
+            //t1.txt="X" // ***DEGBUG/DEMO
+          }
+        }
+
+## page 8 items12
+[0] items12  page
+    sta = 2
+    up = 255
+    down = 255
+    left = 255
+    right = 255
+    pic = 71 (455x320)
+    bco = 0
+    on load:
+        sleep_display.tim=home.sleep_display.tim
+        vis slider_save,0
+        vis i1_label,0
+        vis i2_label,0
+        vis i3_label,0
+        vis i4_label,0
+        vis i5_label,0
+        vis i6_label,0
+        vis i7_label,0
+        vis i8_label,0
+        vis i9_label,0
+        vis i10_label,0
+        vis i11_label,0
+        vis i12_label,0
+        vis i1_button,0
+        vis i2_button,0
+        vis i3_button,0
+        vis i4_button,0
+        vis i5_button,0
+        vis i6_button,0
+        vis i7_button,0
+        vis i8_button,0
+        vis i9_button,0
+        vis i10_button,0
+        vis i11_button,0
+        vis i12_button,0
+[1] i1_label  button
+    at 7,50  156x43
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[2] i2_label  button
+    at 227,50  156x43
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[3] i3_label  button
+    at 7,94  156x43
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[4] i4_label  button
+    at 227,94  156x43
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[5] i5_label  button
+    at 7,138  156x43
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[6] i6_label  button
+    at 227,138  156x43
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[7] i7_label  button
+    at 7,183  156x43
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[8] i8_label  button
+    at 227,183  156x43
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[9] i9_label  button
+    at 7,228  156x43
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[10] i10_label  button
+    at 227,228  156x43
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[11] i11_label  button
+    at 7,272  156x43
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[12] i12_label  button
+    at 227,272  156x43
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[13] i1_button  button  sendkey=press+release
+    at 163,51  62x41
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 11 (stuvwxyz40 40)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[14] i2_button  button  sendkey=press+release
+    at 383,51  62x41
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 11 (stuvwxyz40 40)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[15] i3_button  button  sendkey=press+release
+    at 163,95  62x41
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 11 (stuvwxyz40 40)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[16] i4_button  button  sendkey=press+release
+    at 383,95  62x41
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 11 (stuvwxyz40 40)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[17] i5_button  button  sendkey=press+release
+    at 163,139  62x41
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 11 (stuvwxyz40 40)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[18] i6_button  button  sendkey=press+release
+    at 382,139  62x41
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 11 (stuvwxyz40 40)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[19] i7_button  button  sendkey=press+release
+    at 163,183  62x41
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 11 (stuvwxyz40 40)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[20] i8_button  button  sendkey=press+release
+    at 383,183  62x41
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 11 (stuvwxyz40 40)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[21] i9_button  button  sendkey=press+release
+    at 163,228  62x41
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 11 (stuvwxyz40 40)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[22] i10_button  button  sendkey=press+release
+    at 383,228  62x41
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 11 (stuvwxyz40 40)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[23] i11_button  button  sendkey=press+release
+    at 163,273  62x41
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 11 (stuvwxyz40 40)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[24] i12_button  button  sendkey=press+release
+    at 383,273  62x41
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 1
+    style = 4
+    font = 11 (stuvwxyz40 40)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[25] slider_save  progress bar
+    at 134,43  236x4
+    sta = 1
+    val = 0
+    dis = 25
+    bpic = 73 (236x3)
+    ppic = 74 (236x3)
+    bco = 0
+    pco = 65024
+[26] home  button
+    at 0,0  59x49
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[27] prev  button
+    at 59,3  56x46
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[28] current  button
+    at 125,6  253x40
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 71 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[29] next  button
+    at 392,3  55x46
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 71 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[30] sleep_display  timer
+    en = 1
+    tim = 30000
+    on timer:
+        printh 92 FF FF FF
+[31] tc0  touchcap
+    val = 0
+    on down:
+        sleep_display.en=1
+        //~~~~~~boilerplate~~~~ v0.5.04
+        // GESTURES
+        //~~~~~~~~~~~~~~~~~~~~~
+        // tc (Touch Controller) for initiating GESTURE processing.
+        // (can only have ONE tcx component - lowest id number takes precedence, others ignored).
+        // Event checking is done 'live' in GESTURE (or custom) timer.
+        // Raise this componet to id 1 (highest precendence rank order).
+        // All other UI Events need to be 'Touch Release Events'
+        // (OR components need to be added to Exclusions below.)
+        // Uses Global variables (in [Program.s] tab):
+        //   int x=0,y=0,dx=0,dy=0,dsq=0,gest_time=0,gest_type=0
+        //
+        gest_time=0  // reset counter for press duration
+        //
+        // Set UI components to EXCLUDE from gestures (Sliders)
+        // tc0.val -> component ID; b[tc0.val].type -> component type
+        if(b[tc0.val].type==1)  // Sliders have component type == 1
+        {
+          gest_type=-1 // excluded component
+        }else if(b[tc0.val].type==98&&b[tc0.val].font==11)  // Buttons have component type == 98
+        {
+          gest_type=-1 // excluded component
+        }else
+        {
+          //NORMAL GESTURE processing
+          GESTURE.en=1
+        }
+    on up:
+        //~~~~~~boilerplate~~~~ v0.5.04
+        // GESTURES
+        //~~~~~~~~~~~~~~~~~~~~~
+        GESTURE.en=0
+        //
+        //<- CUSTOM*** add generic long press release actions here
+        if(gest_type==1)
+        {
+          //Right
+          printh 65 08 1B 01 FF FF FF
+        }else if(gest_type==2)
+        {
+          //Left
+          printh 65 08 1D 01 FF FF FF
+        }else if(gest_type==3)
+        {
+          //Down
+          printh 65 08 1A 01 FF FF FF
+        }else if(gest_type>=91)
+        {
+          if(tc0.val==1)
+          {
+            printh 65 08 01 01 FF FF FF
+          }else if(tc0.val==2)
+          {
+            printh 65 08 02 01 FF FF FF
+          }else if(tc0.val==3)
+          {
+            printh 65 08 03 01 FF FF FF
+          }else if(tc0.val==4)
+          {
+            printh 65 08 04 01 FF FF FF
+          }else if(tc0.val==5)
+          {
+            printh 65 08 05 01 FF FF FF
+          }else if(tc0.val==6)
+          {
+            printh 65 08 06 01 FF FF FF
+          }else if(tc0.val==7)
+          {
+            printh 65 08 07 01 FF FF FF
+          }else if(tc0.val==8)
+          {
+            printh 65 08 08 01 FF FF FF
+          }else if(tc0.val==9)
+          {
+            printh 65 08 09 01 FF FF FF
+          }else if(tc0.val==10)
+          {
+            printh 65 08 0A 01 FF FF FF
+          }else if(tc0.val==11)
+          {
+            printh 65 08 0B 01 FF FF FF
+          }else if(tc0.val==12)
+          {
+            printh 65 08 0C 01 FF FF FF
+          }else if(tc0.val==26)
+          {
+            printh 65 08 1A 01 FF FF FF
+          }else if(tc0.val==27)
+          {
+            printh 65 08 1B 01 FF FF FF
+          }else if(tc0.val==29)
+          {
+            printh 65 08 1D 01 FF FF FF
+          }
+        }
+[32] GESTURE  timer
+    en = 0
+    tim = 50
+    on timer:
+        //~~~~~~ boilerplate~~~~ v0.5.004 ***DEMO/DEBUG mods
+        // GESTURE intpreter (press duration & swipes) (timer).
+        //~~~~~~~~~~~~~~~~~~~~~
+        //*** CUSTOMIZE immediate (before realease) actions below for each page ***
+        // Works with tc0 to continually poll gesture x,y,distance,duration
+        // while a touch gesture is occurring (BEFORE Touch Release Event).
+        // Gestures are decoded below 'live' and can be used to either:
+        //  * execute an immediate action (before Touch Release Events), or
+        //  * use `gest_type` as a condition/modifier in Touch Release Events.
+        //---------------------
+        //GESTURE list (returned in `gest_type` Global variable):
+        //  -1: excluded UI component - sliders (+ custom***)
+        //   0: invalid gesture (movement, but too short for swipe)
+        //   1: right swipe
+        //   2: left swipe
+        //   3: down swipe
+        //   4: up swipe
+        //  91: short press (>90 => Press without x,y movement)
+        //  92: long press
+        //  93: very long press
+        //---------------------
+        //
+        if(tch0>0)  //Skip last timer cycle where stroke ends (tch0=0) BEFORE tc0 stops this timer.
+        {
+          //
+          // Monitor duration of gesture (using count of cycles of this timer)
+          gest_time++
+          //
+          // Monitor distance of gesture movement (in pixels squared)
+          dx=tch0-tch2
+          dy=tch1-tch3
+          dsq=dx*dx
+          tmp=dy*dy
+          dsq+=tmp  // easier to work with square of distance - no need to sqrt
+          //
+          //
+          // Gesture interpretation
+          gest_type=0  // not a valid gesture (yet)
+          // Movement < 10px => PRESS(click) component
+          if(dsq<100)
+          {
+            if(gest_time<10)
+            {
+              // o
+              gest_type=91 // short press
+              //t1.txt="o" // ***DEGBUG/DEMO
+            }else if(gest_time<30)
+            {
+              // oo
+              gest_type=92 // long press
+              //t1.txt="oo" // ***DEGBUG/DEMO
+            }else
+            {
+              // ooo
+              gest_type=93 // vlong press
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="ooo" // ***DEGBUG/DEMO
+              if(gest_time==30)
+              {
+                //dim=0
+                //dim=100
+                //dim=dim_default
+              }
+            }
+          }
+          //
+          // Movement > 100px => SWIPE
+          if(dsq>10000)
+          {
+            if(dx>100)
+            {
+              //>>
+              gest_type=1 // right
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt=">>" // ***DEGBUG/DEMO
+            }else if(dx<-100)
+            {
+              //<<
+              gest_type=2 // left
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="<<" // ***DEGBUG/DEMO
+            }else if(dy>100)
+            {
+              //vv
+              gest_type=3 // down
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="vv" // ***DEGBUG/DEMO
+            }else if(dy<-100)
+            {
+              //^^
+              gest_type=4 // up
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="^^" // ***DEGBUG/DEMO
+            }
+          }
+          //
+          //
+          //
+          //
+          //DEBUG/DEMO display of live (pre-release) gesture internal data updates
+          //n0.val=gest_time
+          //n1.val=tch0
+          //n2.val=dx
+          //n3.val=tch1
+          //n4.val=dy
+          //n5.val=tc0.val  //component ID
+          //n5.val=b[tc0.val].type // component type
+          //n6.val=gest_type
+          if(gest_type==0)
+          {
+            //Ambiguous/incomplete gesture - ignore
+            //t1.txt="X" // ***DEGBUG/DEMO
+          }
+        }
+
+## page 9 lights
+[0] lights  page
+    sta = 2
+    up = 255
+    down = 255
+    left = 255
+    right = 255
+    pic = 75 (455x320)
+    bco = 0
+    on load:
+        sleep_display.tim=home.sleep_display.tim
+        vis kelvin_sat,0
+        vis hue,0
+[1] home  button
+    at 0,0  58x51
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 75 (455x320)
+    picc2 = 72 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[2] currentLight  button  global
+    at 70,6  316x40
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 75 (455x320)
+    picc2 = 75 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[3] sleep_display  timer  global
+    en = 1
+    tim = 30000
+    on timer:
+        printh 92 FF FF FF
+[4] tc0  touchcap
+    val = 0
+    on down:
+        sleep_display.en=1
+        //~~~~~~boilerplate~~~~ v0.5.04
+        // GESTURES
+        //~~~~~~~~~~~~~~~~~~~~~
+        // tc (Touch Controller) for initiating GESTURE processing.
+        // (can only have ONE tcx component - lowest id number takes precedence, others ignored).
+        // Event checking is done 'live' in GESTURE (or custom) timer.
+        // Raise this componet to id 1 (highest precendence rank order).
+        // All other UI Events need to be 'Touch Release Events'
+        // (OR components need to be added to Exclusions below.)
+        // Uses Global variables (in [Program.s] tab):
+        //   int x=0,y=0,dx=0,dy=0,dsq=0,gest_time=0,gest_type=0
+        //
+        gest_time=0  // reset counter for press duration
+        //
+        // Set UI components to EXCLUDE from gestures (Sliders)
+        // tc0.val -> component ID; b[tc0.val].type -> component type
+        if(b[tc0.val].type==1)  // Sliders have component type == 1
+        {
+          gest_type=-1 // excluded component
+        }else if(b[tc0.val].type==98&&b[tc0.val].font==10)  // Buttons have component type == 98
+        {
+          gest_type=-1 // excluded component
+        }else
+        {
+          //NORMAL GESTURE processing
+          GESTURE.en=1
+        }
+    on up:
+        //~~~~~~boilerplate~~~~ v0.5.04
+        // GESTURES
+        //~~~~~~~~~~~~~~~~~~~~~
+        GESTURE.en=0
+        //
+        //<- CUSTOM*** add generic long press release actions here
+        if(gest_type==3)
+        {
+          //Down
+          printh 65 09 01 00 FF FF FF
+        }else if(gest_type>=91)
+        {
+          if(tc0.val==1)
+          {
+            printh 65 09 01 00 FF FF FF
+          }else if(tc0.val==8)
+          {
+            printh 65 09 08 00 FF FF FF
+          }
+        }
+[5] kelvin_sat  slider  global  sendkey=release
+    at 155,55  142x260
+    sta = 2
+    val = 0
+    minval = 0
+    maxval = 100
+    dis = 100
+    mode = 1
+    wid = 124
+    hig = 4
+    pic = 78 (142x260)
+    pic1 = 79 (142x260)
+    pic2 = 75 (455x320)
+    picc = 78 (142x260)
+    picc1 = 79 (142x260)
+    bco = 30175
+    bco1 = 65504
+    pco = 65535
+[6] hue  slider  global  sendkey=release
+    at 303,55  142x260
+    sta = 2
+    val = 0
+    minval = 0
+    maxval = 359
+    dis = 100
+    mode = 1
+    wid = 124
+    hig = 4
+    pic = 80 (142x260)
+    pic1 = 81 (142x260)
+    pic2 = 75 (455x320)
+    picc = 81 (142x260)
+    picc1 = 81 (142x260)
+    bco = 30175
+    bco1 = 65504
+    pco = 65535
+[7] brightness  slider  global  sendkey=release
+    at 7,55  142x260
+    sta = 2
+    val = 0
+    minval = 0
+    maxval = 100
+    dis = 100
+    mode = 1
+    wid = 124
+    hig = 4
+    pic = 76 (142x260)
+    pic1 = 77 (142x260)
+    pic2 = 75 (455x320)
+    picc = 78 (142x260)
+    picc1 = 79 (142x260)
+    bco = 30175
+    bco1 = 65504
+    pco = 65535
+[8] colormode  picture  global
+    at 385,0  70x50
+    pic = 85 (70x50)
+[9] GESTURE  timer
+    en = 0
+    tim = 50
+    on timer:
+        //~~~~~~ boilerplate~~~~ v0.5.004 ***DEMO/DEBUG mods
+        // GESTURE intpreter (press duration & swipes) (timer).
+        //~~~~~~~~~~~~~~~~~~~~~
+        //*** CUSTOMIZE immediate (before realease) actions below for each page ***
+        // Works with tc0 to continually poll gesture x,y,distance,duration
+        // while a touch gesture is occurring (BEFORE Touch Release Event).
+        // Gestures are decoded below 'live' and can be used to either:
+        //  * execute an immediate action (before Touch Release Events), or
+        //  * use `gest_type` as a condition/modifier in Touch Release Events.
+        //---------------------
+        //GESTURE list (returned in `gest_type` Global variable):
+        //  -1: excluded UI component - sliders (+ custom***)
+        //   0: invalid gesture (movement, but too short for swipe)
+        //   1: right swipe
+        //   2: left swipe
+        //   3: down swipe
+        //   4: up swipe
+        //  91: short press (>90 => Press without x,y movement)
+        //  92: long press
+        //  93: very long press
+        //---------------------
+        //
+        if(tch0>0)  //Skip last timer cycle where stroke ends (tch0=0) BEFORE tc0 stops this timer.
+        {
+          //
+          // Monitor duration of gesture (using count of cycles of this timer)
+          gest_time++
+          //
+          // Monitor distance of gesture movement (in pixels squared)
+          dx=tch0-tch2
+          dy=tch1-tch3
+          dsq=dx*dx
+          tmp=dy*dy
+          dsq+=tmp  // easier to work with square of distance - no need to sqrt
+          //
+          //
+          // Gesture interpretation
+          gest_type=0  // not a valid gesture (yet)
+          // Movement < 10px => PRESS(click) component
+          if(dsq<100)
+          {
+            if(gest_time<10)
+            {
+              // o
+              gest_type=91 // short press
+              //t1.txt="o" // ***DEGBUG/DEMO
+            }else if(gest_time<30)
+            {
+              // oo
+              gest_type=92 // long press
+              //t1.txt="oo" // ***DEGBUG/DEMO
+            }else
+            {
+              // ooo
+              gest_type=93 // vlong press
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="ooo" // ***DEGBUG/DEMO
+              if(gest_time==30)
+              {
+                //dim=0
+                //dim=100
+                //dim=dim_default
+              }
+            }
+          }
+          //
+          // Movement > 100px => SWIPE
+          if(dsq>10000)
+          {
+            if(dx>100)
+            {
+              //>>
+              gest_type=1 // right
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt=">>" // ***DEGBUG/DEMO
+            }else if(dx<-100)
+            {
+              //<<
+              gest_type=2 // left
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="<<" // ***DEGBUG/DEMO
+            }else if(dy>100)
+            {
+              //vv
+              gest_type=3 // down
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="vv" // ***DEGBUG/DEMO
+            }else if(dy<-100)
+            {
+              //^^
+              gest_type=4 // up
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="^^" // ***DEGBUG/DEMO
+            }
+          }
+          //
+          //
+          //
+          //
+          //DEBUG/DEMO display of live (pre-release) gesture internal data updates
+          //n0.val=gest_time
+          //n1.val=tch0
+          //n2.val=dx
+          //n3.val=tch1
+          //n4.val=dy
+          //n5.val=tc0.val  //component ID
+          //n5.val=b[tc0.val].type // component type
+          //n6.val=gest_type
+          if(gest_type==0)
+          {
+            //Ambiguous/incomplete gesture - ignore
+            //t1.txt="X" // ***DEGBUG/DEMO
+          }
+        }
+
+## page 10 cleanscreen
+[0] cleanscreen  page
+    sta = 1
+    up = 255
+    down = 255
+    left = 255
+    right = 255
+    pic = 88 (456x320)
+    bco = 0
+    on load:
+        vis p_light,0
+        vis t_loading,0
+        vis loadbar,0
+[1] p_animation  picture
+    at 0,0  456x320
+    pic = 88 (456x320)
+[2] tm_animation  timer
+    en = 1
+    tim = 50
+    on timer:
+        if(p_animation.pic!=179)
+        {
+          p_animation.pic=p_animation.pic+1
+        }else
+        {
+          vis p_light,1
+          tm_animation.en=0
+          tm_light.en=1
+          vis loadbar,1
+          tm_loadbar.en=1
+        }
+[3] p_light  crop
+    at 331,128  55x73
+    picc = 169 (456x320)
+[4] tm_light  timer
+    en = 0
+    tim = 50
+    on timer:
+        if(va_up.val==1)
+        {
+          if(p_light.picc<174)
+          {
+            p_light.picc=p_light.picc+1
+          }else
+          {
+            va_up.val=0
+          }
+        }else
+        {
+          if(p_light.picc>169)
+          {
+            p_light.picc=p_light.picc-1
+          }else
+          {
+            va_up.val=1
+          }
+        }
+[5] t_loading  text  global
+    at 79,205  367x30
+    sta = 0
+    txt = ''
+    txt_maxl = 50
+    style = 0
+    font = 3 (replace_h22_id_3 22)
+    pic = none
+    picc = 179 (456x320)
+    bco = 0
+    pco = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[6] loadbar  progress bar
+    at 0,314  456x5
+    sta = 0
+    val = 100
+    dis = 25
+    bpic = none
+    ppic = none
+    bco = 0
+    pco = 65535
+[7] tm_loadbar  timer
+    en = 0
+    tim = 100
+    on timer:
+        if(loadbar.val!=0)
+        {
+          loadbar.val=loadbar.val-1
+        }else
+        {
+          page home
+        }
+[8] tc0  touchcap
+    val = 0
+    on down:
+        loadbar.val=100
+        //~~~~~~boilerplate~~~~ v0.5.04
+        // GESTURES
+        //~~~~~~~~~~~~~~~~~~~~~
+        // tc (Touch Controller) for initiating GESTURE processing.
+        // (can only have ONE tcx component - lowest id number takes precedence, others ignored).
+        // Event checking is done 'live' in GESTURE (or custom) timer.
+        // Raise this componet to id 1 (highest precendence rank order).
+        // All other UI Events need to be 'Touch Release Events'
+        // (OR components need to be added to Exclusions below.)
+        // Uses Global variables (in [Program.s] tab):
+        //   int x=0,y=0,dx=0,dy=0,dsq=0,gest_time=0,gest_type=0
+        //
+        gest_time=0  // reset counter for press duration
+        //
+        // Set UI components to EXCLUDE from gestures (Sliders)
+        // tc0.val -> component ID; b[tc0.val].type -> component type
+        if(b[tc0.val].type==1)  // Sliders have component type == 1
+        {
+          gest_type=-1 // excluded component
+        }else if(b[tc0.val].type==98&&b[tc0.val].font==10)  // Buttons have component type == 98
+        {
+          gest_type=-1 // excluded component
+        }else
+        {
+          //NORMAL GESTURE processing
+          GESTURE.en=1
+        }
+    on up:
+        //~~~~~~boilerplate~~~~ v0.5.04
+        // GESTURES
+        //~~~~~~~~~~~~~~~~~~~~~
+        GESTURE.en=0
+        //
+        //<- CUSTOM*** add generic long press release actions here
+        if(gest_type==3)
+        {
+          //Down
+          page home
+        }else if(gest_type>=91)
+        {
+          //loadbar.val=100
+        }
+[9] GESTURE  timer
+    en = 0
+    tim = 50
+    on timer:
+        //~~~~~~ boilerplate~~~~ v0.5.004 ***DEMO/DEBUG mods
+        // GESTURE intpreter (press duration & swipes) (timer).
+        //~~~~~~~~~~~~~~~~~~~~~
+        //*** CUSTOMIZE immediate (before realease) actions below for each page ***
+        // Works with tc0 to continually poll gesture x,y,distance,duration
+        // while a touch gesture is occurring (BEFORE Touch Release Event).
+        // Gestures are decoded below 'live' and can be used to either:
+        //  * execute an immediate action (before Touch Release Events), or
+        //  * use `gest_type` as a condition/modifier in Touch Release Events.
+        //---------------------
+        //GESTURE list (returned in `gest_type` Global variable):
+        //  -1: excluded UI component - sliders (+ custom***)
+        //   0: invalid gesture (movement, but too short for swipe)
+        //   1: right swipe
+        //   2: left swipe
+        //   3: down swipe
+        //   4: up swipe
+        //  91: short press (>90 => Press without x,y movement)
+        //  92: long press
+        //  93: very long press
+        //---------------------
+        //
+        if(tch0>0)  //Skip last timer cycle where stroke ends (tch0=0) BEFORE tc0 stops this timer.
+        {
+          //
+          // Monitor duration of gesture (using count of cycles of this timer)
+          gest_time++
+          //
+          // Monitor distance of gesture movement (in pixels squared)
+          dx=tch0-tch2
+          dy=tch1-tch3
+          dsq=dx*dx
+          tmp=dy*dy
+          dsq+=tmp  // easier to work with square of distance - no need to sqrt
+          //
+          //
+          // Gesture interpretation
+          gest_type=0  // not a valid gesture (yet)
+          // Movement < 10px => PRESS(click) component
+          if(dsq<100)
+          {
+            if(gest_time<10)
+            {
+              // o
+              gest_type=91 // short press
+              //t1.txt="o" // ***DEGBUG/DEMO
+            }else if(gest_time<30)
+            {
+              // oo
+              gest_type=92 // long press
+              //t1.txt="oo" // ***DEGBUG/DEMO
+            }else
+            {
+              // ooo
+              gest_type=93 // vlong press
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="ooo" // ***DEGBUG/DEMO
+              if(gest_time==30)
+              {
+                //dim=0
+                //dim=100
+                //dim=dim_default
+              }
+            }
+          }
+          //
+          // Movement > 100px => SWIPE
+          if(dsq>10000)
+          {
+            if(dx>100)
+            {
+              //>>
+              gest_type=1 // right
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt=">>" // ***DEGBUG/DEMO
+            }else if(dx<-100)
+            {
+              //<<
+              gest_type=2 // left
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="<<" // ***DEGBUG/DEMO
+            }else if(dy>100)
+            {
+              //vv
+              gest_type=3 // down
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="vv" // ***DEGBUG/DEMO
+            }else if(dy<-100)
+            {
+              //^^
+              gest_type=4 // up
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="^^" // ***DEGBUG/DEMO
+            }
+          }
+          //
+          //
+          //
+          //
+          //DEBUG/DEMO display of live (pre-release) gesture internal data updates
+          //n0.val=gest_time
+          //n1.val=tch0
+          //n2.val=dx
+          //n3.val=tch1
+          //n4.val=dy
+          //n5.val=tc0.val  //component ID
+          //n5.val=b[tc0.val].type // component type
+          //n6.val=gest_type
+          if(gest_type==0)
+          {
+            //Ambiguous/incomplete gesture - ignore
+            //t1.txt="X" // ***DEGBUG/DEMO
+          }
+        }
+[10] va_up  variable
+    sta = 0
+    val = 1
+    txt = 'newtxt'
+    txt_maxl = 10
+
+## page 11 thermostat
+[0] thermostat  page
+    sta = 2
+    up = 255
+    down = 255
+    left = 255
+    right = 255
+    pic = 180 (455x320)
+    bco = 0
+    on load:
+        sleep_display.tim=home.sleep_display.tim
+        setTimer.en=0
+[1] home  button
+    at 0,0  59x49
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+    on down:
+        if(setTempTimer.en==1)
+        {
+          printh 99
+          prints "deactivatetemp",0
+          printh FF FF FF
+          setTempTimer.en=0
+        }
+[2] prev  button
+    at 59,3  56x46
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 180 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+    on down:
+        if(setTempTimer.en==1)
+        {
+          printh 99
+          prints "deactivatetemp",0
+          printh FF FF FF
+          setTempTimer.en=0
+        }
+[3] next  button
+    at 392,3  55x46
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 180 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+    on down:
+        if(setTempTimer.en==1)
+        {
+          printh 99
+          prints "deactivatetemp",0
+          printh FF FF FF
+          setTempTimer.en=0
+        }
+[4] current  button
+    at 124,6  253x40
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 180 (455x320)
+    picc2 = 67 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[5] currentText  text
+    at 118,64  220x30
+    sta = 0
+    txt = 'Room'
+    txt_maxl = 10
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 180 (455x320)
+    bco = 65535
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[6] roomTemp  text
+    at 93,96  240x70
+    sta = 0
+    txt = '-°'
+    txt_maxl = 10
+    style = 0
+    font = 2 (timeandtemp 80)
+    pic = none
+    picc = 180 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 0
+    isbr = 0
+[7] setDown  button
+    at 92,182  80x60
+    sta = 0
+    val = 0
+    txt = '!'
+    txt_maxl = 10
+    style = 4
+    font = 15 (arrows40 40)
+    pic = none
+    pic2 = none
+    picc = 180 (455x320)
+    picc2 = 180 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+    on up:
+        if(setActive.val==1)
+        {
+          //Set button is active, reset timer so it does not deactivate the set button
+          setTimer.en=1
+        }else
+        {
+          setTempTimer.en=1
+        }
+[8] setText  text
+    at 178,173  100x20
+    sta = 0
+    txt = 'Set'
+    txt_maxl = 10
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 180 (455x320)
+    bco = 65535
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[9] setTemp  text
+    at 163,199  130x30
+    sta = 0
+    txt = '20'
+    txt_maxl = 10
+    style = 0
+    font = 12 (timeandtemp30 30)
+    pic = none
+    picc = 180 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[10] setUp  button
+    at 284,182  80x60
+    sta = 0
+    val = 0
+    txt = '"'
+    txt_maxl = 10
+    style = 4
+    font = 15 (arrows40 40)
+    pic = none
+    pic2 = none
+    picc = 180 (455x320)
+    picc2 = 180 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+    on up:
+        if(setActive.val==1)
+        {
+          //Set button is active, reset timer so it does not deactivate the set button
+          setTimer.en=1
+        }else
+        {
+          setTempTimer.en=1
+        }
+[11] sleep_display  timer
+    en = 1
+    tim = 30000
+    on timer:
+        printh 92 FF FF FF
+[12] GESTURE  timer
+    en = 0
+    tim = 50
+    on timer:
+        //~~~~~~ boilerplate~~~~ v0.5.004 ***DEMO/DEBUG mods
+        // GESTURE intpreter (press duration & swipes) (timer).
+        //~~~~~~~~~~~~~~~~~~~~~
+        //*** CUSTOMIZE immediate (before realease) actions below for each page ***
+        // Works with tc0 to continually poll gesture x,y,distance,duration
+        // while a touch gesture is occurring (BEFORE Touch Release Event).
+        // Gestures are decoded below 'live' and can be used to either:
+        //  * execute an immediate action (before Touch Release Events), or
+        //  * use `gest_type` as a condition/modifier in Touch Release Events.
+        //---------------------
+        //GESTURE list (returned in `gest_type` Global variable):
+        //  -1: excluded UI component - sliders (+ custom***)
+        //   0: invalid gesture (movement, but too short for swipe)
+        //   1: right swipe
+        //   2: left swipe
+        //   3: down swipe
+        //   4: up swipe
+        //  91: short press (>90 => Press without x,y movement)
+        //  92: long press
+        //  93: very long press
+        //---------------------
+        //
+        if(tch0>0)  //Skip last timer cycle where stroke ends (tch0=0) BEFORE tc0 stops this timer.
+        {
+          //
+          // Monitor duration of gesture (using count of cycles of this timer)
+          gest_time++
+          //
+          // Monitor distance of gesture movement (in pixels squared)
+          dx=tch0-tch2
+          dy=tch1-tch3
+          dsq=dx*dx
+          tmp=dy*dy
+          dsq+=tmp  // easier to work with square of distance - no need to sqrt
+          //
+          //
+          // Gesture interpretation
+          gest_type=0  // not a valid gesture (yet)
+          // Movement < 10px => PRESS(click) component
+          if(dsq<100)
+          {
+            if(gest_time<10)
+            {
+              // o
+              gest_type=91 // short press
+              //t1.txt="o" // ***DEGBUG/DEMO
+            }else if(gest_time<30)
+            {
+              // oo
+              gest_type=92 // long press
+              //t1.txt="oo" // ***DEGBUG/DEMO
+            }else
+            {
+              // ooo
+              gest_type=93 // vlong press
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="ooo" // ***DEGBUG/DEMO
+              if(gest_time==30)
+              {
+                //dim=0
+                //dim=100
+                //dim=dim_default
+              }
+            }
+          }
+          //
+          // Movement > 100px => SWIPE
+          if(dsq>10000)
+          {
+            if(dx>100)
+            {
+              //>>
+              gest_type=1 // right
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt=">>" // ***DEGBUG/DEMO
+            }else if(dx<-100)
+            {
+              //<<
+              gest_type=2 // left
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="<<" // ***DEGBUG/DEMO
+            }else if(dy>100)
+            {
+              //vv
+              gest_type=3 // down
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="vv" // ***DEGBUG/DEMO
+            }else if(dy<-100)
+            {
+              //^^
+              gest_type=4 // up
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="^^" // ***DEGBUG/DEMO
+            }
+          }
+          //
+          //
+          //
+          //
+          //DEBUG/DEMO display of live (pre-release) gesture internal data updates
+          //n0.val=gest_time
+          //n1.val=tch0
+          //n2.val=dx
+          //n3.val=tch1
+          //n4.val=dy
+          //n5.val=tc0.val  //component ID
+          //n5.val=b[tc0.val].type // component type
+          //n6.val=gest_type
+          if(gest_type==0)
+          {
+            //Ambiguous/incomplete gesture - ignore
+            //t1.txt="X" // ***DEGBUG/DEMO
+          }
+        }
+[13] tc0  touchcap
+    val = 0
+    on down:
+        sleep_display.en=1
+        //~~~~~~boilerplate~~~~ v0.5.04
+        // GESTURES
+        //~~~~~~~~~~~~~~~~~~~~~
+        // tc (Touch Controller) for initiating GESTURE processing.
+        // (can only have ONE tcx component - lowest id number takes precedence, others ignored).
+        // Event checking is done 'live' in GESTURE (or custom) timer.
+        // Raise this componet to id 1 (highest precendence rank order).
+        // All other UI Events need to be 'Touch Release Events'
+        // (OR components need to be added to Exclusions below.)
+        // Uses Global variables (in [Program.s] tab):
+        //   int x=0,y=0,dx=0,dy=0,dsq=0,gest_time=0,gest_type=0
+        //
+        gest_time=0  // reset counter for press duration
+        //
+        // Set UI components to EXCLUDE from gestures (Sliders)
+        // tc0.val -> component ID; b[tc0.val].type -> component type
+        if(b[tc0.val].type==1)  // Sliders have component type == 1
+        {
+          gest_type=-1 // excluded component
+        }else if(b[tc0.val].type==98&&b[tc0.val].font==10)  // Buttons have component type == 98
+        {
+          gest_type=-1 // excluded component
+        }else
+        {
+          //NORMAL GESTURE processing
+          GESTURE.en=1
+        }
+    on up:
+        //~~~~~~boilerplate~~~~ v0.5.04
+        // GESTURES
+        //~~~~~~~~~~~~~~~~~~~~~
+        GESTURE.en=0
+        //
+        //<- CUSTOM*** add generic long press release actions here
+        if(gest_type==1)
+        {
+          //Right
+          setAction.txt="swiperight"
+        }else if(gest_type==2)
+        {
+          //Left
+          setAction.txt="swipeleft"
+        }else if(gest_type==3)
+        {
+          //Down
+          setAction.txt="swipedown"
+        }else if(gest_type==4)
+        {
+          //Down
+          setAction.txt="swipeup"
+        }else if(gest_type>=91)
+        {
+          if(tc0.val==1)
+          {
+            setAction.txt="back"
+          }else if(tc0.val==2)
+          {
+            setAction.txt="prev"
+          }else if(tc0.val==3)
+          {
+            setAction.txt="next"
+          }else if(tc0.val==7)
+          {
+            setAction.txt="tempdown"
+          }else if(tc0.val==10)
+          {
+            setAction.txt="tempup"
+          }else if(tc0.val==30)
+          {
+            if(setActive.val==0)
+            {
+              //No set button is active, activate
+              setActive.val=1
+              setTimer.en=1
+              setTempVal.txt=setTemp.txt
+              setText.txt=set1text.txt
+              setText.pco=65024
+              setTemp.txt=""
+              setTemp.font=0
+              setTemp.txt=""
+              set1text.pco=65024
+              setAction.txt="activate:set1"
+            }else
+            {
+              //Set button is already active
+              if(set1text.pco==65024)
+              {
+                //Its my own set button that is active, deactivate
+                setActive.val=0
+                setTimer.en=0
+                setText.txt="Set"
+                setText.pco=65535
+                setTemp.txt=""
+                setTemp.font=12
+                setTemp.txt=setTempVal.txt
+                set1text.pco=65535
+                setAction.txt="deactivate"
+              }else
+              {
+                //Another set button is active, clear colors on all buttons and activate my own
+                set1text.pco=65535
+                set2text.pco=65535
+                set3text.pco=65535
+                set4text.pco=65535
+                set5text.pco=65535
+                setActive.val=1
+                setTimer.en=1
+                setText.txt=set1text.txt
+                setText.pco=65024
+                setTemp.txt=""
+                setTemp.font=0
+                setTemp.txt=""
+                set1text.pco=65024
+                setAction.txt="activate:set1"
+              }
+            }
+          }else if(tc0.val==31)
+          {
+            if(setActive.val==0)
+            {
+              //No set button is active, activate
+              setActive.val=1
+              setTimer.en=1
+              setTempVal.txt=setTemp.txt
+              setText.txt=set2text.txt
+              setText.pco=65024
+              setTemp.txt=""
+              setTemp.font=0
+              setTemp.txt=""
+              set2text.pco=65024
+              setAction.txt="activate:set2"
+            }else
+            {
+              //Set button is already active
+              if(set2text.pco==65024)
+              {
+                //Its my own set button that is active, deactivate
+                setActive.val=0
+                setTimer.en=0
+                setText.txt="Set"
+                setText.pco=65535
+                setTemp.txt=""
+                setTemp.font=12
+                setTemp.txt=setTempVal.txt
+                set2text.pco=65535
+                setAction.txt="deactivate"
+              }else
+              {
+                //Another set button is active, clear colors on all buttons and activate my own
+                set1text.pco=65535
+                set2text.pco=65535
+                set3text.pco=65535
+                set4text.pco=65535
+                set5text.pco=65535
+                setActive.val=1
+                setTimer.en=1
+                setText.txt=set2text.txt
+                setText.pco=65024
+                setTemp.txt=""
+                setTemp.font=0
+                setTemp.txt=""
+                set2text.pco=65024
+                setAction.txt="activate:set2"
+              }
+            }
+          }else if(tc0.val==32)
+          {
+            if(setActive.val==0)
+            {
+              //No set button is active, activate
+              setActive.val=1
+              setTimer.en=1
+              setTempVal.txt=setTemp.txt
+              setText.txt=set3text.txt
+              setText.pco=65024
+              setTemp.txt=""
+              setTemp.font=0
+              setTemp.txt=""
+              set3text.pco=65024
+              setAction.txt="activate:set3"
+            }else
+            {
+              //Set button is already active
+              if(set3text.pco==65024)
+              {
+                //Its my own set button that is active, deactivate
+                setActive.val=0
+                setTimer.en=0
+                setText.txt="Set"
+                setText.pco=65535
+                setTemp.txt=""
+                setTemp.font=12
+                setTemp.txt=setTempVal.txt
+                set3text.pco=65535
+                setAction.txt="deactivate"
+              }else
+              {
+                //Another set button is active, clear colors on all buttons and activate my own
+                set1text.pco=65535
+                set2text.pco=65535
+                set3text.pco=65535
+                set4text.pco=65535
+                set5text.pco=65535
+                setActive.val=1
+                setTimer.en=1
+                setText.txt=set3text.txt
+                setText.pco=65024
+                setTemp.txt=""
+                setTemp.font=0
+                setTemp.txt=""
+                set3text.pco=65024
+                setAction.txt="activate:set3"
+              }
+            }
+          }else if(tc0.val==33)
+          {
+            if(setActive.val==0)
+            {
+              //No set button is active, activate
+              setActive.val=1
+              setTimer.en=1
+              setTempVal.txt=setTemp.txt
+              setText.txt=set4text.txt
+              setText.pco=65024
+              setTemp.txt=""
+              setTemp.font=0
+              setTemp.txt=""
+              set4text.pco=65024
+              setAction.txt="activate:set4"
+            }else
+            {
+              //Set button is already active
+              if(set4text.pco==65024)
+              {
+                //Its my own set button that is active, deactivate
+                setActive.val=0
+                setTimer.en=0
+                setText.txt="Set"
+                setText.pco=65535
+                setTemp.txt=""
+                setTemp.font=12
+                setTemp.txt=setTempVal.txt
+                set4text.pco=65535
+                setAction.txt="deactivate"
+              }else
+              {
+                //Another set button is active, clear colors on all buttons and activate my own
+                set1text.pco=65535
+                set2text.pco=65535
+                set3text.pco=65535
+                set4text.pco=65535
+                set5text.pco=65535
+                setActive.val=1
+                setTimer.en=1
+                setText.txt=set4text.txt
+                setText.pco=65024
+                setTemp.txt=""
+                setTemp.font=0
+                setTemp.txt=""
+                set4text.pco=65024
+                setAction.txt="activate:set4"
+              }
+            }
+          }else if(tc0.val==34)
+          {
+            if(setActive.val==0)
+            {
+              //No set button is active, activate
+              setActive.val=1
+              setTimer.en=1
+              setTempVal.txt=setTemp.txt
+              setText.txt=set5text.txt
+              setText.pco=65024
+              setTemp.txt=""
+              setTemp.font=0
+              setTemp.txt=""
+              set5text.pco=65024
+              setAction.txt="activate:set5"
+            }else
+            {
+              //Set button is already active
+              if(set5text.pco==65024)
+              {
+                //Its my own set button that is active, deactivate
+                setActive.val=0
+                setTimer.en=0
+                setText.txt="Set"
+                setText.pco=65535
+                setTemp.txt=""
+                setTemp.font=12
+                setTemp.txt=setTempVal.txt
+                set5text.pco=65535
+                setAction.txt="deactivate"
+              }else
+              {
+                //Another set button is active, clear colors on all buttons and activate my own
+                set1text.pco=65535
+                set2text.pco=65535
+                set3text.pco=65535
+                set4text.pco=65535
+                set5text.pco=65535
+                setActive.val=1
+                setTimer.en=1
+                setText.txt=set5text.txt
+                setText.pco=65024
+                setTemp.txt=""
+                setTemp.font=0
+                setTemp.txt=""
+                set5text.pco=65024
+                setAction.txt="activate:set5"
+              }
+            }
+          }else
+          {
+            setAction.txt="nothing"
+          }
+        }
+        printh 99
+        prints setAction.txt,0
+        printh FF FF FF
+[14] setTempVal  variable
+    sta = 1
+    val = 0
+    txt = ''
+    txt_maxl = 10
+[15] setActive  variable
+    sta = 0
+    val = 0
+    txt = 'newtxt'
+    txt_maxl = 10
+[16] setTimer  timer
+    en = 0
+    tim = 3000
+    on timer:
+        //Deactivate set buttons
+        setActive.val=0
+        setTimer.en=0
+        setText.txt="Set"
+        setText.pco=65535
+        setTemp.txt=""
+        setTemp.font=12
+        setTemp.txt=setTempVal.txt
+        set1text.pco=65535
+        set2text.pco=65535
+        set3text.pco=65535
+        set4text.pco=65535
+        set5text.pco=65535
+        printh 99
+        prints "deactivate",0
+        printh FF FF FF
+[17] setAction  variable
+    sta = 1
+    val = 0
+    txt = ''
+    txt_maxl = 30
+[18] n0  variable
+    sta = 0
+    val = 0
+    txt = 'newtxt'
+    txt_maxl = 10
+[19] s0  variable
+    sta = 1
+    val = 0
+    txt = ''
+    txt_maxl = 5
+[20] set1icon  dual-state button
+    at 33,255  70x30
+    sta = 0
+    val = 0
+    txt = '+'
+    txt_maxl = 10
+    style = 4
+    font = 16 (thermostat30NEW 30)
+    pic = none
+    pic2 = none
+    picc = 180 (455x320)
+    picc2 = 180 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[21] set1text  button
+    at 33,285  70x30
+    sta = 0
+    val = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 180 (455x320)
+    picc2 = 180 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[22] set2icon  dual-state button
+    at 111,255  70x30
+    sta = 0
+    val = 0
+    txt = '+'
+    txt_maxl = 10
+    style = 4
+    font = 16 (thermostat30NEW 30)
+    pic = none
+    pic2 = none
+    picc = 180 (455x320)
+    picc2 = 180 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[23] set2text  button
+    at 111,285  70x30
+    sta = 0
+    val = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 180 (455x320)
+    picc2 = 180 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[24] set3icon  dual-state button
+    at 189,255  70x30
+    sta = 0
+    val = 0
+    txt = '+'
+    txt_maxl = 10
+    style = 4
+    font = 16 (thermostat30NEW 30)
+    pic = none
+    pic2 = none
+    picc = 180 (455x320)
+    picc2 = 180 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[25] set3text  button
+    at 189,285  70x30
+    sta = 0
+    val = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 180 (455x320)
+    picc2 = 180 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[26] set4icon  dual-state button
+    at 267,255  70x30
+    sta = 0
+    val = 0
+    txt = '+'
+    txt_maxl = 10
+    style = 4
+    font = 16 (thermostat30NEW 30)
+    pic = none
+    pic2 = none
+    picc = 180 (455x320)
+    picc2 = 180 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[27] set4text  button
+    at 267,285  70x30
+    sta = 0
+    val = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 180 (455x320)
+    picc2 = 180 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[28] set5icon  dual-state button
+    at 345,255  70x30
+    sta = 0
+    val = 0
+    txt = '+'
+    txt_maxl = 10
+    style = 4
+    font = 16 (thermostat30NEW 30)
+    pic = none
+    pic2 = none
+    picc = 180 (455x320)
+    picc2 = 180 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[29] set5text  button
+    at 345,285  70x30
+    sta = 0
+    val = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 180 (455x320)
+    picc2 = 180 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[30] set1  hotspot
+    at 30,244  76x76
+    on down:
+        if(setTempTimer.en==1)
+        {
+          printh 99
+          prints "deactivatetemp",0
+          printh FF FF FF
+          setTempTimer.en=0
+        }
+[31] set2  hotspot
+    at 108,244  76x76
+    on down:
+        if(setTempTimer.en==1)
+        {
+          printh 99
+          prints "deactivatetemp",0
+          printh FF FF FF
+          setTempTimer.en=0
+        }
+[32] set3  hotspot
+    at 186,244  76x76
+[33] set4  hotspot
+    at 264,244  76x76
+    on down:
+        if(setTempTimer.en==1)
+        {
+          printh 99
+          prints "deactivatetemp",0
+          printh FF FF FF
+          setTempTimer.en=0
+        }
+[34] set5  hotspot
+    at 342,244  76x76
+    on down:
+        if(setTempTimer.en==1)
+        {
+          printh 99
+          prints "deactivatetemp",0
+          printh FF FF FF
+          setTempTimer.en=0
+        }
+[35] setTempTimer  timer
+    en = 0
+    tim = 3000
+    on timer:
+        printh 99
+        prints "deactivatetemp",0
+        printh FF FF FF
+        setTempTimer.en=0
