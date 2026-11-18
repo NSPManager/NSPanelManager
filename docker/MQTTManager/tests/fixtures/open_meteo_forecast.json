@@ -1,0 +1,134 @@
+{
+  "latitude": 51.51147,
+  "longitude": -0.13078308,
+  "utc_offset_seconds": 0,
+  "timezone": "Europe/London",
+  "timezone_abbreviation": "GMT",
+  "elevation": 29.0,
+  "current_units": {
+    "time": "unixtime",
+    "interval": "seconds",
+    "temperature_2m": "\u00b0C",
+    "relative_humidity_2m": "%",
+    "precipitation": "mm",
+    "precipitation_probability": "%",
+    "weather_code": "wmo code",
+    "wind_speed_10m": "km/h",
+    "wind_gusts_10m": "km/h"
+  },
+  "current": {
+    "time": 1792957500,
+    "interval": 900,
+    "temperature_2m": 11.0,
+    "relative_humidity_2m": 59,
+    "precipitation": 0.4,
+    "precipitation_probability": 35,
+    "weather_code": 0,
+    "wind_speed_10m": 17.3,
+    "wind_gusts_10m": 37.1
+  },
+  "daily_units": {
+    "time": "unixtime",
+    "weather_code": "wmo code",
+    "temperature_2m_max": "\u00b0C",
+    "temperature_2m_min": "\u00b0C",
+    "sunrise": "unixtime",
+    "sunset": "unixtime",
+    "precipitation_sum": "mm",
+    "precipitation_probability_max": "%",
+    "wind_speed_10m_max": "km/h",
+    "wind_gusts_10m_max": "km/h"
+  },
+  "daily": {
+    "time": [
+      1792886400,
+      1792972800,
+      1793059200,
+      1793145600,
+      1793232000,
+      1793318400,
+      1793404800
+    ],
+    "weather_code": [
+      51,
+      61,
+      61,
+      3,
+      3,
+      3,
+      45
+    ],
+    "temperature_2m_max": [
+      13.5,
+      16.3,
+      16.5,
+      15.7,
+      15.5,
+      14.7,
+      10.5
+    ],
+    "temperature_2m_min": [
+      9.3,
+      9.1,
+      10.3,
+      9.0,
+      9.6,
+      8.6,
+      6.8
+    ],
+    "sunrise": [
+      1792910501,
+      1792997006,
+      1793083510,
+      1793170014,
+      1793256518,
+      1793343023,
+      1793429528
+    ],
+    "sunset": [
+      1792946800,
+      1793033083,
+      1793119369,
+      1793205656,
+      1793291946,
+      1793378236,
+      1793464527
+    ],
+    "precipitation_sum": [
+      1.2,
+      6.8,
+      0.0,
+      12.4,
+      0.3,
+      0.0,
+      0.0
+    ],
+    "precipitation_probability_max": [
+      40,
+      85,
+      5,
+      95,
+      20,
+      10,
+      0
+    ],
+    "wind_speed_10m_max": [
+      30.2,
+      20.2,
+      26.6,
+      16.2,
+      11.2,
+      6.8,
+      3.6
+    ],
+    "wind_gusts_10m_max": [
+      63.4,
+      42.8,
+      57.2,
+      33.5,
+      23.4,
+      12.2,
+      8.3
+    ]
+  }
+}

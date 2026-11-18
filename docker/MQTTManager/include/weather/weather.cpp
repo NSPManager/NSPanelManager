@@ -76,7 +76,7 @@ void MQTTManagerWeather::_pull_new_weather_data() {
   }
 
   std::lock_guard<std::mutex> lock_guard(MQTTManagerWeather::_weater_data_mutex);
-  std::string pull_weather_url = fmt::format("https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timeformat=unixtime&wind_speed_unit={}&timezone={}&precipitation_unit={}&temperature_unit={}",
+  std::string pull_weather_url = fmt::format("https://api.open-meteo.com/v1/forecast?latitude={}&longitude={}&current=temperature_2m,relative_humidity_2m,precipitation,precipitation_probability,weather_code,wind_speed_10m,wind_gusts_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_sum,precipitation_probability_max,wind_speed_10m_max,wind_gusts_10m_max&timeformat=unixtime&wind_speed_unit={}&timezone={}&precipitation_unit={}&temperature_unit={}",
                                              MQTTManagerWeather::_location_latitude,
                                              MQTTManagerWeather::_location_longitude,
                                              MQTTManagerWeather::_wind_speed_format,
@@ -178,6 +178,8 @@ void MQTTManagerWeather::_process_weather_data(std::string &weather_string) {
       }
       MQTTManagerWeather::_current_condition = std::to_string(int(data["current"]["weather_code"]));
       MQTTManagerWeather::_current_wind_speed = data["current"]["wind_speed_10m"];
+      // Not every weather model provides a probability, so a null here must not stop the rest of the update.
+      MQTTManagerWeather::_current_precipitation_probability = data["current"]["precipitation_probability"].is_number() ? float(data["current"]["precipitation_probability"]) : 0;
       MQTTManagerWeather::_current_min_temperature = MQTTManagerWeather::_forecast_weather_info[0].temperature_low;
       MQTTManagerWeather::_current_max_temperature = MQTTManagerWeather::_forecast_weather_info[0].temperature_high;
 
@@ -253,7 +255,7 @@ void MQTTManagerWeather::send_state_update() {
     NSPanelWeatherUpdate_ForecastItem *forecast_item = weather_protbuf.add_forecast_items();
     forecast_item->set_weather_icon(MQTTManagerWeather::_get_icon_from_mapping(info.condition, info.time.tm_hour, false));
     // TODO: Implement ability for users to select precipitation volume instead of probability.
-    forecast_item->set_precipitation_string(fmt::format("{:.0f}%", info.precipitation));
+    forecast_item->set_precipitation_string(fmt::format("{:.0f}%", info.precipitation_probability));
     forecast_item->set_temperature_maxmin_string(fmt::format("{:.0f}°/{:.0f}°", info.temperature_high, info.temperature_low));
     forecast_item->set_wind_string(fmt::format("{:.0f}{}", info.wind_speed, MQTTManagerWeather::_windspeed_unit));
     // TODO: Implement ability for users to display comming 5 hours instead of 5 days.

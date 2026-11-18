@@ -1,14 +1,17 @@
 #ifndef MQTTMANAGER_CONFIG_HPP
 #define MQTTMANAGER_CONFIG_HPP
-#include "light/light.hpp"
+#include "filesystem"
 #include <boost/algorithm/string.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/signals2.hpp>
+#include <cstdint>
 #include <database_manager/database_manager.hpp>
 #include <expected>
+#include <filesystem>
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
+#include <optional>
 #include <protobuf/protobuf_mqttmanager.pb.h>
 #include <spdlog/spdlog.h>
 #include <string>
@@ -47,9 +50,6 @@ enum MQTT_MANAGER_SETTING {
   MQTT_USERNAME,
   OPENHAB_ADDRESS,
   OPENHAB_TOKEN,
-  OPENHAB_BRIGHTNESS_CHANNEL_MAX,
-  OPENHAB_BRIGHTNESS_CHANNEL_MIN,
-  OPENHAB_RGB_CHANNEL_NAME,
   OUTSIDE_TEMP_SENSOR_ENTITY_ID,
   OUTSIDE_TEMP_SENSOR_PROVIDER,
   WEATHER_PRECIPITATION_FORMAT,
@@ -73,6 +73,9 @@ enum MQTT_MANAGER_SETTING {
   OPTIMISTIC_MODE,
   LIGHT_TURN_ON_BRIGHTNESS,
   DEFAULT_NSPANEL_TYPE,
+  BUZZER_SOUND_TOUCH,
+  BUZZER_SOUND_SCENE_ACTIVATED,
+  BUZZER_SOUND_SCENE_SAVED,
   LAST, // Keep last as to be able to reference the last element in the list.
 };
 
@@ -86,6 +89,15 @@ public:
   static void populate_default_and_clean();
 
   static inline std::string timezone;
+  // POSIX TZ rule for timezone, read from its tzdata file. Empty if it could not be read.
+  static inline std::string timezone_posix_rule;
+
+  /**
+   * Read the POSIX TZ rule from the end of a tzdata (TZif) file, ex. "CET-1CEST,M3.5.0,M10.5.0/3".
+   * @param tzif_path: Path of the file, ex. /usr/share/zoneinfo/Europe/Stockholm.
+   * @return The rule, or empty if the file is missing, not version 2 or later, or has no rule.
+   */
+  static std::string read_posix_tz_rule(const std::string &tzif_path);
 
   template <typename T>
   static T get_setting_with_default(MQTT_MANAGER_SETTING key);
@@ -158,24 +170,24 @@ private:
 
   static inline LightTurnOnBehaviour _light_turn_on_behaviour = LightTurnOnBehaviour::COLOR_TEMPERATURE;
 
-  static std::optional<std::string> _get_file_md5_checksum(std::string file_path);
-  static inline std::mutex _md5_checksum_files_mutex;
-  static inline std::string _md5_checksum_firmware_sonoff;
-  static inline std::string _md5_checksum_firmware_custom;
-  static inline std::string _md5_checksum_littlefs_sonoff;
-  static inline std::string _md5_checksum_littlefs_custom;
-  static inline std::string _md5_checksum_eu_tft1;
-  static inline std::string _md5_checksum_eu_tft2;
-  static inline std::string _md5_checksum_eu_tft3;
-  static inline std::string _md5_checksum_eu_tft4;
-  static inline std::string _md5_checksum_us_tft1;
-  static inline std::string _md5_checksum_us_tft2;
-  static inline std::string _md5_checksum_us_tft3;
-  static inline std::string _md5_checksum_us_tft4;
-  static inline std::string _md5_checksum_us_horizontal_mirrored_tft1;
-  static inline std::string _md5_checksum_us_horizontal_mirrored_tft2;
-  static inline std::string _md5_checksum_us_horizontal_mirrored_tft3;
-  static inline std::string _md5_checksum_us_horizontal_mirrored_tft4;
+  // A struct of values needed to cache and hold checksums for files. Stored with an unordered map
+  // where the key of the map is the path to the file.
+  struct _CachedChecksum {
+    std::optional<std::filesystem::file_time_type> mtime;
+    std::string checksum;
+  };
+
+  // Map of cached checksums. Key = file path.
+  static inline std::unordered_map<std::string, _CachedChecksum> _checksums;
+
+  // Mutex for _checksums map
+  static inline std::mutex _checksums_mutex;
+
+  // Get a checksum for a given file. Return error string in case of failure.
+  static std::expected<std::string, std::string> _get_file_md5_checksum(std::string file_path);
+
+  // Get the mtime (modified time) from a given file. Return error string in case of failure.
+  static std::expected<std::filesystem::file_time_type, std::string> _get_file_mtime(std::string file_path);
 
   static inline std::unordered_map<MQTT_MANAGER_SETTING, std::string> _settings_values_cache;
 
@@ -204,8 +216,6 @@ private:
       {MQTT_MANAGER_SETTING::MQTT_USERNAME, {"mqtt_username", ""}},
       {MQTT_MANAGER_SETTING::OPENHAB_ADDRESS, {"openhab_address", ""}},
       {MQTT_MANAGER_SETTING::OPENHAB_TOKEN, {"openhab_token", ""}},
-      {MQTT_MANAGER_SETTING::OPENHAB_BRIGHTNESS_CHANNEL_MAX, {"openhab_brightness_channel_max", "255"}},
-      {MQTT_MANAGER_SETTING::OPENHAB_BRIGHTNESS_CHANNEL_MIN, {"openhab_brightness_channel_min", "0"}},
       {MQTT_MANAGER_SETTING::OUTSIDE_TEMP_SENSOR_ENTITY_ID, {"outside_temp_sensor_entity_id", ""}},
       {MQTT_MANAGER_SETTING::OUTSIDE_TEMP_SENSOR_PROVIDER, {"outside_temp_sensor_provider", ""}},
       {MQTT_MANAGER_SETTING::WEATHER_PRECIPITATION_FORMAT, {"weather_precipitation_format", "mm"}},
@@ -229,6 +239,9 @@ private:
       {MQTT_MANAGER_SETTING::OPTIMISTIC_MODE, {"optimistic_mode", "True"}},
       {MQTT_MANAGER_SETTING::LIGHT_TURN_ON_BRIGHTNESS, {"light_turn_on_brightness", "50"}},
       {MQTT_MANAGER_SETTING::DEFAULT_NSPANEL_TYPE, {"default_nspanel_type", "eu"}},
+      {MQTT_MANAGER_SETTING::BUZZER_SOUND_TOUCH, {"buzzer_sound_touch", ""}}, // RTTTL, empty for no sound
+      {MQTT_MANAGER_SETTING::BUZZER_SOUND_SCENE_ACTIVATED, {"buzzer_sound_scene_activated", ""}},
+      {MQTT_MANAGER_SETTING::BUZZER_SOUND_SCENE_SAVED, {"buzzer_sound_scene_saved", ""}},
 #if defined(TEST_MODE) && TEST_MODE == 1
       {MQTT_MANAGER_SETTING::LAST, {"last", "last_value"}},
 #endif

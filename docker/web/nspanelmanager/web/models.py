@@ -7,7 +7,7 @@ from requests.models import default_hooks
 
 
 class Settings(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     value = models.CharField(max_length=255)
 
     def __str__(self) -> str:
@@ -94,6 +94,8 @@ class Entity(models.Model):
         SWITCH = "switch"
         BUTTON = "button"
         THERMOSTAT = "thermostat"
+        MEDIA_PLAYER = "media_player"
+        COVER = "cover"
 
     room = models.ForeignKey(Room, on_delete=models.CASCADE)
     friendly_name = models.CharField(max_length=255, default="")

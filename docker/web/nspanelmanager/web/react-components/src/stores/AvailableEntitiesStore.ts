@@ -19,6 +19,7 @@ export interface IOptionType {
   value: string;
   label: string;
   icon?: string;
+  type: string;
 }
 
 interface IAvailableEntitiesStore {
@@ -38,6 +39,8 @@ function getOptionsFromItems(items: any[]): IOptionType[] {
       mdi_icon = "mdi-lightbulb";
     } else if (item.item_id.startsWith("input_boolean")) {
       mdi_icon = "mdi-toggle-switch-variant";
+    } else if (item.item_id.startsWith("sensor.")) {
+      mdi_icon = "mdi-access-point";
     } else if (item.item_id.startsWith("switch")) {
       mdi_icon = "mdi-toggle-switch-variant";
     } else if (item.item_id.startsWith("button") || item.item_id.startsWith("input_button")) {
@@ -48,12 +51,17 @@ function getOptionsFromItems(items: any[]): IOptionType[] {
       mdi_icon = "mdi-palette";
     } else if (item.item_id.startsWith("script")) {
       mdi_icon = "mdi-code-json";
+    } else if (item.item_id.startsWith("media_player")) {
+      mdi_icon = "mdi-speaker";
+    } else if (item.item_id.startsWith("cover")) {
+      mdi_icon = "mdi-window-shutter";
     }
 
     options.push({
       value: item.item_id,
       label: item.label,
       icon: mdi_icon,
+      type: item.type,
     });
   }
   return options;

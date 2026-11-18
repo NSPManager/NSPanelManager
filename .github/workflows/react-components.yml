@@ -1,0 +1,56 @@
+name: "React components"
+
+# The React components in docker/web/nspanelmanager/web/react-components are built into dist/ and
+# templates/scripts.html, which are committed and served as-is: the Docker image does not rebuild
+# them. Check that they type-check, build, and match what is committed.
+
+on:
+  pull_request:
+    paths:
+      - "docker/web/nspanelmanager/web/react-components/**"
+      - ".github/workflows/react-components.yml"
+  push:
+    branches:
+      - "main"
+      - "devel"
+      - "beta"
+    paths:
+      - "docker/web/nspanelmanager/web/react-components/**"
+      - ".github/workflows/react-components.yml"
+
+defaults:
+  run:
+    working-directory: docker/web/nspanelmanager/web/react-components
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: docker/web/nspanelmanager/web/react-components/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      # "build" runs tsc -b before vite build, so this is also the type check.
+      - name: Type-check and build
+        run: npm run build
+
+      - name: Check the committed build is up to date
+        run: |
+          git add --intent-to-add --all .
+          if ! git diff --exit-code --stat -- .; then
+            echo "::error::dist/ or templates/scripts.html is out of date. Run the build in react-components and commit the result."
+            exit 1
+          fi
+
+      # Reported but not enforced yet: the existing code has 30 errors, mostly no-explicit-any and
+      # react-refresh/only-export-components.
+      - name: Lint
+        continue-on-error: true
+        run: npx eslint .

@@ -54,6 +54,7 @@ message NSPanelConfig {
     NOTIFY_MANAGER = 2;
     THERMOSTAT_HEAT = 3;
     THERMOSTAT_COOL = 4;
+    OPEN_ENTITY_PAGE = 5; // Open the entity page for buttonN_entity_page_topic. The relay is left alone.
   }
   NSPanelButtonMode button1_mode = 22;
   NSPanelButtonMode button2_mode = 25;
@@ -76,6 +77,27 @@ message NSPanelConfig {
   int32 button1_upper_temperature = 42; // At what temperature should relay1 turn off (heating) or on (cooling) when in thermostat mode.
   int32 button2_lower_temperature = 43; // At what temperature should relay2 turn on (heating) or off (cooling) when in thermostat mode.
   int32 button2_upper_temperature = 44; // At what temperature should relay2 turn off (heating) or on (cooling) when in thermostat mode.
+
+  // Sounds played by the panel buzzer, one entry per event. An event without an entry, or with an empty rtttl, is silent.
+  // Panels ignore events they do not know about.
+  enum NSPanelSoundEvent {
+    TOUCH = 0;           // The screen was touched
+    SCENE_ACTIVATED = 1; // A scene was triggered from the panel. Played instead of the TOUCH sound for that touch.
+    SCENE_SAVED = 2;     // A scene was saved from the panel
+  }
+  message Sound {
+    NSPanelSoundEvent event = 1;
+    string rtttl = 2; // Melody in RTTTL format, ex. "touch:d=32,o=6,b=190:g6,16p,32c7"
+  }
+  repeated Sound sounds = 45;
+
+  // POSIX TZ rule for the manager's timezone, ex. "CET-1CEST,M3.5.0,M10.5.0/3", for setenv("TZ", ...) and tzset().
+  // Empty if the manager could not work it out, in which case show the time from the manager's status/time topic.
+  string tz_posix = 46;
+
+  // State topic of the entity whose page a button opens when buttonN_mode is OPEN_ENTITY_PAGE. Empty otherwise.
+  string button1_entity_page_topic = 47;
+  string button2_entity_page_topic = 48;
 }
 
 enum NSPanelWarningLevel {
@@ -99,6 +121,7 @@ message NSPanelStatusReport {
     UPDATING_TFT = 2;
     UPDATING_FIRMWARE = 3;
     UPDATING_LITTLEFS = 4;
+    REBOOTING = 5;
   }
   state nspanel_state = 1;
   int32 update_progress = 2;
@@ -135,6 +158,19 @@ message NSPanelRoomEntitiesPage {
     int32 pco2 = 5;
     bool can_save_scene = 6;
     string mqtt_state_topic = 7; // MQTT topic where NSPanelEntityState is sent for control of individual entity. Empty if not controllable individually.
+
+    enum EntityType {
+      ENTITY_TYPE_UNSPECIFIED = 0;
+      ENTITY_TYPE_LIGHT = 1;
+      ENTITY_TYPE_SWITCH = 2;
+      ENTITY_TYPE_BUTTON = 3;
+      ENTITY_TYPE_THERMOSTAT = 4;
+      ENTITY_TYPE_SCENE = 5;
+      ENTITY_TYPE_MEDIA_PLAYER = 6;
+      ENTITY_TYPE_COVER = 7;
+    }
+    EntityType type = 8;
+    int32 id = 9;
   }
 
   repeated EntitySlot entities = 4;
@@ -237,6 +273,49 @@ message NSPanelMQTTManagerCommand {
     string new_value = 3;
   }
 
+  message MediaPlayerCommand {
+    enum PlaybackAction {
+      NONE = 0;
+      PLAY = 1;
+      PAUSE = 2;
+      NEXT_TRACK = 3;
+      PREVIOUS_TRACK = 4;
+    }
+
+    int32 media_player_id = 1;
+    PlaybackAction playback_action = 2;
+    bool has_volume = 3;
+    int32 volume = 4; // Volume in 0-100%
+    bool has_source_volume = 5;
+    int32 source_volume = 6; // Volume in 0-100%
+    bool has_muted = 7;
+    bool muted = 8;
+    // Name of a source to select, as sent in the state's source lists. Empty means no change.
+    string select_player_source = 9;
+    string select_source_player_source = 10;
+  }
+
+  message CoverCommand {
+    enum Action {
+      NONE = 0;
+      OPEN = 1;
+      CLOSE = 2;
+      STOP = 3;
+      OPEN_TILT = 4;
+      CLOSE_TILT = 5;
+      STOP_TILT = 6;
+    }
+
+    int32 cover_id = 1;
+    Action action = 2;
+
+    bool has_position = 3;
+    int32 position = 4; // 0 = closed, 100 = open
+
+    bool has_tilt_position = 5;
+    int32 tilt_position = 6; // 0-100
+  }
+
   oneof CommandData {
     FirstPageTurnLightOn first_page_turn_on = 1;
     FirstPageTurnLightOff first_page_turn_off = 2;
@@ -247,6 +326,8 @@ message NSPanelMQTTManagerCommand {
 
     ThermostatTemperatureCommand thermostat_temperature_command = 7;
     ThermostatCommand thermostat_command = 8;
+    MediaPlayerCommand media_player_command = 9;
+    CoverCommand cover_command = 10;
   }
 
   int32 nspanel_id = 100;

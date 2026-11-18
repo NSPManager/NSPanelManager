@@ -82,6 +82,16 @@ public:
   static void load_thermostats();
 
   /*
+   * Load all media players from the DB and remove any existing media player that no longer exist.
+   */
+  static void load_media_players();
+
+  /*
+   * Load all covers from the DB and remove any existing cover that no longer exist.
+   */
+  static void load_covers();
+
+  /*
    * Load all switches from the DB and remove any existing switch that no longer exist.
    */
   static void load_switches();
@@ -208,6 +218,13 @@ public:
   static std::expected<std::shared_ptr<NSPanel>, EntityError> get_nspanel_by_mac(std::string mac);
   static std::expected<int32_t, EntityError> get_room_id_for_panel_id(uint32_t nspanel_id);
 
+#if defined(TEST_MODE) && TEST_MODE == 1
+  // Handles a panel command as if CommandManager had delivered it, without starting init()'s threads.
+  static void test_process_command(NSPanelMQTTManagerCommand &command) {
+    EntityManager::_command_callback(command);
+  }
+#endif
+
 private:
   static inline std::vector<std::shared_ptr<MqttManagerEntity>> _entities;
   static inline std::mutex _entities_mutex;
@@ -217,6 +234,11 @@ private:
 
   static inline std::vector<std::shared_ptr<NSPanel>> _nspanels;
   static inline std::mutex _nspanels_mutex;
+
+  /**
+   * Send a state update over STOMP regarding relevant entities.
+   */
+  static void _send_websocket_state_update();
 
   static inline std::vector<std::shared_ptr<RoomEntitiesPage>> _global_room_entities_pages;
   static inline std::mutex _global_room_entities_pages_mutex;

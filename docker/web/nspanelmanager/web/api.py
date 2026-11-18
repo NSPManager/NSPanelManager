@@ -92,6 +92,8 @@ def get_all_available_entities(request):
                             data["entity_type"] = "light"
                         elif data["entity_id"].startswith("switch."):
                             data["entity_type"] = "switch"
+                        elif data["entity_id"].startswith("cover."):
+                            data["entity_type"] = "cover"
                         else:
                             logging.warn("Unknown entity type for entity: " + data["entity_id"])
 
@@ -133,6 +135,7 @@ def get_all_available_entities(request):
                                     "Color",
                                     "Switch",
                                     "String",
+                                    "Rollershutter",
                                 ]
                                 if "itemType" in channel and (channel["itemType"] in add_items_with_channels_of_type):
                                     add_entity = True
@@ -231,13 +234,13 @@ def get_nspanel_config(request):
         base["button2_mqtt_topic"] = get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_topic", "")
         base["button2_mqtt_payload"] = get_nspanel_setting_with_default(nspanel.id, "button2_mqtt_payload", "")
 
-        if nspanel.button1_detached_mode_light:
-            base["button1_detached_light"] = nspanel.button1_detached_mode_light.id
+        if nspanel.button1_detached_mode_entity:
+            base["button1_detached_light"] = nspanel.button1_detached_mode_entity.id
         else:
-            base["button1_detached_mode_light"] = -1
+            base["button1_detached_light"] = -1
 
-        if nspanel.button2_detached_mode_light:
-            base["button2_detached_light"] = nspanel.button2_detached_mode_light.id
+        if nspanel.button2_detached_mode_entity:
+            base["button2_detached_light"] = nspanel.button2_detached_mode_entity.id
         else:
             base["button2_detached_light"] = -1
         base["rooms"] = []

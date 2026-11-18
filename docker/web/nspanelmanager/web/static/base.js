@@ -16,25 +16,12 @@ function attach_cursor_change_events() {
 $(document).ready(function () {
   console.log("Document ready, attaching functions.");
 
-  stomp_subscribe("mqttmanager/events", (frame) => {
-    var json_data = JSON.parse(frame.body);
-    if (json_data.event_type) {
-      console.log("Triggering custom event: " + json_data.event_type);
-      const trigger_event = new CustomEvent(json_data.event_type, {
-        detail: json_data,
-      });
-      document.getElementsByTagName("body")[0].dispatchEvent(trigger_event);
-    }
-  });
-
   // Listen for warnings from MQTTManager
   stomp_subscribe("mqttmanager/warnings", (data) => {
     var json = JSON.parse(data.body);
     var warnings = json.warnings;
     // Remove any removed warnings
-    $(
-      `#error_toast_container > .alert[data-error-source='${ERROR_TOAST_SOURCE_MANAGER}']`,
-    ).each(function () {
+    $(`#error_toast_container > .alert[data-error-source='${ERROR_TOAST_SOURCE_MANAGER}']`).each(function () {
       let found = false;
       let match_text = $(this).find(".toast-text").text();
       for (let i = 0; i < warnings.length; i++) {
@@ -60,11 +47,7 @@ $(document).ready(function () {
       });
 
       if (!found) {
-        show_error_toast(
-          warnings[i].level,
-          warnings[i].text,
-          ERROR_TOAST_SOURCE_MANAGER,
-        );
+        show_error_toast(warnings[i].level, warnings[i].text, ERROR_TOAST_SOURCE_MANAGER);
       }
     }
   });
@@ -81,32 +64,16 @@ $(document).ready(function () {
           if ("text" in obj) {
             show_error_toast(0, obj["text"], ERROR_TOAST_SOURCE_MANAGER);
           } else {
-            show_error_toast(
-              0,
-              "Request error but no message specified.",
-              ERROR_TOAST_SOURCE_MANAGER,
-            );
+            show_error_toast(0, "Request error but no message specified.", ERROR_TOAST_SOURCE_MANAGER);
           }
         } else {
-          show_error_toast(
-            0,
-            "Unknown request error.",
-            ERROR_TOAST_SOURCE_MANAGER,
-          );
+          show_error_toast(0, "Unknown request error.", ERROR_TOAST_SOURCE_MANAGER);
         }
       } else {
-        show_error_toast(
-          0,
-          "Unknown request error.",
-          ERROR_TOAST_SOURCE_MANAGER,
-        );
+        show_error_toast(0, "Unknown request error.", ERROR_TOAST_SOURCE_MANAGER);
       }
     } catch (error) {
-      show_error_toast(
-        0,
-        "Error while processing error response from server.",
-        ERROR_TOAST_SOURCE_WEB_INTERFACE,
-      );
+      show_error_toast(0, "Error while processing error response from server.", ERROR_TOAST_SOURCE_WEB_INTERFACE);
     }
   });
 
@@ -120,25 +87,18 @@ $(document).ready(function () {
     e.preventDefault();
 
     dialog = document.getElementById("modal_confirm");
-    document
-      .getElementById("modal_confirm_button")
-      .addEventListener("click", function handle_confirm_click(event) {
-        // Remove this event listener so that it doesn't trigger multiple times
-        event.currentTarget.removeEventListener("click", handle_confirm_click);
-        console.log("Sending request");
-        document.getElementById("modal_confirm").close();
-        e.detail.issueRequest(true);
-      });
+    document.getElementById("modal_confirm_button").addEventListener("click", function handle_confirm_click(event) {
+      // Remove this event listener so that it doesn't trigger multiple times
+      event.currentTarget.removeEventListener("click", handle_confirm_click);
+      console.log("Sending request");
+      document.getElementById("modal_confirm").close();
+      e.detail.issueRequest(true);
+    });
 
-    document
-      .getElementById("modal_confirm_cancel_button")
-      .addEventListener("click", function handle_confirm_cancel_click(event) {
-        event.currentTarget.removeEventListener(
-          "click",
-          handle_confirm_cancel_click,
-        );
-        document.getElementById("modal_confirm").close();
-      });
+    document.getElementById("modal_confirm_cancel_button").addEventListener("click", function handle_confirm_cancel_click(event) {
+      event.currentTarget.removeEventListener("click", handle_confirm_cancel_click);
+      document.getElementById("modal_confirm").close();
+    });
 
     document.getElementById("modal_confirm_text").innerHTML = e.detail.question;
     dialog.showModal();
@@ -146,10 +106,7 @@ $(document).ready(function () {
 
   $("[data-dropdown-toggle]").click(function (e) {
     var toggle_id = $(this).data("dropdown-toggle");
-    if (
-      _last_dropdown_id_activated != "" &&
-      _last_dropdown_id_activated != toggle_id
-    ) {
+    if (_last_dropdown_id_activated != "" && _last_dropdown_id_activated != toggle_id) {
       $("#" + _last_dropdown_id_activated).addClass("hidden");
     }
     $("#" + toggle_id).toggleClass("hidden");
@@ -159,10 +116,7 @@ $(document).ready(function () {
 
   $("[data-collapse-toggle]").click(function (e) {
     var toggle_id = $(this).data("collapse-toggle");
-    if (
-      _last_collapse_id_activated != "" &&
-      _last_collapse_id_activated != toggle_id
-    ) {
+    if (_last_collapse_id_activated != "" && _last_collapse_id_activated != toggle_id) {
       $("#" + _last_collapse_id_activated).addClass("max-md:hidden");
     }
     $("#" + toggle_id).toggleClass("max-md:hidden");
@@ -181,9 +135,7 @@ $(document).ready(function () {
     var filename = $("#firmware")
       .val()
       .replace(/C:\\fakepath\\/i, "");
-    $("#save_new_firmware_modal_subtext").html(
-      "Selected file: '" + filename + "'.",
-    );
+    $("#save_new_firmware_modal_subtext").html("Selected file: '" + filename + "'.");
     $("#firmware_upload_submit_button").removeClass("btn-disabled");
   });
 
@@ -191,9 +143,7 @@ $(document).ready(function () {
     var filename = $("#data_file")
       .val()
       .replace(/C:\\fakepath\\/i, "");
-    $("#save_new_data_file_modal_subtext").html(
-      "Selected file: '" + filename + "'.",
-    );
+    $("#save_new_data_file_modal_subtext").html("Selected file: '" + filename + "'.");
     $("#data_file_upload_submit_button").removeClass("btn-disabled");
   });
 
@@ -201,9 +151,7 @@ $(document).ready(function () {
     var filename = $("#tft_file")
       .val()
       .replace(/C:\\fakepath\\/i, "");
-    $("#save_new_tft_file_modal_subtext").html(
-      "Selected file: '" + filename + "'.",
-    );
+    $("#save_new_tft_file_modal_subtext").html("Selected file: '" + filename + "'.");
     $("#tft_upload_submit_button").removeClass("btn-disabled");
   });
 
@@ -234,46 +182,33 @@ $(document).ready(function () {
   });
 
   $("#firmware_dragdrop_target").on("drop", (e) => {
-    if (
-      e.originalEvent.dataTransfer &&
-      e.originalEvent.dataTransfer.files.length
-    ) {
+    if (e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files.length) {
       e.preventDefault();
       e.stopPropagation();
       $("#firmware").prop("files", e.originalEvent.dataTransfer.files);
       var filename = $("#firmware")
         .val()
         .replace(/C:\\fakepath\\/i, "");
-      $("#save_new_firmware_modal_subtext").html(
-        "Selected file: '" + filename + "'.",
-      );
+      $("#save_new_firmware_modal_subtext").html("Selected file: '" + filename + "'.");
       $("#firmware_upload_submit_button").removeClass("btn-disabled");
     }
   });
 
   $("#data_file_dragdrop_target").on("drop", (e) => {
-    if (
-      e.originalEvent.dataTransfer &&
-      e.originalEvent.dataTransfer.files.length
-    ) {
+    if (e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files.length) {
       e.preventDefault();
       e.stopPropagation();
       $("#data_file").prop("files", e.originalEvent.dataTransfer.files);
       var filename = $("#data_file")
         .val()
         .replace(/C:\\fakepath\\/i, "");
-      $("#save_new_data_file_modal_subtext").html(
-        "Selected file: '" + filename + "'.",
-      );
+      $("#save_new_data_file_modal_subtext").html("Selected file: '" + filename + "'.");
       $("#data_file_upload_submit_button").removeClass("btn-disabled");
     }
   });
 
   $("#tft_dragdrop_target").on("drop", (e) => {
-    if (
-      e.originalEvent.dataTransfer &&
-      e.originalEvent.dataTransfer.files.length
-    ) {
+    if (e.originalEvent.dataTransfer && e.originalEvent.dataTransfer.files.length) {
       e.preventDefault();
       e.stopPropagation();
       $("#tft_file").prop("files", e.originalEvent.dataTransfer.files);
