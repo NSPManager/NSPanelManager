@@ -113,7 +113,7 @@ direction 270
     at 79,205  367x30
     sta = 1
     txt = ''
-    txt_maxl = 50
+    txt_maxl = 30
     style = 0
     font = 3 (replace_h22_id_3 22)
     pic = none
@@ -1170,162 +1170,160 @@ direction 270
     ycen = 1
     isbr = 0
 
-## page 4 cover
-[0] cover  page
+## page 4 screensaver2
+[0] screensaver2  page  global
     sta = 2
     up = 255
     down = 255
     left = 255
     right = 255
-    pic = 180 (455x320)
+    pic = 66 (455x320)
     bco = 0
-[1] home  button  sendkey=press
-    at 0,0  59x49
+    on load:
+        //Make sure this is only done first time screensaver page is loaded
+        //if(firstview.val==1)
+        //{
+        //  firstview.val=0
+        //ssBackgroud is changed from NspanelManager depending on user background preferences
+        if(screensaver2.ssBackground.val==0)
+        {
+          screensaver2.pic=0
+          curTime.picc=0
+          curAMPM.picc=0
+          roomTempIcon.picc=0
+          roomTemp.picc=0
+          curDay.picc=0
+          curTempIcon.picc=0
+          curTemp.picc=0
+        }else if(screensaver2.ssBackground.val==1)
+        {
+          screensaver2.pic=66
+          curTime.picc=66
+          curAMPM.picc=66
+          roomTempIcon.picc=66
+          roomTemp.picc=66
+          curDay.picc=66
+          curTempIcon.picc=66
+          curTemp.picc=66
+        }
+        //}
+[1] curTime  text  global
+    at 112,104  229x66
     sta = 0
-    val = 0
     txt = ''
-    txt_maxl = 10
-    style = 4
-    font = 0 (hamlin18_latA 18)
-    pic = none
-    pic2 = none
-    picc = 67 (455x320)
-    picc2 = 68 (455x320)
-    bco = 50712
-    bco2 = 1024
-    pco = 0
-    pco2 = 65535
-    xcen = 1
-    ycen = 1
-    isbr = 0
-[2] current  button
-    at 160,6  300x40
-    sta = 0
-    val = 0
-    txt = ''
-    txt_maxl = 24
-    style = 4
-    font = 0 (hamlin18_latA 18)
-    pic = none
-    pic2 = none
-    picc = 180 (455x320)
-    picc2 = 67 (455x320)
-    bco = 50712
-    bco2 = 1024
-    pco = 65535
-    pco2 = 65535
-    xcen = 1
-    ycen = 1
-    isbr = 0
-[3] state  text
-    at 160,55  300x30
-    sta = 0
-    txt = '                                                                                                                                                                                                                                                                                                                                                                 '
-    txt_maxl = 353
+    txt_maxl = 5
     style = 0
-    font = 0 (hamlin18_latA 18)
+    font = 2 (timeandtemp 80)
     pic = none
-    picc = 180 (455x320)
-    bco = 65535
+    picc = 66 (455x320)
+    bco = 0
     pco = 65535
     xcen = 1
-    ycen = 1
+    ycen = 0
     isbr = 0
-[4] pos  slider  sendkey=release
-    at 10,70  140x230
-    sta = 2
-    val = 0
-    minval = 0
-    maxval = 100
-    dis = 100
-    mode = 1
-    wid = 124
-    hig = 4
-    pic = 76 (142x260)
-    pic1 = 77 (142x260)
-    pic2 = 75 (455x320)
-    picc = 78 (142x260)
-    picc1 = 79 (142x260)
-    bco = 30175
-    bco1 = 65504
-    pco = 65535
-[5] b_open  button  sendkey=press
-    at 160,140  140x50
+[2] vaFunctions  variable  global
     sta = 1
     val = 0
     txt = ''
-    txt_maxl = 10
-    style = 4
-    font = 0 (hamlin18_latA 18)
-    pic = none
-    pic2 = none
-    picc = none
-    picc2 = none
-    bco = 50712
-    bco2 = 50712
-    pco = 65535
-    pco2 = 65535
-    xcen = 1
-    ycen = 1
-    isbr = 0
-[6] b_stop  button  sendkey=press
-    at 310,140  140x50
-    sta = 1
+    txt_maxl = 15
+[3] tc0  touchcap  global
     val = 0
-    txt = ''
-    txt_maxl = 10
-    style = 4
-    font = 0 (hamlin18_latA 18)
-    pic = none
-    pic2 = none
-    picc = none
-    picc2 = none
-    bco = 50712
-    bco2 = 50712
-    pco = 65535
-    pco2 = 65535
-    xcen = 1
-    ycen = 1
-    isbr = 0
-[7] b_close  button  sendkey=press
-    at 160,200  290x50
-    sta = 1
-    val = 0
-    txt = ''
-    txt_maxl = 10
-    style = 4
-    font = 0 (hamlin18_latA 18)
-    pic = none
-    pic2 = none
-    picc = none
-    picc2 = none
-    bco = 50712
-    bco2 = 50712
-    pco = 65535
-    pco2 = 65535
-    xcen = 1
-    ycen = 1
-    isbr = 0
-[8] va_up  variable
+    on up:
+        printh 93 FF FF FF
+[4] firstview  variable  global
     sta = 0
     val = 1
     txt = 'newtxt'
     txt_maxl = 10
-[9] s0  variable
-    sta = 1
-    val = 0
-    txt = ''
-    txt_maxl = 5
-[10] n0  variable
+[5] curDay  text  global
+    at 112,187  229x24
     sta = 0
-    val = 0
+    txt = '-'
+    txt_maxl = 20
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 66 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[6] roomTempIcon  text  global
+    at 370,8  25x32
+    sta = 0
+    txt = 'l'
+    txt_maxl = 32
+    style = 0
+    font = 7 (tinyiconsweather20 20)
+    pic = none
+    picc = 66 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[7] roomTemp  text  global
+    at 396,14  55x24
+    sta = 0
+    txt = '-'
+    txt_maxl = 10
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 66 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[8] ssBackground  variable  global
+    sta = 0
+    val = 1
     txt = 'newtxt'
     txt_maxl = 10
-[11] setTempVal  variable
-    sta = 1
-    val = 0
+[9] curAMPM  text  global
+    at 341,132  41x15
+    sta = 0
     txt = ''
+    txt_maxl = 2
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 66 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 2
+    isbr = 0
+[10] curTempIcon  text  global
+    at 9,8  27x32
+    sta = 0
+    txt = 'm'
+    txt_maxl = 32
+    style = 0
+    font = 7 (tinyiconsweather20 20)
+    pic = none
+    picc = 66 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[11] curTemp  text  global
+    at 37,14  55x24
+    sta = 0
+    txt = '-'
     txt_maxl = 10
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 66 (455x320)
+    bco = 0
+    pco = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
 
 ## page 5 dropdown
 [0] dropdown  page
@@ -1399,7 +1397,7 @@ direction 270
     at 26,227  102x50
     sta = 0
     val = 0
-    txt = '0'
+    txt = ''
     txt_maxl = 10
     style = 4
     font = 9 (newfont9 50)
@@ -1456,7 +1454,7 @@ direction 270
     at 8,144  138x30
     sta = 0
     txt = 'ON'
-    txt_maxl = 10
+    txt_maxl = 15
     style = 0
     font = 0 (hamlin18_latA 18)
     pic = none
@@ -1470,7 +1468,7 @@ direction 270
     at 156,144  138x30
     sta = 0
     txt = 'ON'
-    txt_maxl = 10
+    txt_maxl = 15
     style = 0
     font = 0 (hamlin18_latA 18)
     pic = none
@@ -1484,7 +1482,7 @@ direction 270
     at 304,144  138x30
     sta = 0
     txt = 'Disarmed'
-    txt_maxl = 10
+    txt_maxl = 15
     style = 0
     font = 0 (hamlin18_latA 18)
     pic = none
@@ -1603,9 +1601,6 @@ direction 270
           }else if(tc0.val==17)
           {
             page cleanscreen
-          }else if(tc0.val==18)
-          {
-            page thermostat
           }
         }
 [21] home  button
@@ -1960,7 +1955,7 @@ direction 270
     sta = 0
     val = 0
     txt = ''
-    txt_maxl = 10
+    txt_maxl = 1
     style = 4
     font = 10 (stuvwxyz50NEW 50)
     pic = none
@@ -1979,7 +1974,7 @@ direction 270
     sta = 0
     val = 0
     txt = ''
-    txt_maxl = 10
+    txt_maxl = 1
     style = 4
     font = 10 (stuvwxyz50NEW 50)
     pic = none
@@ -1998,7 +1993,7 @@ direction 270
     sta = 0
     val = 0
     txt = ''
-    txt_maxl = 10
+    txt_maxl = 1
     style = 4
     font = 10 (stuvwxyz50NEW 50)
     pic = none
@@ -2017,7 +2012,7 @@ direction 270
     sta = 0
     val = 0
     txt = ''
-    txt_maxl = 10
+    txt_maxl = 1
     style = 4
     font = 10 (stuvwxyz50NEW 50)
     pic = none
@@ -4088,7 +4083,7 @@ direction 270
     at 79,205  367x30
     sta = 0
     txt = ''
-    txt_maxl = 50
+    txt_maxl = 30
     style = 0
     font = 3 (replace_h22_id_3 22)
     pic = none
@@ -4432,7 +4427,7 @@ direction 270
     at 92,182  80x60
     sta = 0
     val = 0
-    txt = '!'
+    txt = '{'
     txt_maxl = 10
     style = 4
     font = 15 (arrows40 40)
@@ -4488,7 +4483,7 @@ direction 270
     at 284,182  80x60
     sta = 0
     val = 0
-    txt = '"'
+    txt = '|'
     txt_maxl = 10
     style = 4
     font = 15 (arrows40 40)
@@ -5244,3 +5239,887 @@ direction 270
         prints "deactivatetemp",0
         printh FF FF FF
         setTempTimer.en=0
+
+## page 12 blinds
+[0] blinds  page
+    sta = 2
+    up = 255
+    down = 255
+    left = 255
+    right = 255
+    pic = 181 (455x320)
+    bco = 0
+    on load:
+        sleep_display.tim=home.sleep_display.tim
+        vis mode,0
+        vis tPreset1,0
+        vis tPreset2,0
+        vis tPreset3,0
+        vis tUp,0
+        vis tStop,0
+        vis tDown,0
+        vis tSlider,0
+[1] home  button
+    at 0,0  59x49
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[2] current  button  global
+    at 70,6  290x40
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 75 (455x320)
+    picc2 = 75 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 0
+    ycen = 1
+    isbr = 0
+[3] mode  button
+    at 363,0  91x56
+    sta = 0
+    val = 0
+    txt = ':'
+    txt_maxl = 10
+    style = 4
+    font = 14 (arrows30 30)
+    pic = none
+    pic2 = none
+    picc = 181 (455x320)
+    picc2 = 182 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+    on up:
+        if(tintActive.val==0)
+        {
+          tintActive.val=1
+          mode.txt="0"
+          vis bPreset1,0
+          vis bPreset2,0
+          vis bPreset3,0
+          vis bUp,0
+          vis bStop,0
+          vis bDown,0
+          vis bSlider,0
+          vis tPreset1,1
+          vis tPreset2,1
+          vis tPreset3,1
+          vis tUp,1
+          vis tStop,1
+          vis tDown,1
+          vis tSlider,1
+        }else
+        {
+          tintActive.val=0
+          mode.txt=":"
+          vis tPreset1,0
+          vis tPreset2,0
+          vis tPreset3,0
+          vis tUp,0
+          vis tStop,0
+          vis tDown,0
+          vis tSlider,0
+          vis bPreset1,1
+          vis bPreset2,1
+          vis bPreset3,1
+          vis bUp,1
+          vis bStop,1
+          vis bDown,1
+          vis bSlider,1
+        }
+[4] sleep_display  timer
+    en = 1
+    tim = 30000
+    on timer:
+        printh 92 FF FF FF
+[5] GESTURE  timer
+    en = 0
+    tim = 50
+    on timer:
+        //~~~~~~ boilerplate~~~~ v0.5.004 ***DEMO/DEBUG mods
+        // GESTURE intpreter (press duration & swipes) (timer).
+        //~~~~~~~~~~~~~~~~~~~~~
+        //*** CUSTOMIZE immediate (before realease) actions below for each page ***
+        // Works with tc0 to continually poll gesture x,y,distance,duration
+        // while a touch gesture is occurring (BEFORE Touch Release Event).
+        // Gestures are decoded below 'live' and can be used to either:
+        //  * execute an immediate action (before Touch Release Events), or
+        //  * use `gest_type` as a condition/modifier in Touch Release Events.
+        //---------------------
+        //GESTURE list (returned in `gest_type` Global variable):
+        //  -1: excluded UI component - sliders (+ custom***)
+        //   0: invalid gesture (movement, but too short for swipe)
+        //   1: right swipe
+        //   2: left swipe
+        //   3: down swipe
+        //   4: up swipe
+        //  91: short press (>90 => Press without x,y movement)
+        //  92: long press
+        //  93: very long press
+        //---------------------
+        //
+        if(tch0>0)  //Skip last timer cycle where stroke ends (tch0=0) BEFORE tc0 stops this timer.
+        {
+          //
+          // Monitor duration of gesture (using count of cycles of this timer)
+          gest_time++
+          //
+          // Monitor distance of gesture movement (in pixels squared)
+          dx=tch0-tch2
+          dy=tch1-tch3
+          dsq=dx*dx
+          tmp=dy*dy
+          dsq+=tmp  // easier to work with square of distance - no need to sqrt
+          //
+          //
+          // Gesture interpretation
+          gest_type=0  // not a valid gesture (yet)
+          // Movement < 10px => PRESS(click) component
+          if(dsq<100)
+          {
+            if(gest_time<10)
+            {
+              // o
+              gest_type=91 // short press
+              //t1.txt="o" // ***DEGBUG/DEMO
+            }else if(gest_time<30)
+            {
+              // oo
+              gest_type=92 // long press
+              //t1.txt="oo" // ***DEGBUG/DEMO
+            }else
+            {
+              // ooo
+              gest_type=93 // vlong press
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="ooo" // ***DEGBUG/DEMO
+              if(gest_time==30)
+              {
+                //dim=0
+                //dim=100
+                //dim=dim_default
+              }
+            }
+          }
+          //
+          // Movement > 100px => SWIPE
+          if(dsq>10000)
+          {
+            if(dx>100)
+            {
+              //>>
+              gest_type=1 // right
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt=">>" // ***DEGBUG/DEMO
+            }else if(dx<-100)
+            {
+              //<<
+              gest_type=2 // left
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="<<" // ***DEGBUG/DEMO
+            }else if(dy>100)
+            {
+              //vv
+              gest_type=3 // down
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="vv" // ***DEGBUG/DEMO
+            }else if(dy<-100)
+            {
+              //^^
+              gest_type=4 // up
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="^^" // ***DEGBUG/DEMO
+            }
+          }
+          //
+          //
+          //
+          //
+          //DEBUG/DEMO display of live (pre-release) gesture internal data updates
+          //n0.val=gest_time
+          //n1.val=tch0
+          //n2.val=dx
+          //n3.val=tch1
+          //n4.val=dy
+          //n5.val=tc0.val  //component ID
+          //n5.val=b[tc0.val].type // component type
+          //n6.val=gest_type
+          if(gest_type==0)
+          {
+            //Ambiguous/incomplete gesture - ignore
+            //t1.txt="X" // ***DEGBUG/DEMO
+          }
+        }
+[6] tc0  touchcap
+    val = 0
+    on down:
+        sleep_display.en=1
+        //~~~~~~boilerplate~~~~ v0.5.04
+        // GESTURES
+        //~~~~~~~~~~~~~~~~~~~~~
+        // tc (Touch Controller) for initiating GESTURE processing.
+        // (can only have ONE tcx component - lowest id number takes precedence, others ignored).
+        // Event checking is done 'live' in GESTURE (or custom) timer.
+        // Raise this componet to id 1 (highest precendence rank order).
+        // All other UI Events need to be 'Touch Release Events'
+        // (OR components need to be added to Exclusions below.)
+        // Uses Global variables (in [Program.s] tab):
+        //   int x=0,y=0,dx=0,dy=0,dsq=0,gest_time=0,gest_type=0
+        //
+        gest_time=0  // reset counter for press duration
+        //
+        // Set UI components to EXCLUDE from gestures (Sliders)
+        // tc0.val -> component ID; b[tc0.val].type -> component type
+        if(b[tc0.val].type==1)  // Sliders have component type == 1
+        {
+          gest_type=-1 // excluded component
+          //else if(b[tc0.val].type==98&&b[tc0.val].font==10)  // Buttons have component type == 98
+          //{
+          //  gest_type=-1 // excluded component
+          //
+        }else
+        {
+          //NORMAL GESTURE processing
+          GESTURE.en=1
+        }
+    on up:
+        //~~~~~~boilerplate~~~~ v0.5.04
+        // GESTURES
+        //~~~~~~~~~~~~~~~~~~~~~
+        GESTURE.en=0
+        //
+        //<- CUSTOM*** add generic long press release actions here
+        if(gest_type==1)
+        {
+          //Right
+          setAction.txt="swiperight"
+        }else if(gest_type==2)
+        {
+          //Left
+          setAction.txt="swipeleft"
+        }else if(gest_type==3)
+        {
+          //Down
+          setAction.txt="swipedown"
+        }else if(gest_type==4)
+        {
+          //Down
+          setAction.txt="swipeup"
+          //Invalid gesture, will happen on slider component
+        }else if(gest_type==-1)
+        {
+          if(tc0.val==14)
+          {
+            covx bSlider.val,tmpValue.txt,0,0
+            setAction.txt="bSlider:"+tmpValue.txt
+          }else if(tc0.val==21)
+          {
+            covx tSlider.val,tmpValue.txt,0,0
+            setAction.txt="tSlider:"+tmpValue.txt
+          }
+        }else if(gest_type>=91)
+        {
+          if(tc0.val==1)
+          {
+            setAction.txt="back"
+          }else if(tc0.val==3)
+          {
+            setAction.txt="mode"
+          }else if(tc0.val==8)
+          {
+            setAction.txt="bPreset1"
+          }else if(tc0.val==9)
+          {
+            setAction.txt="bPreset2"
+          }else if(tc0.val==10)
+          {
+            setAction.txt="bPreset3"
+          }else if(tc0.val==11)
+          {
+            setAction.txt="bUp"
+          }else if(tc0.val==12)
+          {
+            setAction.txt="bStop"
+          }else if(tc0.val==13)
+          {
+            setAction.txt="bDown"
+          }else if(tc0.val==15)
+          {
+            setAction.txt="tPreset1"
+          }else if(tc0.val==16)
+          {
+            setAction.txt="tPreset2"
+          }else if(tc0.val==17)
+          {
+            setAction.txt="tPreset3"
+          }else if(tc0.val==18)
+          {
+            setAction.txt="tUp"
+          }else if(tc0.val==19)
+          {
+            setAction.txt="tStop"
+          }else if(tc0.val==20)
+          {
+            setAction.txt="tDown"
+          }
+          //continue with else ifs here for each button id that has press functions
+        }else
+        {
+          //all gest types covered will not get here
+        }
+        printh 99
+        prints setAction.txt,0
+        printh FF FF FF
+        setAction.txt=""
+[7] setAction  variable
+    sta = 1
+    val = 0
+    txt = ''
+    txt_maxl = 30
+[8] bPreset1  button
+    at 7,55  142x87
+    sta = 0
+    val = 0
+    txt = '25%'
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 181 (455x320)
+    picc2 = 182 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[9] bPreset2  button
+    at 7,144  142x87
+    sta = 0
+    val = 0
+    txt = '50%'
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 181 (455x320)
+    picc2 = 182 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[10] bPreset3  button
+    at 7,232  142x87
+    sta = 0
+    val = 0
+    txt = '75%'
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 181 (455x320)
+    picc2 = 182 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[11] bUp  button
+    at 155,55  142x83
+    sta = 0
+    val = 0
+    txt = 'k'
+    txt_maxl = 10
+    style = 4
+    font = 9 (newfont9 50)
+    pic = none
+    pic2 = none
+    picc = 181 (455x320)
+    picc2 = 182 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[12] bStop  button
+    at 155,144  142x83
+    sta = 0
+    val = 0
+    txt = 'n'
+    txt_maxl = 10
+    style = 4
+    font = 9 (newfont9 50)
+    pic = none
+    pic2 = none
+    picc = 181 (455x320)
+    picc2 = 182 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[13] bDown  button
+    at 155,232  142x83
+    sta = 0
+    val = 0
+    txt = 'l'
+    txt_maxl = 10
+    style = 4
+    font = 9 (newfont9 50)
+    pic = none
+    pic2 = none
+    picc = 181 (455x320)
+    picc2 = 182 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[14] bSlider  slider  global
+    at 303,55  142x260
+    sta = 0
+    val = 0
+    minval = 0
+    maxval = 100
+    dis = 100
+    mode = 1
+    wid = 124
+    hig = 4
+    pic = 81 (142x260)
+    pic1 = 80 (142x260)
+    pic2 = 75 (455x320)
+    picc = 182 (455x320)
+    picc1 = 181 (455x320)
+    bco = 30175
+    bco1 = 65504
+    pco = 65535
+[15] tPreset1  button
+    at 7,55  142x87
+    sta = 0
+    val = 0
+    txt = '25%'
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 181 (455x320)
+    picc2 = 182 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[16] tPreset2  button
+    at 7,144  142x87
+    sta = 0
+    val = 0
+    txt = '50%'
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 181 (455x320)
+    picc2 = 182 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[17] tPreset3  button
+    at 7,232  142x87
+    sta = 0
+    val = 0
+    txt = '75%'
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 181 (455x320)
+    picc2 = 182 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[18] tUp  button
+    at 155,55  142x83
+    sta = 0
+    val = 0
+    txt = ':'
+    txt_maxl = 10
+    style = 4
+    font = 9 (newfont9 50)
+    pic = none
+    pic2 = none
+    picc = 181 (455x320)
+    picc2 = 182 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[19] tStop  button
+    at 155,144  142x83
+    sta = 0
+    val = 0
+    txt = 'n'
+    txt_maxl = 10
+    style = 4
+    font = 9 (newfont9 50)
+    pic = none
+    pic2 = none
+    picc = 181 (455x320)
+    picc2 = 182 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[20] tDown  button
+    at 155,232  142x83
+    sta = 0
+    val = 0
+    txt = '9'
+    txt_maxl = 10
+    style = 4
+    font = 9 (newfont9 50)
+    pic = none
+    pic2 = none
+    picc = 181 (455x320)
+    picc2 = 182 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[21] tSlider  slider  global
+    at 303,55  142x260
+    sta = 0
+    val = 100
+    minval = 0
+    maxval = 100
+    dis = 100
+    mode = 1
+    wid = 124
+    hig = 4
+    pic = 81 (142x260)
+    pic1 = 80 (142x260)
+    pic2 = 75 (455x320)
+    picc = 182 (455x320)
+    picc1 = 181 (455x320)
+    bco = 30175
+    bco1 = 65504
+    pco = 65535
+[22] tintActive  variable
+    sta = 0
+    val = 0
+    txt = 'newtxt'
+    txt_maxl = 10
+[23] tmpValue  variable
+    sta = 1
+    val = 0
+    txt = ''
+    txt_maxl = 15
+
+## page 13 PAGETEMPLATE
+[0] PAGETEMPLATE  page
+    sta = 2
+    up = 255
+    down = 255
+    left = 255
+    right = 255
+    pic = 180 (455x320)
+    bco = 0
+    on load:
+        sleep_display.tim=home.sleep_display.tim
+[1] home  button
+    at 0,0  59x49
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 67 (455x320)
+    picc2 = 68 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 0
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[2] current  button
+    at 124,6  253x40
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 24
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 180 (455x320)
+    picc2 = 67 (455x320)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[3] sleep_display  timer
+    en = 1
+    tim = 30000
+    on timer:
+        printh 92 FF FF FF
+[4] GESTURE  timer
+    en = 0
+    tim = 50
+    on timer:
+        //~~~~~~ boilerplate~~~~ v0.5.004 ***DEMO/DEBUG mods
+        // GESTURE intpreter (press duration & swipes) (timer).
+        //~~~~~~~~~~~~~~~~~~~~~
+        //*** CUSTOMIZE immediate (before realease) actions below for each page ***
+        // Works with tc0 to continually poll gesture x,y,distance,duration
+        // while a touch gesture is occurring (BEFORE Touch Release Event).
+        // Gestures are decoded below 'live' and can be used to either:
+        //  * execute an immediate action (before Touch Release Events), or
+        //  * use `gest_type` as a condition/modifier in Touch Release Events.
+        //---------------------
+        //GESTURE list (returned in `gest_type` Global variable):
+        //  -1: excluded UI component - sliders (+ custom***)
+        //   0: invalid gesture (movement, but too short for swipe)
+        //   1: right swipe
+        //   2: left swipe
+        //   3: down swipe
+        //   4: up swipe
+        //  91: short press (>90 => Press without x,y movement)
+        //  92: long press
+        //  93: very long press
+        //---------------------
+        //
+        if(tch0>0)  //Skip last timer cycle where stroke ends (tch0=0) BEFORE tc0 stops this timer.
+        {
+          //
+          // Monitor duration of gesture (using count of cycles of this timer)
+          gest_time++
+          //
+          // Monitor distance of gesture movement (in pixels squared)
+          dx=tch0-tch2
+          dy=tch1-tch3
+          dsq=dx*dx
+          tmp=dy*dy
+          dsq+=tmp  // easier to work with square of distance - no need to sqrt
+          //
+          //
+          // Gesture interpretation
+          gest_type=0  // not a valid gesture (yet)
+          // Movement < 10px => PRESS(click) component
+          if(dsq<100)
+          {
+            if(gest_time<10)
+            {
+              // o
+              gest_type=91 // short press
+              //t1.txt="o" // ***DEGBUG/DEMO
+            }else if(gest_time<30)
+            {
+              // oo
+              gest_type=92 // long press
+              //t1.txt="oo" // ***DEGBUG/DEMO
+            }else
+            {
+              // ooo
+              gest_type=93 // vlong press
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="ooo" // ***DEGBUG/DEMO
+              if(gest_time==30)
+              {
+                //dim=0
+                //dim=100
+                //dim=dim_default
+              }
+            }
+          }
+          //
+          // Movement > 100px => SWIPE
+          if(dsq>10000)
+          {
+            if(dx>100)
+            {
+              //>>
+              gest_type=1 // right
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt=">>" // ***DEGBUG/DEMO
+            }else if(dx<-100)
+            {
+              //<<
+              gest_type=2 // left
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="<<" // ***DEGBUG/DEMO
+            }else if(dy>100)
+            {
+              //vv
+              gest_type=3 // down
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="vv" // ***DEGBUG/DEMO
+            }else if(dy<-100)
+            {
+              //^^
+              gest_type=4 // up
+              //page 0  // <- CUSTOM*** live action here
+              //t1.txt="^^" // ***DEGBUG/DEMO
+            }
+          }
+          //
+          //
+          //
+          //
+          //DEBUG/DEMO display of live (pre-release) gesture internal data updates
+          //n0.val=gest_time
+          //n1.val=tch0
+          //n2.val=dx
+          //n3.val=tch1
+          //n4.val=dy
+          //n5.val=tc0.val  //component ID
+          //n5.val=b[tc0.val].type // component type
+          //n6.val=gest_type
+          if(gest_type==0)
+          {
+            //Ambiguous/incomplete gesture - ignore
+            //t1.txt="X" // ***DEGBUG/DEMO
+          }
+        }
+[5] tc0  touchcap
+    val = 0
+    on down:
+        sleep_display.en=1
+        //~~~~~~boilerplate~~~~ v0.5.04
+        // GESTURES
+        //~~~~~~~~~~~~~~~~~~~~~
+        // tc (Touch Controller) for initiating GESTURE processing.
+        // (can only have ONE tcx component - lowest id number takes precedence, others ignored).
+        // Event checking is done 'live' in GESTURE (or custom) timer.
+        // Raise this componet to id 1 (highest precendence rank order).
+        // All other UI Events need to be 'Touch Release Events'
+        // (OR components need to be added to Exclusions below.)
+        // Uses Global variables (in [Program.s] tab):
+        //   int x=0,y=0,dx=0,dy=0,dsq=0,gest_time=0,gest_type=0
+        //
+        gest_time=0  // reset counter for press duration
+        //
+        // Set UI components to EXCLUDE from gestures (Sliders)
+        // tc0.val -> component ID; b[tc0.val].type -> component type
+        if(b[tc0.val].type==1)  // Sliders have component type == 1
+        {
+          gest_type=-1 // excluded component
+        }else if(b[tc0.val].type==98&&b[tc0.val].font==10)  // Buttons have component type == 98
+        {
+          gest_type=-1 // excluded component
+        }else
+        {
+          //NORMAL GESTURE processing
+          GESTURE.en=1
+        }
+    on up:
+        //~~~~~~boilerplate~~~~ v0.5.04
+        // GESTURES
+        //~~~~~~~~~~~~~~~~~~~~~
+        GESTURE.en=0
+        //
+        //<- CUSTOM*** add generic long press release actions here
+        if(gest_type==1)
+        {
+          //Right
+          setAction.txt="swiperight"
+        }else if(gest_type==2)
+        {
+          //Left
+          setAction.txt="swipeleft"
+        }else if(gest_type==3)
+        {
+          //Down
+          setAction.txt="swipedown"
+        }else if(gest_type==4)
+        {
+          //Down
+          setAction.txt="swipeup"
+        }else if(gest_type>=91)
+        {
+          if(tc0.val==1)
+          {
+            setAction.txt="back"
+          }
+          //continue with else ifs here for each button id that has press functions
+        }else
+        {
+          setAction.txt="nothing"
+        }
+        printh 99
+        prints setAction.txt,0
+        printh FF FF FF
+[6] setAction  variable
+    sta = 1
+    val = 0
+    txt = ''
+    txt_maxl = 30
