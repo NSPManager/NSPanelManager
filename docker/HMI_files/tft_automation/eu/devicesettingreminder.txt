@@ -1,0 +1,2 @@
+Reminder that EU screen should have device setting orientation 270
+When created for us_horizontal_mirrored it should be changed to 90

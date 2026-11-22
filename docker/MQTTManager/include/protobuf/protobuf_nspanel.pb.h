@@ -56,18 +56,12 @@ extern NSPanelConfigDefaultTypeInternal _NSPanelConfig_default_instance_;
 class NSPanelConfig_RoomInfo;
 struct NSPanelConfig_RoomInfoDefaultTypeInternal;
 extern NSPanelConfig_RoomInfoDefaultTypeInternal _NSPanelConfig_RoomInfo_default_instance_;
-class NSPanelConfig_Sound;
-struct NSPanelConfig_SoundDefaultTypeInternal;
-extern NSPanelConfig_SoundDefaultTypeInternal _NSPanelConfig_Sound_default_instance_;
 class NSPanelMQTTManagerCommand;
 struct NSPanelMQTTManagerCommandDefaultTypeInternal;
 extern NSPanelMQTTManagerCommandDefaultTypeInternal _NSPanelMQTTManagerCommand_default_instance_;
 class NSPanelMQTTManagerCommand_ButtonPressed;
 struct NSPanelMQTTManagerCommand_ButtonPressedDefaultTypeInternal;
 extern NSPanelMQTTManagerCommand_ButtonPressedDefaultTypeInternal _NSPanelMQTTManagerCommand_ButtonPressed_default_instance_;
-class NSPanelMQTTManagerCommand_CoverCommand;
-struct NSPanelMQTTManagerCommand_CoverCommandDefaultTypeInternal;
-extern NSPanelMQTTManagerCommand_CoverCommandDefaultTypeInternal _NSPanelMQTTManagerCommand_CoverCommand_default_instance_;
 class NSPanelMQTTManagerCommand_FirstPageTurnLightOff;
 struct NSPanelMQTTManagerCommand_FirstPageTurnLightOffDefaultTypeInternal;
 extern NSPanelMQTTManagerCommand_FirstPageTurnLightOffDefaultTypeInternal _NSPanelMQTTManagerCommand_FirstPageTurnLightOff_default_instance_;
@@ -77,9 +71,6 @@ extern NSPanelMQTTManagerCommand_FirstPageTurnLightOnDefaultTypeInternal _NSPane
 class NSPanelMQTTManagerCommand_LightCommand;
 struct NSPanelMQTTManagerCommand_LightCommandDefaultTypeInternal;
 extern NSPanelMQTTManagerCommand_LightCommandDefaultTypeInternal _NSPanelMQTTManagerCommand_LightCommand_default_instance_;
-class NSPanelMQTTManagerCommand_MediaPlayerCommand;
-struct NSPanelMQTTManagerCommand_MediaPlayerCommandDefaultTypeInternal;
-extern NSPanelMQTTManagerCommand_MediaPlayerCommandDefaultTypeInternal _NSPanelMQTTManagerCommand_MediaPlayerCommand_default_instance_;
 class NSPanelMQTTManagerCommand_SaveSceneCommand;
 struct NSPanelMQTTManagerCommand_SaveSceneCommandDefaultTypeInternal;
 extern NSPanelMQTTManagerCommand_SaveSceneCommandDefaultTypeInternal _NSPanelMQTTManagerCommand_SaveSceneCommand_default_instance_;
@@ -194,7 +185,6 @@ enum NSPanelConfig_NSPanelButtonMode : int {
   NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER = 2,
   NSPanelConfig_NSPanelButtonMode_THERMOSTAT_HEAT = 3,
   NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL = 4,
-  NSPanelConfig_NSPanelButtonMode_OPEN_ENTITY_PAGE = 5,
   NSPanelConfig_NSPanelButtonMode_NSPanelConfig_NSPanelButtonMode_INT_MIN_SENTINEL_DO_NOT_USE_ =
       std::numeric_limits<::int32_t>::min(),
   NSPanelConfig_NSPanelButtonMode_NSPanelConfig_NSPanelButtonMode_INT_MAX_SENTINEL_DO_NOT_USE_ =
@@ -204,8 +194,8 @@ enum NSPanelConfig_NSPanelButtonMode : int {
 bool NSPanelConfig_NSPanelButtonMode_IsValid(int value);
 extern const uint32_t NSPanelConfig_NSPanelButtonMode_internal_data_[];
 constexpr NSPanelConfig_NSPanelButtonMode NSPanelConfig_NSPanelButtonMode_NSPanelButtonMode_MIN = static_cast<NSPanelConfig_NSPanelButtonMode>(0);
-constexpr NSPanelConfig_NSPanelButtonMode NSPanelConfig_NSPanelButtonMode_NSPanelButtonMode_MAX = static_cast<NSPanelConfig_NSPanelButtonMode>(5);
-constexpr int NSPanelConfig_NSPanelButtonMode_NSPanelButtonMode_ARRAYSIZE = 5 + 1;
+constexpr NSPanelConfig_NSPanelButtonMode NSPanelConfig_NSPanelButtonMode_NSPanelButtonMode_MAX = static_cast<NSPanelConfig_NSPanelButtonMode>(4);
+constexpr int NSPanelConfig_NSPanelButtonMode_NSPanelButtonMode_ARRAYSIZE = 4 + 1;
 const ::google::protobuf::EnumDescriptor*
 NSPanelConfig_NSPanelButtonMode_descriptor();
 template <typename T>
@@ -218,46 +208,12 @@ const std::string& NSPanelConfig_NSPanelButtonMode_Name(T value) {
 template <>
 inline const std::string& NSPanelConfig_NSPanelButtonMode_Name(NSPanelConfig_NSPanelButtonMode value) {
   return ::google::protobuf::internal::NameOfDenseEnum<NSPanelConfig_NSPanelButtonMode_descriptor,
-                                                 0, 5>(
+                                                 0, 4>(
       static_cast<int>(value));
 }
 inline bool NSPanelConfig_NSPanelButtonMode_Parse(absl::string_view name, NSPanelConfig_NSPanelButtonMode* value) {
   return ::google::protobuf::internal::ParseNamedEnum<NSPanelConfig_NSPanelButtonMode>(
       NSPanelConfig_NSPanelButtonMode_descriptor(), name, value);
-}
-enum NSPanelConfig_NSPanelSoundEvent : int {
-  NSPanelConfig_NSPanelSoundEvent_TOUCH = 0,
-  NSPanelConfig_NSPanelSoundEvent_SCENE_ACTIVATED = 1,
-  NSPanelConfig_NSPanelSoundEvent_SCENE_SAVED = 2,
-  NSPanelConfig_NSPanelSoundEvent_NSPanelConfig_NSPanelSoundEvent_INT_MIN_SENTINEL_DO_NOT_USE_ =
-      std::numeric_limits<::int32_t>::min(),
-  NSPanelConfig_NSPanelSoundEvent_NSPanelConfig_NSPanelSoundEvent_INT_MAX_SENTINEL_DO_NOT_USE_ =
-      std::numeric_limits<::int32_t>::max(),
-};
-
-bool NSPanelConfig_NSPanelSoundEvent_IsValid(int value);
-extern const uint32_t NSPanelConfig_NSPanelSoundEvent_internal_data_[];
-constexpr NSPanelConfig_NSPanelSoundEvent NSPanelConfig_NSPanelSoundEvent_NSPanelSoundEvent_MIN = static_cast<NSPanelConfig_NSPanelSoundEvent>(0);
-constexpr NSPanelConfig_NSPanelSoundEvent NSPanelConfig_NSPanelSoundEvent_NSPanelSoundEvent_MAX = static_cast<NSPanelConfig_NSPanelSoundEvent>(2);
-constexpr int NSPanelConfig_NSPanelSoundEvent_NSPanelSoundEvent_ARRAYSIZE = 2 + 1;
-const ::google::protobuf::EnumDescriptor*
-NSPanelConfig_NSPanelSoundEvent_descriptor();
-template <typename T>
-const std::string& NSPanelConfig_NSPanelSoundEvent_Name(T value) {
-  static_assert(std::is_same<T, NSPanelConfig_NSPanelSoundEvent>::value ||
-                    std::is_integral<T>::value,
-                "Incorrect type passed to NSPanelSoundEvent_Name().");
-  return NSPanelConfig_NSPanelSoundEvent_Name(static_cast<NSPanelConfig_NSPanelSoundEvent>(value));
-}
-template <>
-inline const std::string& NSPanelConfig_NSPanelSoundEvent_Name(NSPanelConfig_NSPanelSoundEvent value) {
-  return ::google::protobuf::internal::NameOfDenseEnum<NSPanelConfig_NSPanelSoundEvent_descriptor,
-                                                 0, 2>(
-      static_cast<int>(value));
-}
-inline bool NSPanelConfig_NSPanelSoundEvent_Parse(absl::string_view name, NSPanelConfig_NSPanelSoundEvent* value) {
-  return ::google::protobuf::internal::ParseNamedEnum<NSPanelConfig_NSPanelSoundEvent>(
-      NSPanelConfig_NSPanelSoundEvent_descriptor(), name, value);
 }
 enum NSPanelStatusReport_state : int {
   NSPanelStatusReport_state_ONLINE = 0,
@@ -265,7 +221,6 @@ enum NSPanelStatusReport_state : int {
   NSPanelStatusReport_state_UPDATING_TFT = 2,
   NSPanelStatusReport_state_UPDATING_FIRMWARE = 3,
   NSPanelStatusReport_state_UPDATING_LITTLEFS = 4,
-  NSPanelStatusReport_state_REBOOTING = 5,
   NSPanelStatusReport_state_NSPanelStatusReport_state_INT_MIN_SENTINEL_DO_NOT_USE_ =
       std::numeric_limits<::int32_t>::min(),
   NSPanelStatusReport_state_NSPanelStatusReport_state_INT_MAX_SENTINEL_DO_NOT_USE_ =
@@ -275,8 +230,8 @@ enum NSPanelStatusReport_state : int {
 bool NSPanelStatusReport_state_IsValid(int value);
 extern const uint32_t NSPanelStatusReport_state_internal_data_[];
 constexpr NSPanelStatusReport_state NSPanelStatusReport_state_state_MIN = static_cast<NSPanelStatusReport_state>(0);
-constexpr NSPanelStatusReport_state NSPanelStatusReport_state_state_MAX = static_cast<NSPanelStatusReport_state>(5);
-constexpr int NSPanelStatusReport_state_state_ARRAYSIZE = 5 + 1;
+constexpr NSPanelStatusReport_state NSPanelStatusReport_state_state_MAX = static_cast<NSPanelStatusReport_state>(4);
+constexpr int NSPanelStatusReport_state_state_ARRAYSIZE = 4 + 1;
 const ::google::protobuf::EnumDescriptor*
 NSPanelStatusReport_state_descriptor();
 template <typename T>
@@ -289,125 +244,12 @@ const std::string& NSPanelStatusReport_state_Name(T value) {
 template <>
 inline const std::string& NSPanelStatusReport_state_Name(NSPanelStatusReport_state value) {
   return ::google::protobuf::internal::NameOfDenseEnum<NSPanelStatusReport_state_descriptor,
-                                                 0, 5>(
+                                                 0, 4>(
       static_cast<int>(value));
 }
 inline bool NSPanelStatusReport_state_Parse(absl::string_view name, NSPanelStatusReport_state* value) {
   return ::google::protobuf::internal::ParseNamedEnum<NSPanelStatusReport_state>(
       NSPanelStatusReport_state_descriptor(), name, value);
-}
-enum NSPanelRoomEntitiesPage_EntitySlot_EntityType : int {
-  NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_UNSPECIFIED = 0,
-  NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_LIGHT = 1,
-  NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_SWITCH = 2,
-  NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_BUTTON = 3,
-  NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_THERMOSTAT = 4,
-  NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_SCENE = 5,
-  NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_MEDIA_PLAYER = 6,
-  NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_COVER = 7,
-  NSPanelRoomEntitiesPage_EntitySlot_EntityType_NSPanelRoomEntitiesPage_EntitySlot_EntityType_INT_MIN_SENTINEL_DO_NOT_USE_ =
-      std::numeric_limits<::int32_t>::min(),
-  NSPanelRoomEntitiesPage_EntitySlot_EntityType_NSPanelRoomEntitiesPage_EntitySlot_EntityType_INT_MAX_SENTINEL_DO_NOT_USE_ =
-      std::numeric_limits<::int32_t>::max(),
-};
-
-bool NSPanelRoomEntitiesPage_EntitySlot_EntityType_IsValid(int value);
-extern const uint32_t NSPanelRoomEntitiesPage_EntitySlot_EntityType_internal_data_[];
-constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot_EntityType_EntityType_MIN = static_cast<NSPanelRoomEntitiesPage_EntitySlot_EntityType>(0);
-constexpr NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot_EntityType_EntityType_MAX = static_cast<NSPanelRoomEntitiesPage_EntitySlot_EntityType>(7);
-constexpr int NSPanelRoomEntitiesPage_EntitySlot_EntityType_EntityType_ARRAYSIZE = 7 + 1;
-const ::google::protobuf::EnumDescriptor*
-NSPanelRoomEntitiesPage_EntitySlot_EntityType_descriptor();
-template <typename T>
-const std::string& NSPanelRoomEntitiesPage_EntitySlot_EntityType_Name(T value) {
-  static_assert(std::is_same<T, NSPanelRoomEntitiesPage_EntitySlot_EntityType>::value ||
-                    std::is_integral<T>::value,
-                "Incorrect type passed to EntityType_Name().");
-  return NSPanelRoomEntitiesPage_EntitySlot_EntityType_Name(static_cast<NSPanelRoomEntitiesPage_EntitySlot_EntityType>(value));
-}
-template <>
-inline const std::string& NSPanelRoomEntitiesPage_EntitySlot_EntityType_Name(NSPanelRoomEntitiesPage_EntitySlot_EntityType value) {
-  return ::google::protobuf::internal::NameOfDenseEnum<NSPanelRoomEntitiesPage_EntitySlot_EntityType_descriptor,
-                                                 0, 7>(
-      static_cast<int>(value));
-}
-inline bool NSPanelRoomEntitiesPage_EntitySlot_EntityType_Parse(absl::string_view name, NSPanelRoomEntitiesPage_EntitySlot_EntityType* value) {
-  return ::google::protobuf::internal::ParseNamedEnum<NSPanelRoomEntitiesPage_EntitySlot_EntityType>(
-      NSPanelRoomEntitiesPage_EntitySlot_EntityType_descriptor(), name, value);
-}
-enum NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction : int {
-  NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_NONE = 0,
-  NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_PLAY = 1,
-  NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_PAUSE = 2,
-  NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_NEXT_TRACK = 3,
-  NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_PREVIOUS_TRACK = 4,
-  NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_INT_MIN_SENTINEL_DO_NOT_USE_ =
-      std::numeric_limits<::int32_t>::min(),
-  NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_INT_MAX_SENTINEL_DO_NOT_USE_ =
-      std::numeric_limits<::int32_t>::max(),
-};
-
-bool NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_IsValid(int value);
-extern const uint32_t NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_internal_data_[];
-constexpr NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_PlaybackAction_MIN = static_cast<NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction>(0);
-constexpr NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_PlaybackAction_MAX = static_cast<NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction>(4);
-constexpr int NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_PlaybackAction_ARRAYSIZE = 4 + 1;
-const ::google::protobuf::EnumDescriptor*
-NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_descriptor();
-template <typename T>
-const std::string& NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_Name(T value) {
-  static_assert(std::is_same<T, NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction>::value ||
-                    std::is_integral<T>::value,
-                "Incorrect type passed to PlaybackAction_Name().");
-  return NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_Name(static_cast<NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction>(value));
-}
-template <>
-inline const std::string& NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_Name(NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction value) {
-  return ::google::protobuf::internal::NameOfDenseEnum<NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_descriptor,
-                                                 0, 4>(
-      static_cast<int>(value));
-}
-inline bool NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_Parse(absl::string_view name, NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction* value) {
-  return ::google::protobuf::internal::ParseNamedEnum<NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction>(
-      NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_descriptor(), name, value);
-}
-enum NSPanelMQTTManagerCommand_CoverCommand_Action : int {
-  NSPanelMQTTManagerCommand_CoverCommand_Action_NONE = 0,
-  NSPanelMQTTManagerCommand_CoverCommand_Action_OPEN = 1,
-  NSPanelMQTTManagerCommand_CoverCommand_Action_CLOSE = 2,
-  NSPanelMQTTManagerCommand_CoverCommand_Action_STOP = 3,
-  NSPanelMQTTManagerCommand_CoverCommand_Action_OPEN_TILT = 4,
-  NSPanelMQTTManagerCommand_CoverCommand_Action_CLOSE_TILT = 5,
-  NSPanelMQTTManagerCommand_CoverCommand_Action_STOP_TILT = 6,
-  NSPanelMQTTManagerCommand_CoverCommand_Action_NSPanelMQTTManagerCommand_CoverCommand_Action_INT_MIN_SENTINEL_DO_NOT_USE_ =
-      std::numeric_limits<::int32_t>::min(),
-  NSPanelMQTTManagerCommand_CoverCommand_Action_NSPanelMQTTManagerCommand_CoverCommand_Action_INT_MAX_SENTINEL_DO_NOT_USE_ =
-      std::numeric_limits<::int32_t>::max(),
-};
-
-bool NSPanelMQTTManagerCommand_CoverCommand_Action_IsValid(int value);
-extern const uint32_t NSPanelMQTTManagerCommand_CoverCommand_Action_internal_data_[];
-constexpr NSPanelMQTTManagerCommand_CoverCommand_Action NSPanelMQTTManagerCommand_CoverCommand_Action_Action_MIN = static_cast<NSPanelMQTTManagerCommand_CoverCommand_Action>(0);
-constexpr NSPanelMQTTManagerCommand_CoverCommand_Action NSPanelMQTTManagerCommand_CoverCommand_Action_Action_MAX = static_cast<NSPanelMQTTManagerCommand_CoverCommand_Action>(6);
-constexpr int NSPanelMQTTManagerCommand_CoverCommand_Action_Action_ARRAYSIZE = 6 + 1;
-const ::google::protobuf::EnumDescriptor*
-NSPanelMQTTManagerCommand_CoverCommand_Action_descriptor();
-template <typename T>
-const std::string& NSPanelMQTTManagerCommand_CoverCommand_Action_Name(T value) {
-  static_assert(std::is_same<T, NSPanelMQTTManagerCommand_CoverCommand_Action>::value ||
-                    std::is_integral<T>::value,
-                "Incorrect type passed to Action_Name().");
-  return NSPanelMQTTManagerCommand_CoverCommand_Action_Name(static_cast<NSPanelMQTTManagerCommand_CoverCommand_Action>(value));
-}
-template <>
-inline const std::string& NSPanelMQTTManagerCommand_CoverCommand_Action_Name(NSPanelMQTTManagerCommand_CoverCommand_Action value) {
-  return ::google::protobuf::internal::NameOfDenseEnum<NSPanelMQTTManagerCommand_CoverCommand_Action_descriptor,
-                                                 0, 6>(
-      static_cast<int>(value));
-}
-inline bool NSPanelMQTTManagerCommand_CoverCommand_Action_Parse(absl::string_view name, NSPanelMQTTManagerCommand_CoverCommand_Action* value) {
-  return ::google::protobuf::internal::ParseNamedEnum<NSPanelMQTTManagerCommand_CoverCommand_Action>(
-      NSPanelMQTTManagerCommand_CoverCommand_Action_descriptor(), name, value);
 }
 enum NSPanelMQTTManagerCommand_AffectLightsOptions : int {
   NSPanelMQTTManagerCommand_AffectLightsOptions_ALL = 0,
@@ -541,7 +383,7 @@ class NSPanelWeatherUpdate_ForecastItem final : public ::google::protobuf::Messa
     return reinterpret_cast<const NSPanelWeatherUpdate_ForecastItem*>(
         &_NSPanelWeatherUpdate_ForecastItem_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 8;
+  static constexpr int kIndexInFileMessages = 7;
   friend void swap(NSPanelWeatherUpdate_ForecastItem& a, NSPanelWeatherUpdate_ForecastItem& b) { a.Swap(&b); }
   inline void Swap(NSPanelWeatherUpdate_ForecastItem* other) {
     if (other == this) return;
@@ -790,7 +632,7 @@ class NSPanelWarning final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelWarning*>(
         &_NSPanelWarning_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 3;
+  static constexpr int kIndexInFileMessages = 2;
   friend void swap(NSPanelWarning& a, NSPanelWarning& b) { a.Swap(&b); }
   inline void Swap(NSPanelWarning* other) {
     if (other == this) return;
@@ -979,7 +821,7 @@ class NSPanelRoomStatus final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelRoomStatus*>(
         &_NSPanelRoomStatus_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 7;
+  static constexpr int kIndexInFileMessages = 6;
   friend void swap(NSPanelRoomStatus& a, NSPanelRoomStatus& b) { a.Swap(&b); }
   inline void Swap(NSPanelRoomStatus* other) {
     if (other == this) return;
@@ -1309,7 +1151,7 @@ class NSPanelRoomEntitiesPage_EntitySlot final : public ::google::protobuf::Mess
     return reinterpret_cast<const NSPanelRoomEntitiesPage_EntitySlot*>(
         &_NSPanelRoomEntitiesPage_EntitySlot_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 5;
+  static constexpr int kIndexInFileMessages = 4;
   friend void swap(NSPanelRoomEntitiesPage_EntitySlot& a, NSPanelRoomEntitiesPage_EntitySlot& b) { a.Swap(&b); }
   inline void Swap(NSPanelRoomEntitiesPage_EntitySlot* other) {
     if (other == this) return;
@@ -1375,31 +1217,6 @@ class NSPanelRoomEntitiesPage_EntitySlot final : public ::google::protobuf::Mess
  public:
   ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
-  using EntityType = NSPanelRoomEntitiesPage_EntitySlot_EntityType;
-  static constexpr EntityType ENTITY_TYPE_UNSPECIFIED = NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_UNSPECIFIED;
-  static constexpr EntityType ENTITY_TYPE_LIGHT = NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_LIGHT;
-  static constexpr EntityType ENTITY_TYPE_SWITCH = NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_SWITCH;
-  static constexpr EntityType ENTITY_TYPE_BUTTON = NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_BUTTON;
-  static constexpr EntityType ENTITY_TYPE_THERMOSTAT = NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_THERMOSTAT;
-  static constexpr EntityType ENTITY_TYPE_SCENE = NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_SCENE;
-  static constexpr EntityType ENTITY_TYPE_MEDIA_PLAYER = NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_MEDIA_PLAYER;
-  static constexpr EntityType ENTITY_TYPE_COVER = NSPanelRoomEntitiesPage_EntitySlot_EntityType_ENTITY_TYPE_COVER;
-  static inline bool EntityType_IsValid(int value) {
-    return NSPanelRoomEntitiesPage_EntitySlot_EntityType_IsValid(value);
-  }
-  static constexpr EntityType EntityType_MIN = NSPanelRoomEntitiesPage_EntitySlot_EntityType_EntityType_MIN;
-  static constexpr EntityType EntityType_MAX = NSPanelRoomEntitiesPage_EntitySlot_EntityType_EntityType_MAX;
-  static constexpr int EntityType_ARRAYSIZE = NSPanelRoomEntitiesPage_EntitySlot_EntityType_EntityType_ARRAYSIZE;
-  static inline const ::google::protobuf::EnumDescriptor* EntityType_descriptor() {
-    return NSPanelRoomEntitiesPage_EntitySlot_EntityType_descriptor();
-  }
-  template <typename T>
-  static inline const std::string& EntityType_Name(T value) {
-    return NSPanelRoomEntitiesPage_EntitySlot_EntityType_Name(value);
-  }
-  static inline bool EntityType_Parse(absl::string_view name, EntityType* value) {
-    return NSPanelRoomEntitiesPage_EntitySlot_EntityType_Parse(name, value);
-  }
 
   // accessors -------------------------------------------------------
   enum : int {
@@ -1410,8 +1227,6 @@ class NSPanelRoomEntitiesPage_EntitySlot final : public ::google::protobuf::Mess
     kPcoFieldNumber = 4,
     kPco2FieldNumber = 5,
     kCanSaveSceneFieldNumber = 6,
-    kTypeFieldNumber = 8,
-    kIdFieldNumber = 9,
   };
   // string name = 2;
   void clear_name() ;
@@ -1501,33 +1316,13 @@ class NSPanelRoomEntitiesPage_EntitySlot final : public ::google::protobuf::Mess
   void _internal_set_can_save_scene(bool value);
 
   public:
-  // .NSPanelRoomEntitiesPage.EntitySlot.EntityType type = 8;
-  void clear_type() ;
-  ::NSPanelRoomEntitiesPage_EntitySlot_EntityType type() const;
-  void set_type(::NSPanelRoomEntitiesPage_EntitySlot_EntityType value);
-
-  private:
-  ::NSPanelRoomEntitiesPage_EntitySlot_EntityType _internal_type() const;
-  void _internal_set_type(::NSPanelRoomEntitiesPage_EntitySlot_EntityType value);
-
-  public:
-  // int32 id = 9;
-  void clear_id() ;
-  ::int32_t id() const;
-  void set_id(::int32_t value);
-
-  private:
-  ::int32_t _internal_id() const;
-  void _internal_set_id(::int32_t value);
-
-  public:
   // @@protoc_insertion_point(class_scope:NSPanelRoomEntitiesPage.EntitySlot)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      4, 9, 0,
-      75, 2>
+      3, 7, 0,
+      67, 2>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -1554,8 +1349,6 @@ class NSPanelRoomEntitiesPage_EntitySlot final : public ::google::protobuf::Mess
     ::int32_t pco_;
     ::int32_t pco2_;
     bool can_save_scene_;
-    int type_;
-    ::int32_t id_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -1619,7 +1412,7 @@ class NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage final : public ::go
     return reinterpret_cast<const NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage*>(
         &_NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 13;
+  static constexpr int kIndexInFileMessages = 12;
   friend void swap(NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage& a, NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_ToggleEntityFromEntitiesPage* other) {
     if (other == this) return;
@@ -1802,7 +1595,7 @@ class NSPanelMQTTManagerCommand_ThermostatTemperatureCommand final : public ::go
     return reinterpret_cast<const NSPanelMQTTManagerCommand_ThermostatTemperatureCommand*>(
         &_NSPanelMQTTManagerCommand_ThermostatTemperatureCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 16;
+  static constexpr int kIndexInFileMessages = 15;
   friend void swap(NSPanelMQTTManagerCommand_ThermostatTemperatureCommand& a, NSPanelMQTTManagerCommand_ThermostatTemperatureCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_ThermostatTemperatureCommand* other) {
     if (other == this) return;
@@ -1985,7 +1778,7 @@ class NSPanelMQTTManagerCommand_ThermostatCommand final : public ::google::proto
     return reinterpret_cast<const NSPanelMQTTManagerCommand_ThermostatCommand*>(
         &_NSPanelMQTTManagerCommand_ThermostatCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 17;
+  static constexpr int kIndexInFileMessages = 16;
   friend void swap(NSPanelMQTTManagerCommand_ThermostatCommand& a, NSPanelMQTTManagerCommand_ThermostatCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_ThermostatCommand* other) {
     if (other == this) return;
@@ -2192,7 +1985,7 @@ class NSPanelMQTTManagerCommand_SaveSceneCommand final : public ::google::protob
     return reinterpret_cast<const NSPanelMQTTManagerCommand_SaveSceneCommand*>(
         &_NSPanelMQTTManagerCommand_SaveSceneCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 14;
+  static constexpr int kIndexInFileMessages = 13;
   friend void swap(NSPanelMQTTManagerCommand_SaveSceneCommand& a, NSPanelMQTTManagerCommand_SaveSceneCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_SaveSceneCommand* other) {
     if (other == this) return;
@@ -2320,319 +2113,6 @@ class NSPanelMQTTManagerCommand_SaveSceneCommand final : public ::google::protob
 };
 // -------------------------------------------------------------------
 
-class NSPanelMQTTManagerCommand_MediaPlayerCommand final : public ::google::protobuf::Message
-/* @@protoc_insertion_point(class_definition:NSPanelMQTTManagerCommand.MediaPlayerCommand) */ {
- public:
-  inline NSPanelMQTTManagerCommand_MediaPlayerCommand() : NSPanelMQTTManagerCommand_MediaPlayerCommand(nullptr) {}
-  ~NSPanelMQTTManagerCommand_MediaPlayerCommand() override;
-  template <typename = void>
-  explicit PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_MediaPlayerCommand(
-      ::google::protobuf::internal::ConstantInitialized);
-
-  inline NSPanelMQTTManagerCommand_MediaPlayerCommand(const NSPanelMQTTManagerCommand_MediaPlayerCommand& from) : NSPanelMQTTManagerCommand_MediaPlayerCommand(nullptr, from) {}
-  inline NSPanelMQTTManagerCommand_MediaPlayerCommand(NSPanelMQTTManagerCommand_MediaPlayerCommand&& from) noexcept
-      : NSPanelMQTTManagerCommand_MediaPlayerCommand(nullptr, std::move(from)) {}
-  inline NSPanelMQTTManagerCommand_MediaPlayerCommand& operator=(const NSPanelMQTTManagerCommand_MediaPlayerCommand& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline NSPanelMQTTManagerCommand_MediaPlayerCommand& operator=(NSPanelMQTTManagerCommand_MediaPlayerCommand&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetArena() == from.GetArena()
-#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetArena() != nullptr
-#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
-  }
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::google::protobuf::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::google::protobuf::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const NSPanelMQTTManagerCommand_MediaPlayerCommand& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const NSPanelMQTTManagerCommand_MediaPlayerCommand* internal_default_instance() {
-    return reinterpret_cast<const NSPanelMQTTManagerCommand_MediaPlayerCommand*>(
-        &_NSPanelMQTTManagerCommand_MediaPlayerCommand_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages = 18;
-  friend void swap(NSPanelMQTTManagerCommand_MediaPlayerCommand& a, NSPanelMQTTManagerCommand_MediaPlayerCommand& b) { a.Swap(&b); }
-  inline void Swap(NSPanelMQTTManagerCommand_MediaPlayerCommand* other) {
-    if (other == this) return;
-#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
-#else   // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetArena() == other->GetArena()) {
-#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::google::protobuf::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(NSPanelMQTTManagerCommand_MediaPlayerCommand* other) {
-    if (other == this) return;
-    ABSL_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  NSPanelMQTTManagerCommand_MediaPlayerCommand* New(::google::protobuf::Arena* arena = nullptr) const final {
-    return ::google::protobuf::Message::DefaultConstruct<NSPanelMQTTManagerCommand_MediaPlayerCommand>(arena);
-  }
-  using ::google::protobuf::Message::CopyFrom;
-  void CopyFrom(const NSPanelMQTTManagerCommand_MediaPlayerCommand& from);
-  using ::google::protobuf::Message::MergeFrom;
-  void MergeFrom(const NSPanelMQTTManagerCommand_MediaPlayerCommand& from) { NSPanelMQTTManagerCommand_MediaPlayerCommand::MergeImpl(*this, from); }
-
-  private:
-  static void MergeImpl(
-      ::google::protobuf::MessageLite& to_msg,
-      const ::google::protobuf::MessageLite& from_msg);
-
-  public:
-  bool IsInitialized() const {
-    return true;
-  }
-  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
-  ::size_t ByteSizeLong() const final;
-  ::uint8_t* _InternalSerialize(
-      ::uint8_t* target,
-      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
-  void InternalSwap(NSPanelMQTTManagerCommand_MediaPlayerCommand* other);
- private:
-  friend class ::google::protobuf::internal::AnyMetadata;
-  static ::absl::string_view FullMessageName() { return "NSPanelMQTTManagerCommand.MediaPlayerCommand"; }
-
- protected:
-  explicit NSPanelMQTTManagerCommand_MediaPlayerCommand(::google::protobuf::Arena* arena);
-  NSPanelMQTTManagerCommand_MediaPlayerCommand(::google::protobuf::Arena* arena, const NSPanelMQTTManagerCommand_MediaPlayerCommand& from);
-  NSPanelMQTTManagerCommand_MediaPlayerCommand(::google::protobuf::Arena* arena, NSPanelMQTTManagerCommand_MediaPlayerCommand&& from) noexcept
-      : NSPanelMQTTManagerCommand_MediaPlayerCommand(arena) {
-    *this = ::std::move(from);
-  }
-  const ::google::protobuf::Message::ClassData* GetClassData() const final;
-
- public:
-  ::google::protobuf::Metadata GetMetadata() const;
-  // nested types ----------------------------------------------------
-  using PlaybackAction = NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction;
-  static constexpr PlaybackAction NONE = NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_NONE;
-  static constexpr PlaybackAction PLAY = NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_PLAY;
-  static constexpr PlaybackAction PAUSE = NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_PAUSE;
-  static constexpr PlaybackAction NEXT_TRACK = NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_NEXT_TRACK;
-  static constexpr PlaybackAction PREVIOUS_TRACK = NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_PREVIOUS_TRACK;
-  static inline bool PlaybackAction_IsValid(int value) {
-    return NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_IsValid(value);
-  }
-  static constexpr PlaybackAction PlaybackAction_MIN = NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_PlaybackAction_MIN;
-  static constexpr PlaybackAction PlaybackAction_MAX = NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_PlaybackAction_MAX;
-  static constexpr int PlaybackAction_ARRAYSIZE = NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_PlaybackAction_ARRAYSIZE;
-  static inline const ::google::protobuf::EnumDescriptor* PlaybackAction_descriptor() {
-    return NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_descriptor();
-  }
-  template <typename T>
-  static inline const std::string& PlaybackAction_Name(T value) {
-    return NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_Name(value);
-  }
-  static inline bool PlaybackAction_Parse(absl::string_view name, PlaybackAction* value) {
-    return NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_Parse(name, value);
-  }
-
-  // accessors -------------------------------------------------------
-  enum : int {
-    kSelectPlayerSourceFieldNumber = 9,
-    kSelectSourcePlayerSourceFieldNumber = 10,
-    kMediaPlayerIdFieldNumber = 1,
-    kPlaybackActionFieldNumber = 2,
-    kVolumeFieldNumber = 4,
-    kHasVolumeFieldNumber = 3,
-    kHasSourceVolumeFieldNumber = 5,
-    kHasMutedFieldNumber = 7,
-    kMutedFieldNumber = 8,
-    kSourceVolumeFieldNumber = 6,
-  };
-  // string select_player_source = 9;
-  void clear_select_player_source() ;
-  const std::string& select_player_source() const;
-  template <typename Arg_ = const std::string&, typename... Args_>
-  void set_select_player_source(Arg_&& arg, Args_... args);
-  std::string* mutable_select_player_source();
-  PROTOBUF_NODISCARD std::string* release_select_player_source();
-  void set_allocated_select_player_source(std::string* value);
-
-  private:
-  const std::string& _internal_select_player_source() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_select_player_source(
-      const std::string& value);
-  std::string* _internal_mutable_select_player_source();
-
-  public:
-  // string select_source_player_source = 10;
-  void clear_select_source_player_source() ;
-  const std::string& select_source_player_source() const;
-  template <typename Arg_ = const std::string&, typename... Args_>
-  void set_select_source_player_source(Arg_&& arg, Args_... args);
-  std::string* mutable_select_source_player_source();
-  PROTOBUF_NODISCARD std::string* release_select_source_player_source();
-  void set_allocated_select_source_player_source(std::string* value);
-
-  private:
-  const std::string& _internal_select_source_player_source() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_select_source_player_source(
-      const std::string& value);
-  std::string* _internal_mutable_select_source_player_source();
-
-  public:
-  // int32 media_player_id = 1;
-  void clear_media_player_id() ;
-  ::int32_t media_player_id() const;
-  void set_media_player_id(::int32_t value);
-
-  private:
-  ::int32_t _internal_media_player_id() const;
-  void _internal_set_media_player_id(::int32_t value);
-
-  public:
-  // .NSPanelMQTTManagerCommand.MediaPlayerCommand.PlaybackAction playback_action = 2;
-  void clear_playback_action() ;
-  ::NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction playback_action() const;
-  void set_playback_action(::NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction value);
-
-  private:
-  ::NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction _internal_playback_action() const;
-  void _internal_set_playback_action(::NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction value);
-
-  public:
-  // int32 volume = 4;
-  void clear_volume() ;
-  ::int32_t volume() const;
-  void set_volume(::int32_t value);
-
-  private:
-  ::int32_t _internal_volume() const;
-  void _internal_set_volume(::int32_t value);
-
-  public:
-  // bool has_volume = 3;
-  void clear_has_volume() ;
-  bool has_volume() const;
-  void set_has_volume(bool value);
-
-  private:
-  bool _internal_has_volume() const;
-  void _internal_set_has_volume(bool value);
-
-  public:
-  // bool has_source_volume = 5;
-  void clear_has_source_volume() ;
-  bool has_source_volume() const;
-  void set_has_source_volume(bool value);
-
-  private:
-  bool _internal_has_source_volume() const;
-  void _internal_set_has_source_volume(bool value);
-
-  public:
-  // bool has_muted = 7;
-  void clear_has_muted() ;
-  bool has_muted() const;
-  void set_has_muted(bool value);
-
-  private:
-  bool _internal_has_muted() const;
-  void _internal_set_has_muted(bool value);
-
-  public:
-  // bool muted = 8;
-  void clear_muted() ;
-  bool muted() const;
-  void set_muted(bool value);
-
-  private:
-  bool _internal_muted() const;
-  void _internal_set_muted(bool value);
-
-  public:
-  // int32 source_volume = 6;
-  void clear_source_volume() ;
-  ::int32_t source_volume() const;
-  void set_source_volume(::int32_t value);
-
-  private:
-  ::int32_t _internal_source_volume() const;
-  void _internal_set_source_volume(::int32_t value);
-
-  public:
-  // @@protoc_insertion_point(class_scope:NSPanelMQTTManagerCommand.MediaPlayerCommand)
- private:
-  class _Internal;
-  friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<
-      4, 10, 0,
-      108, 2>
-      _table_;
-
-  static constexpr const void* _raw_default_instance_ =
-      &_NSPanelMQTTManagerCommand_MediaPlayerCommand_default_instance_;
-
-  friend class ::google::protobuf::MessageLite;
-  friend class ::google::protobuf::Arena;
-  template <typename T>
-  friend class ::google::protobuf::Arena::InternalHelper;
-  using InternalArenaConstructable_ = void;
-  using DestructorSkippable_ = void;
-  struct Impl_ {
-    inline explicit constexpr Impl_(
-        ::google::protobuf::internal::ConstantInitialized) noexcept;
-    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
-                          ::google::protobuf::Arena* arena);
-    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
-                          ::google::protobuf::Arena* arena, const Impl_& from,
-                          const NSPanelMQTTManagerCommand_MediaPlayerCommand& from_msg);
-    ::google::protobuf::internal::ArenaStringPtr select_player_source_;
-    ::google::protobuf::internal::ArenaStringPtr select_source_player_source_;
-    ::int32_t media_player_id_;
-    int playback_action_;
-    ::int32_t volume_;
-    bool has_volume_;
-    bool has_source_volume_;
-    bool has_muted_;
-    bool muted_;
-    ::int32_t source_volume_;
-    mutable ::google::protobuf::internal::CachedSize _cached_size_;
-    PROTOBUF_TSAN_DECLARE_MEMBER
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_protobuf_5fnspanel_2eproto;
-};
-// -------------------------------------------------------------------
-
 class NSPanelMQTTManagerCommand_LightCommand final : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:NSPanelMQTTManagerCommand.LightCommand) */ {
  public:
@@ -2688,7 +2168,7 @@ class NSPanelMQTTManagerCommand_LightCommand final : public ::google::protobuf::
     return reinterpret_cast<const NSPanelMQTTManagerCommand_LightCommand*>(
         &_NSPanelMQTTManagerCommand_LightCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 12;
+  static constexpr int kIndexInFileMessages = 11;
   friend void swap(NSPanelMQTTManagerCommand_LightCommand& a, NSPanelMQTTManagerCommand_LightCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_LightCommand* other) {
     if (other == this) return;
@@ -2964,7 +2444,7 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOn final : public ::google::pr
     return reinterpret_cast<const NSPanelMQTTManagerCommand_FirstPageTurnLightOn*>(
         &_NSPanelMQTTManagerCommand_FirstPageTurnLightOn_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 10;
+  static constexpr int kIndexInFileMessages = 9;
   friend void swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOn& a, NSPanelMQTTManagerCommand_FirstPageTurnLightOn& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOn* other) {
     if (other == this) return;
@@ -3207,7 +2687,7 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOff final : public ::google::p
     return reinterpret_cast<const NSPanelMQTTManagerCommand_FirstPageTurnLightOff*>(
         &_NSPanelMQTTManagerCommand_FirstPageTurnLightOff_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 11;
+  static constexpr int kIndexInFileMessages = 10;
   friend void swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOff& a, NSPanelMQTTManagerCommand_FirstPageTurnLightOff& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_FirstPageTurnLightOff* other) {
     if (other == this) return;
@@ -3335,261 +2815,6 @@ class NSPanelMQTTManagerCommand_FirstPageTurnLightOff final : public ::google::p
 };
 // -------------------------------------------------------------------
 
-class NSPanelMQTTManagerCommand_CoverCommand final : public ::google::protobuf::Message
-/* @@protoc_insertion_point(class_definition:NSPanelMQTTManagerCommand.CoverCommand) */ {
- public:
-  inline NSPanelMQTTManagerCommand_CoverCommand() : NSPanelMQTTManagerCommand_CoverCommand(nullptr) {}
-  ~NSPanelMQTTManagerCommand_CoverCommand() override;
-  template <typename = void>
-  explicit PROTOBUF_CONSTEXPR NSPanelMQTTManagerCommand_CoverCommand(
-      ::google::protobuf::internal::ConstantInitialized);
-
-  inline NSPanelMQTTManagerCommand_CoverCommand(const NSPanelMQTTManagerCommand_CoverCommand& from) : NSPanelMQTTManagerCommand_CoverCommand(nullptr, from) {}
-  inline NSPanelMQTTManagerCommand_CoverCommand(NSPanelMQTTManagerCommand_CoverCommand&& from) noexcept
-      : NSPanelMQTTManagerCommand_CoverCommand(nullptr, std::move(from)) {}
-  inline NSPanelMQTTManagerCommand_CoverCommand& operator=(const NSPanelMQTTManagerCommand_CoverCommand& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline NSPanelMQTTManagerCommand_CoverCommand& operator=(NSPanelMQTTManagerCommand_CoverCommand&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetArena() == from.GetArena()
-#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetArena() != nullptr
-#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
-  }
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::google::protobuf::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::google::protobuf::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const NSPanelMQTTManagerCommand_CoverCommand& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const NSPanelMQTTManagerCommand_CoverCommand* internal_default_instance() {
-    return reinterpret_cast<const NSPanelMQTTManagerCommand_CoverCommand*>(
-        &_NSPanelMQTTManagerCommand_CoverCommand_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages = 19;
-  friend void swap(NSPanelMQTTManagerCommand_CoverCommand& a, NSPanelMQTTManagerCommand_CoverCommand& b) { a.Swap(&b); }
-  inline void Swap(NSPanelMQTTManagerCommand_CoverCommand* other) {
-    if (other == this) return;
-#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
-#else   // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetArena() == other->GetArena()) {
-#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::google::protobuf::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(NSPanelMQTTManagerCommand_CoverCommand* other) {
-    if (other == this) return;
-    ABSL_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  NSPanelMQTTManagerCommand_CoverCommand* New(::google::protobuf::Arena* arena = nullptr) const final {
-    return ::google::protobuf::Message::DefaultConstruct<NSPanelMQTTManagerCommand_CoverCommand>(arena);
-  }
-  using ::google::protobuf::Message::CopyFrom;
-  void CopyFrom(const NSPanelMQTTManagerCommand_CoverCommand& from);
-  using ::google::protobuf::Message::MergeFrom;
-  void MergeFrom(const NSPanelMQTTManagerCommand_CoverCommand& from) { NSPanelMQTTManagerCommand_CoverCommand::MergeImpl(*this, from); }
-
-  private:
-  static void MergeImpl(
-      ::google::protobuf::MessageLite& to_msg,
-      const ::google::protobuf::MessageLite& from_msg);
-
-  public:
-  bool IsInitialized() const {
-    return true;
-  }
-  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
-  ::size_t ByteSizeLong() const final;
-  ::uint8_t* _InternalSerialize(
-      ::uint8_t* target,
-      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
-  void InternalSwap(NSPanelMQTTManagerCommand_CoverCommand* other);
- private:
-  friend class ::google::protobuf::internal::AnyMetadata;
-  static ::absl::string_view FullMessageName() { return "NSPanelMQTTManagerCommand.CoverCommand"; }
-
- protected:
-  explicit NSPanelMQTTManagerCommand_CoverCommand(::google::protobuf::Arena* arena);
-  NSPanelMQTTManagerCommand_CoverCommand(::google::protobuf::Arena* arena, const NSPanelMQTTManagerCommand_CoverCommand& from);
-  NSPanelMQTTManagerCommand_CoverCommand(::google::protobuf::Arena* arena, NSPanelMQTTManagerCommand_CoverCommand&& from) noexcept
-      : NSPanelMQTTManagerCommand_CoverCommand(arena) {
-    *this = ::std::move(from);
-  }
-  const ::google::protobuf::Message::ClassData* GetClassData() const final;
-
- public:
-  ::google::protobuf::Metadata GetMetadata() const;
-  // nested types ----------------------------------------------------
-  using Action = NSPanelMQTTManagerCommand_CoverCommand_Action;
-  static constexpr Action NONE = NSPanelMQTTManagerCommand_CoverCommand_Action_NONE;
-  static constexpr Action OPEN = NSPanelMQTTManagerCommand_CoverCommand_Action_OPEN;
-  static constexpr Action CLOSE = NSPanelMQTTManagerCommand_CoverCommand_Action_CLOSE;
-  static constexpr Action STOP = NSPanelMQTTManagerCommand_CoverCommand_Action_STOP;
-  static constexpr Action OPEN_TILT = NSPanelMQTTManagerCommand_CoverCommand_Action_OPEN_TILT;
-  static constexpr Action CLOSE_TILT = NSPanelMQTTManagerCommand_CoverCommand_Action_CLOSE_TILT;
-  static constexpr Action STOP_TILT = NSPanelMQTTManagerCommand_CoverCommand_Action_STOP_TILT;
-  static inline bool Action_IsValid(int value) {
-    return NSPanelMQTTManagerCommand_CoverCommand_Action_IsValid(value);
-  }
-  static constexpr Action Action_MIN = NSPanelMQTTManagerCommand_CoverCommand_Action_Action_MIN;
-  static constexpr Action Action_MAX = NSPanelMQTTManagerCommand_CoverCommand_Action_Action_MAX;
-  static constexpr int Action_ARRAYSIZE = NSPanelMQTTManagerCommand_CoverCommand_Action_Action_ARRAYSIZE;
-  static inline const ::google::protobuf::EnumDescriptor* Action_descriptor() {
-    return NSPanelMQTTManagerCommand_CoverCommand_Action_descriptor();
-  }
-  template <typename T>
-  static inline const std::string& Action_Name(T value) {
-    return NSPanelMQTTManagerCommand_CoverCommand_Action_Name(value);
-  }
-  static inline bool Action_Parse(absl::string_view name, Action* value) {
-    return NSPanelMQTTManagerCommand_CoverCommand_Action_Parse(name, value);
-  }
-
-  // accessors -------------------------------------------------------
-  enum : int {
-    kCoverIdFieldNumber = 1,
-    kActionFieldNumber = 2,
-    kPositionFieldNumber = 4,
-    kHasPositionFieldNumber = 3,
-    kHasTiltPositionFieldNumber = 5,
-    kTiltPositionFieldNumber = 6,
-  };
-  // int32 cover_id = 1;
-  void clear_cover_id() ;
-  ::int32_t cover_id() const;
-  void set_cover_id(::int32_t value);
-
-  private:
-  ::int32_t _internal_cover_id() const;
-  void _internal_set_cover_id(::int32_t value);
-
-  public:
-  // .NSPanelMQTTManagerCommand.CoverCommand.Action action = 2;
-  void clear_action() ;
-  ::NSPanelMQTTManagerCommand_CoverCommand_Action action() const;
-  void set_action(::NSPanelMQTTManagerCommand_CoverCommand_Action value);
-
-  private:
-  ::NSPanelMQTTManagerCommand_CoverCommand_Action _internal_action() const;
-  void _internal_set_action(::NSPanelMQTTManagerCommand_CoverCommand_Action value);
-
-  public:
-  // int32 position = 4;
-  void clear_position() ;
-  ::int32_t position() const;
-  void set_position(::int32_t value);
-
-  private:
-  ::int32_t _internal_position() const;
-  void _internal_set_position(::int32_t value);
-
-  public:
-  // bool has_position = 3;
-  void clear_has_position() ;
-  bool has_position() const;
-  void set_has_position(bool value);
-
-  private:
-  bool _internal_has_position() const;
-  void _internal_set_has_position(bool value);
-
-  public:
-  // bool has_tilt_position = 5;
-  void clear_has_tilt_position() ;
-  bool has_tilt_position() const;
-  void set_has_tilt_position(bool value);
-
-  private:
-  bool _internal_has_tilt_position() const;
-  void _internal_set_has_tilt_position(bool value);
-
-  public:
-  // int32 tilt_position = 6;
-  void clear_tilt_position() ;
-  ::int32_t tilt_position() const;
-  void set_tilt_position(::int32_t value);
-
-  private:
-  ::int32_t _internal_tilt_position() const;
-  void _internal_set_tilt_position(::int32_t value);
-
-  public:
-  // @@protoc_insertion_point(class_scope:NSPanelMQTTManagerCommand.CoverCommand)
- private:
-  class _Internal;
-  friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<
-      3, 6, 0,
-      0, 2>
-      _table_;
-
-  static constexpr const void* _raw_default_instance_ =
-      &_NSPanelMQTTManagerCommand_CoverCommand_default_instance_;
-
-  friend class ::google::protobuf::MessageLite;
-  friend class ::google::protobuf::Arena;
-  template <typename T>
-  friend class ::google::protobuf::Arena::InternalHelper;
-  using InternalArenaConstructable_ = void;
-  using DestructorSkippable_ = void;
-  struct Impl_ {
-    inline explicit constexpr Impl_(
-        ::google::protobuf::internal::ConstantInitialized) noexcept;
-    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
-                          ::google::protobuf::Arena* arena);
-    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
-                          ::google::protobuf::Arena* arena, const Impl_& from,
-                          const NSPanelMQTTManagerCommand_CoverCommand& from_msg);
-    ::int32_t cover_id_;
-    int action_;
-    ::int32_t position_;
-    bool has_position_;
-    bool has_tilt_position_;
-    ::int32_t tilt_position_;
-    mutable ::google::protobuf::internal::CachedSize _cached_size_;
-    PROTOBUF_TSAN_DECLARE_MEMBER
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_protobuf_5fnspanel_2eproto;
-};
-// -------------------------------------------------------------------
-
 class NSPanelMQTTManagerCommand_ButtonPressed final : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:NSPanelMQTTManagerCommand.ButtonPressed) */ {
  public:
@@ -3645,7 +2870,7 @@ class NSPanelMQTTManagerCommand_ButtonPressed final : public ::google::protobuf:
     return reinterpret_cast<const NSPanelMQTTManagerCommand_ButtonPressed*>(
         &_NSPanelMQTTManagerCommand_ButtonPressed_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 15;
+  static constexpr int kIndexInFileMessages = 14;
   friend void swap(NSPanelMQTTManagerCommand_ButtonPressed& a, NSPanelMQTTManagerCommand_ButtonPressed& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand_ButtonPressed* other) {
     if (other == this) return;
@@ -3753,195 +2978,6 @@ class NSPanelMQTTManagerCommand_ButtonPressed final : public ::google::protobuf:
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const NSPanelMQTTManagerCommand_ButtonPressed& from_msg);
     ::int32_t button_id_;
-    mutable ::google::protobuf::internal::CachedSize _cached_size_;
-    PROTOBUF_TSAN_DECLARE_MEMBER
-  };
-  union { Impl_ _impl_; };
-  friend struct ::TableStruct_protobuf_5fnspanel_2eproto;
-};
-// -------------------------------------------------------------------
-
-class NSPanelConfig_Sound final : public ::google::protobuf::Message
-/* @@protoc_insertion_point(class_definition:NSPanelConfig.Sound) */ {
- public:
-  inline NSPanelConfig_Sound() : NSPanelConfig_Sound(nullptr) {}
-  ~NSPanelConfig_Sound() override;
-  template <typename = void>
-  explicit PROTOBUF_CONSTEXPR NSPanelConfig_Sound(
-      ::google::protobuf::internal::ConstantInitialized);
-
-  inline NSPanelConfig_Sound(const NSPanelConfig_Sound& from) : NSPanelConfig_Sound(nullptr, from) {}
-  inline NSPanelConfig_Sound(NSPanelConfig_Sound&& from) noexcept
-      : NSPanelConfig_Sound(nullptr, std::move(from)) {}
-  inline NSPanelConfig_Sound& operator=(const NSPanelConfig_Sound& from) {
-    CopyFrom(from);
-    return *this;
-  }
-  inline NSPanelConfig_Sound& operator=(NSPanelConfig_Sound&& from) noexcept {
-    if (this == &from) return *this;
-    if (GetArena() == from.GetArena()
-#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
-        && GetArena() != nullptr
-#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
-    ) {
-      InternalSwap(&from);
-    } else {
-      CopyFrom(from);
-    }
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
-  }
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor() {
-    return GetDescriptor();
-  }
-  static const ::google::protobuf::Descriptor* GetDescriptor() {
-    return default_instance().GetMetadata().descriptor;
-  }
-  static const ::google::protobuf::Reflection* GetReflection() {
-    return default_instance().GetMetadata().reflection;
-  }
-  static const NSPanelConfig_Sound& default_instance() {
-    return *internal_default_instance();
-  }
-  static inline const NSPanelConfig_Sound* internal_default_instance() {
-    return reinterpret_cast<const NSPanelConfig_Sound*>(
-        &_NSPanelConfig_Sound_default_instance_);
-  }
-  static constexpr int kIndexInFileMessages = 1;
-  friend void swap(NSPanelConfig_Sound& a, NSPanelConfig_Sound& b) { a.Swap(&b); }
-  inline void Swap(NSPanelConfig_Sound* other) {
-    if (other == this) return;
-#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
-#else   // PROTOBUF_FORCE_COPY_IN_SWAP
-    if (GetArena() == other->GetArena()) {
-#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
-      InternalSwap(other);
-    } else {
-      ::google::protobuf::internal::GenericSwap(this, other);
-    }
-  }
-  void UnsafeArenaSwap(NSPanelConfig_Sound* other) {
-    if (other == this) return;
-    ABSL_DCHECK(GetArena() == other->GetArena());
-    InternalSwap(other);
-  }
-
-  // implements Message ----------------------------------------------
-
-  NSPanelConfig_Sound* New(::google::protobuf::Arena* arena = nullptr) const final {
-    return ::google::protobuf::Message::DefaultConstruct<NSPanelConfig_Sound>(arena);
-  }
-  using ::google::protobuf::Message::CopyFrom;
-  void CopyFrom(const NSPanelConfig_Sound& from);
-  using ::google::protobuf::Message::MergeFrom;
-  void MergeFrom(const NSPanelConfig_Sound& from) { NSPanelConfig_Sound::MergeImpl(*this, from); }
-
-  private:
-  static void MergeImpl(
-      ::google::protobuf::MessageLite& to_msg,
-      const ::google::protobuf::MessageLite& from_msg);
-
-  public:
-  bool IsInitialized() const {
-    return true;
-  }
-  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
-  ::size_t ByteSizeLong() const final;
-  ::uint8_t* _InternalSerialize(
-      ::uint8_t* target,
-      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
-  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
-
-  private:
-  void SharedCtor(::google::protobuf::Arena* arena);
-  void SharedDtor();
-  void InternalSwap(NSPanelConfig_Sound* other);
- private:
-  friend class ::google::protobuf::internal::AnyMetadata;
-  static ::absl::string_view FullMessageName() { return "NSPanelConfig.Sound"; }
-
- protected:
-  explicit NSPanelConfig_Sound(::google::protobuf::Arena* arena);
-  NSPanelConfig_Sound(::google::protobuf::Arena* arena, const NSPanelConfig_Sound& from);
-  NSPanelConfig_Sound(::google::protobuf::Arena* arena, NSPanelConfig_Sound&& from) noexcept
-      : NSPanelConfig_Sound(arena) {
-    *this = ::std::move(from);
-  }
-  const ::google::protobuf::Message::ClassData* GetClassData() const final;
-
- public:
-  ::google::protobuf::Metadata GetMetadata() const;
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-  enum : int {
-    kRtttlFieldNumber = 2,
-    kEventFieldNumber = 1,
-  };
-  // string rtttl = 2;
-  void clear_rtttl() ;
-  const std::string& rtttl() const;
-  template <typename Arg_ = const std::string&, typename... Args_>
-  void set_rtttl(Arg_&& arg, Args_... args);
-  std::string* mutable_rtttl();
-  PROTOBUF_NODISCARD std::string* release_rtttl();
-  void set_allocated_rtttl(std::string* value);
-
-  private:
-  const std::string& _internal_rtttl() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_rtttl(
-      const std::string& value);
-  std::string* _internal_mutable_rtttl();
-
-  public:
-  // .NSPanelConfig.NSPanelSoundEvent event = 1;
-  void clear_event() ;
-  ::NSPanelConfig_NSPanelSoundEvent event() const;
-  void set_event(::NSPanelConfig_NSPanelSoundEvent value);
-
-  private:
-  ::NSPanelConfig_NSPanelSoundEvent _internal_event() const;
-  void _internal_set_event(::NSPanelConfig_NSPanelSoundEvent value);
-
-  public:
-  // @@protoc_insertion_point(class_scope:NSPanelConfig.Sound)
- private:
-  class _Internal;
-  friend class ::google::protobuf::internal::TcParser;
-  static const ::google::protobuf::internal::TcParseTable<
-      1, 2, 0,
-      33, 2>
-      _table_;
-
-  static constexpr const void* _raw_default_instance_ =
-      &_NSPanelConfig_Sound_default_instance_;
-
-  friend class ::google::protobuf::MessageLite;
-  friend class ::google::protobuf::Arena;
-  template <typename T>
-  friend class ::google::protobuf::Arena::InternalHelper;
-  using InternalArenaConstructable_ = void;
-  using DestructorSkippable_ = void;
-  struct Impl_ {
-    inline explicit constexpr Impl_(
-        ::google::protobuf::internal::ConstantInitialized) noexcept;
-    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
-                          ::google::protobuf::Arena* arena);
-    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
-                          ::google::protobuf::Arena* arena, const Impl_& from,
-                          const NSPanelConfig_Sound& from_msg);
-    ::google::protobuf::internal::ArenaStringPtr rtttl_;
-    int event_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -4218,7 +3254,7 @@ class NSPanelWeatherUpdate final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelWeatherUpdate*>(
         &_NSPanelWeatherUpdate_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 9;
+  static constexpr int kIndexInFileMessages = 8;
   friend void swap(NSPanelWeatherUpdate& a, NSPanelWeatherUpdate& b) { a.Swap(&b); }
   inline void Swap(NSPanelWeatherUpdate* other) {
     if (other == this) return;
@@ -4523,7 +3559,7 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelStatusReport*>(
         &_NSPanelStatusReport_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 4;
+  static constexpr int kIndexInFileMessages = 3;
   friend void swap(NSPanelStatusReport& a, NSPanelStatusReport& b) { a.Swap(&b); }
   inline void Swap(NSPanelStatusReport* other) {
     if (other == this) return;
@@ -4595,7 +3631,6 @@ class NSPanelStatusReport final : public ::google::protobuf::Message
   static constexpr state UPDATING_TFT = NSPanelStatusReport_state_UPDATING_TFT;
   static constexpr state UPDATING_FIRMWARE = NSPanelStatusReport_state_UPDATING_FIRMWARE;
   static constexpr state UPDATING_LITTLEFS = NSPanelStatusReport_state_UPDATING_LITTLEFS;
-  static constexpr state REBOOTING = NSPanelStatusReport_state_REBOOTING;
   static inline bool state_IsValid(int value) {
     return NSPanelStatusReport_state_IsValid(value);
   }
@@ -4922,7 +3957,7 @@ class NSPanelRoomEntitiesPage final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelRoomEntitiesPage*>(
         &_NSPanelRoomEntitiesPage_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 6;
+  static constexpr int kIndexInFileMessages = 5;
   friend void swap(NSPanelRoomEntitiesPage& a, NSPanelRoomEntitiesPage& b) { a.Swap(&b); }
   inline void Swap(NSPanelRoomEntitiesPage* other) {
     if (other == this) return;
@@ -5148,15 +4183,13 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
     kButtonPressed = 6,
     kThermostatTemperatureCommand = 7,
     kThermostatCommand = 8,
-    kMediaPlayerCommand = 9,
-    kCoverCommand = 10,
     COMMANDDATA_NOT_SET = 0,
   };
   static inline const NSPanelMQTTManagerCommand* internal_default_instance() {
     return reinterpret_cast<const NSPanelMQTTManagerCommand*>(
         &_NSPanelMQTTManagerCommand_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 20;
+  static constexpr int kIndexInFileMessages = 17;
   friend void swap(NSPanelMQTTManagerCommand& a, NSPanelMQTTManagerCommand& b) { a.Swap(&b); }
   inline void Swap(NSPanelMQTTManagerCommand* other) {
     if (other == this) return;
@@ -5230,8 +4263,6 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
   using ButtonPressed = NSPanelMQTTManagerCommand_ButtonPressed;
   using ThermostatTemperatureCommand = NSPanelMQTTManagerCommand_ThermostatTemperatureCommand;
   using ThermostatCommand = NSPanelMQTTManagerCommand_ThermostatCommand;
-  using MediaPlayerCommand = NSPanelMQTTManagerCommand_MediaPlayerCommand;
-  using CoverCommand = NSPanelMQTTManagerCommand_CoverCommand;
   using AffectLightsOptions = NSPanelMQTTManagerCommand_AffectLightsOptions;
   static constexpr AffectLightsOptions ALL = NSPanelMQTTManagerCommand_AffectLightsOptions_ALL;
   static constexpr AffectLightsOptions TABLE_LIGHTS = NSPanelMQTTManagerCommand_AffectLightsOptions_TABLE_LIGHTS;
@@ -5264,8 +4295,6 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
     kButtonPressedFieldNumber = 6,
     kThermostatTemperatureCommandFieldNumber = 7,
     kThermostatCommandFieldNumber = 8,
-    kMediaPlayerCommandFieldNumber = 9,
-    kCoverCommandFieldNumber = 10,
   };
   // int32 nspanel_id = 100;
   void clear_nspanel_id() ;
@@ -5429,44 +4458,6 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
   ::NSPanelMQTTManagerCommand_ThermostatCommand* _internal_mutable_thermostat_command();
 
   public:
-  // .NSPanelMQTTManagerCommand.MediaPlayerCommand media_player_command = 9;
-  bool has_media_player_command() const;
-  private:
-  bool _internal_has_media_player_command() const;
-
-  public:
-  void clear_media_player_command() ;
-  const ::NSPanelMQTTManagerCommand_MediaPlayerCommand& media_player_command() const;
-  PROTOBUF_NODISCARD ::NSPanelMQTTManagerCommand_MediaPlayerCommand* release_media_player_command();
-  ::NSPanelMQTTManagerCommand_MediaPlayerCommand* mutable_media_player_command();
-  void set_allocated_media_player_command(::NSPanelMQTTManagerCommand_MediaPlayerCommand* value);
-  void unsafe_arena_set_allocated_media_player_command(::NSPanelMQTTManagerCommand_MediaPlayerCommand* value);
-  ::NSPanelMQTTManagerCommand_MediaPlayerCommand* unsafe_arena_release_media_player_command();
-
-  private:
-  const ::NSPanelMQTTManagerCommand_MediaPlayerCommand& _internal_media_player_command() const;
-  ::NSPanelMQTTManagerCommand_MediaPlayerCommand* _internal_mutable_media_player_command();
-
-  public:
-  // .NSPanelMQTTManagerCommand.CoverCommand cover_command = 10;
-  bool has_cover_command() const;
-  private:
-  bool _internal_has_cover_command() const;
-
-  public:
-  void clear_cover_command() ;
-  const ::NSPanelMQTTManagerCommand_CoverCommand& cover_command() const;
-  PROTOBUF_NODISCARD ::NSPanelMQTTManagerCommand_CoverCommand* release_cover_command();
-  ::NSPanelMQTTManagerCommand_CoverCommand* mutable_cover_command();
-  void set_allocated_cover_command(::NSPanelMQTTManagerCommand_CoverCommand* value);
-  void unsafe_arena_set_allocated_cover_command(::NSPanelMQTTManagerCommand_CoverCommand* value);
-  ::NSPanelMQTTManagerCommand_CoverCommand* unsafe_arena_release_cover_command();
-
-  private:
-  const ::NSPanelMQTTManagerCommand_CoverCommand& _internal_cover_command() const;
-  ::NSPanelMQTTManagerCommand_CoverCommand* _internal_mutable_cover_command();
-
-  public:
   void clear_CommandData();
   CommandDataCase CommandData_case() const;
   // @@protoc_insertion_point(class_scope:NSPanelMQTTManagerCommand)
@@ -5480,13 +4471,11 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
   void set_has_button_pressed();
   void set_has_thermostat_temperature_command();
   void set_has_thermostat_command();
-  void set_has_media_player_command();
-  void set_has_cover_command();
   inline bool has_CommandData() const;
   inline void clear_has_CommandData();
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      0, 11, 10,
+      0, 9, 8,
       0, 7>
       _table_;
 
@@ -5519,8 +4508,6 @@ class NSPanelMQTTManagerCommand final : public ::google::protobuf::Message
       ::NSPanelMQTTManagerCommand_ButtonPressed* button_pressed_;
       ::NSPanelMQTTManagerCommand_ThermostatTemperatureCommand* thermostat_temperature_command_;
       ::NSPanelMQTTManagerCommand_ThermostatCommand* thermostat_command_;
-      ::NSPanelMQTTManagerCommand_MediaPlayerCommand* media_player_command_;
-      ::NSPanelMQTTManagerCommand_CoverCommand* cover_command_;
     } CommandData_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     ::uint32_t _oneof_case_[1];
@@ -5586,7 +4573,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     return reinterpret_cast<const NSPanelConfig*>(
         &_NSPanelConfig_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 2;
+  static constexpr int kIndexInFileMessages = 1;
   friend void swap(NSPanelConfig& a, NSPanelConfig& b) { a.Swap(&b); }
   inline void Swap(NSPanelConfig* other) {
     if (other == this) return;
@@ -5653,7 +4640,6 @@ class NSPanelConfig final : public ::google::protobuf::Message
   ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
   using RoomInfo = NSPanelConfig_RoomInfo;
-  using Sound = NSPanelConfig_Sound;
   using NSPanelDefaultPage = NSPanelConfig_NSPanelDefaultPage;
   static constexpr NSPanelDefaultPage HOME = NSPanelConfig_NSPanelDefaultPage_HOME;
   static constexpr NSPanelDefaultPage SCENES = NSPanelConfig_NSPanelDefaultPage_SCENES;
@@ -5702,7 +4688,6 @@ class NSPanelConfig final : public ::google::protobuf::Message
   static constexpr NSPanelButtonMode NOTIFY_MANAGER = NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER;
   static constexpr NSPanelButtonMode THERMOSTAT_HEAT = NSPanelConfig_NSPanelButtonMode_THERMOSTAT_HEAT;
   static constexpr NSPanelButtonMode THERMOSTAT_COOL = NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL;
-  static constexpr NSPanelButtonMode OPEN_ENTITY_PAGE = NSPanelConfig_NSPanelButtonMode_OPEN_ENTITY_PAGE;
   static inline bool NSPanelButtonMode_IsValid(int value) {
     return NSPanelConfig_NSPanelButtonMode_IsValid(value);
   }
@@ -5719,26 +4704,6 @@ class NSPanelConfig final : public ::google::protobuf::Message
   static inline bool NSPanelButtonMode_Parse(absl::string_view name, NSPanelButtonMode* value) {
     return NSPanelConfig_NSPanelButtonMode_Parse(name, value);
   }
-  using NSPanelSoundEvent = NSPanelConfig_NSPanelSoundEvent;
-  static constexpr NSPanelSoundEvent TOUCH = NSPanelConfig_NSPanelSoundEvent_TOUCH;
-  static constexpr NSPanelSoundEvent SCENE_ACTIVATED = NSPanelConfig_NSPanelSoundEvent_SCENE_ACTIVATED;
-  static constexpr NSPanelSoundEvent SCENE_SAVED = NSPanelConfig_NSPanelSoundEvent_SCENE_SAVED;
-  static inline bool NSPanelSoundEvent_IsValid(int value) {
-    return NSPanelConfig_NSPanelSoundEvent_IsValid(value);
-  }
-  static constexpr NSPanelSoundEvent NSPanelSoundEvent_MIN = NSPanelConfig_NSPanelSoundEvent_NSPanelSoundEvent_MIN;
-  static constexpr NSPanelSoundEvent NSPanelSoundEvent_MAX = NSPanelConfig_NSPanelSoundEvent_NSPanelSoundEvent_MAX;
-  static constexpr int NSPanelSoundEvent_ARRAYSIZE = NSPanelConfig_NSPanelSoundEvent_NSPanelSoundEvent_ARRAYSIZE;
-  static inline const ::google::protobuf::EnumDescriptor* NSPanelSoundEvent_descriptor() {
-    return NSPanelConfig_NSPanelSoundEvent_descriptor();
-  }
-  template <typename T>
-  static inline const std::string& NSPanelSoundEvent_Name(T value) {
-    return NSPanelConfig_NSPanelSoundEvent_Name(value);
-  }
-  static inline bool NSPanelSoundEvent_Parse(absl::string_view name, NSPanelSoundEvent* value) {
-    return NSPanelConfig_NSPanelSoundEvent_Parse(name, value);
-  }
 
   // accessors -------------------------------------------------------
   enum : int {
@@ -5746,12 +4711,8 @@ class NSPanelConfig final : public ::google::protobuf::Message
     kGlobalSceneEntityPageIdsFieldNumber = 30,
     kRelay1RelayGroupFieldNumber = 35,
     kRelay2RelayGroupFieldNumber = 37,
-    kSoundsFieldNumber = 45,
     kNameFieldNumber = 1,
     kInsideTemperatureSensorMqttTopicFieldNumber = 40,
-    kTzPosixFieldNumber = 46,
-    kButton1EntityPageTopicFieldNumber = 47,
-    kButton2EntityPageTopicFieldNumber = 48,
     kDefaultRoomFieldNumber = 2,
     kDefaultPageFieldNumber = 3,
     kScreensaverActivationTimeoutFieldNumber = 4,
@@ -5854,23 +4815,6 @@ class NSPanelConfig final : public ::google::protobuf::Message
   ::google::protobuf::RepeatedField<::int32_t>* _internal_mutable_relay2_relay_group();
 
   public:
-  // repeated .NSPanelConfig.Sound sounds = 45;
-  int sounds_size() const;
-  private:
-  int _internal_sounds_size() const;
-
-  public:
-  void clear_sounds() ;
-  ::NSPanelConfig_Sound* mutable_sounds(int index);
-  ::google::protobuf::RepeatedPtrField<::NSPanelConfig_Sound>* mutable_sounds();
-
-  private:
-  const ::google::protobuf::RepeatedPtrField<::NSPanelConfig_Sound>& _internal_sounds() const;
-  ::google::protobuf::RepeatedPtrField<::NSPanelConfig_Sound>* _internal_mutable_sounds();
-  public:
-  const ::NSPanelConfig_Sound& sounds(int index) const;
-  ::NSPanelConfig_Sound* add_sounds();
-  const ::google::protobuf::RepeatedPtrField<::NSPanelConfig_Sound>& sounds() const;
   // string name = 1;
   void clear_name() ;
   const std::string& name() const;
@@ -5901,54 +4845,6 @@ class NSPanelConfig final : public ::google::protobuf::Message
   inline PROTOBUF_ALWAYS_INLINE void _internal_set_inside_temperature_sensor_mqtt_topic(
       const std::string& value);
   std::string* _internal_mutable_inside_temperature_sensor_mqtt_topic();
-
-  public:
-  // string tz_posix = 46;
-  void clear_tz_posix() ;
-  const std::string& tz_posix() const;
-  template <typename Arg_ = const std::string&, typename... Args_>
-  void set_tz_posix(Arg_&& arg, Args_... args);
-  std::string* mutable_tz_posix();
-  PROTOBUF_NODISCARD std::string* release_tz_posix();
-  void set_allocated_tz_posix(std::string* value);
-
-  private:
-  const std::string& _internal_tz_posix() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_tz_posix(
-      const std::string& value);
-  std::string* _internal_mutable_tz_posix();
-
-  public:
-  // string button1_entity_page_topic = 47;
-  void clear_button1_entity_page_topic() ;
-  const std::string& button1_entity_page_topic() const;
-  template <typename Arg_ = const std::string&, typename... Args_>
-  void set_button1_entity_page_topic(Arg_&& arg, Args_... args);
-  std::string* mutable_button1_entity_page_topic();
-  PROTOBUF_NODISCARD std::string* release_button1_entity_page_topic();
-  void set_allocated_button1_entity_page_topic(std::string* value);
-
-  private:
-  const std::string& _internal_button1_entity_page_topic() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_button1_entity_page_topic(
-      const std::string& value);
-  std::string* _internal_mutable_button1_entity_page_topic();
-
-  public:
-  // string button2_entity_page_topic = 48;
-  void clear_button2_entity_page_topic() ;
-  const std::string& button2_entity_page_topic() const;
-  template <typename Arg_ = const std::string&, typename... Args_>
-  void set_button2_entity_page_topic(Arg_&& arg, Args_... args);
-  std::string* mutable_button2_entity_page_topic();
-  PROTOBUF_NODISCARD std::string* release_button2_entity_page_topic();
-  void set_allocated_button2_entity_page_topic(std::string* value);
-
-  private:
-  const std::string& _internal_button2_entity_page_topic() const;
-  inline PROTOBUF_ALWAYS_INLINE void _internal_set_button2_entity_page_topic(
-      const std::string& value);
-  std::string* _internal_mutable_button2_entity_page_topic();
 
   public:
   // int32 default_room = 2;
@@ -6256,8 +5152,8 @@ class NSPanelConfig final : public ::google::protobuf::Message
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 40, 2,
-      160, 7>
+      5, 36, 1,
+      94, 7>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -6284,12 +5180,8 @@ class NSPanelConfig final : public ::google::protobuf::Message
     mutable ::google::protobuf::internal::CachedSize _relay1_relay_group_cached_byte_size_;
     ::google::protobuf::RepeatedField<::int32_t> relay2_relay_group_;
     mutable ::google::protobuf::internal::CachedSize _relay2_relay_group_cached_byte_size_;
-    ::google::protobuf::RepeatedPtrField< ::NSPanelConfig_Sound > sounds_;
     ::google::protobuf::internal::ArenaStringPtr name_;
     ::google::protobuf::internal::ArenaStringPtr inside_temperature_sensor_mqtt_topic_;
-    ::google::protobuf::internal::ArenaStringPtr tz_posix_;
-    ::google::protobuf::internal::ArenaStringPtr button1_entity_page_topic_;
-    ::google::protobuf::internal::ArenaStringPtr button2_entity_page_topic_;
     ::int32_t default_room_;
     int default_page_;
     ::int32_t screensaver_activation_timeout_;
@@ -6453,82 +5345,6 @@ NSPanelConfig_RoomInfo::_internal_scene_page_ids() const {
 inline ::google::protobuf::RepeatedField<::int32_t>* NSPanelConfig_RoomInfo::_internal_mutable_scene_page_ids() {
   ::google::protobuf::internal::TSanRead(&_impl_);
   return &_impl_.scene_page_ids_;
-}
-
-// -------------------------------------------------------------------
-
-// NSPanelConfig_Sound
-
-// .NSPanelConfig.NSPanelSoundEvent event = 1;
-inline void NSPanelConfig_Sound::clear_event() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.event_ = 0;
-}
-inline ::NSPanelConfig_NSPanelSoundEvent NSPanelConfig_Sound::event() const {
-  // @@protoc_insertion_point(field_get:NSPanelConfig.Sound.event)
-  return _internal_event();
-}
-inline void NSPanelConfig_Sound::set_event(::NSPanelConfig_NSPanelSoundEvent value) {
-  _internal_set_event(value);
-  // @@protoc_insertion_point(field_set:NSPanelConfig.Sound.event)
-}
-inline ::NSPanelConfig_NSPanelSoundEvent NSPanelConfig_Sound::_internal_event() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return static_cast<::NSPanelConfig_NSPanelSoundEvent>(_impl_.event_);
-}
-inline void NSPanelConfig_Sound::_internal_set_event(::NSPanelConfig_NSPanelSoundEvent value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.event_ = value;
-}
-
-// string rtttl = 2;
-inline void NSPanelConfig_Sound::clear_rtttl() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.rtttl_.ClearToEmpty();
-}
-inline const std::string& NSPanelConfig_Sound::rtttl() const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:NSPanelConfig.Sound.rtttl)
-  return _internal_rtttl();
-}
-template <typename Arg_, typename... Args_>
-inline PROTOBUF_ALWAYS_INLINE void NSPanelConfig_Sound::set_rtttl(Arg_&& arg,
-                                                     Args_... args) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.rtttl_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:NSPanelConfig.Sound.rtttl)
-}
-inline std::string* NSPanelConfig_Sound::mutable_rtttl() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  std::string* _s = _internal_mutable_rtttl();
-  // @@protoc_insertion_point(field_mutable:NSPanelConfig.Sound.rtttl)
-  return _s;
-}
-inline const std::string& NSPanelConfig_Sound::_internal_rtttl() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.rtttl_.Get();
-}
-inline void NSPanelConfig_Sound::_internal_set_rtttl(const std::string& value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.rtttl_.Set(value, GetArena());
-}
-inline std::string* NSPanelConfig_Sound::_internal_mutable_rtttl() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.rtttl_.Mutable( GetArena());
-}
-inline std::string* NSPanelConfig_Sound::release_rtttl() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:NSPanelConfig.Sound.rtttl)
-  return _impl_.rtttl_.Release();
-}
-inline void NSPanelConfig_Sound::set_allocated_rtttl(std::string* value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.rtttl_.SetAllocated(value, GetArena());
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-        if (_impl_.rtttl_.IsDefault()) {
-          _impl_.rtttl_.Set("", GetArena());
-        }
-  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.Sound.rtttl)
 }
 
 // -------------------------------------------------------------------
@@ -7479,205 +6295,6 @@ inline void NSPanelConfig::_internal_set_button2_upper_temperature(::int32_t val
   _impl_.button2_upper_temperature_ = value;
 }
 
-// repeated .NSPanelConfig.Sound sounds = 45;
-inline int NSPanelConfig::_internal_sounds_size() const {
-  return _internal_sounds().size();
-}
-inline int NSPanelConfig::sounds_size() const {
-  return _internal_sounds_size();
-}
-inline void NSPanelConfig::clear_sounds() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.sounds_.Clear();
-}
-inline ::NSPanelConfig_Sound* NSPanelConfig::mutable_sounds(int index)
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_mutable:NSPanelConfig.sounds)
-  return _internal_mutable_sounds()->Mutable(index);
-}
-inline ::google::protobuf::RepeatedPtrField<::NSPanelConfig_Sound>* NSPanelConfig::mutable_sounds()
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_mutable_list:NSPanelConfig.sounds)
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _internal_mutable_sounds();
-}
-inline const ::NSPanelConfig_Sound& NSPanelConfig::sounds(int index) const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:NSPanelConfig.sounds)
-  return _internal_sounds().Get(index);
-}
-inline ::NSPanelConfig_Sound* NSPanelConfig::add_sounds() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  ::NSPanelConfig_Sound* _add = _internal_mutable_sounds()->Add();
-  // @@protoc_insertion_point(field_add:NSPanelConfig.sounds)
-  return _add;
-}
-inline const ::google::protobuf::RepeatedPtrField<::NSPanelConfig_Sound>& NSPanelConfig::sounds() const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_list:NSPanelConfig.sounds)
-  return _internal_sounds();
-}
-inline const ::google::protobuf::RepeatedPtrField<::NSPanelConfig_Sound>&
-NSPanelConfig::_internal_sounds() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.sounds_;
-}
-inline ::google::protobuf::RepeatedPtrField<::NSPanelConfig_Sound>*
-NSPanelConfig::_internal_mutable_sounds() {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return &_impl_.sounds_;
-}
-
-// string tz_posix = 46;
-inline void NSPanelConfig::clear_tz_posix() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.tz_posix_.ClearToEmpty();
-}
-inline const std::string& NSPanelConfig::tz_posix() const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:NSPanelConfig.tz_posix)
-  return _internal_tz_posix();
-}
-template <typename Arg_, typename... Args_>
-inline PROTOBUF_ALWAYS_INLINE void NSPanelConfig::set_tz_posix(Arg_&& arg,
-                                                     Args_... args) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.tz_posix_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:NSPanelConfig.tz_posix)
-}
-inline std::string* NSPanelConfig::mutable_tz_posix() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  std::string* _s = _internal_mutable_tz_posix();
-  // @@protoc_insertion_point(field_mutable:NSPanelConfig.tz_posix)
-  return _s;
-}
-inline const std::string& NSPanelConfig::_internal_tz_posix() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.tz_posix_.Get();
-}
-inline void NSPanelConfig::_internal_set_tz_posix(const std::string& value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.tz_posix_.Set(value, GetArena());
-}
-inline std::string* NSPanelConfig::_internal_mutable_tz_posix() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.tz_posix_.Mutable( GetArena());
-}
-inline std::string* NSPanelConfig::release_tz_posix() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:NSPanelConfig.tz_posix)
-  return _impl_.tz_posix_.Release();
-}
-inline void NSPanelConfig::set_allocated_tz_posix(std::string* value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.tz_posix_.SetAllocated(value, GetArena());
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-        if (_impl_.tz_posix_.IsDefault()) {
-          _impl_.tz_posix_.Set("", GetArena());
-        }
-  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.tz_posix)
-}
-
-// string button1_entity_page_topic = 47;
-inline void NSPanelConfig::clear_button1_entity_page_topic() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.button1_entity_page_topic_.ClearToEmpty();
-}
-inline const std::string& NSPanelConfig::button1_entity_page_topic() const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:NSPanelConfig.button1_entity_page_topic)
-  return _internal_button1_entity_page_topic();
-}
-template <typename Arg_, typename... Args_>
-inline PROTOBUF_ALWAYS_INLINE void NSPanelConfig::set_button1_entity_page_topic(Arg_&& arg,
-                                                     Args_... args) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.button1_entity_page_topic_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:NSPanelConfig.button1_entity_page_topic)
-}
-inline std::string* NSPanelConfig::mutable_button1_entity_page_topic() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  std::string* _s = _internal_mutable_button1_entity_page_topic();
-  // @@protoc_insertion_point(field_mutable:NSPanelConfig.button1_entity_page_topic)
-  return _s;
-}
-inline const std::string& NSPanelConfig::_internal_button1_entity_page_topic() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.button1_entity_page_topic_.Get();
-}
-inline void NSPanelConfig::_internal_set_button1_entity_page_topic(const std::string& value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.button1_entity_page_topic_.Set(value, GetArena());
-}
-inline std::string* NSPanelConfig::_internal_mutable_button1_entity_page_topic() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.button1_entity_page_topic_.Mutable( GetArena());
-}
-inline std::string* NSPanelConfig::release_button1_entity_page_topic() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:NSPanelConfig.button1_entity_page_topic)
-  return _impl_.button1_entity_page_topic_.Release();
-}
-inline void NSPanelConfig::set_allocated_button1_entity_page_topic(std::string* value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.button1_entity_page_topic_.SetAllocated(value, GetArena());
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-        if (_impl_.button1_entity_page_topic_.IsDefault()) {
-          _impl_.button1_entity_page_topic_.Set("", GetArena());
-        }
-  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.button1_entity_page_topic)
-}
-
-// string button2_entity_page_topic = 48;
-inline void NSPanelConfig::clear_button2_entity_page_topic() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.button2_entity_page_topic_.ClearToEmpty();
-}
-inline const std::string& NSPanelConfig::button2_entity_page_topic() const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:NSPanelConfig.button2_entity_page_topic)
-  return _internal_button2_entity_page_topic();
-}
-template <typename Arg_, typename... Args_>
-inline PROTOBUF_ALWAYS_INLINE void NSPanelConfig::set_button2_entity_page_topic(Arg_&& arg,
-                                                     Args_... args) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.button2_entity_page_topic_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:NSPanelConfig.button2_entity_page_topic)
-}
-inline std::string* NSPanelConfig::mutable_button2_entity_page_topic() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  std::string* _s = _internal_mutable_button2_entity_page_topic();
-  // @@protoc_insertion_point(field_mutable:NSPanelConfig.button2_entity_page_topic)
-  return _s;
-}
-inline const std::string& NSPanelConfig::_internal_button2_entity_page_topic() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.button2_entity_page_topic_.Get();
-}
-inline void NSPanelConfig::_internal_set_button2_entity_page_topic(const std::string& value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.button2_entity_page_topic_.Set(value, GetArena());
-}
-inline std::string* NSPanelConfig::_internal_mutable_button2_entity_page_topic() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.button2_entity_page_topic_.Mutable( GetArena());
-}
-inline std::string* NSPanelConfig::release_button2_entity_page_topic() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:NSPanelConfig.button2_entity_page_topic)
-  return _impl_.button2_entity_page_topic_.Release();
-}
-inline void NSPanelConfig::set_allocated_button2_entity_page_topic(std::string* value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.button2_entity_page_topic_.SetAllocated(value, GetArena());
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-        if (_impl_.button2_entity_page_topic_.IsDefault()) {
-          _impl_.button2_entity_page_topic_.Set("", GetArena());
-        }
-  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.button2_entity_page_topic)
-}
-
 // -------------------------------------------------------------------
 
 // NSPanelWarning
@@ -8495,50 +7112,6 @@ inline void NSPanelRoomEntitiesPage_EntitySlot::set_allocated_mqtt_state_topic(s
         }
   #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:NSPanelRoomEntitiesPage.EntitySlot.mqtt_state_topic)
-}
-
-// .NSPanelRoomEntitiesPage.EntitySlot.EntityType type = 8;
-inline void NSPanelRoomEntitiesPage_EntitySlot::clear_type() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.type_ = 0;
-}
-inline ::NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot::type() const {
-  // @@protoc_insertion_point(field_get:NSPanelRoomEntitiesPage.EntitySlot.type)
-  return _internal_type();
-}
-inline void NSPanelRoomEntitiesPage_EntitySlot::set_type(::NSPanelRoomEntitiesPage_EntitySlot_EntityType value) {
-  _internal_set_type(value);
-  // @@protoc_insertion_point(field_set:NSPanelRoomEntitiesPage.EntitySlot.type)
-}
-inline ::NSPanelRoomEntitiesPage_EntitySlot_EntityType NSPanelRoomEntitiesPage_EntitySlot::_internal_type() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return static_cast<::NSPanelRoomEntitiesPage_EntitySlot_EntityType>(_impl_.type_);
-}
-inline void NSPanelRoomEntitiesPage_EntitySlot::_internal_set_type(::NSPanelRoomEntitiesPage_EntitySlot_EntityType value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.type_ = value;
-}
-
-// int32 id = 9;
-inline void NSPanelRoomEntitiesPage_EntitySlot::clear_id() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.id_ = 0;
-}
-inline ::int32_t NSPanelRoomEntitiesPage_EntitySlot::id() const {
-  // @@protoc_insertion_point(field_get:NSPanelRoomEntitiesPage.EntitySlot.id)
-  return _internal_id();
-}
-inline void NSPanelRoomEntitiesPage_EntitySlot::set_id(::int32_t value) {
-  _internal_set_id(value);
-  // @@protoc_insertion_point(field_set:NSPanelRoomEntitiesPage.EntitySlot.id)
-}
-inline ::int32_t NSPanelRoomEntitiesPage_EntitySlot::_internal_id() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.id_;
-}
-inline void NSPanelRoomEntitiesPage_EntitySlot::_internal_set_id(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.id_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -10415,422 +8988,6 @@ inline void NSPanelMQTTManagerCommand_ThermostatCommand::set_allocated_new_value
 
 // -------------------------------------------------------------------
 
-// NSPanelMQTTManagerCommand_MediaPlayerCommand
-
-// int32 media_player_id = 1;
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::clear_media_player_id() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.media_player_id_ = 0;
-}
-inline ::int32_t NSPanelMQTTManagerCommand_MediaPlayerCommand::media_player_id() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.MediaPlayerCommand.media_player_id)
-  return _internal_media_player_id();
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::set_media_player_id(::int32_t value) {
-  _internal_set_media_player_id(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.MediaPlayerCommand.media_player_id)
-}
-inline ::int32_t NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_media_player_id() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.media_player_id_;
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_set_media_player_id(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.media_player_id_ = value;
-}
-
-// .NSPanelMQTTManagerCommand.MediaPlayerCommand.PlaybackAction playback_action = 2;
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::clear_playback_action() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.playback_action_ = 0;
-}
-inline ::NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction NSPanelMQTTManagerCommand_MediaPlayerCommand::playback_action() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.MediaPlayerCommand.playback_action)
-  return _internal_playback_action();
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::set_playback_action(::NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction value) {
-  _internal_set_playback_action(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.MediaPlayerCommand.playback_action)
-}
-inline ::NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_playback_action() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return static_cast<::NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction>(_impl_.playback_action_);
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_set_playback_action(::NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.playback_action_ = value;
-}
-
-// bool has_volume = 3;
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::clear_has_volume() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.has_volume_ = false;
-}
-inline bool NSPanelMQTTManagerCommand_MediaPlayerCommand::has_volume() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.MediaPlayerCommand.has_volume)
-  return _internal_has_volume();
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::set_has_volume(bool value) {
-  _internal_set_has_volume(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.MediaPlayerCommand.has_volume)
-}
-inline bool NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_has_volume() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.has_volume_;
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_set_has_volume(bool value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.has_volume_ = value;
-}
-
-// int32 volume = 4;
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::clear_volume() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.volume_ = 0;
-}
-inline ::int32_t NSPanelMQTTManagerCommand_MediaPlayerCommand::volume() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.MediaPlayerCommand.volume)
-  return _internal_volume();
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::set_volume(::int32_t value) {
-  _internal_set_volume(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.MediaPlayerCommand.volume)
-}
-inline ::int32_t NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_volume() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.volume_;
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_set_volume(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.volume_ = value;
-}
-
-// bool has_source_volume = 5;
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::clear_has_source_volume() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.has_source_volume_ = false;
-}
-inline bool NSPanelMQTTManagerCommand_MediaPlayerCommand::has_source_volume() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.MediaPlayerCommand.has_source_volume)
-  return _internal_has_source_volume();
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::set_has_source_volume(bool value) {
-  _internal_set_has_source_volume(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.MediaPlayerCommand.has_source_volume)
-}
-inline bool NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_has_source_volume() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.has_source_volume_;
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_set_has_source_volume(bool value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.has_source_volume_ = value;
-}
-
-// int32 source_volume = 6;
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::clear_source_volume() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.source_volume_ = 0;
-}
-inline ::int32_t NSPanelMQTTManagerCommand_MediaPlayerCommand::source_volume() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.MediaPlayerCommand.source_volume)
-  return _internal_source_volume();
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::set_source_volume(::int32_t value) {
-  _internal_set_source_volume(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.MediaPlayerCommand.source_volume)
-}
-inline ::int32_t NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_source_volume() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.source_volume_;
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_set_source_volume(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.source_volume_ = value;
-}
-
-// bool has_muted = 7;
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::clear_has_muted() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.has_muted_ = false;
-}
-inline bool NSPanelMQTTManagerCommand_MediaPlayerCommand::has_muted() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.MediaPlayerCommand.has_muted)
-  return _internal_has_muted();
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::set_has_muted(bool value) {
-  _internal_set_has_muted(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.MediaPlayerCommand.has_muted)
-}
-inline bool NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_has_muted() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.has_muted_;
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_set_has_muted(bool value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.has_muted_ = value;
-}
-
-// bool muted = 8;
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::clear_muted() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.muted_ = false;
-}
-inline bool NSPanelMQTTManagerCommand_MediaPlayerCommand::muted() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.MediaPlayerCommand.muted)
-  return _internal_muted();
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::set_muted(bool value) {
-  _internal_set_muted(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.MediaPlayerCommand.muted)
-}
-inline bool NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_muted() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.muted_;
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_set_muted(bool value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.muted_ = value;
-}
-
-// string select_player_source = 9;
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::clear_select_player_source() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.select_player_source_.ClearToEmpty();
-}
-inline const std::string& NSPanelMQTTManagerCommand_MediaPlayerCommand::select_player_source() const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_player_source)
-  return _internal_select_player_source();
-}
-template <typename Arg_, typename... Args_>
-inline PROTOBUF_ALWAYS_INLINE void NSPanelMQTTManagerCommand_MediaPlayerCommand::set_select_player_source(Arg_&& arg,
-                                                     Args_... args) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.select_player_source_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_player_source)
-}
-inline std::string* NSPanelMQTTManagerCommand_MediaPlayerCommand::mutable_select_player_source() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  std::string* _s = _internal_mutable_select_player_source();
-  // @@protoc_insertion_point(field_mutable:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_player_source)
-  return _s;
-}
-inline const std::string& NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_select_player_source() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.select_player_source_.Get();
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_set_select_player_source(const std::string& value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.select_player_source_.Set(value, GetArena());
-}
-inline std::string* NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_mutable_select_player_source() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.select_player_source_.Mutable( GetArena());
-}
-inline std::string* NSPanelMQTTManagerCommand_MediaPlayerCommand::release_select_player_source() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_player_source)
-  return _impl_.select_player_source_.Release();
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::set_allocated_select_player_source(std::string* value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.select_player_source_.SetAllocated(value, GetArena());
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-        if (_impl_.select_player_source_.IsDefault()) {
-          _impl_.select_player_source_.Set("", GetArena());
-        }
-  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_player_source)
-}
-
-// string select_source_player_source = 10;
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::clear_select_source_player_source() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.select_source_player_source_.ClearToEmpty();
-}
-inline const std::string& NSPanelMQTTManagerCommand_MediaPlayerCommand::select_source_player_source() const
-    ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_source_player_source)
-  return _internal_select_source_player_source();
-}
-template <typename Arg_, typename... Args_>
-inline PROTOBUF_ALWAYS_INLINE void NSPanelMQTTManagerCommand_MediaPlayerCommand::set_select_source_player_source(Arg_&& arg,
-                                                     Args_... args) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.select_source_player_source_.Set(static_cast<Arg_&&>(arg), args..., GetArena());
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_source_player_source)
-}
-inline std::string* NSPanelMQTTManagerCommand_MediaPlayerCommand::mutable_select_source_player_source() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  std::string* _s = _internal_mutable_select_source_player_source();
-  // @@protoc_insertion_point(field_mutable:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_source_player_source)
-  return _s;
-}
-inline const std::string& NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_select_source_player_source() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.select_source_player_source_.Get();
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_set_select_source_player_source(const std::string& value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.select_source_player_source_.Set(value, GetArena());
-}
-inline std::string* NSPanelMQTTManagerCommand_MediaPlayerCommand::_internal_mutable_select_source_player_source() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  return _impl_.select_source_player_source_.Mutable( GetArena());
-}
-inline std::string* NSPanelMQTTManagerCommand_MediaPlayerCommand::release_select_source_player_source() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  // @@protoc_insertion_point(field_release:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_source_player_source)
-  return _impl_.select_source_player_source_.Release();
-}
-inline void NSPanelMQTTManagerCommand_MediaPlayerCommand::set_allocated_select_source_player_source(std::string* value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.select_source_player_source_.SetAllocated(value, GetArena());
-  #ifdef PROTOBUF_FORCE_COPY_DEFAULT_STRING
-        if (_impl_.select_source_player_source_.IsDefault()) {
-          _impl_.select_source_player_source_.Set("", GetArena());
-        }
-  #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
-  // @@protoc_insertion_point(field_set_allocated:NSPanelMQTTManagerCommand.MediaPlayerCommand.select_source_player_source)
-}
-
-// -------------------------------------------------------------------
-
-// NSPanelMQTTManagerCommand_CoverCommand
-
-// int32 cover_id = 1;
-inline void NSPanelMQTTManagerCommand_CoverCommand::clear_cover_id() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.cover_id_ = 0;
-}
-inline ::int32_t NSPanelMQTTManagerCommand_CoverCommand::cover_id() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.CoverCommand.cover_id)
-  return _internal_cover_id();
-}
-inline void NSPanelMQTTManagerCommand_CoverCommand::set_cover_id(::int32_t value) {
-  _internal_set_cover_id(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.CoverCommand.cover_id)
-}
-inline ::int32_t NSPanelMQTTManagerCommand_CoverCommand::_internal_cover_id() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.cover_id_;
-}
-inline void NSPanelMQTTManagerCommand_CoverCommand::_internal_set_cover_id(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.cover_id_ = value;
-}
-
-// .NSPanelMQTTManagerCommand.CoverCommand.Action action = 2;
-inline void NSPanelMQTTManagerCommand_CoverCommand::clear_action() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.action_ = 0;
-}
-inline ::NSPanelMQTTManagerCommand_CoverCommand_Action NSPanelMQTTManagerCommand_CoverCommand::action() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.CoverCommand.action)
-  return _internal_action();
-}
-inline void NSPanelMQTTManagerCommand_CoverCommand::set_action(::NSPanelMQTTManagerCommand_CoverCommand_Action value) {
-  _internal_set_action(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.CoverCommand.action)
-}
-inline ::NSPanelMQTTManagerCommand_CoverCommand_Action NSPanelMQTTManagerCommand_CoverCommand::_internal_action() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return static_cast<::NSPanelMQTTManagerCommand_CoverCommand_Action>(_impl_.action_);
-}
-inline void NSPanelMQTTManagerCommand_CoverCommand::_internal_set_action(::NSPanelMQTTManagerCommand_CoverCommand_Action value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.action_ = value;
-}
-
-// bool has_position = 3;
-inline void NSPanelMQTTManagerCommand_CoverCommand::clear_has_position() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.has_position_ = false;
-}
-inline bool NSPanelMQTTManagerCommand_CoverCommand::has_position() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.CoverCommand.has_position)
-  return _internal_has_position();
-}
-inline void NSPanelMQTTManagerCommand_CoverCommand::set_has_position(bool value) {
-  _internal_set_has_position(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.CoverCommand.has_position)
-}
-inline bool NSPanelMQTTManagerCommand_CoverCommand::_internal_has_position() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.has_position_;
-}
-inline void NSPanelMQTTManagerCommand_CoverCommand::_internal_set_has_position(bool value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.has_position_ = value;
-}
-
-// int32 position = 4;
-inline void NSPanelMQTTManagerCommand_CoverCommand::clear_position() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.position_ = 0;
-}
-inline ::int32_t NSPanelMQTTManagerCommand_CoverCommand::position() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.CoverCommand.position)
-  return _internal_position();
-}
-inline void NSPanelMQTTManagerCommand_CoverCommand::set_position(::int32_t value) {
-  _internal_set_position(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.CoverCommand.position)
-}
-inline ::int32_t NSPanelMQTTManagerCommand_CoverCommand::_internal_position() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.position_;
-}
-inline void NSPanelMQTTManagerCommand_CoverCommand::_internal_set_position(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.position_ = value;
-}
-
-// bool has_tilt_position = 5;
-inline void NSPanelMQTTManagerCommand_CoverCommand::clear_has_tilt_position() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.has_tilt_position_ = false;
-}
-inline bool NSPanelMQTTManagerCommand_CoverCommand::has_tilt_position() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.CoverCommand.has_tilt_position)
-  return _internal_has_tilt_position();
-}
-inline void NSPanelMQTTManagerCommand_CoverCommand::set_has_tilt_position(bool value) {
-  _internal_set_has_tilt_position(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.CoverCommand.has_tilt_position)
-}
-inline bool NSPanelMQTTManagerCommand_CoverCommand::_internal_has_tilt_position() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.has_tilt_position_;
-}
-inline void NSPanelMQTTManagerCommand_CoverCommand::_internal_set_has_tilt_position(bool value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.has_tilt_position_ = value;
-}
-
-// int32 tilt_position = 6;
-inline void NSPanelMQTTManagerCommand_CoverCommand::clear_tilt_position() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.tilt_position_ = 0;
-}
-inline ::int32_t NSPanelMQTTManagerCommand_CoverCommand::tilt_position() const {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.CoverCommand.tilt_position)
-  return _internal_tilt_position();
-}
-inline void NSPanelMQTTManagerCommand_CoverCommand::set_tilt_position(::int32_t value) {
-  _internal_set_tilt_position(value);
-  // @@protoc_insertion_point(field_set:NSPanelMQTTManagerCommand.CoverCommand.tilt_position)
-}
-inline ::int32_t NSPanelMQTTManagerCommand_CoverCommand::_internal_tilt_position() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.tilt_position_;
-}
-inline void NSPanelMQTTManagerCommand_CoverCommand::_internal_set_tilt_position(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.tilt_position_ = value;
-}
-
-// -------------------------------------------------------------------
-
 // NSPanelMQTTManagerCommand
 
 // .NSPanelMQTTManagerCommand.FirstPageTurnLightOn first_page_turn_on = 1;
@@ -11465,164 +9622,6 @@ inline ::NSPanelMQTTManagerCommand_ThermostatCommand* NSPanelMQTTManagerCommand:
   return _msg;
 }
 
-// .NSPanelMQTTManagerCommand.MediaPlayerCommand media_player_command = 9;
-inline bool NSPanelMQTTManagerCommand::has_media_player_command() const {
-  return CommandData_case() == kMediaPlayerCommand;
-}
-inline bool NSPanelMQTTManagerCommand::_internal_has_media_player_command() const {
-  return CommandData_case() == kMediaPlayerCommand;
-}
-inline void NSPanelMQTTManagerCommand::set_has_media_player_command() {
-  _impl_._oneof_case_[0] = kMediaPlayerCommand;
-}
-inline void NSPanelMQTTManagerCommand::clear_media_player_command() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  if (CommandData_case() == kMediaPlayerCommand) {
-    if (GetArena() == nullptr) {
-      delete _impl_.CommandData_.media_player_command_;
-    } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
-      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.media_player_command_);
-    }
-    clear_has_CommandData();
-  }
-}
-inline ::NSPanelMQTTManagerCommand_MediaPlayerCommand* NSPanelMQTTManagerCommand::release_media_player_command() {
-  // @@protoc_insertion_point(field_release:NSPanelMQTTManagerCommand.media_player_command)
-  if (CommandData_case() == kMediaPlayerCommand) {
-    clear_has_CommandData();
-    auto* temp = _impl_.CommandData_.media_player_command_;
-    if (GetArena() != nullptr) {
-      temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
-    }
-    _impl_.CommandData_.media_player_command_ = nullptr;
-    return temp;
-  } else {
-    return nullptr;
-  }
-}
-inline const ::NSPanelMQTTManagerCommand_MediaPlayerCommand& NSPanelMQTTManagerCommand::_internal_media_player_command() const {
-  return CommandData_case() == kMediaPlayerCommand ? *_impl_.CommandData_.media_player_command_ : reinterpret_cast<::NSPanelMQTTManagerCommand_MediaPlayerCommand&>(::_NSPanelMQTTManagerCommand_MediaPlayerCommand_default_instance_);
-}
-inline const ::NSPanelMQTTManagerCommand_MediaPlayerCommand& NSPanelMQTTManagerCommand::media_player_command() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.media_player_command)
-  return _internal_media_player_command();
-}
-inline ::NSPanelMQTTManagerCommand_MediaPlayerCommand* NSPanelMQTTManagerCommand::unsafe_arena_release_media_player_command() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:NSPanelMQTTManagerCommand.media_player_command)
-  if (CommandData_case() == kMediaPlayerCommand) {
-    clear_has_CommandData();
-    auto* temp = _impl_.CommandData_.media_player_command_;
-    _impl_.CommandData_.media_player_command_ = nullptr;
-    return temp;
-  } else {
-    return nullptr;
-  }
-}
-inline void NSPanelMQTTManagerCommand::unsafe_arena_set_allocated_media_player_command(::NSPanelMQTTManagerCommand_MediaPlayerCommand* value) {
-  // We rely on the oneof clear method to free the earlier contents
-  // of this oneof. We can directly use the pointer we're given to
-  // set the new value.
-  clear_CommandData();
-  if (value) {
-    set_has_media_player_command();
-    _impl_.CommandData_.media_player_command_ = value;
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:NSPanelMQTTManagerCommand.media_player_command)
-}
-inline ::NSPanelMQTTManagerCommand_MediaPlayerCommand* NSPanelMQTTManagerCommand::_internal_mutable_media_player_command() {
-  if (CommandData_case() != kMediaPlayerCommand) {
-    clear_CommandData();
-    set_has_media_player_command();
-    _impl_.CommandData_.media_player_command_ =
-        ::google::protobuf::Message::DefaultConstruct<::NSPanelMQTTManagerCommand_MediaPlayerCommand>(GetArena());
-  }
-  return _impl_.CommandData_.media_player_command_;
-}
-inline ::NSPanelMQTTManagerCommand_MediaPlayerCommand* NSPanelMQTTManagerCommand::mutable_media_player_command() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  ::NSPanelMQTTManagerCommand_MediaPlayerCommand* _msg = _internal_mutable_media_player_command();
-  // @@protoc_insertion_point(field_mutable:NSPanelMQTTManagerCommand.media_player_command)
-  return _msg;
-}
-
-// .NSPanelMQTTManagerCommand.CoverCommand cover_command = 10;
-inline bool NSPanelMQTTManagerCommand::has_cover_command() const {
-  return CommandData_case() == kCoverCommand;
-}
-inline bool NSPanelMQTTManagerCommand::_internal_has_cover_command() const {
-  return CommandData_case() == kCoverCommand;
-}
-inline void NSPanelMQTTManagerCommand::set_has_cover_command() {
-  _impl_._oneof_case_[0] = kCoverCommand;
-}
-inline void NSPanelMQTTManagerCommand::clear_cover_command() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  if (CommandData_case() == kCoverCommand) {
-    if (GetArena() == nullptr) {
-      delete _impl_.CommandData_.cover_command_;
-    } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
-      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.CommandData_.cover_command_);
-    }
-    clear_has_CommandData();
-  }
-}
-inline ::NSPanelMQTTManagerCommand_CoverCommand* NSPanelMQTTManagerCommand::release_cover_command() {
-  // @@protoc_insertion_point(field_release:NSPanelMQTTManagerCommand.cover_command)
-  if (CommandData_case() == kCoverCommand) {
-    clear_has_CommandData();
-    auto* temp = _impl_.CommandData_.cover_command_;
-    if (GetArena() != nullptr) {
-      temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
-    }
-    _impl_.CommandData_.cover_command_ = nullptr;
-    return temp;
-  } else {
-    return nullptr;
-  }
-}
-inline const ::NSPanelMQTTManagerCommand_CoverCommand& NSPanelMQTTManagerCommand::_internal_cover_command() const {
-  return CommandData_case() == kCoverCommand ? *_impl_.CommandData_.cover_command_ : reinterpret_cast<::NSPanelMQTTManagerCommand_CoverCommand&>(::_NSPanelMQTTManagerCommand_CoverCommand_default_instance_);
-}
-inline const ::NSPanelMQTTManagerCommand_CoverCommand& NSPanelMQTTManagerCommand::cover_command() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  // @@protoc_insertion_point(field_get:NSPanelMQTTManagerCommand.cover_command)
-  return _internal_cover_command();
-}
-inline ::NSPanelMQTTManagerCommand_CoverCommand* NSPanelMQTTManagerCommand::unsafe_arena_release_cover_command() {
-  // @@protoc_insertion_point(field_unsafe_arena_release:NSPanelMQTTManagerCommand.cover_command)
-  if (CommandData_case() == kCoverCommand) {
-    clear_has_CommandData();
-    auto* temp = _impl_.CommandData_.cover_command_;
-    _impl_.CommandData_.cover_command_ = nullptr;
-    return temp;
-  } else {
-    return nullptr;
-  }
-}
-inline void NSPanelMQTTManagerCommand::unsafe_arena_set_allocated_cover_command(::NSPanelMQTTManagerCommand_CoverCommand* value) {
-  // We rely on the oneof clear method to free the earlier contents
-  // of this oneof. We can directly use the pointer we're given to
-  // set the new value.
-  clear_CommandData();
-  if (value) {
-    set_has_cover_command();
-    _impl_.CommandData_.cover_command_ = value;
-  }
-  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:NSPanelMQTTManagerCommand.cover_command)
-}
-inline ::NSPanelMQTTManagerCommand_CoverCommand* NSPanelMQTTManagerCommand::_internal_mutable_cover_command() {
-  if (CommandData_case() != kCoverCommand) {
-    clear_CommandData();
-    set_has_cover_command();
-    _impl_.CommandData_.cover_command_ =
-        ::google::protobuf::Message::DefaultConstruct<::NSPanelMQTTManagerCommand_CoverCommand>(GetArena());
-  }
-  return _impl_.CommandData_.cover_command_;
-}
-inline ::NSPanelMQTTManagerCommand_CoverCommand* NSPanelMQTTManagerCommand::mutable_cover_command() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-  ::NSPanelMQTTManagerCommand_CoverCommand* _msg = _internal_mutable_cover_command();
-  // @@protoc_insertion_point(field_mutable:NSPanelMQTTManagerCommand.cover_command)
-  return _msg;
-}
-
 // int32 nspanel_id = 100;
 inline void NSPanelMQTTManagerCommand::clear_nspanel_id() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
@@ -11683,34 +9682,10 @@ inline const EnumDescriptor* GetEnumDescriptor<::NSPanelConfig_NSPanelButtonMode
   return ::NSPanelConfig_NSPanelButtonMode_descriptor();
 }
 template <>
-struct is_proto_enum<::NSPanelConfig_NSPanelSoundEvent> : std::true_type {};
-template <>
-inline const EnumDescriptor* GetEnumDescriptor<::NSPanelConfig_NSPanelSoundEvent>() {
-  return ::NSPanelConfig_NSPanelSoundEvent_descriptor();
-}
-template <>
 struct is_proto_enum<::NSPanelStatusReport_state> : std::true_type {};
 template <>
 inline const EnumDescriptor* GetEnumDescriptor<::NSPanelStatusReport_state>() {
   return ::NSPanelStatusReport_state_descriptor();
-}
-template <>
-struct is_proto_enum<::NSPanelRoomEntitiesPage_EntitySlot_EntityType> : std::true_type {};
-template <>
-inline const EnumDescriptor* GetEnumDescriptor<::NSPanelRoomEntitiesPage_EntitySlot_EntityType>() {
-  return ::NSPanelRoomEntitiesPage_EntitySlot_EntityType_descriptor();
-}
-template <>
-struct is_proto_enum<::NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction> : std::true_type {};
-template <>
-inline const EnumDescriptor* GetEnumDescriptor<::NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction>() {
-  return ::NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_descriptor();
-}
-template <>
-struct is_proto_enum<::NSPanelMQTTManagerCommand_CoverCommand_Action> : std::true_type {};
-template <>
-inline const EnumDescriptor* GetEnumDescriptor<::NSPanelMQTTManagerCommand_CoverCommand_Action>() {
-  return ::NSPanelMQTTManagerCommand_CoverCommand_Action_descriptor();
 }
 template <>
 struct is_proto_enum<::NSPanelMQTTManagerCommand_AffectLightsOptions> : std::true_type {};

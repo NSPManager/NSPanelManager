@@ -1,0 +1,40 @@
+<script type="module">
+  import { define, html } from '/static/node_modules/hybrids/src/index.js';
+
+  stomp_subscribe("nspanel/{{ nspanel.mac_address }}/status", (message) => {
+    var element = document.getElementById(`nspanel-ram-status-{{ nspanel.id }}`);
+    var data = JSON.parse(message.body);
+    element.state = data.state;
+    element.ram_usage = data.ram_usage;
+  })
+
+  define({
+    tag: "nspanel-ram-status",
+    nspanel_id: '',
+    state: '',
+    ram_usage: '',
+    render: ({id, nspanel_id, state, ram_usage}) => {
+      if (state == "offline" || state == "unknown") {
+        return html`
+           <div class="icon-text">
+                <span class="icon me-1">
+                    <i class="mdi mdi-memory"></i>
+                </span>
+                RAM: <span id="ram-${nspanel_id}">?%</span>
+            </div>
+        `;
+      } else {
+        return html`
+            <div class="icon-text">
+                <span class="icon me-1">
+                    <i class="mdi mdi-memory"></i>
+                </span>
+                RAM: <span id="ram-${nspanel_id}">${ram_usage}%</span>
+            </div>
+        `;
+      }
+    },
+  })
+</script>
+
+<nspanel-ram-status id="nspanel-ram-status-{{ nspanel.id }}" nspanel_id="{{ nspanel.id }}" state="" ram_usage=""></nspanel-ram-status>

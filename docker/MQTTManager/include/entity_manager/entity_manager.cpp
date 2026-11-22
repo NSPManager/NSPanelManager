@@ -2,16 +2,12 @@
 #include "button/home_assistant_button.hpp"
 #include "button/nspm_button.hpp"
 #include "command_manager/command_manager.hpp"
-#include "cover/cover.hpp"
-#include "cover/home_assistant_cover.hpp"
-#include "cover/openhab_cover.hpp"
 #include "entity/entity.hpp"
 #include "light/home_assistant_light.hpp"
 #include "light/light.hpp"
 #include "light/openhab_light.hpp"
-#include "media_player/home_assistant_media_player.hpp"
-#include "media_player/media_player.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
+#include "protobuf_general.pb.h"
 #include "protobuf_nspanel.pb.h"
 #include "room/room.hpp"
 #include "room/room_entities_page.hpp"
@@ -31,12 +27,14 @@
 #include <boost/stacktrace/frame.hpp>
 #include <boost/stacktrace/stacktrace_fwd.hpp>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <database_manager/database_manager.hpp>
 #include <entity_manager/entity_manager.hpp>
 #include <expected>
+#include <iterator>
 #include <memory>
 #include <mqtt_manager_config/mqtt_manager_config.hpp>
 #include <mutex>
@@ -90,8 +88,6 @@ void EntityManager::load_entities() {
   EntityManager::load_lights();
   EntityManager::load_buttons();
   EntityManager::load_thermostats();
-  EntityManager::load_media_players();
-  EntityManager::load_covers();
   EntityManager::load_switches();
   EntityManager::load_scenes();
   EntityManager::load_global_room_entities_pages();
@@ -108,7 +104,6 @@ void EntityManager::load_entities() {
   // publish with an empty payload clears the retained message on the broker.
   // Without this call, panels would never receive the aggregate until the next
   // light-state change.
-  EntityManager::_send_websocket_state_update();
   EntityManager::_room_updated_callback(nullptr);
 }
 
@@ -125,13 +120,10 @@ void EntityManager::load_rooms() {
   SPDLOG_INFO("Loading {} rooms.", room_ids.size());
 
   // Remove room if it does no longer exist
-  {
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
-    EntityManager::_rooms.erase(std::remove_if(EntityManager::_rooms.begin(), EntityManager::_rooms.end(), [&room_ids](auto room) {
-                                  return std::find_if(room_ids.begin(), room_ids.end(), [&room](auto id) { return id == room->get_id(); }) == room_ids.end();
-                                }),
-                                EntityManager::_rooms.end());
-  }
+  EntityManager::_rooms.erase(std::remove_if(EntityManager::_rooms.begin(), EntityManager::_rooms.end(), [&room_ids](auto room) {
+                                return std::find_if(room_ids.begin(), room_ids.end(), [&room](auto id) { return id == room->get_id(); }) == room_ids.end();
+                              }),
+                              EntityManager::_rooms.end());
 
   // Cause existing room to reload config or add a new room if it does not exist.
   for (auto &room_id : room_ids) {
@@ -149,7 +141,6 @@ void EntityManager::load_rooms() {
     }
   }
 
-  std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
   std::sort(EntityManager::_rooms.begin(), EntityManager::_rooms.end(), [](const std::shared_ptr<Room> &a, const std::shared_ptr<Room> &b) {
     return a->get_display_order() < b->get_display_order();
   });
@@ -170,6 +161,7 @@ void EntityManager::load_nspanels() {
     auto existing_nspanel = EntityManager::get_nspanel_by_id(nspanel_id);
     if (existing_nspanel) [[likely]] {
       (*existing_nspanel)->reload_config();
+      (*existing_nspanel)->send_config();
     } else {
       std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
       auto panel = std::shared_ptr<NSPanel>(new NSPanel(nspanel_id));
@@ -320,98 +312,6 @@ void EntityManager::load_thermostats() {
   SPDLOG_DEBUG("Loaded {} thermostats", thermostat_ids.size());
 }
 
-void EntityManager::load_media_players() {
-  auto media_player_ids = database_manager::database.select(&database_manager::Entity::id, sqlite_orm::from<database_manager::Entity>(),
-                                                            sqlite_orm::where(sqlite_orm::glob(&database_manager::Entity::entity_type, "media_player")));
-  SPDLOG_INFO("Loading {} media players.", media_player_ids.size());
-
-  // Check if any existing media player has been removed.
-  EntityManager::_entities.erase(std::remove_if(EntityManager::_entities.begin(), EntityManager::_entities.end(), [&media_player_ids](auto entity) {
-                                   return entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::MEDIA_PLAYER && std::find_if(media_player_ids.begin(), media_player_ids.end(), [&entity](auto id) { return id == entity->get_id(); }) == media_player_ids.end();
-                                 }),
-                                 EntityManager::_entities.end());
-
-  // Cause existing media players to reload config or add a new media player if it does not exist.
-  for (auto &media_player_id : media_player_ids) {
-    auto existing_media_player = EntityManager::get_entity_by_id<MediaPlayerEntity>(MQTT_MANAGER_ENTITY_TYPE::MEDIA_PLAYER, media_player_id);
-    if (existing_media_player) [[likely]] {
-      (*existing_media_player)->reload_config();
-    } else {
-      std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
-
-      try {
-        auto media_player_settings = database_manager::database.get<database_manager::Entity>(media_player_id);
-        nlohmann::json entity_data = media_player_settings.get_entity_data_json();
-        if (entity_data.contains("controller")) {
-          std::string controller = entity_data["controller"];
-          if (controller.compare("home_assistant") == 0) {
-            std::shared_ptr<MediaPlayerEntity> media_player_entity = std::make_shared<HomeAssistantMediaPlayer>(media_player_settings.id);
-            SPDLOG_INFO("Media player {}::{} was found in database but not in config. Creating media player.", media_player_entity->get_id(), media_player_entity->get_name());
-            EntityManager::_entities.push_back(media_player_entity);
-          } else if (controller.compare("openhab") == 0) {
-            SPDLOG_ERROR("Media player {}::{} is controlled by OpenHAB, which is not implemented for media players. Will ignore entity.", media_player_settings.id, media_player_settings.friendly_name);
-          } else {
-            SPDLOG_ERROR("Unknown media player type '{}'. Will ignore entity.", controller);
-          }
-        } else {
-          SPDLOG_ERROR("Media player {}::{} does not define a controller!", media_player_settings.id, media_player_settings.friendly_name);
-        }
-      } catch (std::exception &e) {
-        SPDLOG_ERROR("Caught exception: {}", e.what());
-        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
-      }
-    }
-  }
-  SPDLOG_DEBUG("Loaded {} media players", media_player_ids.size());
-}
-
-void EntityManager::load_covers() {
-  auto cover_ids = database_manager::database.select(&database_manager::Entity::id, sqlite_orm::from<database_manager::Entity>(),
-                                                     sqlite_orm::where(sqlite_orm::glob(&database_manager::Entity::entity_type, "cover")));
-  SPDLOG_INFO("Loading {} covers.", cover_ids.size());
-
-  // Check if any existing cover has been removed.
-  EntityManager::_entities.erase(std::remove_if(EntityManager::_entities.begin(), EntityManager::_entities.end(), [&cover_ids](auto entity) {
-                                   return entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::COVER && std::find_if(cover_ids.begin(), cover_ids.end(), [&entity](auto id) { return id == entity->get_id(); }) == cover_ids.end();
-                                 }),
-                                 EntityManager::_entities.end());
-
-  // Cause existing covers to reload config or add a new cover if it does not exist.
-  for (auto &cover_id : cover_ids) {
-    auto existing_cover = EntityManager::get_entity_by_id<CoverEntity>(MQTT_MANAGER_ENTITY_TYPE::COVER, cover_id);
-    if (existing_cover) [[likely]] {
-      (*existing_cover)->reload_config();
-    } else {
-      std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
-
-      try {
-        auto cover_settings = database_manager::database.get<database_manager::Entity>(cover_id);
-        nlohmann::json entity_data = cover_settings.get_entity_data_json();
-        if (entity_data.contains("controller")) {
-          std::string controller = entity_data["controller"];
-          if (controller.compare("home_assistant") == 0) {
-            std::shared_ptr<HomeAssistantCover> cover_entity = std::make_shared<HomeAssistantCover>(cover_settings.id);
-            SPDLOG_INFO("Cover {}::{} was found in database but not in config. Creating cover.", cover_entity->get_id(), cover_entity->get_name());
-            EntityManager::_entities.push_back(cover_entity);
-          } else if (controller.compare("openhab") == 0) {
-            std::shared_ptr<OpenhabCover> cover_entity = std::make_shared<OpenhabCover>(cover_settings.id);
-            SPDLOG_INFO("Cover {}::{} was found in database but not in config. Creating cover.", cover_entity->get_id(), cover_entity->get_name());
-            EntityManager::_entities.push_back(cover_entity);
-          } else {
-            SPDLOG_ERROR("Unknown cover type '{}'. Will ignore entity.", controller);
-          }
-        } else {
-          SPDLOG_ERROR("Cover {}::{} does not define a controller!", cover_settings.id, cover_settings.friendly_name);
-        }
-      } catch (std::exception &e) {
-        SPDLOG_ERROR("Caught exception: {}", e.what());
-        SPDLOG_ERROR("Stacktrace: {}", boost::stacktrace::to_string(boost::stacktrace::stacktrace()));
-      }
-    }
-  }
-  SPDLOG_DEBUG("Loaded {} covers", cover_ids.size());
-}
-
 void EntityManager::load_switches() {
   auto switch_ids = database_manager::database.select(&database_manager::Entity::id, sqlite_orm::from<database_manager::Entity>(),
                                                       sqlite_orm::where(sqlite_orm::glob(&database_manager::Entity::entity_type, "switch")));
@@ -488,7 +388,7 @@ void EntityManager::load_scenes() {
           SPDLOG_INFO("Scene {}::{} was found in database but not in config. Creating scene.", scene->get_id(), scene->get_name());
           std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
           EntityManager::_entities.push_back(scene);
-        } else if (scene_settings.scene_type.compare("nspm_scene") == 0 || scene_settings.scene_type.compare("nspm") == 0) {
+        } else if (scene_settings.scene_type.compare("nspm_scene") == 0) {
           std::shared_ptr<NSPMScene> scene = std::shared_ptr<NSPMScene>(new NSPMScene(scene_settings.id));
           SPDLOG_INFO("Scene {}::{} was found in database but not in config. Creating scene.", scene->get_id(), scene->get_name());
           std::lock_guard<std::mutex> mutex_guard(EntityManager::_entities_mutex);
@@ -627,16 +527,9 @@ void EntityManager::update_all_rooms_status() {
     uint16_t num_kelvin_lights_ceiling = 0; // Total number of ceiling lights with color temperature
     uint16_t num_kelvin_lights_table = 0;   // Total number of table lights with color temperature
 
-    // Work on a copy, as load_rooms() may change the list meanwhile.
-    std::vector<std::shared_ptr<Room>> rooms;
-    {
-      std::lock_guard<std::mutex> mutex_guard(EntityManager::_rooms_mutex);
-      rooms = EntityManager::_rooms;
-    }
-
     // Determine if any light is on in any of the rooms
     bool any_light_on = false;
-    for (auto room : rooms) {
+    for (auto room : EntityManager::_rooms) {
       std::vector<std::shared_ptr<Light>> entities = room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT);
       for (auto light : entities) {
         if (light->get_state() && light->get_controlled_from_main_page()) {
@@ -646,7 +539,7 @@ void EntityManager::update_all_rooms_status() {
       }
     }
 
-    for (auto room : rooms) {
+    for (auto room : EntityManager::_rooms) {
       for (auto &light : room->get_all_entities_by_type<Light>(MQTT_MANAGER_ENTITY_TYPE::LIGHT)) {
         // Light is not controlled from main page, exclude it from calculations.
         if (!light->get_controlled_from_main_page()) {
@@ -1022,9 +915,12 @@ void EntityManager::_handle_register_request(const nlohmann::json &data) {
     if (new_panel != nullptr) {
       std::lock_guard<std::mutex> lock_guard(EntityManager::_nspanels_mutex);
       EntityManager::_nspanels.push_back(new_panel);
+      nlohmann::json data = {
+          {"event_type", "register_request"},
+          {"nspanel_id", new_panel->get_id()}};
+      WebsocketServer::update_stomp_topic_value("mqttmanager/events", data);
     }
   }
-  EntityManager::_send_websocket_state_update();
 }
 
 std::expected<std::shared_ptr<NSPanel>, EntityManager::EntityError> EntityManager::get_nspanel_by_id(uint id) {
@@ -1060,20 +956,4 @@ std::expected<std::shared_ptr<NSPanel>, EntityManager::EntityError> EntityManage
   }
   SPDLOG_TRACE("Did not find NSPanel by MAC {}", mac);
   return std::unexpected(EntityManager::EntityError::NOT_FOUND);
-}
-
-void EntityManager::_send_websocket_state_update() {
-  nlohmann::json data = {
-      {"nspanels", nlohmann::json::array()}};
-  {
-    std::lock_guard<std::mutex> mutex_guard(EntityManager::_nspanels_mutex);
-    for (auto nspanel : EntityManager::_nspanels) {
-      data["nspanels"].push_back({
-          {"id", nspanel->get_id()},
-          {"mac", nspanel->get_mac()},
-      });
-    }
-  }
-  WebsocketServer::set_stomp_topic_retained("entity_states", true);
-  WebsocketServer::update_stomp_topic_value("entity_states", data);
 }

@@ -5,9 +5,7 @@ import socket
 from pprint import pprint
 from re import A
 
-import requests
 from django.core.files.storage import FileSystemStorage
-from django.db import transaction
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
@@ -15,10 +13,11 @@ import web.home_assistant_api
 import web.openhab_api
 from web.settings_helper import (
     get_nspanel_setting_with_default,
+    get_setting_with_default,
     set_setting_value,
 )
 
-from .apps import create_entity_pages_for_room, send_mqttmanager_reload_command
+from .apps import send_mqttmanager_reload_command
 from .models import Entity, LightState, NSPanel, RelayGroup, Room, RoomEntitiesPage, Scene, Settings
 
 ########################
@@ -34,25 +33,6 @@ def get_home_assistant_entities(request):
     return JsonResponse(web.home_assistant_api.get_all_home_assistant_items(filter_params))
 
 
-def test_home_assistant(request):
-    if request.method != "GET":
-        return JsonResponse({"status": "error"}, status=405)
-
-    address = request.GET.get("address")
-    token = request.GET.get("token")
-    if not address or not token:
-        return JsonResponse({"status": "error", "message": "address and token are required"}, status=400)
-
-    try:
-        response = requests.get(f"{address}/api/states", headers={"Authorization": f"Bearer {token}"})
-        if response.ok:
-            return JsonResponse({"status": "success"})
-        else:
-            return JsonResponse({"status": "error", "message": response.text}, status=response.status_code)
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)}, status=500)
-
-
 def get_openhab_items(request):
     if request.method != "GET":
         return JsonResponse({"status": "error"}, status=405)
@@ -65,49 +45,70 @@ def get_openhab_items(request):
     return JsonResponse(openhab_items)
 
 
-def test_openhab(request):
-    if request.method != "GET":
-        return JsonResponse({"status": "error"}, status=405)
-
-    address = request.GET.get("address")
-    token = request.GET.get("token")
-    if not address or not token:
-        return JsonResponse({"status": "error", "message": "address and token are required"}, status=400)
-
-    try:
-        response = requests.get(f"{address}/rest/items", headers={"Authorization": f"Bearer {token}"})
-        if response.ok:
-            return JsonResponse({"status": "success"})
-        else:
-            return JsonResponse({"status": "error", "message": response.text}, status=response.status_code)
-    except Exception as e:
-        return JsonResponse({"status": "error", "message": str(e)}, status=500)
-
-
 ##########################
 ## MQTTManager section ###
 ##########################
 
+# Keys that are not allowed to be pulled though the REST API beacuse of security concerns.
+banned_setting_keys = [
+    "MQTT_SERVER",
+    "MQTT_PORT",
+    "MQTT_USERNAME",
+    "MQTT_PASSWORD",
+    "HOME_ASSISTANT_ADDRESS",
+    "HOME_ASSISTANT_TOKEN",
+    "OPENHAB_ADDRESS",
+    "OPENHAB_TOKEN",
+    "OPENHAB_TOKEN",
+]
 
-@csrf_exempt
-def test_mqttmanager(request):
-    if request.method != "GET":
-        return JsonResponse({"status": "error"}, status=405)
 
-    address = request.GET.get("address")
-    port = request.GET.get("port")
-    if not address or not port:
-        return JsonResponse({"status": "error", "message": "address and port are required"}, status=400)
+def mqttmanager_get_setting(request, setting_key):
+    if setting_key in banned_setting_keys:
+        return JsonResponse({"status": "error"}, status=403)  # Return error forbidden
 
     try:
-        response = requests.get(f"http://{address}:{port}/rest/settings")
-        if response.ok:
-            return JsonResponse({"status": "success"})
+        settings = {}
+        if request.method == "GET":
+            settings[setting_key] = get_setting_with_default(setting_key)
         else:
-            return JsonResponse({"status": "error", "message": response.text}, status=response.status_code)
+            return JsonResponse({"status": "error"}, status=405)
+
+        return JsonResponse(
+            {
+                "status": "ok",
+                "settings": settings,
+            }
+        )
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error"}, status=500)
+
+
+@csrf_exempt
+def mqttmanager_settings_post(request):
+    try:
+        settings = {}
+        if request.method == "POST":
+            data = json.loads(request.body)
+            for setting_key in data["settings"]:
+                if setting_key in banned_setting_keys:
+                    return JsonResponse({"status": "error"}, status=403)  # Return error forbidden
+                settings[setting_key] = get_setting_with_default(setting_key)
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+
+        return JsonResponse(
+            {
+                "status": "ok",
+                "settings": settings,
+            }
+        )
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+    return JsonResponse({"status": "error"}, status=500)
 
 
 ######################
@@ -163,8 +164,6 @@ def relay_groups(request):
 def rooms(request):
     if request.method == "GET":
         return rooms_get(request)
-    elif request.method == "PUT":
-        return room_put(request)
     elif request.method == "POST":
         return room_create(request)
     else:
@@ -174,8 +173,6 @@ def rooms(request):
 def settings(request):
     if request.method == "GET":
         return settings_get(request)
-    elif request.method == "POST":
-        return settings_post(request)
     else:
         return JsonResponse({"status": "error"}, status=405)
 
@@ -184,31 +181,13 @@ def settings_get(request):
     settings = {}
     for setting in Settings.objects.all():
         settings[setting.name] = setting.value
-    # Never return secrets, only whether they are set. Any of them may never have been saved.
-    for secret in ("home_assistant_token", "openhab_token", "mqtt_password"):
-        settings[f"{secret}_set"] = settings.pop(secret, "") != ""
+    settings["home_assistant_token_set"] = settings.get("home_assistant_token", "") != ""
+    del settings["home_assistant_token"]
+    settings["openhab_token_set"] = settings.get("openhab_token", "") != ""
+    del settings["openhab_token"]
+    settings["mqtt_password_set"] = settings.get("mqtt_password", "") != ""
+    del settings["mqtt_password"]
     return JsonResponse({"status": "ok", "settings": settings}, status=200)
-
-
-def settings_post(request):
-    try:
-        if request.method == "POST":
-            data = json.loads(request.body)
-            if "settings" not in data:
-                return JsonResponse({"status": "error", "message": "No settings provided"}, status=400)
-            elif not isinstance(data["settings"], dict):
-                return JsonResponse({"status": "error", "message": "Settings must be a dictionary"}, status=400)
-
-            for setting_key in data["settings"]:
-                set_setting_value(setting_key, data["settings"][setting_key])
-
-            send_mqttmanager_reload_command()
-            return JsonResponse({"status": "ok"})
-        else:
-            return JsonResponse({"status": "error"}, status=405)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
 
 
 def rooms_get(request):
@@ -222,10 +201,7 @@ def rooms_get(request):
             rooms.append(
                 {
                     "id": room.id,
-                    "friendly_name": room.friendly_name,
-                    "display_order": room.displayOrder,
-                    "room_temp_provider": room.room_temp_provider,
-                    "room_temp_sensor": room.room_temp_sensor,
+                    "name": room.friendly_name,
                 }
             )
         return JsonResponse({"status": "ok", "rooms": rooms}, status=200)
@@ -234,36 +210,20 @@ def rooms_get(request):
         return JsonResponse({"status": "error"}, status=500)
 
 
-# The entities page layouts the panel GUI has.
-PAGE_SIZES = (4, 8, 12)
-
-
-def get_page_size_error(page_type):
-    if page_type not in PAGE_SIZES:
-        return f"Unsupported page size {page_type!r}. Expected one of: {', '.join(map(str, PAGE_SIZES))}."
-    return None
-
-
 def put_room_entities_order(request, room_id):
     if request.method == "PUT":
         try:
             data = json.loads(request.body)
-            for item in data["entities"] + data["scenes"]:
-                page = RoomEntitiesPage.objects.get(id=item["entities_page_id"])
-                if not 0 <= item["room_view_position"] < page.page_type:
-                    return JsonResponse({"status": "error", "message": f"room_view_position must be between 0 and {page.page_type - 1} on page {page.id}."}, status=400)
-            # All or nothing: a bad entry must not leave the entries before it already moved.
-            with transaction.atomic():
-                for entity in data["entities"]:
-                    db_entity = Entity.objects.get(id=entity["id"])
-                    db_entity.room_view_position = entity["room_view_position"]
-                    db_entity.entities_page_id = entity["entities_page_id"]
-                    db_entity.save()
-                for scene in data["scenes"]:
-                    db_scene = Scene.objects.get(id=scene["id"])
-                    db_scene.room_view_position = scene["room_view_position"]
-                    db_scene.entities_page_id = scene["entities_page_id"]
-                    db_scene.save()
+            for entity in data["entities"]:
+                db_entity = Entity.objects.get(id=entity["id"])
+                db_entity.room_view_position = entity["room_view_position"]
+                db_entity.entities_page_id = entity["entities_page_id"]
+                db_entity.save()
+            for scene in data["scenes"]:
+                db_scene = Scene.objects.get(id=scene["id"])
+                db_scene.room_view_position = scene["room_view_position"]
+                db_scene.entities_page_id = scene["entities_page_id"]
+                db_scene.save()
             send_mqttmanager_reload_command()
             return JsonResponse({"status": "ok"}, status=200)
         except Exception as ex:
@@ -302,9 +262,6 @@ def room_entities_pages(request, room_id):
         for field in required_fields:
             if field not in data:
                 return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
-        page_size_error = get_page_size_error(data["type"])
-        if page_size_error:
-            return JsonResponse({"status": "error", "message": page_size_error}, status=400)
 
         room = Room.objects.get(id=room_id)
         pages = RoomEntitiesPage.objects.filter(room=room).order_by("display_order")
@@ -345,18 +302,9 @@ def room_entities_page(request, page_id):
         try:
             data = json.loads(request.body)
             db_page = RoomEntitiesPage.objects.get(id=page_id)
-            new_page_type = data.get("number_of_entities", db_page.page_type)
-            if new_page_type != db_page.page_type:
-                page_size_error = get_page_size_error(new_page_type)
-                if page_size_error:
-                    return JsonResponse({"status": "error", "message": page_size_error}, status=400)
-                # Shrinking must not leave entities in slots the panel no longer shows.
-                if db_page.entity_set.filter(room_view_position__gte=new_page_type).exists() or db_page.scene_set.filter(room_view_position__gte=new_page_type).exists():
-                    return JsonResponse({"status": "error", "message": f"Move or remove the entities in slots {new_page_type + 1} and above before shrinking this page."}, status=400)
-            db_page.page_type = new_page_type
+            db_page.page_type = data.get("number_of_entities", db_page.page_type)
             db_page.display_order = data.get("display_order", db_page.display_order)
             db_page.save()
-            send_mqttmanager_reload_command()
             return JsonResponse({"status": "ok"}, status=200)
         except Exception as ex:
             logging.exception(ex)
@@ -393,64 +341,6 @@ def room_entities_pages_order(request):
         return JsonResponse({"status": "error"}, status=405)
 
 
-####################
-# NSPanel REST API #
-####################
-
-
-def nspanel_delete(request, nspanel_id):
-    try:
-        if request.method == "DELETE":
-            nspanel = NSPanel.objects.get(id=nspanel_id)
-            nspanel.delete()
-            response = JsonResponse({"status": "ok"}, status=200)
-            send_mqttmanager_reload_command()
-            return response
-        else:
-            return JsonResponse({"status": "error"}, status=405)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
-
-
-def nspanel_accept(request, nspanel_id):
-    try:
-        if request.method == "POST":
-            data = json.loads(request.body)
-            if "room_id" not in data:
-                return JsonResponse({"status": "error", "message": "room_id is required"}, status=400)
-            nspanel = NSPanel.objects.get(id=nspanel_id)
-            nspanel.denied = False
-            nspanel.accepted = True
-            nspanel.room = Room.objects.get(id=data["room_id"])
-            nspanel.save()
-            response = JsonResponse({"status": "ok", "id": nspanel.id}, status=200)
-            send_mqttmanager_reload_command()
-            return response
-        else:
-            return JsonResponse({"status": "error"}, status=405)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
-
-
-def nspanel_deny(request, nspanel_id):
-    try:
-        if request.method == "POST":
-            nspanel = NSPanel.objects.get(id=nspanel_id)
-            nspanel.denied = True
-            nspanel.accepted = False
-            nspanel.save()
-            response = JsonResponse({"status": "ok", "id": nspanel.id}, status=200)
-            send_mqttmanager_reload_command()
-            return response
-        else:
-            return JsonResponse({"status": "error"}, status=405)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
-
-
 ########################
 ### Global functions ###
 ########################
@@ -484,9 +374,6 @@ def global_entities_pages(request):
         for field in required_fields:
             if field not in data:
                 return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
-        page_size_error = get_page_size_error(data["type"])
-        if page_size_error:
-            return JsonResponse({"status": "error", "message": page_size_error}, status=400)
 
         pages = RoomEntitiesPage.objects.filter(room=None).order_by("display_order")
         new_display_order = 0  # Default to zero of no pages exists
@@ -515,15 +402,7 @@ def room_delete(request, room_id):
     if request.method == "DELETE":
         try:
             room = Room.objects.get(id=room_id)
-            # Panels are not deleted with their room; move them to another room.
-            new_room = Room.objects.exclude(id=room.id).first()
-            if new_room:
-                NSPanel.objects.filter(room=room).update(room=new_room)
-            elif NSPanel.objects.filter(room=room).exists():
-                # Panels must belong to a room, so the last room can only be deleted once it has no panels.
-                return JsonResponse({"status": "error", "message": "The last room cannot be deleted while panels are assigned to it."}, status=400)
             room.delete()
-            send_mqttmanager_reload_command()
             return JsonResponse({"status": "ok", "room_id": room_id}, status=200)
         except Exception as ex:
             logging.exception(ex)
@@ -544,45 +423,14 @@ def room_entities(request, room_id):
         return JsonResponse({"status": "error"}, status=405)
 
 
-def room_put(request):
-    if request.method == "PUT":
-        try:
-            data = json.loads(request.body)
-            room_id = data["id"]
-            room = Room.objects.get(id=room_id)
-
-            if "friendly_name" in data:
-                room.friendly_name = data["friendly_name"]
-            if "display_order" in data:
-                room.displayOrder = data["display_order"]
-            if "room_temp_provider" in data:
-                room.room_temp_provider = data["room_temp_provider"]
-            if "room_temp_sensor" in data:
-                room.room_temp_sensor = data["room_temp_sensor"]
-            room.save()
-            send_mqttmanager_reload_command()
-            return JsonResponse({"status": "ok", "room_id": room.id}, status=200)
-        except Exception as ex:
-            logging.exception(ex)
-            return JsonResponse({"status": "error", "message": str(ex)}, status=500)
-    else:
-        return JsonResponse({"status": "error"}, status=405)
-
-
 @csrf_exempt
 def room_create(request):
     if request.method == "POST":
         try:
             data = json.loads(request.body)
-            max_length = Room._meta.get_field("friendly_name").max_length
-            if not data["name"] or len(data["name"]) > max_length:
-                return JsonResponse({"status": "error", "message": f"Room name must be 1 to {max_length} characters"}, status=400)
-            with transaction.atomic():
-                new_room = Room()
-                new_room.friendly_name = data["name"]
-                new_room.save()
-                create_entity_pages_for_room(new_room)
-            send_mqttmanager_reload_command()
+            new_room = Room()
+            new_room.friendly_name = data["name"]
+            new_room.save()
             return JsonResponse({"status": "ok", "room_id": new_room.id}, status=200)
         except Exception as ex:
             logging.exception(ex)
@@ -634,7 +482,7 @@ def scenes(request):
 def scenes_get(request):
     try:
         scenes = []
-        if request.GET.get("scene_id"):
+        if request.GET.get("light_id"):
             scenes_objects = Scene.objects.filter(id=request.GET.get("scene_id"))
         elif request.GET.get("room_id"):
             scenes_objects = Scene.objects.filter(room_id=request.GET.get("room_id"))
@@ -682,7 +530,7 @@ def scenes_post(request):
             scene.lightstate_set.all().delete()  # Remove all old states
             # TODO: Convert light states to JSON fields in DB.
             for light_state in data["light_states"]:
-                light = Entity.objects.filter(id=light_state["light_id"], entity_type=Entity.EntityType.LIGHT).first()
+                light = Light.objects.filter(id=light_state["light_id"]).first()
                 if light:
                     new_state = LightState()
                     new_state.light = light
@@ -738,7 +586,6 @@ def get_scene(request, scene_id):
         elif request.method == "DELETE":
             scene = Scene.objects.get(id=scene_id)
             scene.delete()
-            send_mqttmanager_reload_command()
             return JsonResponse({"status": "success"})
     except Exception as ex:
         logging.exception(ex)
@@ -747,45 +594,6 @@ def get_scene(request, scene_id):
 
 
 ### Generic Entity section ###
-# The controllers MQTTManager's entity classes (docker/MQTTManager/include/{light,switch,button,thermostat}/)
-# accept for each entity type. Anything else is logged as an error when it loads the entity.
-ENTITY_CONTROLLERS = {
-    Entity.EntityType.LIGHT: ("home_assistant", "openhab"),
-    Entity.EntityType.SWITCH: ("home_assistant", "openhab"),
-    Entity.EntityType.BUTTON: ("home_assistant", "nspm"),
-    Entity.EntityType.THERMOSTAT: ("home_assistant", "openhab"),
-    Entity.EntityType.MEDIA_PLAYER: ("home_assistant",),
-    Entity.EntityType.COVER: ("home_assistant", "openhab"),
-}
-
-# The scene types MQTTManager's EntityManager loads. It ignores scenes of any other type.
-SCENE_TYPES = ("home_assistant", "openhab", "nspm_scene")
-
-
-def get_controller_error(entity_type, controller):
-    if controller not in ENTITY_CONTROLLERS[entity_type]:
-        return f"Unknown controller {controller!r}. Expected one of: {', '.join(ENTITY_CONTROLLERS[entity_type])}."
-    return None
-
-
-def get_placement_error(obj, room, entities_page, room_view_position):
-    """Return why obj (an Entity or Scene) cannot go in that slot, or None if it can.
-
-    Only a new or changed placement is checked, so entities saved before these checks
-    existed can still be edited without being moved.
-    """
-    room_id = room.id if room else None
-    if obj.pk is not None and (obj.room_id, obj.entities_page_id, obj.room_view_position) == (room_id, entities_page.id, room_view_position):
-        return None
-    if entities_page.room_id != room_id:
-        return "The entities page belongs to a different room."
-    if not 0 <= room_view_position < entities_page.page_type:
-        return f"room_view_position must be between 0 and {entities_page.page_type - 1} on this page."
-    if type(obj).objects.filter(entities_page=entities_page, room_view_position=room_view_position).exclude(pk=obj.pk).exists():
-        return "That position on the page is already taken."
-    return None
-
-
 def get_rest_entitiy_representation(entity_id):
     entity = Entity.objects.get(id=entity_id)
     return {
@@ -833,7 +641,7 @@ def entities_lights(request):
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=405)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
 
 
 def put_light_entity(request):
@@ -853,7 +661,6 @@ def put_light_entity(request):
             "is_ceiling_light",
             "openhab_item_color_temp",
             "openhab_item_dimmer",
-            "openhab_item_switch",
             "openhab_item_rgb",
         ]
         data = json.loads(request.body)["values"]
@@ -861,16 +668,11 @@ def put_light_entity(request):
             if field not in data:
                 return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
 
-        controller_error = get_controller_error(Entity.EntityType.LIGHT, data["controller"])
-        if controller_error:
-            return JsonResponse({"status": "error", "message": controller_error}, status=400)
-
         entity_data = {
             "controller": data["controller"],
             "home_assistant_name": data.get("home_assistant_name", ""),
             "openhab_control_mode": "dimmer" if data.get("can_dim", False) else "switch",
             "openhab_item_dimmer": data.get("openhab_item_dimmer", ""),
-            "openhab_item_switch": data.get("openhab_item_switch", ""),
             "openhab_item_color_temp": data.get("openhab_item_color_temp", ""),
             "openhab_item_rgb": data.get("openhab_item_rgb", ""),
             "can_dim": str(data["can_dim"]).lower() == "true",
@@ -885,17 +687,10 @@ def put_light_entity(request):
             new_light = Entity()
             new_light.entity_type = Entity.EntityType.LIGHT
 
-        room = Room.objects.get(id=int(data["room_id"]))
-        entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
-        room_view_position = int(data["room_view_position"])
-        placement_error = get_placement_error(new_light, room, entities_page, room_view_position)
-        if placement_error:
-            return JsonResponse({"status": "error", "message": placement_error}, status=400)
-
         new_light.friendly_name = data["friendly_name"]
-        new_light.room = room
-        new_light.entities_page = entities_page
-        new_light.room_view_position = room_view_position
+        new_light.room = Room.objects.get(id=int(data["room_id"]))
+        new_light.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        new_light.room_view_position = int(data["room_view_position"])
 
         new_light.entity_data = entity_data
         new_light.save()
@@ -919,7 +714,7 @@ def entities_switches(request):
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=405)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
 
 
 def put_switch_entity(request):
@@ -939,10 +734,6 @@ def put_switch_entity(request):
             if field not in data:
                 return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
 
-        controller_error = get_controller_error(Entity.EntityType.SWITCH, data["controller"])
-        if controller_error:
-            return JsonResponse({"status": "error", "message": controller_error}, status=400)
-
         entity_data = {
             "openhab_item_switch": data.get("openhab_item_switch", ""),
             "home_assistant_name": data.get("home_assistant_name", ""),
@@ -954,17 +745,10 @@ def put_switch_entity(request):
             new_switch = Entity()
             new_switch.entity_type = Entity.EntityType.SWITCH
 
-        room = Room.objects.get(id=int(data["room_id"]))
-        entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
-        room_view_position = int(data["room_view_position"])
-        placement_error = get_placement_error(new_switch, room, entities_page, room_view_position)
-        if placement_error:
-            return JsonResponse({"status": "error", "message": placement_error}, status=400)
-
         new_switch.friendly_name = data["friendly_name"]
-        new_switch.room = room
-        new_switch.entities_page = entities_page
-        new_switch.room_view_position = room_view_position
+        new_switch.room = Room.objects.get(id=int(data["room_id"]))
+        new_switch.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        new_switch.room_view_position = int(data["room_view_position"])
 
         new_switch.entity_data = entity_data
         new_switch.save()
@@ -988,7 +772,7 @@ def entities_buttons(request):
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=405)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
 
 
 def put_button_entity(request):
@@ -1009,10 +793,6 @@ def put_button_entity(request):
             if field not in data:
                 return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
 
-        controller_error = get_controller_error(Entity.EntityType.BUTTON, data["controller"])
-        if controller_error:
-            return JsonResponse({"status": "error", "message": controller_error}, status=400)
-
         entity_data = {
             "mqtt_topic": data.get("mqtt_topic", ""),
             "mqtt_payload": data.get("mqtt_payload", ""),
@@ -1025,17 +805,10 @@ def put_button_entity(request):
             new_button = Entity()
             new_button.entity_type = Entity.EntityType.BUTTON
 
-        room = Room.objects.get(id=int(data["room_id"]))
-        entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
-        room_view_position = int(data["room_view_position"])
-        placement_error = get_placement_error(new_button, room, entities_page, room_view_position)
-        if placement_error:
-            return JsonResponse({"status": "error", "message": placement_error}, status=400)
-
         new_button.friendly_name = data["friendly_name"]
-        new_button.room = room
-        new_button.entities_page = entities_page
-        new_button.room_view_position = room_view_position
+        new_button.room = Room.objects.get(id=int(data["room_id"]))
+        new_button.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        new_button.room_view_position = int(data["room_view_position"])
 
         new_button.entity_data = entity_data
         new_button.save()
@@ -1054,12 +827,12 @@ def put_button_entity(request):
 
 def entities_thermostats(request):
     try:
-        if request.method == "PUT":
-            return put_thermostat_entity(request)
+        # if request.method == "PUT":
+        return put_thermostat_entity(request)
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=405)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
 
 
 def put_thermostat_entity(request):
@@ -1072,7 +845,6 @@ def put_thermostat_entity(request):
             "type",
             "friendly_name",
             "step_size",
-            "use_current_temperature",
             "home_assistant_name",
             "openhab_fan_mode_item",
             "openhab_hvac_mode_item",
@@ -1100,10 +872,6 @@ def put_thermostat_entity(request):
                         if field not in item:
                             return JsonResponse({"status": "error", "message": f"Missing required field in {mode}. Missing field: {field}"}, status=400)
 
-        controller_error = get_controller_error(Entity.EntityType.THERMOSTAT, data["controller"])
-        if controller_error:
-            return JsonResponse({"status": "error", "message": controller_error}, status=400)
-
         entity_data = {
             "controller": data.get("controller", ""),
             "fan_modes": data.get("fan_modes", []),
@@ -1111,7 +879,6 @@ def put_thermostat_entity(request):
             "preset_modes": data.get("preset_modes", []),
             "swing_modes": data.get("swing_modes", []),
             "swingh_modes": data.get("swingh_modes", []),
-            "use_current_temperature": data.get("use_current_temperature", "True") == "True",
             "home_assistant_name": data.get("home_assistant_name", ""),
             "openhab_fan_mode_item": data.get("openhab_fan_mode_item", ""),
             "openhab_hvac_mode_item": data.get("openhab_hvac_mode_item", ""),
@@ -1119,7 +886,6 @@ def put_thermostat_entity(request):
             "openhab_swing_mode_item": data.get("openhab_swing_mode_item", ""),
             "openhab_swingh_mode_item": data.get("openhab_swingh_mode_item", ""),
             "openhab_temperature_item": data.get("openhab_temperature_item", ""),
-            "openhab_current_temperature_item": data.get("openhab_current_temperature_item", ""),
             "step_size": float(data.get("step_size", 1)),
         }
         if "id" in data and data["id"]:
@@ -1128,272 +894,13 @@ def put_thermostat_entity(request):
             new_thermostat = Entity()
             new_thermostat.entity_type = Entity.EntityType.THERMOSTAT
 
-        room = Room.objects.get(id=int(data["room_id"]))
-        entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
-        room_view_position = int(data["room_view_position"])
-        placement_error = get_placement_error(new_thermostat, room, entities_page, room_view_position)
-        if placement_error:
-            return JsonResponse({"status": "error", "message": placement_error}, status=400)
-
         new_thermostat.friendly_name = data["friendly_name"]
-        new_thermostat.room = room
-        new_thermostat.entities_page = entities_page
-        new_thermostat.room_view_position = room_view_position
+        new_thermostat.room = Room.objects.get(id=int(data["room_id"]))
+        new_thermostat.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        new_thermostat.room_view_position = int(data["room_view_position"])
 
         new_thermostat.entity_data = entity_data
         new_thermostat.save()
-        send_mqttmanager_reload_command()
-
-        return JsonResponse({"status": "ok"}, status=200)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
-
-
-########################
-# Media player section #
-########################
-
-
-# How the volume of the source feeding a media player is found in Home Assistant.
-# See HomeAssistantSourceVolumeStrategy in the MQTTManager for what each one expects.
-MEDIA_PLAYER_SOURCE_VOLUME_STRATEGIES = ["none", "player_attributes", "source_entity"]
-
-# Volume in % that one volume up/down press on the panel changes, unless set per media player.
-MEDIA_PLAYER_DEFAULT_VOLUME_STEP = 5
-
-
-def entities_media_players(request):
-    try:
-        if request.method == "PUT":
-            return put_media_player_entity(request)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=405)
-
-
-def put_media_player_entity(request):
-    try:
-        required_fields = [  # Fields required for media player entities
-            "room_id",
-            "entities_page_id",
-            "room_view_position",
-            "controller",
-            "friendly_name",
-            "home_assistant_name",
-        ]
-
-        data = json.loads(request.body)
-        for field in required_fields:
-            if field not in data:
-                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
-
-        if data["controller"] != "home_assistant":
-            return JsonResponse({"status": "error", "message": f"Unsupported controller for media player: {data['controller']}"}, status=400)
-
-        # Source volume is optional, a media player without it only has its own volume.
-        source_volume_strategy = data.get("source_volume_strategy", "none")
-        source_entity_attribute = data.get("source_entity_attribute", "")
-        source_volume_attribute = data.get("source_volume_attribute", "")
-        if not all(isinstance(value, str) for value in [source_volume_strategy, source_entity_attribute, source_volume_attribute]):
-            return JsonResponse({"status": "error", "message": "source_volume_strategy, source_entity_attribute and source_volume_attribute must be strings."}, status=400)
-        source_entity_attribute = source_entity_attribute.strip()
-        source_volume_attribute = source_volume_attribute.strip()
-
-        # Each strategy needs different attributes on the media player in Home Assistant. Reject a combination
-        # here rather than leaving the manager to log an error and silently fall back to no source volume.
-        if source_volume_strategy not in MEDIA_PLAYER_SOURCE_VOLUME_STRATEGIES:
-            return JsonResponse({"status": "error", "message": f"Unknown source volume strategy: {source_volume_strategy}. Expected one of {', '.join(MEDIA_PLAYER_SOURCE_VOLUME_STRATEGIES)}."}, status=400)
-        if source_volume_strategy != "none" and not source_entity_attribute:
-            return JsonResponse({"status": "error", "message": f"Source volume strategy '{source_volume_strategy}' requires source_entity_attribute."}, status=400)
-        if source_volume_strategy == "player_attributes" and not source_volume_attribute:
-            return JsonResponse({"status": "error", "message": "Source volume strategy 'player_attributes' requires source_volume_attribute."}, status=400)
-
-        # How much one volume up/down press on the panel changes the volume. Optional, see below for the default.
-        volume_step = data.get("volume_step")
-        if volume_step is not None and (isinstance(volume_step, bool) or not isinstance(volume_step, int) or volume_step < 1 or volume_step > 100):
-            return JsonResponse({"status": "error", "message": "volume_step must be an integer between 1 and 100."}, status=400)
-
-        try:
-            room_id = int(data["room_id"])
-            entities_page_id = int(data["entities_page_id"])
-            room_view_position = int(data["room_view_position"])
-            media_player_id = int(data["id"]) if data.get("id") else None
-        except (TypeError, ValueError):
-            return JsonResponse({"status": "error", "message": "room_id, entities_page_id, room_view_position and id must be integers."}, status=400)
-
-        if media_player_id is not None:
-            # Only update existing media players, never another type of entity that happens to have this ID.
-            new_media_player = Entity.objects.filter(id=media_player_id).first()
-            if new_media_player is None:
-                return JsonResponse({"status": "error", "message": f"No entity with id {media_player_id}."}, status=404)
-            if new_media_player.entity_type != Entity.EntityType.MEDIA_PLAYER:
-                return JsonResponse({"status": "error", "message": f"Entity {media_player_id} is a {new_media_player.entity_type}, not a media player."}, status=409)
-        else:
-            new_media_player = Entity()
-            new_media_player.entity_type = Entity.EntityType.MEDIA_PLAYER
-
-        room = Room.objects.filter(id=room_id).first()
-        if room is None:
-            return JsonResponse({"status": "error", "message": f"No room with id {room_id}."}, status=404)
-
-        # The media player is shown in a slot on one of the room's entities pages.
-        entities_page = RoomEntitiesPage.objects.filter(id=entities_page_id).first()
-        if entities_page is None:
-            return JsonResponse({"status": "error", "message": f"No entities page with id {entities_page_id}."}, status=404)
-        if entities_page.room_id != room.id or entities_page.is_scenes_page:
-            return JsonResponse({"status": "error", "message": f"Entities page {entities_page_id} is not an entities page in room {room_id}."}, status=400)
-        if room_view_position < 0 or room_view_position >= entities_page.page_type:
-            return JsonResponse({"status": "error", "message": f"room_view_position must be between 0 and {entities_page.page_type - 1} for entities page {entities_page_id}."}, status=400)
-
-        # The slot must be free. Updating a media player in place keeps its own slot.
-        slot_taken = Entity.objects.filter(entities_page=entities_page, room_view_position=room_view_position).exclude(id=new_media_player.id).exists() or Scene.objects.filter(entities_page=entities_page, room_view_position=room_view_position).exists()
-        if slot_taken:
-            return JsonResponse({"status": "error", "message": f"Slot {room_view_position} on entities page {entities_page_id} is already in use."}, status=409)
-
-        # Without a volume step in the request, an existing media player keeps its step and a new one gets 5%.
-        if volume_step is None:
-            volume_step = new_media_player.entity_data.get("volume_step", MEDIA_PLAYER_DEFAULT_VOLUME_STEP)
-
-        entity_data = {
-            "controller": data["controller"],
-            "home_assistant_name": data["home_assistant_name"],
-            "source_volume_strategy": source_volume_strategy,
-            "source_entity_attribute": source_entity_attribute,
-            "source_volume_attribute": source_volume_attribute,
-            "volume_step": volume_step,
-        }
-        new_media_player.friendly_name = data["friendly_name"]
-        new_media_player.room = room
-        new_media_player.entities_page = entities_page
-        new_media_player.room_view_position = room_view_position
-        new_media_player.entity_data = entity_data
-        new_media_player.save()
-        send_mqttmanager_reload_command()
-
-        return JsonResponse({"status": "ok"}, status=200)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
-
-
-####################
-# Covers section   #
-####################
-
-
-def entities_covers(request):
-    try:
-        if request.method == "PUT":
-            return put_cover_entity(request)
-    except Exception as ex:
-        logging.exception(ex)
-        return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=405)
-
-
-def put_cover_entity(request):
-    try:
-        required_fields = [
-            "room_id",
-            "entities_page_id",
-            "room_view_position",
-            "controller",
-            "friendly_name",
-            "invert_positions",
-            "home_assistant_name",
-            "openhab_item",
-            "openhab_tilt_item",
-            "position_preset1",
-            "position_preset2",
-            "position_preset3",
-            "tilt_preset1",
-            "tilt_preset2",
-            "tilt_preset3",
-        ]
-
-        data = json.loads(request.body)
-        for field in required_fields:
-            if field not in data:
-                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
-
-        for field in ("controller", "friendly_name", "home_assistant_name", "openhab_item", "openhab_tilt_item"):
-            if not isinstance(data[field], str):
-                return JsonResponse({"status": "error", "message": f"{field} must be a string."}, status=400)
-
-        controller_error = get_controller_error(Entity.EntityType.COVER, data["controller"])
-        if controller_error:
-            return JsonResponse({"status": "error", "message": controller_error}, status=400)
-
-        home_assistant_name = data["home_assistant_name"].strip()
-        openhab_item = data["openhab_item"].strip()
-        openhab_tilt_item = data["openhab_tilt_item"].strip()
-        invert_positions = data["invert_positions"] if "invert_positions" in data else False
-        if data["controller"] == "home_assistant":
-            if not home_assistant_name:
-                return JsonResponse({"status": "error", "message": "home_assistant_name is required for a Home Assistant cover."}, status=400)
-            if not home_assistant_name.startswith("cover."):
-                return JsonResponse({"status": "error", "message": "home_assistant_name must be a cover.* entity."}, status=400)
-        else:
-            if not openhab_item:
-                return JsonResponse({"status": "error", "message": "openhab_item is required for an OpenHAB cover."}, status=400)
-
-        try:
-            room_id = int(data["room_id"])
-            entities_page_id = int(data["entities_page_id"])
-            room_view_position = int(data["room_view_position"])
-            cover_id = int(data["id"]) if data.get("id") else None
-        except (TypeError, ValueError):
-            return JsonResponse({"status": "error", "message": "room_id, entities_page_id, room_view_position and id must be integers."}, status=400)
-
-        if cover_id is not None:
-            new_cover = Entity.objects.filter(id=cover_id).first()
-            if new_cover is None:
-                return JsonResponse({"status": "error", "message": f"No entity with id {cover_id}."}, status=404)
-            if new_cover.entity_type != Entity.EntityType.COVER:
-                return JsonResponse({"status": "error", "message": f"Entity {cover_id} is a {new_cover.entity_type}, not a cover."}, status=409)
-        else:
-            new_cover = Entity()
-            new_cover.entity_type = Entity.EntityType.COVER
-
-        room = Room.objects.filter(id=room_id).first()
-        if room is None:
-            return JsonResponse({"status": "error", "message": f"No room with id {room_id}."}, status=404)
-
-        entities_page = RoomEntitiesPage.objects.filter(id=entities_page_id).first()
-        if entities_page is None:
-            return JsonResponse({"status": "error", "message": f"No entities page with id {entities_page_id}."}, status=404)
-        if entities_page.room_id != room.id:
-            return JsonResponse({"status": "error", "message": f"Entities page {entities_page_id} belongs to another room."}, status=400)
-        if entities_page.is_scenes_page:
-            return JsonResponse({"status": "error", "message": "Covers cannot be placed on a scenes page."}, status=400)
-
-        placement_error = get_placement_error(new_cover, room, entities_page, room_view_position)
-        if placement_error:
-            return JsonResponse({"status": "error", "message": placement_error}, status=400)
-
-        entity_data = {
-            "controller": data["controller"],
-            "home_assistant_name": home_assistant_name,
-            "openhab_item": openhab_item,
-            "openhab_tilt_item": openhab_tilt_item,
-            "invert_positions": invert_positions,
-            "position_preset1": int(data["position_preset1"]),
-            "position_preset2": int(data["position_preset2"]),
-            "position_preset3": int(data["position_preset3"]),
-            "tilt_preset1": int(data["tilt_preset1"]),
-            "tilt_preset2": int(data["tilt_preset2"]),
-            "tilt_preset3": int(data["tilt_preset3"]),
-        }
-        new_cover.friendly_name = data["friendly_name"].strip()
-        if not new_cover.friendly_name:
-            return JsonResponse({"status": "error", "message": "friendly_name must not be empty."}, status=400)
-        new_cover.room = room
-        new_cover.entities_page = entities_page
-        new_cover.room_view_position = room_view_position
-        new_cover.entity_data = entity_data
-        new_cover.save()
         send_mqttmanager_reload_command()
 
         return JsonResponse({"status": "ok"}, status=200)
@@ -1409,12 +916,12 @@ def put_cover_entity(request):
 
 def entities_scenes(request):
     try:
-        if request.method == "PUT":
-            return put_scene_entity(request)
+        # if request.method == "PUT":
+        return put_scene_entity(request)
     except Exception as ex:
         logging.exception(ex)
         return JsonResponse({"status": "error"}, status=500)
-    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=405)
+    return JsonResponse({"status": "error", "error": "Unsupported method"}, status=403)
 
 
 def put_scene_entity(request):
@@ -1435,27 +942,15 @@ def put_scene_entity(request):
             if field not in data:
                 return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
 
-        if data["scene_type"] not in SCENE_TYPES:
-            return JsonResponse({"status": "error", "message": f"Unknown scene_type {data['scene_type']!r}. Expected one of: {', '.join(SCENE_TYPES)}."}, status=400)
-        if data["scene_type"] != "nspm_scene" and not data["backend_name"]:
-            return JsonResponse({"status": "error", "message": "backend_name is required for Home Assistant and OpenHAB scenes."}, status=400)
-
         if "id" in data and data["id"]:
             new_scene = Scene.objects.get(id=int(data["id"]))
         else:
             new_scene = Scene()
 
-        room = Room.objects.get(id=int(data["room_id"])) if data["room_id"] else None
-        entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
-        room_view_position = int(data["room_view_position"])
-        placement_error = get_placement_error(new_scene, room, entities_page, room_view_position)
-        if placement_error:
-            return JsonResponse({"status": "error", "message": placement_error}, status=400)
-
         new_scene.friendly_name = data["friendly_name"]
-        new_scene.room = room
-        new_scene.entities_page = entities_page
-        new_scene.room_view_position = room_view_position
+        new_scene.room = Room.objects.get(id=int(data["room_id"])) if data["room_id"] else None
+        new_scene.entities_page = RoomEntitiesPage.objects.get(id=int(data["entities_page_id"]))
+        new_scene.room_view_position = int(data["room_view_position"])
 
         new_scene.scene_type = data.get("scene_type", "")
         new_scene.backend_name = data.get("backend_name", "")

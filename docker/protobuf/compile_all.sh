@@ -1,8 +1,7 @@
 #!/bin/bash
-# Output directories default to their paths in the dev container; CI overrides them.
-DEST_DIR_MQTTMANAGER=${DEST_DIR_MQTTMANAGER:-/MQTTManager/include/protobuf/}
-DEST_DIR_DJANGO=${DEST_DIR_DJANGO:-/usr/src/app/nspanelmanager/web/protobuf/}
-DEST_DIR_FIRMWARE=${DEST_DIR_FIRMWARE:-/full_git/protobuf_firmware/}
+DEST_DIR_MQTTMANAGER=/MQTTManager/include/protobuf/
+DEST_DIR_DJANGO=/usr/src/app/nspanelmanager/web/protobuf/
+DEST_DIR_FIRMWARE=/full_git/protobuf_firmware/
 SRC_FILES=('protobuf_mqttmanager.proto' 'protobuf_general.proto' 'protobuf_formats.proto')
 
 for SRC_FILE in ${SRC_FILES[@]}; do

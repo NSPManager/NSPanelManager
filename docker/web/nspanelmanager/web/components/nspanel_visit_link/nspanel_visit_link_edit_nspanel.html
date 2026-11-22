@@ -1,0 +1,38 @@
+<script type="module">
+  import { define, html } from '/static/node_modules/hybrids/src/index.js';
+
+  stomp_subscribe("nspanel/{{ nspanel.mac_address }}/status", (message) => {
+    var element = document.getElementById(`nspanel-visit-link-{{ nspanel.id }}`);
+    var data = JSON.parse(message.body);
+    element.state = data.state;
+    element.address = data.ip_address;
+  })
+
+  define({
+    tag: "nspanel-visit-link",
+    nspanel_id: '',
+    state: '',
+    address: '',
+    render: ({id, state, address}) => {
+      if (state == "offline") {
+        return html`
+            <a title="No visit link available." class="transition-all ease-linear duration-100">
+                <div class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
+                    <span class="mdi mdi-web me-2"></span><span class="line-through">Visit</span>
+                </div>
+            </a>
+        `;
+      } else {
+        return html`
+            <a href="http://${address}" target="_blank" title="Visit NSPanel settings page." class="transition-all ease-linear duration-100">
+                <div class="p-3 w-full border-solid border-b-2 border-base-300 hover:bg-base-300 cursor-pointer">
+                    <span class="mdi mdi-web me-2"></span><span class="">Visit</span>
+                </div>
+            </a>
+        `;
+      }
+    },
+  })
+</script>
+
+<nspanel-visit-link id="nspanel-visit-link-{{ nspanel.id }}" nspanel_id="{{ nspanel.id }}" state="" address=""></nspanel-visit-link>
