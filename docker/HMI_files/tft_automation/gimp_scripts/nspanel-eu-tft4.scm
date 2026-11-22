@@ -575,7 +575,7 @@
 	;MAKE BACKGROUND PAGE INVISIBLE TO PREPARE FOR NEXT ROOM
 	(gimp-item-set-visible (car (gimp-image-get-layer-by-name image "ENTITY_THERMOSTAT")) 0)
 
-		;;------------------------------------------------------------------------------------------------------------------------
+;;------------------------------------------------------------------------------------------------------------------------
 ;; BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE BLINDS_PAGE
 
 	;MAKE BACKGROUND PAGE VISIBLE
@@ -590,7 +590,7 @@
 		(gimp-image-merge-visible-layers newImage 1)
 		(let*
 		((activeLayer (car (gimp-image-get-active-layer newImage))))
-		(gimp-file-save RUN-NONINTERACTIVE image activeLayer "pictures_tft1/181_blinds_depress.bmp" "pictures_tft1/181_blinds_depress.bmp")
+		(gimp-file-save RUN-NONINTERACTIVE image activeLayer "pictures_tft4/181_blinds_depress.bmp" "pictures_tft4/181_blinds_depress.bmp")
 		)
 	(gimp-image-delete newImage)
 	)
@@ -603,7 +603,7 @@
 		(gimp-image-merge-visible-layers newImage 1)
 		(let*
 		((activeLayer (car (gimp-image-get-active-layer newImage))))
-		(gimp-file-save RUN-NONINTERACTIVE image activeLayer "pictures_tft1/182_blinds_press.bmp" "pictures_tft1/182_blinds_press.bmp")
+		(gimp-file-save RUN-NONINTERACTIVE image activeLayer "pictures_tft4/182_blinds_press.bmp" "pictures_tft4/182_blinds_press.bmp")
 		)
 	(gimp-image-delete newImage)
 	)

@@ -7,7 +7,7 @@ from tests.test_hmi import PROJECTS, load
 
 # Text fields whose text the font they name cannot draw, because the text is a placeholder the
 # firmware overwrites. Anything new here is worth a look: a font index may be stale.
-UNDRAWABLE = {('eu', 'dropdown', 'i4_button')}
+UNDRAWABLE = set()
 
 
 class ProjectFontsTest(unittest.TestCase):
@@ -23,6 +23,10 @@ class ProjectFontsTest(unittest.TestCase):
     def test_both_regions_carry_the_same_fonts(self):
         us = {f.name: b for (_, b), f in zip(load('us').font_blocks(), load('us').fonts())}
         eu = {f.name: b for (_, b), f in zip(load('eu').font_blocks(), load('eu').fonts())}
+
+        for k in sorted(set(us) | set(eu)):
+            if us.get(k) != eu.get(k):
+                print('differs:', k)
         self.assertEqual(us, eu)
 
     def test_known_icon_fonts_are_where_components_expect_them(self):
