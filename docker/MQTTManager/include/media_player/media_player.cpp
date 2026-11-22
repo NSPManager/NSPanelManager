@@ -48,7 +48,6 @@ void MediaPlayerEntity::reload_config() {
     if (controller.compare("home_assistant") == 0) {
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT;
     } else if (controller.compare("openhab") == 0) {
-      SPDLOG_ERROR("OpenHAB media players are not implemented, media player {}::{} will not be available.", this->_id, this->_name);
       this->_controller = MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB;
     } else {
       SPDLOG_ERROR("Got unknown controller ({}) for media player {}::{}. Will default to HOME_ASSISTANT.", controller, this->_id, this->_name);
