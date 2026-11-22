@@ -29,9 +29,11 @@ while true; do
 done
 
 if [ "$TEST_MODE" -eq 1 ]; then
-  NSPM_BUILD_TESTS=ON
+  sed -i 's/set(TEST_MODE.*/set(TEST_MODE 1)/g' /MQTTManager/CMakeLists.txt
+  sed -i 's/add_compile_definitions(TEST_MODE.*/add_compile_definitions(TEST_MODE=1)/g' /MQTTManager/CMakeLists.txt
 else
-  NSPM_BUILD_TESTS=OFF
+  sed -i 's/set(TEST_MODE.*/set(TEST_MODE 0)/g' /MQTTManager/CMakeLists.txt
+  sed -i 's/add_compile_definitions(TEST_MODE.*/add_compile_definitions(TEST_MODE=0)/g' /MQTTManager/CMakeLists.txt
 fi
 
 if [ -z "$TARGETPLATFORM" ]; then
@@ -137,7 +139,7 @@ conan install . --build=missing -pr:b default -pr:h host
 echo "--> Conan install complete."
 cd build
 source $BUILD_TYPE/generators/conanbuild.sh
-cmake .. -DCMAKE_TOOLCHAIN_FILE=$BUILD_TYPE/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS} -DNSPM_BUILD_TESTS=${NSPM_BUILD_TESTS}
+cmake .. -DCMAKE_TOOLCHAIN_FILE=$BUILD_TYPE/generators/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DBUILD_SHARED_LIBS=${BUILD_SHARED_LIBS}
 cmake --build . --config $BUILD_TYPE -j $(nproc)
 if [ -f /MQTTManager/fix_compile_commands_path.sh ]; then
   source /MQTTManager/fix_compile_commands_path.sh

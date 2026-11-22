@@ -1,0 +1,19 @@
+.centeredImageContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0; /* Space around the figure */
+}
+
+img {
+    max-width: 100%;
+    height: auto; /* Ensure responsive images */
+}
+
+.caption {
+    margin-top: 8px; /* Space between image and caption */
+    font-size: 0.9em; /* Slightly smaller text */
+    color: #555; /* Subtle color for the caption */
+    text-align: center;
+}

@@ -1,6 +1,5 @@
 var stomp_subscription_callbacks = {};
 var stomp_subscription_destinations = {};
-var last_stomp_messages = {};
 function stomp_connected_callback() {
   console.log("Connected to STOMP. Resubscribing...");
   $("#ws_connection_in_progress_notification").addClass("hidden");
@@ -47,10 +46,6 @@ function stomp_subscribe(topic, callback) {
     if (!stomp_subscription_callbacks[topic]["callbacks"].includes(callback)) {
       console.log("Attaching callback to existing subscription");
       stomp_subscription_callbacks[topic]["callbacks"].push(callback);
-
-      if (topic in last_stomp_messages) {
-        callback(last_stomp_messages[topic]);
-      }
     }
   } else {
     stomp_subscription_callbacks[topic] = {
@@ -76,7 +71,6 @@ function stomp_subscribe(topic, callback) {
 }
 
 function stomp_unsubscribe(topic, callback) {
-  if (!stomp_subscription_callbacks[topic]) return;
   stomp_subscription_callbacks[topic]["callbacks"].splice(stomp_subscription_callbacks[topic]["callbacks"].indexOf(callback), 1);
 
   if (stomp_subscription_callbacks[topic]["callbacks"].length === 0) {
@@ -87,7 +81,6 @@ function stomp_unsubscribe(topic, callback) {
 }
 
 function stomp_message_callback(message) {
-  last_stomp_messages[message.headers.destination] = message;
   stomp_subscription_callbacks[message.headers.destination]["callbacks"].forEach(function (callback) {
     callback(message);
   });

@@ -28,12 +28,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
-# Persistent data (secret key, database). Overridable so that tests can run outside the container.
-DATA_DIR = environment("NSPM_DATA_DIR", default="/data")
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = ""
-SECRET_KEY_PATH = os.path.join(DATA_DIR, "secret.key")
+SECRET_KEY_PATH = "/data/secret.key"
 if os.path.exists(SECRET_KEY_PATH):
     with open(SECRET_KEY_PATH) as f:
         SECRET_KEY = f.read()
@@ -62,7 +59,6 @@ INSTALLED_APPS = [
     #'django.contrib.staticfiles', Disabled and make use of django_components.safer_staticfiles instead. It will not serve out .py or .html files
     "django_components.safer_staticfiles",
     "django_components",
-    "rest_framework",
 ]
 
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "web/components"), os.path.join(BASE_DIR, "web/react-components/dist")]
@@ -111,7 +107,7 @@ WSGI_APPLICATION = "nspanelmanager.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
-DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": os.path.join(DATA_DIR, "nspanelmanager_db.sqlite3"), "timeout": 20}}
+DATABASES = {"default": {"ENGINE": "django.db.backends.sqlite3", "NAME": "/data/nspanelmanager_db.sqlite3", "timeout": 20}}
 
 LOGGING = {
     "version": 1,
@@ -170,14 +166,3 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
-
-# Django REST Framework, used by the /rest/v2/* views (web/rest_v2/). The older /rest/* views are plain Django views.
-REST_FRAMEWORK = {
-    # There are no user accounts. CsrfOnlyAuthentication keeps the CSRF check the plain views get from
-    # CsrfViewMiddleware: DRF exempts its views from the middleware and leaves CSRF to authentication.
-    "DEFAULT_AUTHENTICATION_CLASSES": ["web.rest_v2.auth.CsrfOnlyAuthentication"],
-    "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.AllowAny"],
-    "UNAUTHENTICATED_USER": None,
-    "DEFAULT_PARSER_CLASSES": ["rest_framework.parsers.JSONParser"],
-    "DEFAULT_RENDERER_CLASSES": ["rest_framework.renderers.JSONRenderer"],
-}

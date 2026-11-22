@@ -41,5 +41,8 @@ firmware/NSPanelManagerFirmware/CMakeLists.txt
 
 # MacOS
 .DS_Store
-docker/MQTTManager/tests/last_run.log
-docker/HMI_files/tft_automation/last_pictures_run.log
+
+# Ignore only neccesary files from LaTeX manual
+docs/tex/*
+!docs/tex/*.pdf
+!docs/tex/*.tex

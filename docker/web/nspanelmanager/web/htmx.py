@@ -20,6 +20,10 @@ from requests.sessions import Request
 
 import web.home_assistant_api
 import web.openhab_api
+from web.components.nspanel_room_entities_pages.nspanel_room_entities_pages import (
+    NSPanelRoomEntitiesPages,
+)
+from web.components.rooms_list.rooms_list import RoomsList
 from web.settings_helper import (
     delete_nspanel_setting,
     get_nspanel_setting_with_default,
@@ -44,6 +48,40 @@ from .models import (
 )
 
 
+def partial_index_nspanels_section(request):
+    if get_setting_with_default("use_fahrenheit") == "True":
+        temperature_unit = "°F"
+    else:
+        temperature_unit = "°C"
+
+    nspanels = []
+    for nspanel in NSPanel.objects.filter(denied=False):
+        panel_info = {}
+        panel_info["data"] = nspanel
+        nspanels.append(panel_info)
+
+    data = {
+        "nspanels": nspanels,
+        "temperature_unit": temperature_unit,
+    }
+
+    return render(request, "index_htmx_nspanels_section.html", data)
+
+
+def partial_nspanel_index_view(request, nspanel_id):
+    try:
+        if request.method == "GET":
+            data = {
+                "nspanel": {"data": NSPanel.objects.get(id=nspanel_id)},
+            }
+            return render(request, "partial/nspanel_index_view_htmx.html", data)
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
 @csrf_exempt
 def unblock_nspanel(request, nspanel_id):
     if request.method == "DELETE":
@@ -55,6 +93,62 @@ def unblock_nspanel(request, nspanel_id):
         response = HttpResponse("")
         response["HX-Refresh"] = "true"
         return response
+
+
+@csrf_exempt
+def nspanel_accept_register_request(request, nspanel_id):
+    try:
+        if request.method == "POST":
+            nspanel = NSPanel.objects.get(id=nspanel_id)
+            nspanel.denied = False
+            nspanel.accepted = True
+            nspanel.save()
+            send_mqttmanager_reload_command()
+
+            response = HttpResponse("", status=200)
+            response["HX-Refresh"] = "true"
+            return response
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+@csrf_exempt
+def nspanel_deny_register_request(request, nspanel_id):
+    try:
+        if request.method == "POST":
+            nspanel = NSPanel.objects.get(id=nspanel_id)
+            nspanel.denied = True
+            nspanel.save()
+
+            send_mqttmanager_reload_command()
+
+            response = HttpResponse("", status=200)
+            response["HX-Refresh"] = "true"
+            return response
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
+
+
+@csrf_exempt
+def nspanel_delete(request, nspanel_id):
+    try:
+        if request.method == "DELETE":
+            nspanel = NSPanel.objects.get(id=nspanel_id)
+            nspanel.delete()
+            response = HttpResponse("", status=200)
+            response["HX-Redirect"] = "/"
+            return response
+        else:
+            return JsonResponse({"status": "error"}, status=405)
+    except Exception as ex:
+        logging.exception(ex)
+        return JsonResponse({"status": "error"}, status=500)
 
 
 def select_room_temperature_sensor_provider(request, room_id):
@@ -209,7 +303,6 @@ def relay_group_save(request):
             rg = RelayGroup()
         rg.friendly_name = request.POST["name"]
         rg.save()
-        send_mqttmanager_reload_command()
 
         response = HttpResponse()
         response["HX-Refresh"] = "true"
@@ -221,7 +314,6 @@ def relay_group_delete(request, relay_group_id):
     if request.method == "DELETE":
         rg = RelayGroup.objects.get(id=relay_group_id)
         rg.delete()
-        send_mqttmanager_reload_command()
 
         response = HttpResponse()
         response["HX-Refresh"] = "true"
@@ -267,6 +359,20 @@ def relay_group_remove_relay(request, relay_binding_id):
         response = HttpResponse()
         response["HX-Refresh"] = "true"
         return response
+
+
+@csrf_exempt
+def handle_entity_modal_result(request):
+    if request.session["action"] == "ADD_SCENE_TO_NSPANEL_ENTITY_PAGE":
+        return create_or_update_scene_entity(request)
+    else:
+        return JsonResponse(
+            {
+                "status": "error",
+                "text": "Unknown action! Action: " + request.session["action"],
+            },
+            status=500,
+        )
 
 
 def partial_select_new_entity_item_list(request, action, action_args):
@@ -439,6 +545,61 @@ def partial_entity_add_scene_entity(request):
     return render(request, "partial/select_entity/entity_add_or_edit_scene.html", data)
 
 
+@csrf_exempt
+def partial_remove_entity_from_page_slot(request, page_id, slot_id):
+    page = RoomEntitiesPage.objects.get(id=page_id)
+
+    # Check for light in given slot
+    entities = page.entity_set.filter(room_view_position=slot_id).all()
+    if entities.count() > 0:
+        entities.delete()
+        send_mqttmanager_reload_command()
+
+    entities = page.scene_set.filter(room_view_position=slot_id).all()
+    if entities.count() > 0:
+        entities.delete()
+        send_mqttmanager_reload_command()
+
+    room_id = 0
+    if page.room:
+        room_id = page.room.id
+
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(
+        request=request,
+        view="edit_room",
+        room_id=room_id,
+        is_scenes_pages=page.is_scenes_page,
+        is_global_scenes_page=(page.room is None),
+    )
+
+
+def partial_edit_entities_page(request, page_id):
+    data = {
+        "page_id": page_id,
+    }
+    return render(request, "partial/edit_entities_page.html", data)
+
+
+def partial_save_edit_entities_page(request, page_id, page_type):
+    page = RoomEntitiesPage.objects.get(id=page_id)
+    page.page_type = page_type
+    page.save()
+
+    room_id = 0
+    if page.room:
+        room_id = page.room.id
+    send_mqttmanager_reload_command()
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(
+        request=request,
+        view="edit_room",
+        room_id=room_id,
+        is_scenes_pages=page.is_scenes_page,
+        is_global_scenes_page=(page.room is None),
+    )
+
+
 def get_entity_in_page_slot(page_id, slot_id):
     page = RoomEntitiesPage.objects.get(id=page_id)
     entities = Entity.objects.filter(entities_page=page, room_view_position=slot_id)
@@ -450,6 +611,98 @@ def get_entity_in_page_slot(page_id, slot_id):
         return entities[0]
 
     return None
+
+
+@csrf_exempt
+def partial_move_entity(request):
+    existing_entity_in_slot = get_entity_in_page_slot(request.POST["page_id"], request.POST["slot_id"])
+    new_entity_in_slot = None
+    if request.POST["new_entity_type"] == "scene":
+        new_entity_in_slot = Scene.objects.get(id=request.POST["new_entity_id"])
+    else:
+        try:
+            new_entity_in_slot = Entity.objects.get(id=request.POST["new_entity_id"])
+        except Exception as e:
+            return JsonResponse({"status": "error", "text": "Did not find existing entity to move!"})
+
+    if existing_entity_in_slot:
+        # Swap the existing entity place with the new entity to be put on that slot
+        existing_entity_in_slot.entities_page = new_entity_in_slot.entities_page
+        existing_entity_in_slot.room_view_position = new_entity_in_slot.room_view_position
+        existing_entity_in_slot.save()
+
+    new_entity_in_slot.entities_page = RoomEntitiesPage.objects.get(id=request.POST["page_id"])
+    new_entity_in_slot.room_view_position = request.POST["slot_id"]
+    new_entity_in_slot.save()
+    send_mqttmanager_reload_command()
+
+    if new_entity_in_slot.room is None:
+        room_id = 0
+        is_global_scenes_page = True
+    else:
+        room_id = new_entity_in_slot.room.id
+        is_global_scenes_page = False
+
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(
+        request,
+        view="edit_room",
+        room_id=room_id,
+        is_scenes_pages=new_entity_in_slot.entities_page.is_scenes_page,
+        is_global_scenes_page=is_global_scenes_page,
+    )
+
+
+@csrf_exempt
+def partial_move_entities_pages(request):
+    if "htmx_form_save_entities_pages_order_field" in request.POST:
+        json_data = json.loads(request.POST["htmx_form_save_entities_pages_order_field"])
+        if "pages" in json_data:
+            if len(json_data["pages"]) > 0:
+                entity_page = RoomEntitiesPage.objects.get(id=json_data["pages"][0])
+                is_global_scenes_pages = False
+                if entity_page.room is None:
+                    room_id = 0
+                    is_global_scenes_pages = True
+                else:
+                    room_id = entity_page.room.id
+                for index, page_id in enumerate(json_data["pages"]):
+                    page = RoomEntitiesPage.objects.get(id=page_id)
+                    page.display_order = index
+                    page.save()
+                send_mqttmanager_reload_command()
+                entities_pages = NSPanelRoomEntitiesPages()
+                return entities_pages.get(
+                    request,
+                    view="edit_room",
+                    room_id=room_id,
+                    is_scenes_pages=entity_page.is_scenes_page,
+                    is_global_scenes_page=is_global_scenes_pages,
+                )
+            else:
+                return JsonResponse(
+                    {
+                        "status": "error",
+                        "text": "'pages' field empty in request POST-data.",
+                    },
+                    status=500,
+                )
+        else:
+            return JsonResponse(
+                {
+                    "status": "error",
+                    "text": "'pages' field not available in JSON-data.",
+                },
+                status=500,
+            )
+    else:
+        return JsonResponse(
+            {
+                "status": "error",
+                "text": "'htmx_form_save_entities_pages_order_field' field not available in request POST-data.",
+            },
+            status=500,
+        )
 
 
 @csrf_exempt
@@ -517,6 +770,74 @@ def partial_add_entity_to_entities_page_config_modal(request, entity_source):
 
 
 @csrf_exempt
+def partial_delete_entities_page(request, page_id):
+    page = RoomEntitiesPage.objects.get(id=page_id)
+    if page.room is None:
+        is_global_scenes_page = True
+        room_id = 0
+    else:
+        is_global_scenes_page = False
+        room_id = page.room.id
+    page.delete()
+
+    # Recalculate entity page order
+    for index, entity_page in enumerate(
+        RoomEntitiesPage.objects.filter(room=page.room, is_scenes_page=page.is_scenes_page).order_by("display_order"),
+        start=0,
+    ):
+        entity_page.display_order = index
+        entity_page.save()
+
+    send_mqttmanager_reload_command()
+
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(
+        request=request,
+        view="edit_room",
+        room_id=room_id,
+        is_scenes_pages=page.is_scenes_page,
+        is_global_scenes_page=is_global_scenes_page,
+    )
+
+
+def create_entities_page_in_room(request, room_id, page_type, is_scenes_page, is_global_scenes_page):
+    entity_page = RoomEntitiesPage()
+    entity_page.is_scenes_page = is_scenes_page == "True"
+    entity_page.is_global_scenes_page = is_global_scenes_page == "True"
+    if entity_page.is_global_scenes_page:
+        entity_page.room = None
+        entity_page.display_order = RoomEntitiesPage.objects.filter(room=None, is_scenes_page=is_scenes_page).count()
+    else:
+        room = Room.objects.get(id=room_id)
+        entity_page.room = room
+        entity_page.display_order = RoomEntitiesPage.objects.filter(room=room, is_scenes_page=is_scenes_page).count()
+
+    if page_type == 4:
+        entity_page.page_type = 4
+        entity_page.save()
+        send_mqttmanager_reload_command()
+    elif page_type == 8:
+        entity_page.page_type = 8
+        entity_page.save()
+        send_mqttmanager_reload_command()
+    elif page_type == 12:
+        entity_page.page_type = 12
+        entity_page.save()
+        send_mqttmanager_reload_command()
+    else:
+        print(f"ERROR! Unknown page type {page_type}")
+    # Return new partial HTMX update of all entities pages in this room
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(
+        request=request,
+        view="edit_room",
+        room_id=room_id,
+        is_scenes_pages=entity_page.is_scenes_page,
+        is_global_scenes_page=(entity_page.room == None),
+    )
+
+
+@csrf_exempt
 def partial_reorder_rooms(request):
     if "htmx_form_save_rooms_order_field" in request.POST:
         json_data = json.loads(request.POST["htmx_form_save_rooms_order_field"])
@@ -568,6 +889,308 @@ def partial_select_new_outside_temperature_sensor(request):
 
 # When creating a new or updating an existing light entity this will take care of the actual creation/updating of the model
 # in the database.
+def create_or_update_light_entity(request):
+    action_args = json.loads(request.session["action_args"])  # Loads arguments set when first starting process of adding/updating entity
+
+    entity_data = {
+        "controller": request.session["entity_source"],
+        "home_assistant_name": "",
+        "openhab_name": "",
+        "openhab_control_mode": "",
+        "openhab_item_switch": "",
+        "openhab_item_dimmer": "",
+        "openhab_item_color_temp": "",
+        "openhab_item_rgb": "",
+        "can_dim": False,
+        "can_color_temperature": False,
+        "can_rgb": False,
+        "is_ceiling_light": False,
+        "controlled_by_nspanel_main_page": True,
+    }
+    if "entity_id" in action_args and int(action_args["entity_id"]) >= 0:
+        new_light = Entity.objects.get(id=int(action_args["entity_id"]))
+        entity_data = new_light.entity_data
+    else:
+        new_light = Entity()
+        new_light.entity_type = Entity.EntityType.LIGHT
+
+    if entity_data["controller"] == "home_assistant":
+        entity_data["home_assistant_name"] = request.POST["home_assistant_item"]
+    new_light.friendly_name = request.POST["add_new_light_name"]
+    new_light.room = Room.objects.get(id=int(action_args["room_id"]))
+    new_light.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
+    new_light.room_view_position = int(action_args["page_slot"])
+
+    entity_data["controlled_by_nspanel_main_page"] = "controlled_by_nspanel_main_page" in request.POST
+    entity_data["is_ceiling_light"] = request.POST["light_type"] == "ceiling"
+
+    if request.POST["light_control_mode"] == "dimmer":
+        entity_data["can_dim"] = True
+        entity_data["openhab_control_mode"] = "dimmer"
+        if entity_data["controller"] == "openhab":
+            entity_data["openhab_item_dimmer"] = request.POST["openhab_dimming_item"]
+    else:
+        entity_data["openhab_control_mode"] = "switch"
+        entity_data["can_dim"] = False
+        if entity_data["controller"] == "openhab":
+            entity_data["openhab_item_switch"] = request.POST["openhab_dimming_item"]
+
+    if "color_temperature" in request.POST:
+        entity_data["can_color_temperature"] = True
+        if entity_data["controller"] == "openhab":
+            entity_data["openhab_item_color_temp"] = request.POST["openhab_color_temperature_item"]
+    else:
+        entity_data["can_color_temperature"] = False
+        entity_data["openhab_item_color_temp"] = ""
+
+    if "rgb" in request.POST:
+        entity_data["can_rgb"] = True
+        if entity_data["controller"] == "openhab":
+            entity_data["openhab_item_rgb"] = request.POST["openhab_rgb_item"]
+    else:
+        entity_data["can_rgb"] = False
+        entity_data["openhab_item_rgb"] = ""
+
+    new_light.entity_data = entity_data
+    new_light.save()
+    send_mqttmanager_reload_command()
+
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(
+        request=request,
+        view="edit_room",
+        room_id=new_light.room.id,
+        is_scenes_pages=False,
+        is_global_scenes_page=False,
+    )
+
+
+def create_or_update_switch_entity(request):
+    action_args = json.loads(request.session["action_args"])  # Loads arguments set when first starting process of adding/updating entity
+
+    entity_data = {
+        "controller": request.session["entity_source"],
+        "home_assistant_name": "",
+        "openhab_name": "",
+        "openhab_item_switch": "",
+    }
+    if "entity_id" in action_args and int(action_args["entity_id"]) >= 0:
+        new_switch = Entity.objects.get(id=int(action_args["entity_id"]))
+        entity_data = new_switch.entity_data
+    else:
+        new_switch = Entity()
+        new_switch.entity_type = Entity.EntityType.SWITCH
+        # Only set once, during initial creation:
+        new_switch.room = Room.objects.get(id=int(action_args["room_id"]))
+        new_switch.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
+        new_switch.room_view_position = int(action_args["page_slot"])
+        if entity_data["controller"] == "home_assistant":
+            entity_data["home_assistant_name"] = request.POST["backend_name"]
+        elif entity_data["controller"] == "openhab":
+            entity_data["openhab_item_switch"] = request.POST["backend_name"]
+
+    new_switch.friendly_name = request.POST["light_name"]
+    new_switch.entity_data = entity_data
+    new_switch.save()
+    send_mqttmanager_reload_command()
+
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(
+        request=request,
+        view="edit_room",
+        room_id=new_switch.room.id,
+        is_scenes_pages=False,
+        is_global_scenes_page=False,
+    )
+
+
+def create_or_update_button_entity(request):
+    action_args = json.loads(request.session["action_args"])  # Loads arguments set when first starting process of adding/updating entity
+
+    entity_data = {
+        "controller": request.session["entity_source"],
+        "home_assistant_name": "",
+        "mqtt_topic": "",  # Used in case of controller = manual
+        "mqtt_payload": "",  # Used in case of controller = manual
+    }
+    if "entity_id" in action_args and int(action_args["entity_id"]):
+        new_button = Entity.objects.get(id=int(action_args["entity_id"]))
+        entity_data = new_button.entity_data
+    else:
+        new_button = Entity()
+        new_button.entity_type = Entity.EntityType.BUTTON
+        # Only set once, during initial creation:
+        new_button.room = Room.objects.get(id=int(action_args["room_id"]))
+        new_button.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
+        new_button.room_view_position = int(action_args["page_slot"])
+
+    if entity_data["controller"] == "home_assistant":
+        entity_data["home_assistant_name"] = request.POST["backend_name"]
+    elif entity_data["controller"] == "nspm":
+        entity_data["mqtt_topic"] = request.POST["mqtt_topic"]
+        entity_data["mqtt_payload"] = request.POST["mqtt_payload"]
+    new_button.friendly_name = request.POST["light_name"]
+    new_button.entity_data = entity_data
+    new_button.save()
+    send_mqttmanager_reload_command()
+
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(
+        request=request,
+        view="edit_room",
+        room_id=new_button.room.id,
+        is_scenes_pages=False,
+        is_global_scenes_page=False,
+    )
+
+
+def create_or_update_scene_entity(request):
+    action_args = json.loads(request.session["action_args"])  # Loads arguments set when first starting process of adding/updating entity
+
+    if "entity_id" in action_args and int(action_args["entity_id"]) >= 0:
+        new_scene = Scene.objects.get(id=int(action_args["entity_id"]))
+    else:
+        new_scene = Scene()
+        if "room_id" in action_args:
+            new_scene.room = Room.objects.get(id=int(action_args["room_id"]))
+        else:
+            new_scene.room = None
+        new_scene.entities_page = RoomEntitiesPage.objects.get(id=int(action_args["page_id"]))
+        new_scene.room_view_position = int(action_args["page_slot"])
+        new_scene.scene_type = request.session["entity_source"]
+        if new_scene.scene_type == "nspanelmanager":
+            pass  # Do nothing, this is one of our own scenes.
+        elif new_scene.scene_type == "home_assistant":
+            new_scene.backend_name = request.POST["backend_name"]
+        elif new_scene.scene_type == "openhab":
+            new_scene.backend_name = request.POST["backend_name"]
+
+    new_scene.friendly_name = request.POST["scene_name"]
+    new_scene.save()
+    send_mqttmanager_reload_command()
+
+    room_id = 0
+    if new_scene.room:
+        room_id = new_scene.room.id
+
+    entities_pages = NSPanelRoomEntitiesPages()
+    return entities_pages.get(
+        request=request,
+        view="edit_room",
+        room_id=room_id,
+        is_scenes_pages=True,
+        is_global_scenes_page=(new_scene.room == None),
+    )
+
+
+def initial_setup_welcome(request):
+    return render(request, "modals/initial_setup/welcome.html")
+
+
+@csrf_exempt
+def initial_setup_manager_settings(request):
+    if request.method == "POST":
+        if "manager_address" in request.POST:
+            set_setting_value("manager_address", request.POST["manager_address"])
+        if "manager_port" in request.POST:
+            set_setting_value("manager_port", request.POST["manager_port"])
+        send_mqttmanager_reload_command()
+
+        # Save settings succesfully, return the next view in the setup guide. MQTT:
+        data = {
+            "mqtt_server": get_setting_with_default("mqtt_server"),
+            "mqtt_port": get_setting_with_default("mqtt_port"),
+            "mqtt_username": get_setting_with_default("mqtt_username"),
+            "mqtt_password": get_setting_with_default("mqtt_password"),
+        }
+        return render(request, "modals/initial_setup/mqtt.html", data)
+    elif request.method == "GET":
+        data = {
+            "manager_address": get_setting_with_default("manager_address"),
+            "manager_port": get_setting_with_default("manager_port"),
+        }
+        return render(request, "modals/initial_setup/manager_settings.html", data)
+
+
+@csrf_exempt
+def initial_setup_mqtt_settings(request):
+    if request.method == "POST":
+        if "mqtt_server" in request.POST:
+            set_setting_value("mqtt_server", request.POST["mqtt_server"])
+        if "mqtt_port" in request.POST:
+            set_setting_value("mqtt_port", request.POST["mqtt_port"])
+        if "mqtt_username" in request.POST:
+            set_setting_value("mqtt_username", request.POST["mqtt_username"])
+        if "mqtt_password" in request.POST:
+            set_setting_value("mqtt_password", request.POST["mqtt_password"])
+        send_mqttmanager_reload_command()
+
+        # Save settings succesfully, return the next view in the setup guide. Home Assistant:
+        environment = environ.Env()
+        data = {
+            "home_assistant_address": get_setting_with_default("home_assistant_address"),
+            "home_assistant_token": get_setting_with_default("home_assistant_token"),
+            "is_home_assistant_addon": ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true"),
+        }
+        return render(request, "modals/initial_setup/home_assistant.html", data)
+    elif request.method == "GET":
+        data = {
+            "mqtt_server": get_setting_with_default("mqtt_server"),
+            "mqtt_port": get_setting_with_default("mqtt_port"),
+            "mqtt_username": get_setting_with_default("mqtt_username"),
+            "mqtt_password": get_setting_with_default("mqtt_password"),
+        }
+        return render(request, "modals/initial_setup/mqtt.html", data)
+
+
+@csrf_exempt
+def initial_setup_home_assistant_settings(request):
+    if request.method == "POST":
+        if "home_assistant_address" in request.POST:
+            set_setting_value("home_assistant_address", request.POST["home_assistant_address"])
+        if "home_assistant_token" in request.POST:
+            set_setting_value("home_assistant_token", request.POST["home_assistant_token"])
+        send_mqttmanager_reload_command()
+
+        # Save settings succesfully, return the next view in the setup guide. OpenHAB:
+        data = {
+            "openhab_address": get_setting_with_default("openhab_address"),
+            "openhab_token": get_setting_with_default("openhab_token"),
+        }
+        return render(request, "modals/initial_setup/openhab.html", data)
+    elif request.method == "GET":
+        environment = environ.Env()
+        data = {
+            "home_assistant_address": get_setting_with_default("home_assistant_address"),
+            "home_assistant_token": get_setting_with_default("home_assistant_token"),
+            "is_home_assistant_addon": ("IS_HOME_ASSISTANT_ADDON" in environment and environment("IS_HOME_ASSISTANT_ADDON") == "true"),
+        }
+        return render(request, "modals/initial_setup/home_assistant.html", data)
+
+
+@csrf_exempt
+def initial_setup_openhab_settings(request):
+    if request.method == "POST":
+        if "openhab_address" in request.POST:
+            set_setting_value("openhab_address", request.POST["openhab_address"])
+        if "openhab_token" in request.POST:
+            set_setting_value("openhab_token", request.POST["openhab_token"])
+        send_mqttmanager_reload_command()
+
+        # Save settings succesfully, return the next view in the setup guide. Finished:
+        return render(request, "modals/initial_setup/finished.html")
+    elif request.method == "GET":
+        data = {
+            "openhab_address": get_setting_with_default("openhab_address"),
+            "openhab_token": get_setting_with_default("openhab_token"),
+        }
+        return render(request, "modals/initial_setup/openhab.html", data)
+
+
+def initial_setup_finished(request):
+    return render(request, "modals/initial_setup/finished.html")
+
+
 def show_messages(request):
     data = get_base_data(request)
     data["messages"] = Message.objects.all()

@@ -9,18 +9,16 @@ public:
   ~OpenhabThermostat();
   void reload_config();
   void send_state_update_to_controller();
-  void openhab_target_temperature_event_callback(nlohmann::json event_data);  // When target temperature changes
-  void openhab_current_temperature_event_callback(nlohmann::json event_data); // When current temperature changes
-  void openhab_fan_mode_event_callback(nlohmann::json event_data);            // When fan mode changes
-  void openhab_mode_event_callback(nlohmann::json event_data);                // When mode changes
-  void openhab_preset_event_callback(nlohmann::json event_data);              // When preset changes
-  void openhab_swing_event_callback(nlohmann::json event_data);               // When swing changes
-  void openhab_swingh_event_callback(nlohmann::json event_data);              // When horizontal swing changes
+  void openhab_target_temperature_event_callback(nlohmann::json event_data); // When target temperature changes
+  void openhab_fan_mode_event_callback(nlohmann::json event_data);           // When fan mode changes
+  void openhab_mode_event_callback(nlohmann::json event_data);               // When mode changes
+  void openhab_preset_event_callback(nlohmann::json event_data);             // When preset changes
+  void openhab_swing_event_callback(nlohmann::json event_data);              // When swing changes
+  void openhab_swingh_event_callback(nlohmann::json event_data);             // When horizontal swing changes
   void command_callback(NSPanelMQTTManagerCommand &command);
 
 private:
   std::string _openhab_target_temperature_item;
-  std::string _openhab_current_temperature_item;
   std::string _openhab_fan_mode_item;
   std::string _openhab_mode_item;
   std::string _openhab_preset_item;

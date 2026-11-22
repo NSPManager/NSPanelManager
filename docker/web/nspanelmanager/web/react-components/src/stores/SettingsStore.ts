@@ -24,6 +24,9 @@ interface ISettings {
   mqtt_username: string;
   openhab_address: string;
   openhab_token_set: boolean;
+  openhab_brightness_channel_max: number;
+  openhab_brightness_channel_min: number;
+  openhab_rgb_channel_name: string;
   outside_temp_sensor_entity_id: string;
   outside_temp_sensor_provider: string;
   weather_precipitation_format: string;
@@ -83,8 +86,7 @@ export const useSettingsStore = create<ISettingsStore>((set) => ({
     })
       .then((response) => response.json())
       .then((data) => {
-        set((state) => ({ ...state, settings: data.settings }));
-        set((state) => ({ ...state, status: "loaded" }));
+        set((state) => ({ ...state, status: "loaded", settings: data.settings }));
       });
   },
 }));

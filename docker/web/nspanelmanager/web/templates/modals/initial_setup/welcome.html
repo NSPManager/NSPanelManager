@@ -1,0 +1,59 @@
+{% load static %}
+<dialog id="welcome_modal" class="modal" hx-swap-oob="true">
+    <div class="modal-box">
+        <form method="dialog">
+            <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+        </form>
+
+        <div class="flex justify-center mb-2">
+            <ul class="steps">
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_welcome' %}" hx-swap="none" class="step step-primary cursor-pointer">Welcome</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_manager_settings' %}" hx-swap="none" class="step cursor-pointer">Manager</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_mqtt_settings' %}" hx-swap="none" class="step cursor-pointer">MQTT</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_home_assistant_settings' %}" hx-swap="none" class="step cursor-pointer">Home Assistant</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_openhab_settings' %}" hx-swap="none" class="step cursor-pointer">OpenHAB</li>
+                <li hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_finished' %}" hx-swap="none" class="step cursor-pointer">Finish</li>
+            </ul>
+        </div>
+
+        <div class="flex items-center justify-center space-x-3 rtl:space-x-reverse mt-4">
+            <div class="bg-neutral p-2 rounded-btn">
+                <img src="{{ ingress_path }}{% static 'logo.svg' %}" alt="Logo" class="h-14">
+            </div>
+        </div>
+        <div class="text-center mt-1">
+            <span>Version: %version%</span>
+        </div>
+
+        <div class="text-center mt-2">
+            <span class="mt-2 text-center">This initial setup guide will take you through the necessary steps to setup your NSPanelManager installer.</span>
+            <span class="my-2 text-center font-bold">Press the Next button to start the initial setup guide.</span>
+        </div>
+
+        <div class="text-center mt-4">
+            <span class="text-center">In case you need help with the setup, here are a few helpful resources:</span>
+        </div>
+
+        <div id="about_links" class="join join-vertical w-full">
+            <a class="join-item btn btn-link" href="https://nspanelmanager.com" target="_blank">Documentation</a>
+            <a class="join-item btn btn-link" href="https://github.com/NSPManager/NSPanelManager" target="_blank">GitHub</a>
+            <a class="join-item btn btn-link" href="https://discord.gg/RwXvAH56fE" target="_blank">Discord</a>
+        </div>
+
+        <div class="flex justify-end mt-4">
+            <button class="btn btn-success" hx-get="{{ ingress_path }}{% url 'htmx_initial_setup_manager_settings' %}" hx-swap="none">Next</button>
+        </div>
+
+    </div>
+
+    <!-- Backdrop that closes dialog/modal on click -->
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+
+    <script>
+    // Initial setup modal is always loaded as part of the page and can therefore be shown immediately.
+      console.log("Showing welcome modal");
+      welcome_modal.showModal();
+    </script>
+</dialog>

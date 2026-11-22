@@ -40,7 +40,6 @@ void StompTopic::subscribe(ix::WebSocket &webSocket, std::string subscription_id
   _subscribers.push_back(std::make_pair(&webSocket, subscription_id));
 
   if (this->_retained) {
-    SPDLOG_DEBUG("Subscribed to retained topic. Will send message.");
     StompFrame frame;
     frame.type = StompFrame::MessageType::MESSAGE;
     frame.headers["message-id"] = boost::uuids::to_string(this->_uuid_generator());
@@ -98,7 +97,6 @@ void StompTopic::update_value(nlohmann::json &data) {
 }
 
 void StompTopic::set_retained(bool retained) {
-  SPDLOG_TRACE("Setting topic '{}' to retained? {}", this->_topic_name, retained ? "Yes" : "No");
   this->_retained = retained;
 }
 
@@ -302,7 +300,6 @@ void WebsocketServer::_websocket_message_callback(std::shared_ptr<ix::Connection
             }
 
             // Topic was not found, create topic and subscribe to it
-            SPDLOG_WARN("STOMP Topic '{}' not found in call to subscribe. Will create topic.", frame->headers["destination"]);
             WebsocketServer::_stomp_topics.push_back(std::make_shared<StompTopic>(frame->headers["destination"], ""));
             WebsocketServer::_stomp_topics.back()->subscribe(webSocket, frame->headers["id"]);
           } else if (frame->type == StompFrame::UNSUBSCRIBE) {
@@ -606,22 +603,7 @@ void WebsocketServer::_send_active_warnings() {
   base["warnings"] = nlohmann::json::array();
   for (auto &warning : WebsocketServer::_active_warnings) {
     SPDLOG_DEBUG("Sending warnings, found warning: {}", warning.warning_text);
-    std::string warning_level_str = "unknown";
-    switch (warning.level) {
-    case WebsocketServer::ActiveWarningLevel::ERROR:
-      warning_level_str = "error";
-      break;
-    case WebsocketServer::ActiveWarningLevel::WARNING:
-      warning_level_str = "warning";
-      break;
-    case WebsocketServer::ActiveWarningLevel::INFO:
-      warning_level_str = "info";
-      break;
-    case WebsocketServer::ActiveWarningLevel::DEBUG:
-      warning_level_str = "debug";
-      break;
-    }
-    base["warnings"].push_back({{"level", warning_level_str}, {"text", warning.warning_text}});
+    base["warnings"].push_back({{"level", warning.level}, {"text", warning.warning_text}});
   }
   WebsocketServer::update_stomp_topic_value("mqttmanager/warnings", base);
 }
