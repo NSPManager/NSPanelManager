@@ -1,0 +1,89 @@
+# Differences between the US and EU HMIs that hmi_compare.py allows; see the docstring there.
+#
+#   expected  a difference that is meant to be there; the reason is required
+#   todo      one that should go, or that nobody has yet said is meant to be there
+#
+# Fixing a todo means deleting its line; the check fails while a listed difference no longer exists.
+
+expected  *                        direction  # each layout is drawn for its own panel's orientation
+expected  *                        Program.s  # EU-only lcd_dev display setup at power-on
+
+expected  blinds.bSlider           hig        # EU's sliders are vertical, US's horizontal
+expected  blinds.bSlider           mode       # EU's sliders are vertical, US's horizontal
+expected  blinds.bSlider           wid        # EU's sliders are vertical, US's horizontal
+
+expected  blinds.tSlider           hig        # EU's sliders are vertical, US's horizontal
+expected  blinds.tSlider           mode       # EU's sliders are vertical, US's horizontal
+expected  blinds.tSlider           wid        # EU's sliders are vertical, US's horizontal
+
+expected  dropdown.next            font       # draws no text (empty txt, picture button), so its font is never seen
+expected  dropdown.prev            font       # draws no text (empty txt, picture button), so its font is never seen
+
+expected  home.b_ceiling           font       # draws no text (empty txt, picture button), so its font is never seen
+expected  home.b_table             font       # draws no text (empty txt, picture button), so its font is never seen
+expected  home.mode                ycen       # text alignment suits each layout
+expected  home.s_brightness        hig        # EU's sliders are vertical, US's horizontal
+expected  home.s_brightness        mode       # EU's sliders are vertical, US's horizontal
+expected  home.s_brightness        wid        # EU's sliders are vertical, US's horizontal
+expected  home.s_kelvin            hig        # EU's sliders are vertical, US's horizontal
+expected  home.s_kelvin            mode       # EU's sliders are vertical, US's horizontal
+expected  home.s_kelvin            wid        # EU's sliders are vertical, US's horizontal
+
+expected  items12.home             font       # draws no text (empty txt, picture button), so its font is never seen
+expected  items12.next             font       # draws no text (empty txt, picture button), so its font is never seen
+expected  items12.prev             font       # draws no text (empty txt, picture button), so its font is never seen
+# REMOVE? slider_save is an image so this can't be right. 
+todo      items12.slider_save      bco        # save bar colours differ (US green, EU orange on black)
+# REMOVE? slider_save is an image so this can't be right. 
+todo      items12.slider_save      pco        # save bar colours differ (US green, EU orange on black)
+
+expected  items4.home              font       # draws no text (empty txt, picture button), so its font is never seen
+expected  items4.i1_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items4.i2_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items4.i3_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items4.i4_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items4.next              font       # draws no text (empty txt, picture button), so its font is never seen
+expected  items4.prev              font       # draws no text (empty txt, picture button), so its font is never seen
+# REMOVE? slider_save is an image so this can't be right. 
+todo      items4.slider_save       bco        # save bar colours differ (US green, EU orange on black)
+# REMOVE? slider_save is an image so this can't be right. 
+todo      items4.slider_save       pco        # save bar colours differ (US green, EU orange on black)
+expected  items4.tc0               on down    # tests the item buttons' font index (US 11, EU 10), which follows their font
+
+expected  items8.home              font       # draws no text (empty txt, picture button), so its font is never seen
+expected  items8.i1_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items8.i2_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items8.i3_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items8.i4_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items8.i5_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items8.i6_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items8.i7_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items8.i8_button         font       # EU's taller item buttons use the 50px icon font, US's the 40px
+expected  items8.next              font       # draws no text (empty txt, picture button), so its font is never seen
+expected  items8.prev              font       # draws no text (empty txt, picture button), so its font is never seen
+# REMOVE? slider_save is an image so this can't be right. 
+todo      items8.slider_save       bco        # save bar colours differ (US green, EU orange on black)
+# REMOVE? slider_save is an image so this can't be right. 
+todo      items8.slider_save       pco        # save bar colours differ (US green, EU orange on black)
+expected  items8.tc0               on down    # tests the item buttons' font index (US 11, EU 10), which follows their font
+
+expected  lights.brightness        hig        # EU's sliders are vertical, US's horizontal
+expected  lights.brightness        mode       # EU's sliders are vertical, US's horizontal
+expected  lights.brightness        wid        # EU's sliders are vertical, US's horizontal
+expected  lights.home              font       # draws no text (empty txt, picture button), so its font is never seen
+expected  lights.hue               hig        # EU's sliders are vertical, US's horizontal
+expected  lights.hue               mode       # EU's sliders are vertical, US's horizontal
+expected  lights.hue               wid        # EU's sliders are vertical, US's horizontal
+expected  lights.kelvin_sat        hig        # EU's sliders are vertical, US's horizontal
+expected  lights.kelvin_sat        mode       # EU's sliders are vertical, US's horizontal
+expected  lights.kelvin_sat        wid        # EU's sliders are vertical, US's horizontal
+
+expected  screensaver.curTime      xcen       # text alignment suits each layout
+expected  screensaver.forDay1      xcen       # text alignment suits each layout
+expected  screensaver.forDay2      xcen       # text alignment suits each layout
+expected  screensaver.forDay3      xcen       # text alignment suits each layout
+expected  screensaver.forDay4      xcen       # text alignment suits each layout
+expected  screensaver.forDay5      xcen       # text alignment suits each layout
+
+expected  thermostat.next          font       # draws no text (empty txt, picture button), so its font is never seen
+expected  thermostat.prev          font       # draws no text (empty txt, picture button), so its font is never seen

@@ -1,1 +1,4 @@
 * text=auto eol=lf
+
+# Readable diffs of Nextion projects; see docker/HMI_files/hmi_inventory.py
+*.HMI diff=hmi
