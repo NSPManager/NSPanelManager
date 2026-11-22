@@ -2,6 +2,7 @@
 #include "light/light.hpp"
 #include "openssl/evp.h"
 #include "web_helper/WebHelper.hpp"
+#include <algorithm>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/trim.hpp>
@@ -15,8 +16,11 @@
 #include <curl/easy.h>
 #include <database_manager/database_manager.hpp>
 #include <exception>
+#include <expected>
+#include <filesystem>
 #include <fmt/core.h>
 #include <fstream>
+#include <iterator>
 #include <mutex>
 #include <nlohmann/detail/conversions/to_json.hpp>
 #include <nlohmann/detail/exceptions.hpp>
@@ -29,6 +33,7 @@
 #include <spdlog/spdlog.h>
 #include <sqlite_orm/sqlite_orm.h>
 #include <string>
+#include <system_error>
 #include <websocket_server/websocket_server.hpp>
 
 void MqttManagerConfig::load() {
@@ -42,6 +47,12 @@ void MqttManagerConfig::load() {
   boost::algorithm::trim(timezone_str);
   MqttManagerConfig::timezone = timezone_str;
   SPDLOG_INFO("Read timezone {} from /etc/timezone.", timezone_str);
+  MqttManagerConfig::timezone_posix_rule = MqttManagerConfig::read_posix_tz_rule(fmt::format("/usr/share/zoneinfo/{}", timezone_str));
+  if (MqttManagerConfig::timezone_posix_rule.empty()) {
+    SPDLOG_WARN("Could not read a POSIX TZ rule for timezone {}. NSPanels will show the time sent by the manager.", timezone_str);
+  } else {
+    SPDLOG_INFO("Using POSIX TZ rule {} for timezone {}.", MqttManagerConfig::timezone_posix_rule, timezone_str);
+  }
 
   SPDLOG_DEBUG("Clearing config values cache.");
   MqttManagerConfig::_settings_values_cache.clear();
@@ -74,6 +85,7 @@ void MqttManagerConfig::load() {
 
   MqttManagerConfig::update_firmware_checksum();
   MqttManagerConfig::update_tft_checksums();
+  SPDLOG_DEBUG("Checksum calculation done.");
 
   MqttManagerConfig::populate_default_and_clean();
 
@@ -180,181 +192,107 @@ LightTurnOnBehaviour MqttManagerConfig::get_light_turn_on_behaviour() {
 }
 
 void MqttManagerConfig::update_firmware_checksum() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
   SPDLOG_INFO("Updating/calculating MD5 checksums for all firmware files.");
 
-  // Update firmware checksum
-  auto firmware_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/firmware/sonoff/firmware.bin");
-  if (firmware_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_firmware_sonoff = firmware_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for sonoff firmware was not able to be calculated.");
-    SPDLOG_INFO("Firmware checksum: {}", firmware_checksum.value());
-  } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for sonoff firmware was not able to be calculated.");
-    SPDLOG_ERROR("Failed to calculate checksum for sonoff firmware!");
-  }
+  std::vector<std::string> files = {
+      "/usr/src/app/nspanelmanager/firmware/sonoff/firmware.bin",
+      "/usr/src/app/nspanelmanager/firmware/custom/firmware.bin",
+      "/usr/src/app/nspanelmanager/firmware/sonoff/data_file.bin",
+      "/usr/src/app/nspanelmanager/firmware/custom/data_file.bin",
+  };
 
-  firmware_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/firmware/custom/firmware.bin");
-  if (firmware_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_firmware_custom = firmware_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for custom firmware was not able to be calculated.");
-    SPDLOG_INFO("Firmware checksum: {}", firmware_checksum.value());
-  } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for custom firmware was not able to be calculated.");
-    SPDLOG_ERROR("Failed to calculate checksum for custom firmware!");
-  }
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_checksums_mutex);
+  bool recalculate_file = false;
+  for (auto &file : files) {
+    // Check if a cached key already exists for the file.
+    bool file_in_map = MqttManagerConfig::_checksums.find(file) != MqttManagerConfig::_checksums.end();
+    std::expected<std::filesystem::file_time_type, std::string> file_mtime;
+    if (file_in_map) [[likely]] {
+      file_mtime = MqttManagerConfig::_get_file_mtime(file);
+      if (file_mtime.has_value()) [[likely]] {
+        if (MqttManagerConfig::_checksums[file].mtime != *file_mtime) {
+          recalculate_file = true;
+        } else [[likely]] {
+          recalculate_file = false;
+        }
+      } else {
+        SPDLOG_ERROR("Failed to check mtime for file '{}'. Will try to recalculate file checksum anyway.", file);
+      }
+    } else {
+      recalculate_file = true;
+    }
 
-  // Update LittleFS checksum
-  auto littlefs_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/firmware/sonoff/data_file.bin");
-  if (littlefs_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_littlefs_sonoff = littlefs_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for sonoff littlefs/data file was not able to be calculated.");
-    SPDLOG_INFO("LittleFS checksum: {}", littlefs_checksum.value());
-  } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for sonoff littlefs/data file was not able to be calculated.");
-    SPDLOG_ERROR("Failed to calculate checksum for LittleFS!");
-  }
-
-  littlefs_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/firmware/custom/data_file.bin");
-  if (littlefs_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_littlefs_custom = littlefs_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for custom littlefs/data file was not able to be calculated.");
-    SPDLOG_INFO("LittleFS checksum: {}", littlefs_checksum.value());
-  } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for custom littlefs/data file was not able to be calculated.");
-    SPDLOG_ERROR("Failed to calculate checksum for LittleFS!");
+    if (recalculate_file) [[unlikely]] {
+      auto checksum = MqttManagerConfig::_get_file_md5_checksum(file);
+      if (checksum.has_value()) [[likely]] {
+        MqttManagerConfig::_checksums[file] = {
+            .mtime = file_mtime.has_value() ? std::optional<std::filesystem::file_time_type>{*file_mtime} : std::nullopt,
+            .checksum = *checksum,
+        };
+      } else {
+        SPDLOG_ERROR("Failed to calculate checksum for file '{}'. Error: {}", file, checksum.error());
+      }
+    }
   }
 }
 
 void MqttManagerConfig::update_tft_checksums() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
   SPDLOG_INFO("Updating/calculating MD5 checksums for all .tft GUI files.");
 
-  auto eu_tft1_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/HMI_files/tft_automation/eu/output_tft1/gui.tft");
-  if (eu_tft1_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_eu_tft1 = eu_tft1_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for EU tft1 was not able to be calculated.");
-    SPDLOG_INFO("EU TFT1 GUI file checksum: {}", eu_tft1_checksum.value());
-  } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for EU tft1 was not able to be calculated.");
-    SPDLOG_ERROR("Failed to calculate checksum for EU TFT1 Nextion GUI file!");
-  }
+  std::vector<std::string> files = {
+      "/usr/src/app/nspanelmanager/HMI_files/tft_automation/eu/output_tft1/gui.tft",
+      "/usr/src/app/nspanelmanager/HMI_files/tft_automation/eu/output_tft2/gui.tft",
+      "/usr/src/app/nspanelmanager/HMI_files/tft_automation/eu/output_tft3/gui.tft",
+      "/usr/src/app/nspanelmanager/HMI_files/tft_automation/eu/output_tft4/gui.tft",
+      "/usr/src/app/nspanelmanager/HMI_files/tft_automation/us/output_tft1/gui.tft",
+      "/usr/src/app/nspanelmanager/HMI_files/tft_automation/us/output_tft2/gui.tft",
+      "/usr/src/app/nspanelmanager/HMI_files/tft_automation/us/output_tft3/gui.tft",
+      "/usr/src/app/nspanelmanager/HMI_files/tft_automation/us/output_tft4/gui.tft",
+      "/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft1/gui.tft",
+      "/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft2/gui.tft",
+      "/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft3/gui.tft",
+      "/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft4/gui.tft",
+  };
 
-  auto eu_tft2_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/HMI_files/tft_automation/eu/output_tft2/gui.tft");
-  if (eu_tft2_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_eu_tft2 = eu_tft2_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for EU tft2 was not able to be calculated.");
-    SPDLOG_INFO("EU TFT2 GUI file checksum: {}", eu_tft2_checksum.value());
-  } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for EU tft2 was not able to be calculated.");
-    SPDLOG_ERROR("Failed to calculate checksum for EU TFT2 Nextion GUI file!");
-  }
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_checksums_mutex);
+  bool recalculate_file = false;
+  for (auto &file : files) {
+    // Check if a cached key already exists for the file.
+    bool file_in_map = MqttManagerConfig::_checksums.find(file) != MqttManagerConfig::_checksums.end();
+    std::expected<std::filesystem::file_time_type, std::string> file_mtime;
+    if (file_in_map) [[likely]] {
+      file_mtime = MqttManagerConfig::_get_file_mtime(file);
+      if (file_mtime.has_value()) [[likely]] {
+        if (MqttManagerConfig::_checksums[file].mtime != *file_mtime) {
+          recalculate_file = true;
+        } else [[likely]] {
+          recalculate_file = false;
+        }
+      } else {
+        SPDLOG_ERROR("Failed to check mtime for file '{}'. Will try to recalculate file checksum anyway.", file);
+      }
+    } else {
+      recalculate_file = true;
+    }
 
-  auto eu_tft3_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/HMI_files/tft_automation/eu/output_tft3/gui.tft");
-  if (eu_tft3_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_eu_tft3 = eu_tft3_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for EU tft3 was not able to be calculated.");
-    SPDLOG_INFO("EU TFT3 GUI file checksum: {}", eu_tft3_checksum.value());
-  } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for EU tft3 was not able to be calculated.");
-    SPDLOG_ERROR("Failed to calculate checksum for EU TFT3 Nextion GUI file!");
-  }
-
-  auto eu_tft4_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/HMI_files/tft_automation/eu/output_tft4/gui.tft");
-  if (eu_tft4_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_eu_tft4 = eu_tft4_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for EU tft4 was not able to be calculated.");
-    SPDLOG_INFO("EU TFT4 GUI file checksum: {}", eu_tft4_checksum.value());
-  } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for EU tft4 was not able to be calculated.");
-    SPDLOG_ERROR("Failed to calculate checksum for EU TFT4 Nextion GUI file!");
-  }
-
-  auto us_tft1_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us/output_tft1/gui.tft");
-  if (us_tft1_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_us_tft1 = us_tft1_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for US tft1 was not able to be calculated.");
-    SPDLOG_INFO("US TFT1 GUI file checksum: {}", us_tft1_checksum.value());
-  } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for US tft1 was not able to be calculated.");
-    SPDLOG_ERROR("Failed to calculate checksum for US TFT1 Nextion GUI file!");
-  }
-
-  auto us_tft2_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us/output_tft2/gui.tft");
-  if (us_tft2_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_us_tft2 = us_tft2_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for US tft2 was not able to be calculated.");
-    SPDLOG_INFO("US TFT2 GUI file checksum: {}", us_tft2_checksum.value());
-  } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for US tft2 was not able to be calculated.");
-    SPDLOG_ERROR("Failed to calculate checksum for US TFT2 Nextion GUI file!");
-  }
-
-  auto us_tft3_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us/output_tft3/gui.tft");
-  if (us_tft3_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_us_tft3 = us_tft3_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for US tft3 was not able to be calculated.");
-    SPDLOG_INFO("US TFT3 GUI file checksum: {}", us_tft3_checksum.value());
-  } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for US tft3 was not able to be calculated.");
-    SPDLOG_ERROR("Failed to calculate checksum for US TFT3 Nextion GUI file!");
-  }
-
-  auto us_tft4_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us/output_tft4/gui.tft");
-  if (us_tft4_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_us_tft4 = us_tft4_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for US tft4 was not able to be calculated.");
-    SPDLOG_INFO("US TFT4 GUI file checksum: {}", us_tft4_checksum.value());
-  } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for US tft4 was not able to be calculated.");
-    SPDLOG_ERROR("Failed to calculate checksum for US TFT4 Nextion GUI file!");
-  }
-
-  auto us_tft1_horizontal_mirrored_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft1/gui.tft");
-  if (us_tft1_horizontal_mirrored_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft1 = us_tft1_horizontal_mirrored_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for US tft1 (mirrored) was not able to be calculated.");
-    SPDLOG_INFO("US landscape mirrored TFT1 GUI file checksum: {}", us_tft1_horizontal_mirrored_checksum.value());
-  } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for US tft1 (mirrored) was not able to be calculated.");
-    SPDLOG_ERROR("Failed to calculate checksum for US landscape mirrored TFT1 Nextion GUI file!");
-  }
-
-  auto us_tft2_horizontal_mirrored_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft2/gui.tft");
-  if (us_tft2_horizontal_mirrored_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft2 = us_tft2_horizontal_mirrored_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for US tft2 (mirrored) was not able to be calculated.");
-    SPDLOG_INFO("US landscape mirrored TFT2 GUI file checksum: {}", us_tft2_horizontal_mirrored_checksum.value());
-  } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for US tft2 (mirrored) was not able to be calculated.");
-    SPDLOG_ERROR("Failed to calculate checksum for US landscape mirrored TFT2 Nextion GUI file!");
-  }
-
-  auto us_tft3_horizontal_mirrored_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft3/gui.tft");
-  if (us_tft3_horizontal_mirrored_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft3 = us_tft3_horizontal_mirrored_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for US tft3 (mirrored) was not able to be calculated.");
-    SPDLOG_INFO("US landscape mirrored TFT3 GUI file checksum: {}", us_tft3_horizontal_mirrored_checksum.value());
-  } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for US tft3 (mirrored) was not able to be calculated.");
-    SPDLOG_ERROR("Failed to calculate checksum for US landscape mirrored TFT3 Nextion GUI file!");
-  }
-
-  auto us_tft4_horizontal_mirrored_checksum = MqttManagerConfig::_get_file_md5_checksum("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft4/gui.tft");
-  if (us_tft4_horizontal_mirrored_checksum.has_value()) {
-    MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft4 = us_tft4_horizontal_mirrored_checksum.value();
-    WebsocketServer::remove_warning("MD5 checksum for US tft4 (mirrored) was not able to be calculated.");
-    SPDLOG_INFO("US landscape mirrored TFT4 GUI file checksum: {}", us_tft4_horizontal_mirrored_checksum.value());
-  } else {
-    WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MD5 checksum for US tft4 (mirrored) was not able to be calculated.");
-    SPDLOG_ERROR("Failed to calculate checksum for US landscape mirrored TFT4 Nextion GUI file!");
+    if (recalculate_file) [[unlikely]] {
+      auto checksum = MqttManagerConfig::_get_file_md5_checksum(file);
+      if (checksum.has_value()) [[likely]] {
+        MqttManagerConfig::_checksums[file] = {
+            .mtime = file_mtime.has_value() ? std::optional<std::filesystem::file_time_type>{*file_mtime} : std::nullopt,
+            .checksum = *checksum,
+        };
+      } else {
+        SPDLOG_ERROR("Failed to calculate checksum for file '{}'. Error: {}", file, checksum.error());
+      }
+    }
   }
 }
 
-std::optional<std::string> MqttManagerConfig::_get_file_md5_checksum(std::string file_path) {
+std::expected<std::string, std::string> MqttManagerConfig::_get_file_md5_checksum(std::string file_path) {
   std::ifstream file(file_path, std::ifstream::binary);
   if (!file) {
-    return std::nullopt;
+    return std::unexpected<std::string>("Failed to open file.");
   }
 
   EVP_MD_CTX *mdctx;
@@ -365,17 +303,11 @@ std::optional<std::string> MqttManagerConfig::_get_file_md5_checksum(std::string
   mdctx = EVP_MD_CTX_new();
   EVP_DigestInit_ex(mdctx, EVP_md5(), NULL);
 
-  // MD5_Update
-  // char buffer[1024];
-  // while (file.read(buffer, 1024)) {
-  //   EVP_DigestUpdate(mdctx, buffer, file.gcount());
-  // }
-
   unsigned char buffer[8192];
   while (file.read(reinterpret_cast<char *>(buffer), sizeof(buffer)) || file.gcount() > 0) {
     if (EVP_DigestUpdate(mdctx, buffer, file.gcount()) != 1) {
       EVP_MD_CTX_free(mdctx);
-      return "";
+      return std::unexpected<std::string>("Failed to update EVP digiest while processing file");
     }
   }
 
@@ -383,13 +315,6 @@ std::optional<std::string> MqttManagerConfig::_get_file_md5_checksum(std::string
   md5_digest = (unsigned char *)OPENSSL_malloc(md5_digest_len);
   EVP_DigestFinal_ex(mdctx, md5_digest, &md5_digest_len);
   EVP_MD_CTX_free(mdctx);
-
-  // char tmp[3] = {0};
-  // std::string return_string;
-  // for (int i = 0; i < md5_digest_len; i++) {
-  //   sprintf(tmp, "%02x", md5_digest[i]);
-  //   return_string.append(tmp);
-  // }
 
   std::stringstream ss;
   ss << std::hex << std::uppercase << std::setfill('0');
@@ -401,132 +326,165 @@ std::optional<std::string> MqttManagerConfig::_get_file_md5_checksum(std::string
   return boost::algorithm::to_lower_copy(ss.str()); // Convert to lowercase as the md5 checksum calculated in Django is calculated with lower case latters.
 }
 
+std::expected<std::filesystem::file_time_type, std::string> MqttManagerConfig::_get_file_mtime(std::string file_path) {
+  std::error_code ec;
+  auto mtime = std::filesystem::last_write_time(file_path, ec);
+  if (ec) [[unlikely]] {
+    return std::unexpected<std::string>(fmt::format("Failed to get last write time (mtime) file file '{}'. Error code: '{}', message: {}", file_path, ec.value(), ec.message()));
+  }
+  return mtime;
+}
+
 std::expected<std::string, bool> MqttManagerConfig::get_firmware_sonoff_checksum() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_firmware_sonoff.empty()) {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_checksums_mutex);
+  if (MqttManagerConfig::_checksums.find("/usr/src/app/nspanelmanager/firmware/sonoff/firmware.bin") == MqttManagerConfig::_checksums.end()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_firmware_sonoff;
+  return MqttManagerConfig::_checksums["/usr/src/app/nspanelmanager/firmware/sonoff/firmware.bin"].checksum;
 }
 
 std::expected<std::string, bool> MqttManagerConfig::get_firmware_custom_checksum() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_firmware_custom.empty()) {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_checksums_mutex);
+  if (MqttManagerConfig::_checksums.find("/usr/src/app/nspanelmanager/firmware/custom/firmware.bin") == MqttManagerConfig::_checksums.end()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_firmware_custom;
+  return MqttManagerConfig::_checksums["/usr/src/app/nspanelmanager/firmware/custom/firmware.bin"].checksum;
 }
 
 std::expected<std::string, bool> MqttManagerConfig::get_littlefs_sonoff_checksum() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_littlefs_sonoff.empty()) {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_checksums_mutex);
+  if (MqttManagerConfig::_checksums.find("/usr/src/app/nspanelmanager/firmware/sonoff/data_file.bin") == MqttManagerConfig::_checksums.end()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_littlefs_sonoff;
+  return MqttManagerConfig::_checksums["/usr/src/app/nspanelmanager/firmware/sonoff/data_file.bin"].checksum;
 }
 
 std::expected<std::string, bool> MqttManagerConfig::get_littlefs_custom_checksum() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_littlefs_custom.empty()) {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_checksums_mutex);
+  if (MqttManagerConfig::_checksums.find("/usr/src/app/nspanelmanager/firmware/custom/data_file.bin") == MqttManagerConfig::_checksums.end()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_littlefs_custom;
+  return MqttManagerConfig::_checksums["/usr/src/app/nspanelmanager/firmware/custom/data_file.bin"].checksum;
 }
 
 std::expected<std::string, bool> MqttManagerConfig::get_eu_tft1_checksum() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_eu_tft1.empty()) {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_checksums_mutex);
+  if (MqttManagerConfig::_checksums.find("/usr/src/app/nspanelmanager/HMI_files/tft_automation/eu/output_tft1/gui.tft") == MqttManagerConfig::_checksums.end()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_eu_tft1;
+  return MqttManagerConfig::_checksums["/usr/src/app/nspanelmanager/HMI_files/tft_automation/eu/output_tft1/gui.tft"].checksum;
 }
 
 std::expected<std::string, bool> MqttManagerConfig::get_eu_tft2_checksum() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_eu_tft2.empty()) {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_checksums_mutex);
+  if (MqttManagerConfig::_checksums.find("/usr/src/app/nspanelmanager/HMI_files/tft_automation/eu/output_tft2/gui.tft") == MqttManagerConfig::_checksums.end()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_eu_tft2;
+  return MqttManagerConfig::_checksums["/usr/src/app/nspanelmanager/HMI_files/tft_automation/eu/output_tft2/gui.tft"].checksum;
 }
 
 std::expected<std::string, bool> MqttManagerConfig::get_eu_tft3_checksum() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_eu_tft3.empty()) {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_checksums_mutex);
+  if (MqttManagerConfig::_checksums.find("/usr/src/app/nspanelmanager/HMI_files/tft_automation/eu/output_tft3/gui.tft") == MqttManagerConfig::_checksums.end()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_eu_tft3;
+  return MqttManagerConfig::_checksums["/usr/src/app/nspanelmanager/HMI_files/tft_automation/eu/output_tft3/gui.tft"].checksum;
 }
 
 std::expected<std::string, bool> MqttManagerConfig::get_eu_tft4_checksum() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_eu_tft4.empty()) {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_checksums_mutex);
+  if (MqttManagerConfig::_checksums.find("/usr/src/app/nspanelmanager/HMI_files/tft_automation/eu/output_tft4/gui.tft") == MqttManagerConfig::_checksums.end()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_eu_tft4;
+  return MqttManagerConfig::_checksums["/usr/src/app/nspanelmanager/HMI_files/tft_automation/eu/output_tft4/gui.tft"].checksum;
 }
 
 std::expected<std::string, bool> MqttManagerConfig::get_us_tft1_checksum() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_us_tft1.empty()) {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_checksums_mutex);
+  if (MqttManagerConfig::_checksums.find("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us/output_tft1/gui.tft") == MqttManagerConfig::_checksums.end()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_us_tft1;
+  return MqttManagerConfig::_checksums["/usr/src/app/nspanelmanager/HMI_files/tft_automation/us/output_tft1/gui.tft"].checksum;
 }
 
 std::expected<std::string, bool> MqttManagerConfig::get_us_tft2_checksum() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_us_tft2.empty()) {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_checksums_mutex);
+  if (MqttManagerConfig::_checksums.find("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us/output_tft2/gui.tft") == MqttManagerConfig::_checksums.end()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_us_tft2;
+  return MqttManagerConfig::_checksums["/usr/src/app/nspanelmanager/HMI_files/tft_automation/us/output_tft2/gui.tft"].checksum;
 }
 
 std::expected<std::string, bool> MqttManagerConfig::get_us_tft3_checksum() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_us_tft3.empty()) {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_checksums_mutex);
+  if (MqttManagerConfig::_checksums.find("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us/output_tft3/gui.tft") == MqttManagerConfig::_checksums.end()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_us_tft3;
+  return MqttManagerConfig::_checksums["/usr/src/app/nspanelmanager/HMI_files/tft_automation/us/output_tft3/gui.tft"].checksum;
 }
 
 std::expected<std::string, bool> MqttManagerConfig::get_us_tft4_checksum() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_us_tft4.empty()) {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_checksums_mutex);
+  if (MqttManagerConfig::_checksums.find("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us/output_tft4/gui.tft") == MqttManagerConfig::_checksums.end()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_us_tft4;
+  return MqttManagerConfig::_checksums["/usr/src/app/nspanelmanager/HMI_files/tft_automation/us/output_tft4/gui.tft"].checksum;
 }
 
 std::expected<std::string, bool> MqttManagerConfig::get_us_horizontal_mirrored_tft1_checksum() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft1.empty()) {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_checksums_mutex);
+  if (MqttManagerConfig::_checksums.find("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft1/gui.tft") == MqttManagerConfig::_checksums.end()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft1;
+  return MqttManagerConfig::_checksums["/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft1/gui.tft"].checksum;
 }
 
 std::expected<std::string, bool> MqttManagerConfig::get_us_horizontal_mirrored_tft2_checksum() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft2.empty()) {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_checksums_mutex);
+  if (MqttManagerConfig::_checksums.find("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft2/gui.tft") == MqttManagerConfig::_checksums.end()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft2;
+  return MqttManagerConfig::_checksums["/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft2/gui.tft"].checksum;
 }
 
 std::expected<std::string, bool> MqttManagerConfig::get_us_horizontal_mirrored_tft3_checksum() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft3.empty()) {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_checksums_mutex);
+  if (MqttManagerConfig::_checksums.find("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft3/gui.tft") == MqttManagerConfig::_checksums.end()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft3;
+  return MqttManagerConfig::_checksums["/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft3/gui.tft"].checksum;
 }
 
 std::expected<std::string, bool> MqttManagerConfig::get_us_horizontal_mirrored_tft4_checksum() {
-  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_md5_checksum_files_mutex);
-  if (MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft4.empty()) {
+  std::lock_guard<std::mutex> lock_guard(MqttManagerConfig::_checksums_mutex);
+  if (MqttManagerConfig::_checksums.find("/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft4/gui.tft") == MqttManagerConfig::_checksums.end()) {
     return std::unexpected(false);
   }
-  return MqttManagerConfig::_md5_checksum_us_horizontal_mirrored_tft4;
+  return MqttManagerConfig::_checksums["/usr/src/app/nspanelmanager/HMI_files/tft_automation/us_horizontal_mirrored/output_tft4/gui.tft"].checksum;
+}
+
+std::string MqttManagerConfig::read_posix_tz_rule(const std::string &tzif_path) {
+  try {
+    std::ifstream file(tzif_path, std::ios::in | std::ios::binary);
+    if (!file) {
+      return "";
+    }
+    std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+
+    // Version 2 and later files end with the rule between two newlines (RFC 8536, section 3.3).
+    // Version 1 files have a zero version byte and no rule.
+    if (content.size() < 5 || content.compare(0, 4, "TZif") != 0 || content[4] < '2' || content.back() != '\n') {
+      return "";
+    }
+    size_t rule_start = content.rfind('\n', content.size() - 2);
+    if (rule_start == std::string::npos) {
+      return "";
+    }
+    return content.substr(rule_start + 1, content.size() - rule_start - 2);
+  } catch (std::exception &ex) {
+    SPDLOG_WARN("Caught exception while reading POSIX TZ rule from '{}': {}", tzif_path, ex.what());
+    return "";
+  }
 }
 
 // TESTING

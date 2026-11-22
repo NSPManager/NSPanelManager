@@ -2,7 +2,10 @@ import { create } from "zustand";
 
 interface IRoomSettings {
   id: number;
-  name: string;
+  friendly_name: string;
+  display_order: number;
+  room_temp_provider: string;
+  room_temp_sensor: string;
 }
 
 interface ISettingsStore {

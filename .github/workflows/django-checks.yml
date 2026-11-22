@@ -1,0 +1,66 @@
+name: "Django checks"
+
+on:
+  pull_request:
+    paths:
+      - "docker/web/**"
+      - "docker/ruff.toml"
+      - ".github/workflows/django-checks.yml"
+  push:
+    branches:
+      - "main"
+      - "devel"
+      - "beta"
+    paths:
+      - "docker/web/**"
+      - "docker/ruff.toml"
+      - ".github/workflows/django-checks.yml"
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Pinned: ruff's default rules and its findings change between releases.
+      - name: Install ruff
+        run: pip install ruff==0.16.10
+
+      # Only undefined names and syntax errors fail the build for now. The rest of
+      # docker/ruff.toml's rules still report findings (unused imports and the like)
+      # that need a cleanup pass before they can be enforced.
+      - name: Check for undefined names and syntax errors
+        working-directory: docker
+        run: ruff check web/ --select F821,E9 --output-format github
+
+  migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12" # Matches the python:3.12 base image in docker/Dockerfile
+          cache: pip
+          cache-dependency-path: docker/web/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r docker/web/requirements.txt
+
+      # settings.py keeps the secret key and database in /data, as in the container.
+      - name: Create the data directory
+        run: sudo install -d -o "$USER" /data
+
+      - name: Run Django system checks
+        working-directory: docker/web/nspanelmanager
+        run: python manage.py check
+
+      # Fails if a model change has no migration, which would leave existing installs
+      # with a database that doesn't match the code after upgrading.
+      - name: Check for missing migrations
+        working-directory: docker/web/nspanelmanager
+        run: python manage.py makemigrations --check --dry-run

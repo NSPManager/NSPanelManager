@@ -83,6 +83,7 @@ void HomeAssistantLight::send_state_update_to_controller() {
   if (this->_home_assistant_light_type == MQTT_MANAGER_HOME_ASSISTANT_LIGHT_TYPE::TYPE_LIGHT) {
     service_data["domain"] = "light";
     if (this->_requested_state) {
+      bool turning_on = !this->_current_state;
       service_data["service"] = "turn_on";
       if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
         this->_current_state = true;
@@ -95,22 +96,26 @@ void HomeAssistantLight::send_state_update_to_controller() {
         }
       }
 
-      // This is a turn on event and it currently off. Send kelvin if turn on behavior is to use color temp.
-      if (this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT || (!this->_current_state && MqttManagerConfig::get_light_turn_on_behaviour() == LightTurnOnBehaviour::COLOR_TEMPERATURE)) {
-        service_data["service_data"]["color_temp_kelvin"] = this->_requested_color_temperature <= 0 ? MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN) : this->_requested_color_temperature;
-        if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
-          this->_current_color_temperature = this->_requested_color_temperature;
-          this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
-        }
-      }
+      // Only send a kelvin the light supports and that is known. 0 means HA has not reported one yet (e.g. the light has only been seen off),
+      // in which case HA keeps the light's own last colour temperature.
+      bool can_send_kelvin = this->_can_color_temperature && this->_requested_color_temperature > 0;
+      bool new_colour_requested = this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::RGB && (this->_requested_hue != this->_current_hue || this->_requested_saturation != this->_current_saturation);
 
-      if (this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT && this->_requested_color_temperature != this->_current_color_temperature) {
-        service_data["service_data"]["color_temp_kelvin"] = this->_requested_color_temperature <= 0 ? MqttManagerConfig::get_setting_with_default<uint32_t>(MQTT_MANAGER_SETTING::COLOR_TEMP_MIN) : this->_requested_color_temperature;
+      // This is a turn on event and it is currently off. Force colour temperature mode if turn on behavior is to use color temp, unless a new colour was asked for.
+      if (can_send_kelvin && turning_on && !new_colour_requested && MqttManagerConfig::get_light_turn_on_behaviour() == LightTurnOnBehaviour::COLOR_TEMPERATURE) {
+        this->_requested_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
+        service_data["service_data"]["color_temp_kelvin"] = this->_requested_color_temperature;
         if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
           this->_current_color_temperature = this->_requested_color_temperature;
           this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
         }
-      } else if (this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::RGB && this->_requested_hue != this->_current_hue || this->_requested_saturation != this->_current_saturation) {
+      } else if (can_send_kelvin && this->_requested_mode == MQTT_MANAGER_LIGHT_MODE::DEFAULT && this->_requested_color_temperature != this->_current_color_temperature) {
+        service_data["service_data"]["color_temp_kelvin"] = this->_requested_color_temperature;
+        if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
+          this->_current_color_temperature = this->_requested_color_temperature;
+          this->_current_mode = MQTT_MANAGER_LIGHT_MODE::DEFAULT;
+        }
+      } else if (new_colour_requested) {
         service_data["service_data"]["hs_color"] = {this->_requested_hue, this->_requested_saturation};
         if (MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::OPTIMISTIC_MODE)) {
           this->_current_hue = this->_requested_hue;

@@ -242,6 +242,12 @@ std::string OpenhabManager::_fetch_item_state_via_rest(std::string item) {
 
 void OpenhabManager::send_json(nlohmann::json &data) {
   data["source"] = "NSPanelManager::MqttManager";
+#if defined(TEST_MODE) && TEST_MODE == 1
+  {
+    std::lock_guard<std::mutex> lock_guard(OpenhabManager::_test_sent_messages_mutex);
+    OpenhabManager::_test_sent_messages.push_back(data);
+  }
+#endif
   std::string buffer = data.dump();
   OpenhabManager::_send_string(buffer);
 }

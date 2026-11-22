@@ -103,10 +103,18 @@ struct Entity {
   void set_entity_data_json(const nlohmann::json &json);
 };
 
+// How long a query waits for the web interface to release its lock on the database before
+// failing with "database is locked". Matches the "timeout" the web interface uses (settings.py).
+static constexpr int DATABASE_BUSY_TIMEOUT_MS = 20000;
+
+// `database` below is static, so each translation unit that includes this header has its own
+// storage, with its own connections. Anything that must apply to every connection is set
+// here, where each of those copies is made.
+static inline auto make_database() {
 #if defined(TEST_MODE) && TEST_MODE == 1
-static inline auto database = sqlite_orm::make_storage("/tmp/nspanelmanager_db_test.sqlite3",
+  auto storage = sqlite_orm::make_storage("/tmp/nspanelmanager_db_test.sqlite3",
 #else
-static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.sqlite3",
+  auto storage = sqlite_orm::make_storage("/data/nspanelmanager_db.sqlite3",
 #endif
                                                        sqlite_orm::make_table("web_roomentitiespage",
                                                                               sqlite_orm::make_column("id", &RoomEntitiesPage::id, sqlite_orm::primary_key().autoincrement()),
@@ -175,6 +183,15 @@ static inline auto database = sqlite_orm::make_storage("/data/nspanelmanager_db.
                                                                               sqlite_orm::make_column("entities_page_id", &Entity::entities_page_id),
                                                                               sqlite_orm::make_column("entity_data", &Entity::entity_data),
                                                                               sqlite_orm::make_column("room_id", &Entity::room_id)));
+  // Without a busy timeout SQLite fails at once while the web interface is writing. A save
+  // in the web interface is also what triggers a reload, so a reload often reads while the
+  // write that triggered it is still committing. The failed reads used to return settings
+  // as empty strings, and std::stoi("") then aborted MQTTManager.
+  storage.on_open = [](sqlite3 *db) { sqlite3_busy_timeout(db, DATABASE_BUSY_TIMEOUT_MS); };
+  return storage;
+}
+
+static inline auto database = make_database();
 
 static void init() {
 
