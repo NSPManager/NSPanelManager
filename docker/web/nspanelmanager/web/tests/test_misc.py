@@ -16,6 +16,7 @@ from .harness import NSPMTestCase
 
 class MessageTests(NSPMTestCase):
     def test_unread_messages_are_flagged_and_can_be_marked_read(self):
+        Message.objects.all().delete()  # Migrations add their own messages (e.g. 0071).
         message = Message.objects.create(title="Update available", message="v2.1 is out")
         self.assertTrue(self.client.get(reverse("index")).context["has_unread_messages"])
 

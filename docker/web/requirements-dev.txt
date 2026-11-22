@@ -1,0 +1,15 @@
+# Development and CI only: not installed in the release image (docker/Dockerfile installs requirements.txt).
+# drf-spectacular generates docker/web/openapi.yaml (see generate_api.sh and web/tests/test_openapi.py). It
+# pulls in jsonschema -> rpds-py, which is built with Rust and has no wheel for every architecture the
+# image is released for (armhf), so it must stay out of requirements.txt. The app imports it only through
+# web/rest_v2/schema.py, which falls back to no-ops when it isn't installed.
+-r requirements.txt
+attrs==26.1.0
+drf-spectacular==0.30.0
+inflection==0.5.1
+jsonschema==4.26.0
+jsonschema-specifications==2025.9.1
+referencing==0.37.0
+rpds-py==2026.9.1
+typing_extensions==4.16.0
+uritemplate==4.2.0

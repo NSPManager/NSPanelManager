@@ -180,6 +180,9 @@ private:
   // A thermostat temperature limit setting, or 0 if it is not a number.
   int _get_nspanel_temperature_limit_setting(std::string key);
 
+  // The last config sent to the panel that is currently retained in MQTT.
+  NSPanelConfig _last_send_config;
+
   // Vars:
   uint32_t _id;
   database_manager::NSPanel _settings; // Settings loaded from database
@@ -218,6 +221,7 @@ private:
     FOLLOW,
     THERMOSTAT_HEATING,
     THERMOSTAT_COOLING,
+    OPEN_MEDIA_PLAYER, // Opens the first media player in the panel's room. Stored in the database: only append.
   };
 
   // MQTT Stuff:

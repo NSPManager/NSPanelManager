@@ -853,6 +853,7 @@ def put_light_entity(request):
             "is_ceiling_light",
             "openhab_item_color_temp",
             "openhab_item_dimmer",
+            "openhab_item_switch",
             "openhab_item_rgb",
         ]
         data = json.loads(request.body)["values"]
@@ -869,6 +870,7 @@ def put_light_entity(request):
             "home_assistant_name": data.get("home_assistant_name", ""),
             "openhab_control_mode": "dimmer" if data.get("can_dim", False) else "switch",
             "openhab_item_dimmer": data.get("openhab_item_dimmer", ""),
+            "openhab_item_switch": data.get("openhab_item_switch", ""),
             "openhab_item_color_temp": data.get("openhab_item_color_temp", ""),
             "openhab_item_rgb": data.get("openhab_item_rgb", ""),
             "can_dim": str(data["can_dim"]).lower() == "true",
@@ -1299,8 +1301,16 @@ def put_cover_entity(request):
             "room_view_position",
             "controller",
             "friendly_name",
+            "invert_positions",
             "home_assistant_name",
             "openhab_item",
+            "openhab_tilt_item",
+            "position_preset1",
+            "position_preset2",
+            "position_preset3",
+            "tilt_preset1",
+            "tilt_preset2",
+            "tilt_preset3",
         ]
 
         data = json.loads(request.body)
@@ -1308,7 +1318,7 @@ def put_cover_entity(request):
             if field not in data:
                 return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
 
-        for field in ("controller", "friendly_name", "home_assistant_name", "openhab_item"):
+        for field in ("controller", "friendly_name", "home_assistant_name", "openhab_item", "openhab_tilt_item"):
             if not isinstance(data[field], str):
                 return JsonResponse({"status": "error", "message": f"{field} must be a string."}, status=400)
 
@@ -1318,6 +1328,8 @@ def put_cover_entity(request):
 
         home_assistant_name = data["home_assistant_name"].strip()
         openhab_item = data["openhab_item"].strip()
+        openhab_tilt_item = data["openhab_tilt_item"].strip()
+        invert_positions = data["invert_positions"] if "invert_positions" in data else False
         if data["controller"] == "home_assistant":
             if not home_assistant_name:
                 return JsonResponse({"status": "error", "message": "home_assistant_name is required for a Home Assistant cover."}, status=400)
@@ -1365,6 +1377,14 @@ def put_cover_entity(request):
             "controller": data["controller"],
             "home_assistant_name": home_assistant_name,
             "openhab_item": openhab_item,
+            "openhab_tilt_item": openhab_tilt_item,
+            "invert_positions": invert_positions,
+            "position_preset1": int(data["position_preset1"]),
+            "position_preset2": int(data["position_preset2"]),
+            "position_preset3": int(data["position_preset3"]),
+            "tilt_preset1": int(data["tilt_preset1"]),
+            "tilt_preset2": int(data["tilt_preset2"]),
+            "tilt_preset3": int(data["tilt_preset3"]),
         }
         new_cover.friendly_name = data["friendly_name"].strip()
         if not new_cover.friendly_name:

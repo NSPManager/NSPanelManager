@@ -5,6 +5,7 @@
 #include <boost/lockfree/spsc_queue.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
 #include <boost/signals2.hpp>
+#include <condition_variable>
 #include <functional>
 #include <google/protobuf/message.h>
 #include <mqtt/client.h>
@@ -194,6 +195,35 @@ public:
     std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_test_published_messages_mutex);
     return std::exchange(MQTT_Manager::_test_mirrored_messages, {});
   }
+
+  // Queue a message as if it had been received from the MQTT server.
+  static bool test_enqueue_message(const std::string &topic, const std::string &message) {
+    if (!MQTT_Manager::_mqtt_message_queue.push(MQTTMessage{.topic = topic, .message = message})) {
+      return false;
+    }
+    MQTT_Manager::_notify_mqtt_message_queued();
+    return true;
+  }
+
+  // Start the thread that processes queued messages, as connect() does.
+  static void test_start_processing_thread() {
+    if (!MQTT_Manager::_process_messages_thread.joinable()) {
+      MQTT_Manager::_stop_processing_messages = false;
+      MQTT_Manager::_process_messages_thread = std::thread(MQTT_Manager::_process_mqtt_messages);
+    }
+  }
+
+  // Stop the thread that processes queued messages and wait for it to exit.
+  static void test_stop_processing_thread() {
+    if (MQTT_Manager::_process_messages_thread.joinable()) {
+      {
+        std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_message_queue_mutex);
+        MQTT_Manager::_stop_processing_messages = true;
+      }
+      MQTT_Manager::_mqtt_message_queue_condition.notify_one();
+      MQTT_Manager::_process_messages_thread.join();
+    }
+  }
 #endif
 
 private:
@@ -206,6 +236,11 @@ private:
 #endif
   static inline boost::lockfree::spsc_queue<MQTTMessage, boost::lockfree::capacity<256>> _mqtt_message_queue;
   static inline std::thread _process_messages_thread;
+  // Wakes _process_mqtt_messages when a message is pushed to _mqtt_message_queue. The queue itself
+  // stays lock-free; the mutex only guards the wait so a notification can't be lost.
+  static inline std::mutex _mqtt_message_queue_mutex;
+  static inline std::condition_variable _mqtt_message_queue_condition;
+  static inline std::atomic<bool> _stop_processing_messages = false;
   static inline mqtt::client *_mqtt_client = nullptr;
   static inline std::mutex _mqtt_client_mutex;
   static inline std::mutex _mqtt_message_mutex;
@@ -241,6 +276,11 @@ private:
   static void _mirror_to_stomp(const std::string &topic, const std::string &payload, bool retain);
 
   static void _process_mqtt_messages();
+
+  /**
+   * Wake the message processing thread. Call after each successful push to _mqtt_message_queue.
+   */
+  static void _notify_mqtt_message_queued();
   static void _process_mqtt_command(nlohmann::json &data);
 
   static inline std::atomic<bool> _reconnect_on_disconnect = true;

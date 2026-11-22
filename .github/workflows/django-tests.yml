@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - "docker/web/**"
+      # web/tests/test_rest_v2_settings.py checks /rest/v2/settings against MQTTManager's setting keys.
+      - "docker/MQTTManager/include/mqtt_manager_config/mqtt_manager_config.hpp"
       - ".github/workflows/django-tests.yml"
   push:
     branches:
@@ -12,6 +14,8 @@ on:
       - "beta"
     paths:
       - "docker/web/**"
+      # web/tests/test_rest_v2_settings.py checks /rest/v2/settings against MQTTManager's setting keys.
+      - "docker/MQTTManager/include/mqtt_manager_config/mqtt_manager_config.hpp"
       - ".github/workflows/django-tests.yml"
 
 # Fork pull requests already get a read-only token and no repository secrets; this keeps
@@ -30,10 +34,11 @@ jobs:
         with:
           python-version: "3.12" # Matches the python:3.12 base image in docker/Dockerfile
           cache: pip
-          cache-dependency-path: docker/web/requirements.txt
+          cache-dependency-path: docker/web/requirements*.txt
 
+      # requirements-dev.txt adds drf-spectacular, so test_openapi.py runs here.
       - name: Install dependencies
-        run: pip install -r docker/web/requirements.txt unittest-xml-reporting
+        run: pip install -r docker/web/requirements-dev.txt unittest-xml-reporting
 
       - name: Run tests
         run: docker/web/run_tests.sh -v 2
@@ -51,3 +56,58 @@ jobs:
           detailed_summary: true
           include_passed: true
           require_tests: true
+
+  # The release image installs only requirements.txt (docker/Dockerfile). drf-spectacular is dev-only
+  # because its rpds-py dependency has no wheel for every release architecture (armhf), so check the
+  # app and its tests work without it.
+  prod-deps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12" # Matches the python:3.12 base image in docker/Dockerfile
+          cache: pip
+          cache-dependency-path: docker/web/requirements.txt
+
+      - name: Install the release image's dependencies only
+        run: pip install -r docker/web/requirements.txt
+
+      - name: Check development-only packages are absent
+        run: |
+          for module in drf_spectacular jsonschema rpds; do
+            if python -c "import $module" 2>/dev/null; then
+              echo "::error::$module is importable with only docker/web/requirements.txt installed; it must stay in requirements-dev.txt"
+              exit 1
+            fi
+          done
+
+      - name: Run tests
+        run: docker/web/run_tests.sh
+
+  # test_openapi.py checks openapi.yaml against the DRF views; this checks the UI's generated
+  # TypeScript types against openapi.yaml. Together they catch a contract change committed
+  # without running docker/web/generate_api.sh.
+  api-types:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: docker/web/nspanelmanager/web/react-components
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Regenerate TypeScript types from openapi.yaml
+        run: npm run generate:api-types
+
+      - name: Check the committed types are up to date
+        run: |
+          if [ -n "$(git status --porcelain -- src/api/schema.d.ts)" ]; then
+            git diff -- src/api/schema.d.ts
+            echo "::error file=docker/web/nspanelmanager/web/react-components/src/api/schema.d.ts::src/api/schema.d.ts is out of date with docker/web/openapi.yaml. Run docker/web/generate_api.sh and commit the result."
+            exit 1
+          fi

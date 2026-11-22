@@ -2,6 +2,7 @@
 #include "database_manager/database_manager.hpp"
 #include "entity_manager/entity_manager.hpp"
 #include "manager_clock/manager_clock.hpp"
+#include "media_player/media_player.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "mqtt_manager_config/mqtt_manager_config.hpp"
 #include "protobuf_nspanel.pb.h"
@@ -30,6 +31,7 @@
 #include <exception>
 #include <fmt/chrono.h>
 #include <fmt/core.h>
+#include <google/protobuf/util/message_differencer.h>
 #include <iomanip>
 #include <ixwebsocket/IXWebSocketSendInfo.h>
 #include <light/light.hpp>
@@ -60,10 +62,6 @@ NSPanel::NSPanel(uint32_t id) {
   this->_id = id;
   SPDLOG_INFO("Loading new NSPanel with ID {}.", id);
   this->reload_config();
-  if (!this->_mqtt_config_topic.empty() && this->_state != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT) {
-    SPDLOG_INFO("Loaded accepted NSPanel {}::{}.", this->_id, this->_name);
-    this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
-  }
 
   CommandManager::attach_callback(boost::bind(&NSPanel::command_callback, this, _1));
   WebsocketServer::attach_stomp_callback(fmt::format("nspanel/{}/command", this->_mac), boost::bind(&NSPanel::handle_stomp_command_callback, this, _1));
@@ -142,7 +140,7 @@ void NSPanel::reload_config() {
     } else if (panel_settings.model.compare("web") == 0) {
       this->_model = MQTT_MANAGER_NSPANEL_MODEL::WEB;
     } else {
-      SPDLOG_ERROR("Failed to prase panel model for NSPanel {}::{}. Got value '{}'. Will assume sonoff.", panel_settings.id, panel_settings.friendly_name, panel_settings.model);
+      SPDLOG_ERROR("Failed to parse panel model for NSPanel {}::{}. Got value '{}'. Will assume sonoff.", panel_settings.id, panel_settings.friendly_name, panel_settings.model);
       this->_model = MQTT_MANAGER_NSPANEL_MODEL::SONOFF;
     }
 
@@ -198,7 +196,7 @@ void NSPanel::reload_config() {
     if (!panel_settings.denied && !panel_settings.accepted) {
       // No decission has been made on wether ot accept or deny panel. It is therefore awaiting_accept
       this->_state = MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT;
-    } else if (this->_state == MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT || this->_state == MQTT_MANAGER_NSPANEL_STATE::DENIED) {
+    } else if (panel_settings.accepted && (this->_state == MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT || this->_state == MQTT_MANAGER_NSPANEL_STATE::DENIED)) {
       // The panel has just been accepted. Wait for it to register again.
       this->_state = MQTT_MANAGER_NSPANEL_STATE::WAITING;
     }
@@ -254,7 +252,7 @@ void NSPanel::reload_config() {
       SPDLOG_INFO("Subscribing to NSPanel MQTT topics.");
       MQTT_Manager::subscribe(this->_mqtt_relay1_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
       MQTT_Manager::subscribe(this->_mqtt_relay2_state_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
-      MQTT_Manager::subscribe(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));                                // TODO: Remove me and use only topic based on MAC-address instead
+      MQTT_Manager::subscribe(this->_mqtt_log_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2)); // TODO: Remove me and use only topic based on MAC-address instead
       MQTT_Manager::subscribe(this->_mqtt_legacy_status_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
       MQTT_Manager::subscribe(this->_mqtt_legacy_status_report_topic, boost::bind(&NSPanel::mqtt_callback, this, _1, _2));
       MQTT_Manager::subscribe(this->_mqtt_mac_log_topic, boost::bind(&NSPanel::mqtt_log_callback, this, _1, _2));
@@ -334,6 +332,15 @@ void NSPanel::send_config() {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
     config.set_button1_lower_temperature(this->_get_nspanel_temperature_limit_setting("button1_relay_lower_temperature"));
     config.set_button1_upper_temperature(this->_get_nspanel_temperature_limit_setting("button1_relay_upper_temperature"));
+  } else if (b1_mode == ButtonMode::OPEN_MEDIA_PLAYER) {
+    auto media_players = (*default_room)->get_all_entities_by_type<MediaPlayerEntity>(MQTT_MANAGER_ENTITY_TYPE::MEDIA_PLAYER);
+    if (!media_players.empty()) {
+      config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_OPEN_ENTITY_PAGE);
+      config.set_button1_entity_page_topic(media_players.front()->get_mqtt_state_topic());
+    } else {
+      SPDLOG_WARN("Button 1 on NSPanel {}::{} opens the room's first media player, but room {} has no media player.", this->_id, this->_name, this->_settings.room_id);
+      config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
+    }
   } else {
     config.set_button1_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
@@ -351,6 +358,15 @@ void NSPanel::send_config() {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_THERMOSTAT_COOL);
     config.set_button2_lower_temperature(this->_get_nspanel_temperature_limit_setting("button2_relay_lower_temperature"));
     config.set_button2_upper_temperature(this->_get_nspanel_temperature_limit_setting("button2_relay_upper_temperature"));
+  } else if (b2_mode == ButtonMode::OPEN_MEDIA_PLAYER) {
+    auto media_players = (*default_room)->get_all_entities_by_type<MediaPlayerEntity>(MQTT_MANAGER_ENTITY_TYPE::MEDIA_PLAYER);
+    if (!media_players.empty()) {
+      config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_OPEN_ENTITY_PAGE);
+      config.set_button2_entity_page_topic(media_players.front()->get_mqtt_state_topic());
+    } else {
+      SPDLOG_WARN("Button 2 on NSPanel {}::{} opens the room's first media player, but room {} has no media player.", this->_id, this->_name, this->_settings.room_id);
+      config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
+    }
   } else {
     config.set_button2_mode(NSPanelConfig_NSPanelButtonMode_NOTIFY_MANAGER);
   }
@@ -503,8 +519,13 @@ void NSPanel::send_config() {
     }
   }
 
-  SPDLOG_DEBUG("Sending updated NSPanelConfig to panel {}::{} over MQTT.", this->_id, this->_name);
-  MQTT_Manager::publish_protobuf(this->_mqtt_config_topic, config, true);
+  google::protobuf::util::MessageDifferencer differencer;
+  if (!differencer.Equals(this->_last_send_config, config)) {
+    SPDLOG_DEBUG("Sending updated NSPanelConfig to panel {}::{} over MQTT.", this->_id, this->_name);
+    MQTT_Manager::publish_protobuf(this->_mqtt_config_topic, config, true);
+  } else {
+    SPDLOG_DEBUG("Not sending updated config for NSPanel {}::{} as no config change has occured from last sent config.");
+  }
 }
 
 NSPanel::~NSPanel() {
@@ -931,6 +952,7 @@ void NSPanel::send_websocket_status_update() {
       {"update_progress", this->_update_progress},
       {"accepted", this->_state != MQTT_MANAGER_NSPANEL_STATE::AWAITING_ACCEPT},
       {"denied", this->_state == MQTT_MANAGER_NSPANEL_STATE::DENIED},
+      {"default_room_id", this->get_default_room_id()},
   };
   status_data["warnings"] = nlohmann::json::array({});
   for (NSPanelWarningWebsocketRepresentation warning : this->_nspanel_warnings) {
@@ -1681,6 +1703,11 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
           break;
         }
 
+        case ButtonMode::OPEN_MEDIA_PLAYER:
+          // The panel opens the media player itself. It only notifies the manager when the room has no media player.
+          SPDLOG_WARN("Button 1 on NSPanel {}::{} was pressed, but there is no media player in its room to open.", this->_id, this->_name);
+          break;
+
         default:
           SPDLOG_WARN("Unknown button mode triggered from panel.");
           break;
@@ -1714,6 +1741,11 @@ void NSPanel::command_callback(NSPanelMQTTManagerCommand &command) {
           MQTT_Manager::publish(topic, payload);
           break;
         }
+
+        case ButtonMode::OPEN_MEDIA_PLAYER:
+          // The panel opens the media player itself. It only notifies the manager when the room has no media player.
+          SPDLOG_WARN("Button 2 on NSPanel {}::{} was pressed, but there is no media player in its room to open.", this->_id, this->_name);
+          break;
 
         default:
           SPDLOG_WARN("Unknown button mode triggered from panel.");

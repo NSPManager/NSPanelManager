@@ -20,7 +20,6 @@ from requests.sessions import Request
 
 import web.home_assistant_api
 import web.openhab_api
-from web.components.rooms_list.rooms_list import RoomsList
 from web.settings_helper import (
     delete_nspanel_setting,
     get_nspanel_setting_with_default,

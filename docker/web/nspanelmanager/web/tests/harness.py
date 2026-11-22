@@ -123,6 +123,9 @@ class NSPMTestCase(TestCase):
         # Home Assistant goes to the fake, anything else fails the test.
         self._patch("requests.get", side_effect=self._fake_http_get)
 
+        self.client.get("/")
+        self.csrf_token = self.client.cookies["csrftoken"].value
+
     def _fake_http_get(self, url, *args, **kwargs):
         if url.startswith(get_setting_with_default("home_assistant_address")):
             return self.home_assistant._get(url, *args, **kwargs)
@@ -258,7 +261,11 @@ class NSPMTestCase(TestCase):
 
     def put_json(self, url, data):
         """Send JSON the way the React UI does (fetch with a JSON body)."""
-        return self.client.put(url, json.dumps(data) if not isinstance(data, str) else data, content_type="application/json")
+        return self.client.put(url, json.dumps(data) if not isinstance(data, str) else data, content_type="application/json", HTTP_X_CSRFTOKEN=self.csrf_token)
+
+    def patch_json(self, url, data):
+        """Send JSON the way the React UI does (fetch with a JSON body)."""
+        return self.client.patch(url, json.dumps(data) if not isinstance(data, str) else data, content_type="application/json", HTTP_X_CSRFTOKEN=self.csrf_token)
 
     def post_json(self, url, data):
-        return self.client.post(url, json.dumps(data) if not isinstance(data, str) else data, content_type="application/json")
+        return self.client.post(url, json.dumps(data) if not isinstance(data, str) else data, content_type="application/json", HTTP_X_CSRFTOKEN=self.csrf_token)

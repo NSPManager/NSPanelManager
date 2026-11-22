@@ -36,6 +36,7 @@
                             <input
                                 type="radio"
                                 name="theme-dropdown"
+                                id="theme-radio-{{ theme_option }}"
                                 class="theme-controller radio radio-xs checked:bg-success ml-2"
                                 value="{{ theme_option }}"
                                 hx-post="{{ ingress_path }}{% url 'htmx_interface_theme' %}" hx-swap="none"

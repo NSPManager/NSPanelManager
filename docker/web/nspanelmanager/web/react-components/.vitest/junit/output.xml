@@ -1,0 +1,780 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="200" failures="0" errors="0" time="7.264198965">
+    <testsuite name="src/api/client.test.ts" timestamp="2026-11-12T19:39:53.378Z" hostname="2cfb94c025a9" tests="4" failures="0" errors="0" skipped="0" time="0.010335435">
+        <testcase classname="src/api/client.test.ts" name="api client &gt; PATCHes settings as JSON with the CSRF token" time="0.006939214">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api client &gt; returns field errors from a 400" time="0.000970875">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api client &gt; GETs settings without a CSRF token" time="0.000729043">
+        </testcase>
+        <testcase classname="src/api/client.test.ts" name="api client &gt; reads cookies by exact name" time="0.0005493">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/MultiStep_AddEditEntity/MultiStep_AddEditEntity.test.tsx" timestamp="2026-11-12T19:39:53.379Z" hostname="2cfb94c025a9" tests="6" failures="0" errors="0" skipped="0" time="1.196445925">
+        <testcase classname="src/components/MultiStep_AddEditEntity/MultiStep_AddEditEntity.test.tsx" name="add or edit entity wizard &gt; only offers Home Assistant as the controller for a media player" time="0.228593596">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/MultiStep_AddEditEntity.test.tsx" name="add or edit entity wizard &gt; offers OpenHAB for other entity types when it is configured" time="0.143735072">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/MultiStep_AddEditEntity.test.tsx" name="add or edit entity wizard &gt; offers both controllers for a cover" time="0.136473633">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/MultiStep_AddEditEntity.test.tsx" name="add or edit entity wizard &gt; goes from the cover type to the cover form" time="0.291728014">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/MultiStep_AddEditEntity.test.tsx" name="add or edit entity wizard &gt; goes from the media player type to the media player form" time="0.282654305">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/MultiStep_AddEditEntity.test.tsx" name="add or edit entity wizard &gt; opens an existing media player straight on its form" time="0.112113953">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_cover.test.tsx" timestamp="2026-11-12T19:39:53.380Z" hostname="2cfb94c025a9" tests="7" failures="0" errors="0" skipped="0" time="0.739896776">
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_cover.test.tsx" name="cover form &gt; only offers Home Assistant cover entities" time="0.166176939">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_cover.test.tsx" name="cover form &gt; can&apos;t be saved without a name and an entity" time="0.126811735">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_cover.test.tsx" name="cover form &gt; shows the detected capabilities" time="0.05174071">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_cover.test.tsx" name="cover form &gt; saves a Home Assistant cover" time="0.109531353">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_cover.test.tsx" name="cover form &gt; only offers Rollershutter items for OpenHAB and saves the item" time="0.179871886">
+            <system-out>
+&lt;ref *1&gt; HTMLInputElement {
+  &apos;__reactFiber$7o0o9phk2i&apos;: &lt;ref *2&gt; FiberNode {
+    tag: 5,
+    key: null,
+    elementType: &apos;input&apos;,
+    type: &apos;input&apos;,
+    stateNode: [Circular *1],
+    return: FiberNode {
+      tag: 5,
+      key: null,
+      elementType: &apos;div&apos;,
+      type: &apos;div&apos;,
+      stateNode: [HTMLDivElement],
+      return: [FiberNode],
+      child: [Circular *2],
+      sibling: null,
+      index: 1,
+      ref: null,
+      refCleanup: null,
+      pendingProps: [Object],
+      memoizedProps: [Object],
+      updateQueue: null,
+      memoizedState: null,
+      dependencies: null,
+      mode: 3,
+      flags: 4,
+      subtreeFlags: 4194308,
+      deletions: null,
+      lanes: 0,
+      childLanes: 0,
+      alternate: [FiberNode],
+      actualDuration: 0.0033670000002530287,
+      actualStartTime: 989.866452,
+      selfBaseDuration: 0.0015030000000706423,
+      treeBaseDuration: 0.002736000000140848,
+      _debugInfo: null,
+      _debugOwner: [FiberNode],
+      _debugStack: Error: react-stack-top-frame
+          at Object.process.env.NODE_ENV.exports.createElement (/usr/src/app/nspanelmanager/web/react-components/node_modules/react/cjs/react.development.js:1053:20)
+          at /usr/src/app/nspanelmanager/web/react-components/node_modules/@emotion/react/dist/emotion-element-e8f4cc37.development.cjs.js:298:37
+          at EmotionCssPropInternal (/usr/src/app/nspanelmanager/web/react-components/node_modules/@emotion/react/dist/emotion-element-e8f4cc37.development.cjs.js:61:12)
+          at Object.react_stack_bottom_frame (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+          at renderWithHooks (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+          at updateForwardRef (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:9724:19)
+          at beginWork (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:12117:18)
+          at runWithFiberInDEV (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+          at performUnitOfWork (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+          at workLoopSync (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:17469:41),
+      _debugTask: null,
+      _debugNeedsRemount: false,
+      _debugHookTypes: null
+    },
+    child: null,
+    sibling: null,
+    index: 0,
+    ref: [Function (anonymous)],
+    refCleanup: undefined,
+    pendingProps: {
+      className: &apos;&apos;,
+      ref: [Function (anonymous)],
+      style: [Object],
+      disabled: false,
+      autoCapitalize: &apos;none&apos;,
+      autoComplete: &apos;off&apos;,
+      autoCorrect: &apos;off&apos;,
+      id: &apos;react-select-7-input&apos;,
+      onBlur: [Function (anonymous)],
+      onChange: [Function (anonymous)],
+      onFocus: [Function (anonymous)],
+      spellCheck: &apos;false&apos;,
+      tabIndex: 0,
+      form: undefined,
+      type: &apos;text&apos;,
+      value: &apos;&apos;,
+      &apos;aria-autocomplete&apos;: &apos;list&apos;,
+      &apos;aria-expanded&apos;: false,
+      &apos;aria-haspopup&apos;: true,
+      &apos;aria-errormessage&apos;: undefined,
+      &apos;aria-invalid&apos;: undefined,
+      &apos;aria-label&apos;: undefined,
+      &apos;aria-labelledby&apos;: undefined,
+      &apos;aria-required&apos;: undefined,
+      role: &apos;combobox&apos;,
+      &apos;aria-activedescendant&apos;: &apos;&apos;,
+      &apos;aria-describedby&apos;: &apos;react-select-7-placeholder&apos;
+    },
+    memoizedProps: {
+      className: &apos;&apos;,
+      ref: [Function (anonymous)],
+      style: [Object],
+      disabled: false,
+      autoCapitalize: &apos;none&apos;,
+      autoComplete: &apos;off&apos;,
+      autoCorrect: &apos;off&apos;,
+      id: &apos;react-select-7-input&apos;,
+      onBlur: [Function (anonymous)],
+      onChange: [Function (anonymous)],
+      onFocus: [Function (anonymous)],
+      spellCheck: &apos;false&apos;,
+      tabIndex: 0,
+      form: undefined,
+      type: &apos;text&apos;,
+      value: &apos;&apos;,
+      &apos;aria-autocomplete&apos;: &apos;list&apos;,
+      &apos;aria-expanded&apos;: false,
+      &apos;aria-haspopup&apos;: true,
+      &apos;aria-errormessage&apos;: undefined,
+      &apos;aria-invalid&apos;: undefined,
+      &apos;aria-label&apos;: undefined,
+      &apos;aria-labelledby&apos;: undefined,
+      &apos;aria-required&apos;: undefined,
+      role: &apos;combobox&apos;,
+      &apos;aria-activedescendant&apos;: &apos;&apos;,
+      &apos;aria-describedby&apos;: &apos;react-select-7-placeholder&apos;
+    },
+    updateQueue: null,
+    memoizedState: null,
+    dependencies: null,
+    mode: 3,
+    flags: 4194308,
+    subtreeFlags: 0,
+    deletions: null,
+    lanes: 0,
+    childLanes: 0,
+    alternate: FiberNode {
+      tag: 5,
+      key: null,
+      elementType: &apos;input&apos;,
+      type: &apos;input&apos;,
+      stateNode: [Circular *1],
+      return: [FiberNode],
+      child: null,
+      sibling: null,
+      index: 0,
+      ref: [Function (anonymous)],
+      refCleanup: undefined,
+      pendingProps: [Object],
+      memoizedProps: [Object],
+      updateQueue: null,
+      memoizedState: null,
+      dependencies: null,
+      mode: 3,
+      flags: 4194308,
+      subtreeFlags: 0,
+      deletions: null,
+      lanes: 0,
+      childLanes: 0,
+      alternate: [Circular *2],
+      actualDuration: 0.0009619999999586071,
+      actualStartTime: 991.704556,
+      selfBaseDuration: 0.0007409999999481443,
+      treeBaseDuration: 0.0007409999999481443,
+      _debugInfo: null,
+      _debugOwner: [FiberNode],
+      _debugStack: Error: react-stack-top-frame
+          at process.env.NODE_ENV.exports.createElement (/usr/src/app/nspanelmanager/web/react-components/node_modules/react/cjs/react.development.js:1053:20)
+          at Object.jsx (/usr/src/app/nspanelmanager/web/react-components/node_modules/@emotion/react/dist/emotion-react.development.cjs.js:362:43)
+          at Input (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-select/dist/index-42b266b1.cjs.dev.js:1160:13)
+          at Object.react_stack_bottom_frame (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+          at renderWithHooks (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+          at updateFunctionComponent (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+          at beginWork (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+          at runWithFiberInDEV (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+          at performUnitOfWork (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+          at workLoopSync (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:17469:41),
+      _debugTask: null,
+      _debugNeedsRemount: false,
+      _debugHookTypes: null
+    },
+    actualDuration: 0.0017140000001063527,
+    actualStartTime: 989.867995,
+    selfBaseDuration: 0.0012330000000702057,
+    treeBaseDuration: 0.0012330000000702057,
+    _debugInfo: null,
+    _debugOwner: FiberNode {
+      tag: 0,
+      key: null,
+      elementType: [Function: Input],
+      type: [Function: Input],
+      stateNode: null,
+      return: [FiberNode],
+      child: [FiberNode],
+      sibling: null,
+      index: 1,
+      ref: null,
+      refCleanup: null,
+      pendingProps: [Object],
+      memoizedProps: [Object],
+      updateQueue: null,
+      memoizedState: null,
+      dependencies: null,
+      mode: 3,
+      flags: 1,
+      subtreeFlags: 4718597,
+      deletions: null,
+      lanes: 0,
+      childLanes: 0,
+      alternate: [FiberNode],
+      actualDuration: 0.0805240000000822,
+      actualStartTime: 989.789185,
+      selfBaseDuration: 0.05884200000002693,
+      treeBaseDuration: 0.07957300000009582,
+      _debugInfo: null,
+      _debugOwner: [FiberNode],
+      _debugStack: Error: react-stack-top-frame
+          at Object.process.env.NODE_ENV.exports.createElement (/usr/src/app/nspanelmanager/web/react-components/node_modules/react/cjs/react.development.js:1053:20)
+          at Select.renderInput (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-select/dist/Select-1b9abbe3.cjs.dev.js:2185:44)
+          at Select.render (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-select/dist/Select-1b9abbe3.cjs.dev.js:2625:49)
+          at Object.react_stack_bottom_frame (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:25917:29)
+          at updateClassComponent (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:10719:25)
+          at beginWork (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:11792:13)
+          at runWithFiberInDEV (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+          at performUnitOfWork (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+          at workLoopSync (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:17469:41)
+          at renderRootSync (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:17450:11),
+      _debugTask: null,
+      _debugNeedsRemount: false,
+      _debugHookTypes: null
+    },
+    _debugStack: Error: react-stack-top-frame
+        at process.env.NODE_ENV.exports.createElement (/usr/src/app/nspanelmanager/web/react-components/node_modules/react/cjs/react.development.js:1053:20)
+        at Object.jsx (/usr/src/app/nspanelmanager/web/react-components/node_modules/@emotion/react/dist/emotion-react.development.cjs.js:362:43)
+        at Input (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-select/dist/index-42b266b1.cjs.dev.js:1160:13)
+        at Object.react_stack_bottom_frame (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:25904:20)
+        at renderWithHooks (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:7662:22)
+        at updateFunctionComponent (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:10166:19)
+        at beginWork (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:11778:18)
+        at runWithFiberInDEV (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:874:13)
+        at performUnitOfWork (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:17641:22)
+        at workLoopSync (/usr/src/app/nspanelmanager/web/react-components/node_modules/react-dom/cjs/react-dom-client.development.js:17469:41),
+    _debugTask: null,
+    _debugNeedsRemount: false,
+    _debugHookTypes: null
+  },
+  &apos;__reactProps$7o0o9phk2i&apos;: {
+    className: &apos;&apos;,
+    ref: [Function (anonymous)],
+    style: {
+      label: &apos;input&apos;,
+      color: &apos;inherit&apos;,
+      background: 0,
+      opacity: 1,
+      width: &apos;100%&apos;,
+      gridArea: &apos;1 / 2&apos;,
+      font: &apos;inherit&apos;,
+      minWidth: &apos;2px&apos;,
+      border: 0,
+      margin: 0,
+      outline: 0,
+      padding: 0
+    },
+    disabled: false,
+    autoCapitalize: &apos;none&apos;,
+    autoComplete: &apos;off&apos;,
+    autoCorrect: &apos;off&apos;,
+    id: &apos;react-select-7-input&apos;,
+    onBlur: [Function (anonymous)],
+    onChange: [Function (anonymous)],
+    onFocus: [Function (anonymous)],
+    spellCheck: &apos;false&apos;,
+    tabIndex: 0,
+    form: undefined,
+    type: &apos;text&apos;,
+    value: &apos;&apos;,
+    &apos;aria-autocomplete&apos;: &apos;list&apos;,
+    &apos;aria-expanded&apos;: false,
+    &apos;aria-haspopup&apos;: true,
+    &apos;aria-errormessage&apos;: undefined,
+    &apos;aria-invalid&apos;: undefined,
+    &apos;aria-label&apos;: undefined,
+    &apos;aria-labelledby&apos;: undefined,
+    &apos;aria-required&apos;: undefined,
+    role: &apos;combobox&apos;,
+    &apos;aria-activedescendant&apos;: &apos;&apos;,
+    &apos;aria-describedby&apos;: &apos;react-select-7-placeholder&apos;
+  },
+  &apos;__reactEvents$7o0o9phk2i&apos;: Set(1) { &apos;invalid__bubble&apos; },
+  value: [Getter/Setter],
+  _valueTracker: {
+    getValue: [Function: getValue],
+    setValue: [Function: setValue],
+    stopTracking: [Function: stopTracking]
+  },
+  Symbol(SameObject caches): [Object: null prototype] {
+    style: CSSStyleDeclaration {
+      &apos;0&apos;: &apos;color&apos;,
+      &apos;1&apos;: &apos;background-image&apos;,
+      &apos;2&apos;: &apos;background-position&apos;,
+      &apos;3&apos;: &apos;background-size&apos;,
+      &apos;4&apos;: &apos;background-repeat&apos;,
+      &apos;5&apos;: &apos;background-origin&apos;,
+      &apos;6&apos;: &apos;background-clip&apos;,
+      &apos;7&apos;: &apos;background-attachment&apos;,
+      &apos;8&apos;: &apos;background-color&apos;,
+      &apos;9&apos;: &apos;background&apos;,
+      &apos;10&apos;: &apos;opacity&apos;,
+      &apos;11&apos;: &apos;width&apos;,
+      &apos;12&apos;: &apos;grid-area&apos;,
+      &apos;13&apos;: &apos;font-style&apos;,
+      &apos;14&apos;: &apos;font-variant&apos;,
+      &apos;15&apos;: &apos;font-weight&apos;,
+      &apos;16&apos;: &apos;font-size&apos;,
+      &apos;17&apos;: &apos;line-height&apos;,
+      &apos;18&apos;: &apos;font-family&apos;,
+      &apos;19&apos;: &apos;font&apos;,
+      &apos;20&apos;: &apos;min-width&apos;,
+      &apos;21&apos;: &apos;border&apos;,
+      &apos;22&apos;: &apos;border-width&apos;,
+      &apos;23&apos;: &apos;border-style&apos;,
+      &apos;24&apos;: &apos;border-color&apos;,
+      &apos;25&apos;: &apos;border-top&apos;,
+      &apos;26&apos;: &apos;border-top-width&apos;,
+      &apos;27&apos;: &apos;border-top-style&apos;,
+      &apos;28&apos;: &apos;border-top-color&apos;,
+      &apos;29&apos;: &apos;border-right&apos;,
+      &apos;30&apos;: &apos;border-right-width&apos;,
+      &apos;31&apos;: &apos;border-right-style&apos;,
+      &apos;32&apos;: &apos;border-right-color&apos;,
+      &apos;33&apos;: &apos;border-bottom&apos;,
+      &apos;34&apos;: &apos;border-bottom-width&apos;,
+      &apos;35&apos;: &apos;border-bottom-style&apos;,
+      &apos;36&apos;: &apos;border-bottom-color&apos;,
+      &apos;37&apos;: &apos;border-left&apos;,
+      &apos;38&apos;: &apos;border-left-width&apos;,
+      &apos;39&apos;: &apos;border-left-style&apos;,
+      &apos;40&apos;: &apos;border-left-color&apos;,
+      &apos;41&apos;: &apos;border-image&apos;,
+      &apos;42&apos;: &apos;margin-top&apos;,
+      &apos;43&apos;: &apos;margin-right&apos;,
+      &apos;44&apos;: &apos;margin-bottom&apos;,
+      &apos;45&apos;: &apos;margin-left&apos;,
+      &apos;46&apos;: &apos;margin&apos;,
+      &apos;47&apos;: &apos;outline&apos;,
+      &apos;48&apos;: &apos;padding-top&apos;,
+      &apos;49&apos;: &apos;padding-right&apos;,
+      &apos;50&apos;: &apos;padding-bottom&apos;,
+      &apos;51&apos;: &apos;padding-left&apos;,
+      &apos;52&apos;: &apos;padding&apos;,
+      _global: [Object [global]],
+      _onChange: [Function (anonymous)],
+      _computed: false,
+      _ownerNode: null,
+      _parentRule: null,
+      _readonly: false,
+      _updating: false,
+      _length: 53,
+      _propertyIndices: [Map],
+      _priorities: Map(0) {},
+      _values: [Map],
+      label: &apos;input&apos;
+    },
+    attributes: Proxy(NamedNodeMap {}),
+    classList: Proxy(DOMTokenList {}),
+    childNodes: Proxy(NodeList {})
+  }
+}
+
+            </system-out>
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_cover.test.tsx" name="cover form &gt; opens an existing cover on its form" time="0.005651884">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_cover.test.tsx" name="cover form &gt; shows a notification when saving fails" time="0.099242066">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.test.tsx" timestamp="2026-11-12T19:39:53.380Z" hostname="2cfb94c025a9" tests="16" failures="0" errors="0" skipped="0" time="1.773411838">
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.test.tsx" name="media player form &gt; only offers Home Assistant media players" time="0.162383778">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.test.tsx" name="media player form &gt; can&apos;t be saved without a name and an entity" time="0.131598233">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.test.tsx" name="media player form &gt; saves a standalone media player without source player settings" time="0.121203595">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.test.tsx" name="media player form &gt; only asks for the source player details in a multi-room setup" time="0.024916998">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.test.tsx" name="media player form &gt; saves a room player that says which player feeds it" time="0.163789726">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.test.tsx" name="media player form &gt; saves a room player that reports the source player and its volume" time="0.20672802">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.test.tsx" name="media player form &gt; doesn&apos;t save source player settings after switching back to standalone" time="0.205968982">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.test.tsx" name="media player form &gt; suggests attribute names from the selected media player" time="0.097476735">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.test.tsx" name="media player form &gt; rejects a volume step of &quot;0&quot;" time="0.112663503">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.test.tsx" name="media player form &gt; rejects a volume step of &quot;101&quot;" time="0.111061351">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.test.tsx" name="media player form &gt; rejects a volume step of &quot;2.5&quot;" time="0.10936629">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.test.tsx" name="media player form &gt; rejects a volume step of &quot;&quot;" time="0.089597062">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.test.tsx" name="media player form &gt; saves a custom volume step" time="0.111159999">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.test.tsx" name="media player form &gt; loads an existing multi-room media player for editing" time="0.022075036">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.test.tsx" name="media player form &gt; uses defaults when editing a media player saved before the source settings existed" time="0.011021086">
+        </testcase>
+        <testcase classname="src/components/MultiStep_AddEditEntity/entity_types/step3_edit_media_player.test.tsx" name="media player form &gt; reports the server&apos;s error and stays open when saving fails" time="0.091465213">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/SettingsPage/SettingsPage.test.tsx" timestamp="2026-11-12T19:39:53.383Z" hostname="2cfb94c025a9" tests="31" failures="0" errors="0" skipped="0" time="3.287870685">
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="loading &gt; shows the stored settings" time="0.212861965">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="loading &gt; shows a load error and retries" time="0.049001554">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="loading &gt; marks settings with no valid stored value, and doesn&apos;t send them unless filled in" time="0.17108975">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="saving &gt; sends only the changed settings, with the CSRF token" time="0.2090507">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="saving &gt; is clean again after saving" time="0.152026471">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="saving &gt; sends nothing for a change that was undone" time="0.091732422">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="saving &gt; discards changes" time="0.137500307">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="saving &gt; sends a blank number as null so the server reports it" time="0.093562813">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="saving &gt; shows field errors next to their fields and saves nothing" time="0.110342286">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="saving &gt; reports other errors" time="0.098275211">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="secrets &gt; keeps a stored secret when left blank" time="0.118560615">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="secrets &gt; sends a new secret" time="0.120973047">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="secrets &gt; clears a stored secret" time="0.123528692">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="secrets &gt; offers clear only for a stored secret" time="0.024036325">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="Home Assistant add-on &gt; locks the Home Assistant settings" time="0.047662185">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="conditional settings &gt; shows the outside temperature setting only for the screensaver modes without weather" time="0.145513304">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="helpers &gt; loads the manager address and port from the page URL" time="0.115706903">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="helpers &gt; tests the manager address with the values in the form" time="0.052541603">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="helpers &gt; tests Home Assistant only with a typed token" time="0.093535903">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="buzzer sounds &gt; is off by default" time="0.054151139">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="buzzer sounds &gt; shows stored sounds as their preset, or as custom" time="0.028053695">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="buzzer sounds &gt; saves a chosen preset as its RTTTL, and nothing else" time="0.106338054">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="buzzer sounds &gt; turns a sound off by saving it blank" time="0.094331535">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="buzzer sounds &gt; lets a preset be edited as a custom sound" time="0.124405701">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="buzzer sounds &gt; shows invalid RTTTL as it is typed and doesn&apos;t save it" time="0.242580772">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="buzzer sounds &gt; flags a stored sound the panel can&apos;t play" time="0.023237538">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="buzzer sounds &gt; shows a server error next to the sound" time="0.072968139">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="buzzer sounds &gt; previews the panel&apos;s steps, one sound at a time" time="0.136893635">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="buzzer sounds &gt; previews the touch sound for a blank scene activated sound" time="0.051424089">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="buzzer sounds &gt; simulates the piezo unless that is turned off" time="0.137523208">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/SettingsPage.test.tsx" name="buzzer sounds &gt; says when the browser can&apos;t preview" time="0.047113588">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/SettingsPage/buzzer.test.ts" timestamp="2026-11-12T19:39:53.384Z" hostname="2cfb94c025a9" tests="12" failures="0" errors="0" skipped="0" time="0.005758918">
+        <testcase classname="src/components/SettingsPage/buzzer.test.ts" name="buzzer presets &gt; Tick is RTTTL the panel accepts" time="0.001943515">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/buzzer.test.ts" name="buzzer presets &gt; Pip is RTTTL the panel accepts" time="0.000254887">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/buzzer.test.ts" name="buzzer presets &gt; Mid tick is RTTTL the panel accepts" time="0.000197317">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/buzzer.test.ts" name="buzzer presets &gt; Tuk is RTTTL the panel accepts" time="0.000187979">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/buzzer.test.ts" name="buzzer presets &gt; Tock is RTTTL the panel accepts" time="0.000169003">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/buzzer.test.ts" name="buzzer presets &gt; Chime is RTTTL the panel accepts" time="0.000152732">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/buzzer.test.ts" name="buzzer presets &gt; Confirm is RTTTL the panel accepts" time="0.000119358">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/buzzer.test.ts" name="buzzer presets &gt; Rising is RTTTL the panel accepts" time="0.00008898">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/buzzer.test.ts" name="buzzer presets &gt; Saved is RTTTL the panel accepts" time="0.000144275">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/buzzer.test.ts" name="buzzer presets &gt; Silent is RTTTL the panel accepts" time="0.000166718">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/buzzer.test.ts" name="buzzer presets &gt; plays the softer touch sounds as intended" time="0.000418029">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/buzzer.test.ts" name="buzzer presets &gt; offers every sounding preset for every event" time="0.000761025">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/SettingsPage/form.test.ts" timestamp="2026-11-12T19:39:53.384Z" hostname="2cfb94c025a9" tests="5" failures="0" errors="0" skipped="0" time="0.002590622">
+        <testcase classname="src/components/SettingsPage/form.test.ts" name="toFormValues &gt; copies the page&apos;s settings and leaves the secrets blank" time="0.001252314">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/form.test.ts" name="buildPatch &gt; sends only the changed settings" time="0.000233867">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/form.test.ts" name="buildPatch &gt; sends nothing when nothing changed" time="0.000111393">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/form.test.ts" name="buildPatch &gt; sends a typed secret, or blank to clear one, and otherwise leaves secrets alone" time="0.000148674">
+        </testcase>
+        <testcase classname="src/components/SettingsPage/form.test.ts" name="buildPatch &gt; never sends the Home Assistant settings in the add-on" time="0.00012071">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/common/fields.test.tsx" timestamp="2026-11-12T19:39:53.384Z" hostname="2cfb94c025a9" tests="8" failures="0" errors="0" skipped="0" time="0.238134732">
+        <testcase classname="src/components/common/fields.test.tsx" name="field errors &gt; shows the error under the field and links it to the input" time="0.02214532">
+        </testcase>
+        <testcase classname="src/components/common/fields.test.tsx" name="field errors &gt; shows the hint when there is no error" time="0.002880195">
+        </testcase>
+        <testcase classname="src/components/common/fields.test.tsx" name="a field with no valid stored value (a null default) &gt; asks for a value" time="0.007205473">
+        </testcase>
+        <testcase classname="src/components/common/fields.test.tsx" name="NumberInput &gt; submits a number, or null when blank" time="0.117453657">
+        </testcase>
+        <testcase classname="src/components/common/fields.test.tsx" name="RadioGroup &gt; submits the chosen option&apos;s value" time="0.051775005">
+        </testcase>
+        <testcase classname="src/components/common/fields.test.tsx" name="SecretInput &gt; offers no clear checkbox when nothing is stored" time="0.003273517">
+        </testcase>
+        <testcase classname="src/components/common/fields.test.tsx" name="SecretInput &gt; says a stored secret is kept, and disables the input once Clear is ticked" time="0.03061544">
+        </testcase>
+        <testcase classname="src/components/common/fields.test.tsx" name="SecretInput &gt; offers no clear checkbox when disabled" time="0.001771195">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/lib/rtttl.test.ts" timestamp="2026-11-12T19:39:53.384Z" hostname="2cfb94c025a9" tests="111" failures="0" errors="0" skipped="0" time="0.009754034">
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; has vectors for every outcome" time="0.001274245">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;tick:d=64,o=7,b=625:b&quot;" time="0.000446874">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;chime:d=32,o=6,b=190:g6,16p,32c7&quot;" time="0.000148213">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;confirm:d=16,o=6,b=357:e,g&quot;" time="0.000107456">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;rising:d=16,o=6,b=180:c,e,g&quot;" time="0.000094901">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;saved:d=16,o=6,b=200:c,e,g,8c7&quot;" time="0.000088069">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;silent:d=64,o=6,b=900:p&quot;" time="0.000081466">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c&quot;" time="0.000051338">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;name::c&quot;" time="0.000056919">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:d=8:c&quot;" time="0.000101684">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:o=4:c&quot;" time="0.000095472">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:b=120:c&quot;" time="0.000070375">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:d=8,o=5,b=200:c&quot;" time="0.000054524">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:b=900:c&quot;" time="0.000031751">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:b=1:c&quot;" time="0.000333818">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:d=4,o=6,b=63:8c,8p,16e.7&quot;" time="0.000073581">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:d=4,o=6,b=63:8c,8p,16e7.&quot;" time="0.000037852">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c#&quot;" time="0.000024356">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::d#5&quot;" time="0.000022453">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::f#.&quot;" time="0.000027131">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::a#8&quot;" time="0.000039756">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::h&quot;" time="0.000024136">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::h5&quot;" time="0.000024427">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::b#&quot;" time="0.000021512">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::b#8&quot;" time="0.000031611">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::e#&quot;" time="0.000033795">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::1c&quot;" time="0.000033584">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::2c&quot;" time="0.000023344">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::32c&quot;" time="0.000028655">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::64c&quot;" time="0.000021982">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c1&quot;" time="0.000021872">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c8&quot;" time="0.000022984">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::p&quot;" time="0.00002635">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::4p.&quot;" time="0.000023405">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c.&quot;" time="0.000021661">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c.6&quot;" time="0.000021571">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c6.&quot;" time="0.000021251">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::8c#.5&quot;" time="0.000022894">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::8c#5.&quot;" time="0.000022924">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c,c&quot;" time="0.00003111">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c,c,c&quot;" time="0.000035929">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::64c,64c&quot;" time="0.000029086">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:b=900:64c,64c&quot;" time="0.00002604">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c,p,c&quot;" time="0.000045397">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c,d,c&quot;" time="0.000056498">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c,c6&quot;" time="0.000058792">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c5,c6&quot;" time="0.000072439">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:d=32,b=900:c,c&quot;" time="0.000068291">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot; Tick : D=64, O=7, B=625 : B &quot;" time="0.000061107">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::C#,E&quot;" time="0.000056869">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c,&quot;" time="0.000027433">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c,d,&quot;" time="0.000023515">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;\tx:\td=8:\tc\n&quot;" time="0.000025018">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;x:d=64,o=6,b=900:c,d,c,d,c,d,c,d,c,d,c,d,c,d,c,d,c,d,c,d,c," time="0.000594035">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;x:d=64,o=6,b=900:c,d,c,d,c,d,c,d,c,d,c,d,c,d,c,d,c,d,c,d,c," time="0.000198689">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;x:d=1,o=6,b=8:c,d&quot;" time="0.000073">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;x:d=1,o=6,b=8:c&quot;" time="0.000051488">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;x:d=16,o=6,b=600:c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c," time="0.00064332">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;x:d=16,o=6,b=600:c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c,c," time="0.000130279">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;a,b=1::c&quot;" time="0.000036741">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;&quot;" time="0.00004712">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot; &quot;" time="0.000058212">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;c,d&quot;" time="0.000067919">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:c&quot;" time="0.000052681">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;a:b:c:d&quot;" time="0.000055195">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::&quot;" time="0.000105071">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::,&quot;" time="0.000041108">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c,,d&quot;" time="0.000030969">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::,c&quot;" time="0.0000265">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c,,&quot;" time="0.000027884">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::x&quot;" time="0.000027111">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::cc&quot;" time="0.000038704">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c##&quot;" time="0.000031069">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::p#&quot;" time="0.000029236">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c9&quot;" time="0.000027322">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c0&quot;" time="0.00002591">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::3c&quot;" time="0.000029086">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::128c&quot;" time="0.000029978">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::0c&quot;" time="0.000038243">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c..&quot;" time="0.000028214">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c.6.&quot;" time="0.000026761">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::c66&quot;" time="0.000040107">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::-c&quot;" time="0.000028876">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:d=3:c&quot;" time="0.000029586">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:d=128:c&quot;" time="0.000072229">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:o=0:c&quot;" time="0.000048342">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:o=9:c&quot;" time="0.000028595">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:b=0:c&quot;" time="0.00002655">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:b=901:c&quot;" time="0.000025739">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:b=999:c&quot;" time="0.000027152">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:b=1000:c&quot;" time="0.000045146">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:x=1:c&quot;" time="0.000043924">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:d:c&quot;" time="0.00003121">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:d=:c&quot;" time="0.000030979">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:d=4,:c&quot;" time="0.000039986">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:d=4,,o=5:c&quot;" time="0.000031891">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:d=4;o=5:c&quot;" time="0.000027522">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:d=4o=5:c&quot;" time="0.000025038">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:=4:c&quot;" time="0.000035157">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;:dd=4:c&quot;" time="0.000026541">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;::cé&quot;" time="0.000027723">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; matches the firmware for &quot;é::c&quot;" time="0.000040497">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; does not fold Unicode" time="0.000180274">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; explains c,d" time="0.000157952">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; explains :b=901:c" time="0.000102877">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; explains :o=9:c" time="0.000064884">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; explains :d=3:c" time="0.000031329">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; explains :x=1:c" time="0.000032072">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; explains ::c,e,q" time="0.000041439">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; explains ::c,,d" time="0.000033444">
+        </testcase>
+        <testcase classname="src/lib/rtttl.test.ts" name="parseRtttl &gt; explains x:d=1,o=6,b=8:c,d" time="0.000039125">
+        </testcase>
+    </testsuite>
+</testsuites>

@@ -238,6 +238,19 @@ class PanelSettingsFormTests(NSPMTestCase):
 
         self.assertIsNone(self.panel_setting("button2_mqtt_topic"))
 
+    def test_button_open_media_player_mode(self):
+        light = self.make_light(self.room, "Ceiling")
+        self.save(button1_mode="1", button1_detached_mode_light=str(light.id))
+
+        self.save(button1_mode="6", button2_mode="6")
+
+        self.panel.refresh_from_db()
+        self.assertEqual((self.panel.button1_mode, self.panel.button2_mode), (6, 6))
+        self.assertIsNone(self.panel.button1_detached_mode_entity)
+        self.assertManagerReloaded()
+        response = self.client.get(reverse("edit_nspanel", kwargs={"panel_id": self.panel.id}))
+        self.assertContains(response, '<option value="6" selected>', count=2)
+
     def test_detached_mode_with_unknown_entity_is_rejected(self):
         self.assertRejected(self.save(button1_mode="1", button1_detached_mode_light="999"))
         self.panel.refresh_from_db()

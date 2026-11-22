@@ -66,7 +66,11 @@ typedef enum _NSPanelConfig__NSPanelButtonMode {
   NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__FOLLOW = 1,
   NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__NOTIFY_MANAGER = 2,
   NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__THERMOSTAT_HEAT = 3,
-  NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__THERMOSTAT_COOL = 4
+  NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__THERMOSTAT_COOL = 4,
+  /*
+   * Open the entity page for buttonN_entity_page_topic. The relay is left alone.
+   */
+  NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__OPEN_ENTITY_PAGE = 5
     PROTOBUF_C__FORCE_ENUM_TO_BE_INT_SIZE(NSPANEL_CONFIG__NSPANEL_BUTTON_MODE)
 } NSPanelConfig__NSPanelButtonMode;
 /*
@@ -243,10 +247,15 @@ struct  NSPanelConfig
    * Empty if the manager could not work it out, in which case show the time from the manager's status/time topic.
    */
   char *tz_posix;
+  /*
+   * State topic of the entity whose page a button opens when buttonN_mode is OPEN_ENTITY_PAGE. Empty otherwise.
+   */
+  char *button1_entity_page_topic;
+  char *button2_entity_page_topic;
 };
 #define NSPANEL_CONFIG__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&nspanel_config__descriptor) \
-    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, 0,NULL, 0, 0, 0, 0,NULL, 0,NULL, 0, 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0,NULL, (char *)protobuf_c_empty_string }
+    , (char *)protobuf_c_empty_string, 0, NSPANEL_CONFIG__NSPANEL_DEFAULT_PAGE__HOME, 0, 0, 0, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_SCREENSAVER_MODE__WEATHER_WITH_BACKGROUND, 0, 0, 0, 0, 0, 0,NULL, 0, 0, 0, 0, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, NSPANEL_CONFIG__NSPANEL_BUTTON_MODE__DIRECT, 0,NULL, 0, 0, 0, 0,NULL, 0,NULL, 0, 0, (char *)protobuf_c_empty_string, 0, 0, 0, 0, 0,NULL, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string, (char *)protobuf_c_empty_string }
 
 
 struct  NSPanelWarning

@@ -67,7 +67,9 @@ void MQTT_Manager::connect() {
             MQTTMessage message_struct{
                 .topic = msg->get_topic(),
                 .message = msg->get_payload_str()};
-            MQTT_Manager::_mqtt_message_queue.push(message_struct);
+            if (MQTT_Manager::_mqtt_message_queue.push(message_struct)) {
+              MQTT_Manager::_notify_mqtt_message_queued();
+            }
           } else if (!MQTT_Manager::_mqtt_client->is_connected()) {
             WebsocketServer::register_warning(WebsocketServer::ActiveWarningLevel::ERROR, "MQTT not connected.");
             MQTT_Manager::_reconnect_mqtt_client();
@@ -288,7 +290,10 @@ void MQTT_Manager::_reconnect_mqtt_client() {
               .topic = msg->get_topic(),
               .message = msg->get_payload_str()};
           while (!MQTT_Manager::_mqtt_message_queue.push(message_struct)) {
+            // Queue full: the processing thread is awake draining it, give it the CPU.
+            std::this_thread::yield();
           }
+          MQTT_Manager::_notify_mqtt_message_queued();
         }
       } while (received_message);
     }
@@ -299,10 +304,24 @@ void MQTT_Manager::_reconnect_mqtt_client() {
   MQTT_Manager::_connected_callbacks();
 }
 
+void MQTT_Manager::_notify_mqtt_message_queued() {
+  // Taking the mutex orders the push before the processing thread's emptiness check, so the
+  // notification can't land between that check and the thread starting to wait.
+  { std::lock_guard<std::mutex> lock_guard(MQTT_Manager::_mqtt_message_queue_mutex); }
+  MQTT_Manager::_mqtt_message_queue_condition.notify_one();
+}
+
 void MQTT_Manager::_process_mqtt_messages() {
   while (true) {
-    while (MQTT_Manager::_mqtt_message_queue.empty()) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    {
+      std::unique_lock<std::mutex> lock(MQTT_Manager::_mqtt_message_queue_mutex);
+      // The timeout is only a safety net, every push notifies.
+      MQTT_Manager::_mqtt_message_queue_condition.wait_for(lock, std::chrono::seconds(1), [] {
+        return !MQTT_Manager::_mqtt_message_queue.empty() || MQTT_Manager::_stop_processing_messages;
+      });
+      if (MQTT_Manager::_stop_processing_messages) {
+        return;
+      }
     }
     MQTT_Manager::_mqtt_message_queue.consume_all([](MQTTMessage message) {
       try {

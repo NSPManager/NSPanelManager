@@ -11,6 +11,7 @@ public:
   ~OpenhabCover();
   void reload_config();
   void openhab_event_callback(nlohmann::json event_data);
+  void openhab_tilt_event_callback(nlohmann::json event_data);
 
   void open();
   void close();
@@ -34,11 +35,22 @@ private:
   void _send_command(const std::string &type, const std::string &value);
 
   /**
+   * Send an ItemCommandEvent to OpenHAB.
+   */
+  void _send_tilt_command(const std::string &type, const std::string &value);
+
+  /**
    * Update the panel state from a Rollershutter percentage state.
    */
   void _update_from_state(const nlohmann::json &state);
 
+  /**
+   * Update the panel state from a Rollershutter percentage state.
+   */
+  void _update_from_tilt_state(const nlohmann::json &state);
+
   std::string _openhab_item;
+  std::string _openhab_tilt_item;
 };
 
 #endif // !MQTT_MANAGER_OPENHAB_COVER_HPP
