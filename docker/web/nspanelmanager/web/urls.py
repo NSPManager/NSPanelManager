@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import api, htmx, rest, views
+from . import api, background, htmx, rest, views
 from .rest_v2 import global_settings as rest_v2_settings
 from .rest_v2 import rooms as rest_v2_rooms
 
@@ -21,6 +21,7 @@ urlpatterns = [
     path("download_firmware", views.download_firmware, name="download_firmware"),
     path("download_data_file", views.download_data_file, name="download_data_file"),
     path("download_tft/<int:panel_id>", views.download_tft, name="download_tft"),
+    path("download_background/<int:panel_id>", background.download_background, name="download_background"),
     path("checksum_firmware", views.checksum_firmware, name="checksum_firmware"),
     path("checksum_data_file", views.checksum_data_file, name="checksum_data_file"),
     path("checksum_tft_file/<int:panel_id>", views.checksum_tft_file, name="checksum_tft_file"),
