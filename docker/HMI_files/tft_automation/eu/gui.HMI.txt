@@ -5267,7 +5267,7 @@ direction 270
     picc2 = 68 (455x320)
     bco = 50712
     bco2 = 1024
-    pco = 0
+    pco = 65535
     pco2 = 65535
     xcen = 1
     ycen = 1
