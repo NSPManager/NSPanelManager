@@ -3,6 +3,7 @@ import { useDraggable } from "@dnd-kit/react";
 import { type IEntityOrSceneData, type IDragingItemData } from "../../stores/EntitiesPagesStore";
 import { useEntitiesPagesStore } from "../../stores/EntitiesPagesStore";
 import MultiStep_AddOrEditEntity from "../MultiStep_AddEditEntity/MultiStep_AddEditEntity";
+import { CustomIcon } from "../CustomIcons/CustomIcons";
 
 const GenericEntityBox = ({ entity, draging_item }: { entity: IEntityOrSceneData; draging_item: IDragingItemData | undefined | null }) => {
   const { ref } = useDraggable({
@@ -143,7 +144,10 @@ const GenericEntityBox = ({ entity, draging_item }: { entity: IEntityOrSceneData
             return <div className="status status-error animate-ping absolute top-2 left-2 cursor-default" title="Unknown controller"></div>;
           }
         })()}
-        <span className="text-sm m-2">{entity.friendly_name}</span>
+        <span className="text-sm m-2">
+          <CustomIcon character={entity.icon} className="me-1" />
+          {entity.friendly_name}
+        </span>
       </div>
     </>
   );

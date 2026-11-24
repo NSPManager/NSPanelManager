@@ -113,6 +113,19 @@ class Scene(models.Model):
     room = models.ForeignKey(Room, null=True, blank=True, on_delete=models.CASCADE)
     room_view_position = models.IntegerField()
     entities_page = models.ForeignKey(RoomEntitiesPage, on_delete=models.CASCADE, null=True)
+    # Custom icon: the private use character of an IconPackIcon, or empty for the default scene icon.
+    icon = models.CharField(max_length=8, default="", blank=True)
+
+
+class IconPackIcon(models.Model):
+    """
+    A custom icon chosen for an entity, scene or thermostat mode: a Material Design Icon, and the
+    code point in Unicode's private use area (U+E000-U+F8FF) it is sent to the panels as. The
+    panels draw it from the icon pack, see web/icon_pack.py. Code points never change once given.
+    """
+
+    name = models.CharField(max_length=128, unique=True)  # MDI name, e.g. "lamp"
+    code_point = models.IntegerField(unique=True)
 
 
 class LightState(models.Model):

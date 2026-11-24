@@ -98,6 +98,15 @@ message NSPanelConfig {
   // State topic of the entity whose page a button opens when buttonN_mode is OPEN_ENTITY_PAGE. Empty otherwise.
   string button1_entity_page_topic = 47;
   string button2_entity_page_topic = 48;
+
+  // How the panel's display is mounted. The panel stores this and uses it from the next boot on
+  // to set up its display, restarting when it changes. EU panels are always LANDSCAPE.
+  enum NSPanelDisplayOrientation {
+    LANDSCAPE = 0;          // EU panel, or US panel mounted horizontally
+    LANDSCAPE_MIRRORED = 1; // US panel mounted horizontally, turned the other way round
+    PORTRAIT = 2;           // US panel mounted vertically
+  }
+  NSPanelDisplayOrientation display_orientation = 49;
 }
 
 enum NSPanelWarningLevel {

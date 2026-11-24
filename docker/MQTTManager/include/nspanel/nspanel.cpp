@@ -304,7 +304,17 @@ void NSPanel::send_config() {
   config.set_clock_us_style(MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::CLOCK_US_STYLE));
   config.set_tz_posix(MqttManagerConfig::timezone_posix_rule);
   config.set_use_fahrenheit(MqttManagerConfig::get_setting_with_default<bool>(MQTT_MANAGER_SETTING::USE_FAHRENHEIT));
-  config.set_is_us_panel(this->_get_nspanel_setting_with_default("is_us_panel", "False").compare("True") == 0);
+  bool is_us_panel = this->_get_nspanel_setting_with_default("is_us_panel", "False").compare("True") == 0;
+  config.set_is_us_panel(is_us_panel);
+  // The panel sets up its display from this. A US panel mounted horizontally shows the same landscape interface as an EU panel.
+  std::string us_panel_orientation = this->_get_nspanel_setting_with_default("us_panel_orientation", "vertical");
+  if (!is_us_panel || us_panel_orientation.compare("horizontal") == 0) {
+    config.set_display_orientation(NSPanelConfig_NSPanelDisplayOrientation_LANDSCAPE);
+  } else if (us_panel_orientation.compare("horizontal_mirrored") == 0) {
+    config.set_display_orientation(NSPanelConfig_NSPanelDisplayOrientation_LANDSCAPE_MIRRORED);
+  } else {
+    config.set_display_orientation(NSPanelConfig_NSPanelDisplayOrientation_PORTRAIT);
+  }
   config.set_reverse_relays(this->_get_nspanel_setting_with_default("reverse_relays", "False").compare("True") == 0);
   config.set_relay1_default_mode(this->_get_nspanel_setting_with_default("relay1_default_mode", "False").compare("True") == 0);
   config.set_relay2_default_mode(this->_get_nspanel_setting_with_default("relay2_default_mode", "False").compare("True") == 0);

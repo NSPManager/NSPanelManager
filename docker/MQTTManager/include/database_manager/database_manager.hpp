@@ -66,6 +66,7 @@ struct Scene {
   std::string backend_name;
   int room_view_position;
   int entities_page_id;
+  std::string icon; // Custom icon character, or empty for the default icon. See the web interface's icon_pack.py
 };
 
 struct SceneLightState {
@@ -165,7 +166,8 @@ static inline auto make_database() {
                                                                               sqlite_orm::make_column("scene_type", &Scene::scene_type),
                                                                               sqlite_orm::make_column("backend_name", &Scene::backend_name),
                                                                               sqlite_orm::make_column("entities_page_id", &Scene::entities_page_id),
-                                                                              sqlite_orm::make_column("room_view_position", &Scene::room_view_position)),
+                                                                              sqlite_orm::make_column("room_view_position", &Scene::room_view_position),
+                                                                              sqlite_orm::make_column("icon", &Scene::icon)),
                                                        sqlite_orm::make_table("web_lightstate",
                                                                               sqlite_orm::make_column("id", &SceneLightState::id, sqlite_orm::primary_key().autoincrement()),
                                                                               sqlite_orm::make_column("scene_id", &SceneLightState::scene_id),

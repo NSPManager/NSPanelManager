@@ -1,4 +1,4 @@
-import { r as require_react, t as require_jsx_runtime } from "./main-BX5WWnL7.js";
+import { r as require_react, t as require_jsx_runtime } from "./main-BFg3H8gZ.js";
 //#region node_modules/openapi-fetch/dist/index.mjs
 var PATH_PARAM_RE = /\{[^{}]+\}/g;
 var supportsRequestInitExt = () => {

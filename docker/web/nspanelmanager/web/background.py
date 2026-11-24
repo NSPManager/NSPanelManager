@@ -3,8 +3,9 @@ Background image for the panels' LVGL interface.
 
 The panel downloads it from /download_background/<panel_id> at start and
 whenever its config is reloaded. The image is sent in the panel's own pixel
-format, so the panel needs no image decoder: raw RGB565, little endian,
-454x320, row by row. The ETag lets the panel skip the download when its stored
+format, so the panel needs no image decoder: raw RGB565, little endian, at the
+size of the panel's display, row by row: 454x320, or 320x480 for a US panel
+mounted vertically. The ETag lets the panel skip the download when its stored
 image is current (it sends the ETag back in If-None-Match). 404 means no
 background, so the panel removes its stored image.
 
@@ -17,8 +18,10 @@ from functools import lru_cache
 
 from django.http import HttpResponse
 
-WIDTH = 454
-HEIGHT = 320
+from web.settings_helper import get_nspanel_setting_with_default
+
+LANDSCAPE_SIZE = (454, 320)  # EU panels, and US panels mounted horizontally
+PORTRAIT_SIZE = (320, 480)  # US panels mounted vertically
 
 # Gradient from the top to the bottom of the screen. Every row is one color: the panel
 # compresses each row it sends to the display, and a row of one color costs almost nothing,
@@ -40,24 +43,33 @@ def _to_rgb565(r: float, g: float, b: float, threshold: float) -> int:
     return (r5 << 11) | (g6 << 5) | b5
 
 
-@lru_cache(maxsize=1)
-def blue_gradient_rgb565() -> bytes:
+def display_size(panel_id) -> tuple[int, int]:
+    # Matches the display orientation the MQTTManager sends the panel in its config.
+    is_us_panel = get_nspanel_setting_with_default(panel_id, "is_us_panel", "False") == "True"
+    orientation = get_nspanel_setting_with_default(panel_id, "us_panel_orientation", "vertical")
+    if is_us_panel and orientation not in ("horizontal", "horizontal_mirrored"):
+        return PORTRAIT_SIZE
+    return LANDSCAPE_SIZE
+
+
+@lru_cache(maxsize=2)
+def blue_gradient_rgb565(width: int, height: int) -> bytes:
     rows = []
-    for y in range(HEIGHT):
-        t = y / (HEIGHT - 1)
+    for y in range(height):
+        t = y / (height - 1)
         r, g, b = (top + (bottom - top) * t for top, bottom in zip(GRADIENT_TOP, GRADIENT_BOTTOM))
         pixel = _to_rgb565(r, g, b, (_ROW_DITHER[y % 4] + 0.5) / 4)
-        rows.append(pixel.to_bytes(2, "little") * WIDTH)
+        rows.append(pixel.to_bytes(2, "little") * width)
     return b"".join(rows)
 
 
-@lru_cache(maxsize=1)
+@lru_cache(maxsize=2)
 def _etag(data: bytes) -> str:
     return '"' + hashlib.sha1(data).hexdigest() + '"'
 
 
 def download_background(request, panel_id):
-    data = blue_gradient_rgb565()
+    data = blue_gradient_rgb565(*display_size(panel_id))
     etag = _etag(data)
     if request.headers.get("If-None-Match") == etag:
         response = HttpResponse(status=304)

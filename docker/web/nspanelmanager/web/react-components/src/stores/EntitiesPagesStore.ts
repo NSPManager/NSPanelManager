@@ -18,6 +18,7 @@ export interface IEntityOrSceneData {
   controller: string;
   controlled_by_nspanel_main_page: boolean;
   step_size?: number;
+  icon?: string; // Custom icon character, or "" for the default icon. See CustomIconsStore.
 }
 
 export interface IEntityPageData {

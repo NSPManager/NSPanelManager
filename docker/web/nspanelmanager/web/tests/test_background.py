@@ -4,14 +4,18 @@ The background image panels download for their LVGL interface.
 
 from django.urls import reverse
 
-from web.background import HEIGHT, WIDTH
+from web.background import LANDSCAPE_SIZE, PORTRAIT_SIZE
+from web.settings_helper import set_nspanel_setting_value
 
 from .harness import NSPMTestCase
 
 
+WIDTH, HEIGHT = LANDSCAPE_SIZE
+
+
 class BackgroundImageTests(NSPMTestCase):
-    def url(self):
-        return reverse("download_background", kwargs={"panel_id": 1})
+    def url(self, panel_id=1):
+        return reverse("download_background", kwargs={"panel_id": panel_id})
 
     def test_image_is_raw_rgb565_at_display_size(self):
         response = self.client.get(self.url())
@@ -45,4 +49,22 @@ class BackgroundImageTests(NSPMTestCase):
         response = self.client.get(self.url(), headers={"If-None-Match": '"stale"'})
 
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.content), WIDTH * HEIGHT * 2)
+
+    def test_vertical_us_panel_gets_a_portrait_image(self):
+        panel = self.make_panel(self.make_room("Kitchen"), "US panel")
+        set_nspanel_setting_value(panel.id, "is_us_panel", "True")
+        set_nspanel_setting_value(panel.id, "us_panel_orientation", "vertical")
+
+        response = self.client.get(self.url(panel.id))
+
+        self.assertEqual(len(response.content), PORTRAIT_SIZE[0] * PORTRAIT_SIZE[1] * 2)
+
+    def test_horizontal_us_panel_gets_the_landscape_image(self):
+        panel = self.make_panel(self.make_room("Kitchen"), "US panel")
+        set_nspanel_setting_value(panel.id, "is_us_panel", "True")
+        set_nspanel_setting_value(panel.id, "us_panel_orientation", "horizontal")
+
+        response = self.client.get(self.url(panel.id))
+
         self.assertEqual(len(response.content), WIDTH * HEIGHT * 2)

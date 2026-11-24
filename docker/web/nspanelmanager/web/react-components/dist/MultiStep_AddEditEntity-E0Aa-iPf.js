@@ -1,13 +1,13 @@
-import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-BX5WWnL7.js";
-import { t as create } from "./react-DewMULbh.js";
-import { t as useSettingsStore } from "./SettingsStore-C8HLU8jh.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-h_TeG1zc.js";
-import { a as set, i as get, o as useFieldArray, r as appendErrors, s as useForm } from "./index.esm-DhiAim-D.js";
-import { n as Notify } from "./NSPanelToastContainer-DGRdX11E.js";
-import { t as motion } from "./proxy-BgaTkGUO.js";
-import { t as AnimatePresence } from "./AnimatePresence-Cjr4XULy.js";
+import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-BFg3H8gZ.js";
+import { t as create } from "./react-DFHB3Hsy.js";
+import { t as useSettingsStore } from "./SettingsStore-z_pLQOUe.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-BNRMRi2p.js";
+import { a as set, i as get, o as useFieldArray, r as appendErrors, s as useForm } from "./index.esm-rbcDlEpM.js";
+import { n as Notify } from "./NSPanelToastContainer-BJ1V6Ir-.js";
+import { t as motion } from "./proxy-Buxi9nf-.js";
+import { t as AnimatePresence } from "./AnimatePresence-Dn6Obt0g.js";
 //#region src/stores/EntitiesPagesStore.ts
-function getCookie$1(name) {
+function getCookie$2(name) {
 	let cookieValue = "";
 	if (document.cookie && document.cookie !== "") {
 		const cookies = document.cookie.split(";");
@@ -40,7 +40,7 @@ var useEntitiesPagesStore = create((set) => ({
 			mode: "same-origin",
 			headers: {
 				"Content-Type": "application/json",
-				"X-CSRFToken": getCookie$1("csrftoken")
+				"X-CSRFToken": getCookie$2("csrftoken")
 			}
 		}).then((response) => response.json()).then((data) => {
 			set((state) => ({
@@ -5282,6 +5282,204 @@ function refine(fn, _params = {}) {
 function superRefine(fn, params) {
 	return /* @__PURE__ */ _superRefine(fn, params);
 }
+function isCustomIcon(icon) {
+	if (!icon || icon.length !== 1) return false;
+	const code = icon.charCodeAt(0);
+	return code >= 57344 && code <= 63743;
+}
+function getCookie$1(name) {
+	for (const cookie of document.cookie ? document.cookie.split(";") : []) {
+		const trimmed = cookie.trim();
+		if (trimmed.startsWith(name + "=")) return decodeURIComponent(trimmed.substring(name.length + 1));
+	}
+	return "";
+}
+var useCustomIconsStore = create()((set, get) => ({
+	icons: [],
+	available: null,
+	fetchIcons: async () => {
+		const response = await fetch("/rest/icons", { credentials: "same-origin" });
+		if (response.ok) set({ icons: (await response.json()).icons });
+	},
+	fetchAvailable: async () => {
+		if (get().available !== null) return;
+		const response = await fetch("/rest/icons/available", { credentials: "same-origin" });
+		if (response.ok) set({ available: (await response.json()).names });
+	},
+	register: async (name) => {
+		const response = await fetch("/rest/icons", {
+			credentials: "same-origin",
+			method: "POST",
+			mode: "same-origin",
+			headers: {
+				"Content-Type": "application/json",
+				"X-CSRFToken": getCookie$1("csrftoken")
+			},
+			body: JSON.stringify({ name })
+		});
+		const data = await response.json();
+		if (!response.ok) throw new Error(data.message || `${response.status}`);
+		const icon = data;
+		if (!get().icons.some((existing) => existing.code_point === icon.code_point)) set({ icons: [...get().icons, icon] });
+		return icon;
+	}
+}));
+//#endregion
+//#region src/components/CustomIcons/CustomIcons.tsx
+var MAX_SHOWN = 120;
+/**
+* A custom icon character, as stored for an entity, scene or thermostat mode, drawn as its
+* Material Design Icon. Nothing for anything else.
+*/
+var CustomIcon = ({ character, className = "" }) => {
+	const icons = useCustomIconsStore((state) => state.icons);
+	const fetchIcons = useCustomIconsStore((state) => state.fetchIcons);
+	const icon = isCustomIcon(character) ? icons.find((icon) => icon.character === character) : void 0;
+	(0, import_react.useEffect)(() => {
+		if (isCustomIcon(character) && icon === void 0) fetchIcons();
+	}, [
+		character,
+		icon,
+		fetchIcons
+	]);
+	if (icon === void 0) return null;
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+		className: `mdi mdi-${icon.name} ${className}`,
+		title: icon.name
+	});
+};
+var IconName = ({ name }) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(import_jsx_runtime.Fragment, { children: name.split("-").map((part, index, parts) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", { children: [part, index < parts.length - 1 && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: ["-", /* @__PURE__ */ (0, import_jsx_runtime.jsx)("wbr", {})] })] }, index)) });
+/**
+* A dialog to search all Material Design Icons and choose one, laid out like pictogrammers.com: each
+* icon over its name. The chosen icon is registered as a custom icon, and onSelect gets the
+* character to store. selected: the character currently chosen, highlighted in the list.
+*/
+var CustomIconDialog = ({ open, onClose, onSelect, selected }) => {
+	const dialogRef = (0, import_react.useRef)(null);
+	const { available, fetchAvailable, register, icons } = useCustomIconsStore();
+	const [search, setSearch] = (0, import_react.useState)("");
+	const selectedName = isCustomIcon(selected) ? icons.find((icon) => icon.character === selected)?.name : void 0;
+	(0, import_react.useEffect)(() => {
+		const dialog = dialogRef.current;
+		if (open) {
+			fetchAvailable();
+			dialog?.showModal();
+		} else if (dialog?.open) dialog.close();
+	}, [open, fetchAvailable]);
+	const matches = (0, import_react.useMemo)(() => {
+		const words = search.toLowerCase().split(/[\s-]+/).filter((word) => word.length > 0);
+		return (available ?? []).filter((name) => words.every((word) => name.includes(word)));
+	}, [available, search]);
+	async function choose(name) {
+		try {
+			onSelect((await register(name)).character);
+			onClose();
+		} catch (error) {
+			Notify({
+				message: `Error choosing icon. Error: ${error}`,
+				level: "error",
+				duration: 1e4
+			});
+		}
+	}
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("dialog", {
+		ref: dialogRef,
+		className: "modal",
+		onClose: (e) => {
+			e.stopPropagation();
+			onClose();
+		},
+		onCancel: (e) => e.stopPropagation(),
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "modal-box max-w-5xl",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h3", {
+					className: "text-lg font-bold mb-2",
+					children: "Choose icon"
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+					type: "text",
+					className: "input input-bordered w-full mb-2",
+					placeholder: "Search icons, e.g. lamp, fan, tv",
+					value: search,
+					onChange: (e) => setSearch(e.target.value),
+					autoFocus: true
+				}),
+				available === null ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "flex justify-center p-4",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "loading loading-spinner" })
+				}) : /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "grid grid-cols-3 sm:grid-cols-5 md:grid-cols-7 gap-1 max-h-[60vh] overflow-y-auto",
+					children: matches.slice(0, MAX_SHOWN).map((name) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
+						type: "button",
+						title: name,
+						className: `flex flex-col items-center justify-start gap-2 rounded-box p-3 cursor-pointer hover:bg-primary/20 ${name === selectedName ? "bg-primary/20" : ""}`,
+						onClick: () => choose(name),
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mdi mdi-${name} text-4xl leading-none` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-xs text-center leading-tight break-normal",
+							children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(IconName, { name })
+						})]
+					}, name))
+				}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+					className: "text-sm opacity-70 mt-2",
+					children: matches.length > MAX_SHOWN ? `Showing ${MAX_SHOWN} of ${matches.length} icons. Search to find more.` : `${matches.length} icons.`
+				})] }),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "modal-action",
+					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						type: "button",
+						className: "btn",
+						onClick: onClose,
+						children: "Cancel"
+					})
+				})
+			]
+		})
+	});
+};
+/**
+* Choose a custom icon for an entity or scene, or its default icon. value and onChange use the
+* stored form: a custom icon character, or "" for the default icon. defaultIcon: the MDI name of
+* the default icon, to show it while no custom icon is chosen.
+*/
+var CustomIconPicker = ({ value, onChange, id, defaultIcon }) => {
+	const [dialogOpen, setDialogOpen] = (0, import_react.useState)(false);
+	const custom = isCustomIcon(value);
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+		className: "flex items-center gap-2",
+		id,
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+				type: "button",
+				className: "btn btn-outline",
+				title: "Choose icon",
+				onClick: () => setDialogOpen(true),
+				children: custom ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomIcon, {
+					character: value,
+					className: "text-2xl"
+				}) : defaultIcon ? /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: `mdi mdi-${defaultIcon} text-2xl` }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "text-sm",
+					children: "Default"
+				})] }) : /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "text-sm",
+					children: "Default icon"
+				})
+			}),
+			custom && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+				type: "button",
+				className: "btn btn-ghost btn-sm",
+				onClick: () => onChange(""),
+				children: "Use default icon"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomIconDialog, {
+				open: dialogOpen,
+				onClose: () => setDialogOpen(false),
+				onSelect: onChange,
+				selected: value
+			})
+		]
+	});
+};
 //#endregion
 //#region node_modules/@hookform/resolvers/dist/resolvers.mjs
 var t$1 = (r, t, s) => {
@@ -5536,6 +5734,8 @@ var schema$6 = object({
 	entities_page_id: number(),
 	room_view_position: number(),
 	friendly_name: string().min(1),
+	icon: string().optional(),
+	icon_off: string().optional(),
 	controller: string(),
 	can_color_temperature: boolean().optional(),
 	can_dim: boolean().optional(),
@@ -5558,7 +5758,7 @@ var CustomOption$6 = ({ innerProps, isDisabled, isFocused, isSelected, children,
 };
 var select_components$6 = { Option: CustomOption$6 };
 var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_id, room_view_position, id, onComplete }) => {
-	const { handleSubmit, register, reset, getValues, setValue, formState: { isValid } } = useForm({
+	const { handleSubmit, register, reset, getValues, setValue, watch, formState: { isValid } } = useForm({
 		resolver: u(schema$6),
 		defaultValues: {
 			id: id ?? null,
@@ -5683,6 +5883,24 @@ var MultiStep_AddEditEntity_Step3_Light = ({ controller, room_id, entities_page_
 								})
 							})]
 						})
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "w-full mb-4 flex flex-wrap gap-6",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "block mb-2 text-sm font-medium",
+							children: "Icon on the panel when on"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomIconPicker, {
+							value: watch("icon"),
+							onChange: (icon) => setValue("icon", icon, { shouldDirty: true }),
+							defaultIcon: "toggle-switch"
+						})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "block mb-2 text-sm font-medium",
+							children: "Icon on the panel when off"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomIconPicker, {
+							value: watch("icon_off"),
+							onChange: (icon) => setValue("icon_off", icon, { shouldDirty: true }),
+							defaultIcon: "toggle-switch-off"
+						})] })]
 					}),
 					controller == "home_assistant" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
 						className: "block mb-2 text-sm font-medium",
@@ -5973,6 +6191,8 @@ var schema$5 = object({
 	entities_page_id: number(),
 	room_view_position: number(),
 	friendly_name: string().min(1),
+	icon: string().optional(),
+	icon_off: string().optional(),
 	controller: string(),
 	home_assistant_name: string().optional(),
 	openhab_item_switch: string().optional()
@@ -5987,7 +6207,7 @@ var CustomOption$5 = ({ innerProps, isDisabled, isFocused, isSelected, children,
 };
 var select_components$5 = { Option: CustomOption$5 };
 var MultiStep_AddEditEntity_Step3_Switch = ({ controller, room_id, entities_page_id, room_view_position, id, onComplete }) => {
-	const { handleSubmit, register, reset, getValues, setValue, formState: { isValid } } = useForm({
+	const { handleSubmit, register, reset, getValues, setValue, watch, formState: { isValid } } = useForm({
 		resolver: u(schema$5),
 		defaultValues: {
 			id: id ?? null,
@@ -6105,6 +6325,24 @@ var MultiStep_AddEditEntity_Step3_Switch = ({ controller, room_id, entities_page
 							})]
 						})
 					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "w-full mb-4 flex flex-wrap gap-6",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "block mb-2 text-sm font-medium",
+							children: "Icon on the panel when on"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomIconPicker, {
+							value: watch("icon"),
+							onChange: (icon) => setValue("icon", icon, { shouldDirty: true }),
+							defaultIcon: "toggle-switch"
+						})] }), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "block mb-2 text-sm font-medium",
+							children: "Icon on the panel when off"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomIconPicker, {
+							value: watch("icon_off"),
+							onChange: (icon) => setValue("icon_off", icon, { shouldDirty: true }),
+							defaultIcon: "toggle-switch-off"
+						})] })]
+					}),
 					controller == "home_assistant" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
 						className: "block mb-2 text-sm font-medium",
 						children: "Home Assistant entity"
@@ -6183,6 +6421,7 @@ var schema$4 = object({
 	entities_page_id: number(),
 	room_view_position: number(),
 	friendly_name: string().min(1),
+	icon: string().optional(),
 	controller: string(),
 	home_assistant_name: string().optional(),
 	mqtt_topic: string().optional(),
@@ -6198,7 +6437,7 @@ var CustomOption$4 = ({ innerProps, isDisabled, isFocused, isSelected, children,
 };
 var select_components$4 = { Option: CustomOption$4 };
 var MultiStep_AddEditEntity_Step3_Button = ({ controller, room_id, entities_page_id, room_view_position, id, onComplete }) => {
-	const { handleSubmit, register, reset, getValues, setValue, formState: { isValid } } = useForm({
+	const { handleSubmit, register, reset, getValues, setValue, watch, formState: { isValid } } = useForm({
 		resolver: u(schema$4),
 		defaultValues: {
 			id: null,
@@ -6317,6 +6556,16 @@ var MultiStep_AddEditEntity_Step3_Button = ({ controller, room_id, entities_page
 							})]
 						})
 					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "w-full mb-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "block mb-2 text-sm font-medium",
+							children: "Icon on the panel"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomIconPicker, {
+							value: watch("icon"),
+							onChange: (icon) => setValue("icon", icon, { shouldDirty: true })
+						})]
+					}),
 					controller == "home_assistant" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
 						className: "block mb-2 text-sm font-medium",
 						children: "Home Assistant entity"
@@ -6404,6 +6653,7 @@ var schema$3 = object({
 	entities_page_id: number(),
 	room_view_position: number(),
 	friendly_name: string().min(1),
+	icon: string().optional(),
 	step_size: float32(),
 	controller: string(),
 	use_current_temperature: string(),
@@ -6551,6 +6801,7 @@ var IconSelector = ({ value, onChange }) => {
 	];
 	const [selectedIcon, setSelectedIcon] = (0, import_react.useState)(value);
 	const [detailsOpen, setDetailsOpen] = (0, import_react.useState)(false);
+	const [customDialogOpen, setCustomDialogOpen] = (0, import_react.useState)(false);
 	const ref = (0, import_react.useRef)(null);
 	const select_icon = (icon) => {
 		setSelectedIcon(icon);
@@ -6566,7 +6817,7 @@ var IconSelector = ({ value, onChange }) => {
 			window.removeEventListener("click", listener);
 		};
 	}, [ref, detailsOpen]);
-	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("details", {
 		open: detailsOpen,
 		onToggle: (e) => setDetailsOpen(e.currentTarget.open),
 		className: "dropdown dropdown-end h-auto",
@@ -6576,33 +6827,53 @@ var IconSelector = ({ value, onChange }) => {
 			id: "icon_selector_button",
 			title: "Select icon",
 			className: "btn rounded-box h-full border-neutral border-y border-x-0 font-nspm-mdi w-full",
-			children: selectedIcon
+			children: isCustomIcon(selectedIcon) ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomIcon, {
+				character: selectedIcon,
+				className: "text-xl"
+			}) : selectedIcon
 		}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 			className: "dropdown-content bg-base-100 text-base-content rounded-box rounded-tr-none w-56 border border-primary",
-			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "flex justify-center pb-1 mb-2 mt-1 border-b border-primary",
-				children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-					className: "text-sm",
-					children: "Select Icon"
-				})
-			}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-				className: "grid grid-cols-4 w-full",
-				children: climateIcons.map((icon) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					type: "button",
-					title: icon.name,
-					className: "btn btn-ghost rounded-none hover:btn-info icon-select-button",
-					"data-icon_value": icon.icon,
-					onClick: () => {
-						select_icon(icon.icon);
-					},
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "flex justify-center pb-1 mb-2 mt-1 border-b border-primary",
 					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-						className: "font-nspm-mdi",
-						children: icon.icon
+						className: "text-sm",
+						children: "Select Icon"
 					})
-				}))
-			})]
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "grid grid-cols-4 w-full",
+					children: climateIcons.map((icon) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						type: "button",
+						title: icon.name,
+						className: "btn btn-ghost rounded-none hover:btn-info icon-select-button",
+						"data-icon_value": icon.icon,
+						onClick: () => {
+							select_icon(icon.icon);
+						},
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "font-nspm-mdi",
+							children: icon.icon
+						})
+					}))
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+					type: "button",
+					className: "btn btn-ghost btn-sm w-full rounded-t-none border-t border-primary",
+					onClick: () => {
+						setDetailsOpen(false);
+						setCustomDialogOpen(true);
+					},
+					children: "More icons..."
+				})
+			]
 		})]
-	});
+	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomIconDialog, {
+		open: customDialogOpen,
+		onClose: () => setCustomDialogOpen(false),
+		onSelect: select_icon,
+		selected: selectedIcon
+	})] });
 };
 var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_page_id, room_view_position, id, onComplete }) => {
 	const { control, handleSubmit, register, reset, getValues, setValue, formState: { isValid }, watch } = useForm({
@@ -6809,6 +7080,16 @@ var MultiStep_AddEditEntity_Step3_Thermostat = ({ controller, room_id, entities_
 								})
 							})]
 						})
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "w-full mb-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "block mb-2 text-sm font-medium",
+							children: "Icon on the panel"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomIconPicker, {
+							value: watch("icon"),
+							onChange: (icon) => setValue("icon", icon, { shouldDirty: true })
+						})]
 					}),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "mb-4",
@@ -7519,6 +7800,7 @@ var schema$2 = object({
 	entities_page_id: number(),
 	room_view_position: number(),
 	friendly_name: string().min(1),
+	icon: string().optional(),
 	backend_name: string().optional()
 });
 var CustomOption$2 = ({ innerProps, isDisabled, isFocused, isSelected, children, data }) => {
@@ -7531,7 +7813,7 @@ var CustomOption$2 = ({ innerProps, isDisabled, isFocused, isSelected, children,
 };
 var select_components$2 = { Option: CustomOption$2 };
 var MultiStep_AddEditEntity_Step3_Scene = ({ controller, room_id, entities_page_id, room_view_position, id, onComplete }) => {
-	const { handleSubmit, register, reset, getValues, setValue, formState: { isValid } } = useForm({
+	const { handleSubmit, register, reset, getValues, setValue, watch, formState: { isValid } } = useForm({
 		resolver: u(schema$2),
 		defaultValues: {
 			id: id ?? null,
@@ -7647,6 +7929,16 @@ var MultiStep_AddEditEntity_Step3_Scene = ({ controller, room_id, entities_page_
 							})]
 						})
 					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "w-full mb-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "block mb-2 text-sm font-medium",
+							children: "Icon on the panel"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomIconPicker, {
+							value: watch("icon"),
+							onChange: (icon) => setValue("icon", icon, { shouldDirty: true })
+						})]
+					}),
 					controller == "home_assistant" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
 						className: "block mb-2 text-sm font-medium",
 						children: "Home Assistant scene"
@@ -7725,6 +8017,7 @@ var schema$1 = object({
 	entities_page_id: number(),
 	room_view_position: number(),
 	friendly_name: string().min(1),
+	icon: string().optional(),
 	controller: string(),
 	home_assistant_name: string(),
 	openhab_item_control: string(),
@@ -7991,6 +8284,16 @@ var MultiStep_AddEditEntity_Step3_MediaPlayer = ({ controller, room_id, entities
 							})]
 						})
 					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "w-full mb-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "block mb-2 text-sm font-medium",
+							children: "Icon on the panel"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomIconPicker, {
+							value: watch("icon"),
+							onChange: (icon) => setValue("icon", icon, { shouldDirty: true })
+						})]
+					}),
 					controller == "home_assistant" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "mb-4",
 						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
@@ -8197,6 +8500,7 @@ var schema = object({
 	entities_page_id: number(),
 	room_view_position: number(),
 	friendly_name: string().min(1),
+	icon: string().optional(),
 	controller: string(),
 	home_assistant_name: string(),
 	openhab_item: string(),
@@ -8398,6 +8702,16 @@ var MultiStep_AddEditEntity_Step3_Cover = ({ controller, room_id, entities_page_
 								})
 							})]
 						})
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+						className: "w-full mb-4",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "block mb-2 text-sm font-medium",
+							children: "Icon on the panel"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomIconPicker, {
+							value: watch("icon"),
+							onChange: (icon) => setValue("icon", icon, { shouldDirty: true })
+						})]
 					}),
 					controller == "home_assistant" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
@@ -8813,4 +9127,4 @@ var MultiStep_AddOrEditEntity = ({ room_id, entities_page_id, room_view_position
 	});
 };
 //#endregion
-export { useEntitiesPagesStore as i, MultiStep_AddOrEditEntity as n, useAvailableEntitiesStore as r, MultiStep_AddEditEntity_exports as t };
+export { useEntitiesPagesStore as a, CustomIcon as i, MultiStep_AddOrEditEntity as n, useAvailableEntitiesStore as r, MultiStep_AddEditEntity_exports as t };

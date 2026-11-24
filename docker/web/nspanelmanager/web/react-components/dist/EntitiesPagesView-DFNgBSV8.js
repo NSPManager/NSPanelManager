@@ -1,7 +1,7 @@
-import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-BX5WWnL7.js";
-import { a as useDroppable, i as useDraggable, n as isSortable, r as DragDropProvider, t as useSortable } from "./sortable-D_AGODML.js";
-import { t as create } from "./react-DewMULbh.js";
-import { i as useEntitiesPagesStore, n as MultiStep_AddOrEditEntity } from "./MultiStep_AddEditEntity-Dzt8KsRT.js";
+import { c as __toESM, r as require_react, t as require_jsx_runtime } from "./main-BFg3H8gZ.js";
+import { a as useDroppable, i as useDraggable, n as isSortable, r as DragDropProvider, t as useSortable } from "./sortable-ByvqcbOw.js";
+import { t as create } from "./react-DFHB3Hsy.js";
+import { a as useEntitiesPagesStore, i as CustomIcon, n as MultiStep_AddOrEditEntity } from "./MultiStep_AddEditEntity-E0Aa-iPf.js";
 //#region src/components/EntitiesPage/GenericEntityBox.tsx
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var import_jsx_runtime = require_jsx_runtime();
@@ -152,9 +152,12 @@ var GenericEntityBox = ({ entity, draging_item }) => {
 						title: "Unknown controller"
 					});
 				})(),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 					className: "text-sm m-2",
-					children: entity.friendly_name
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomIcon, {
+						character: entity.icon,
+						className: "me-1"
+					}), entity.friendly_name]
 				})
 			]
 		})
@@ -299,9 +302,12 @@ var GenericSceneBox = ({ scene, draging_item }) => {
 						title: "Unknown controller"
 					});
 				})(),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
 					className: "text-sm m-2",
-					children: scene.friendly_name
+					children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(CustomIcon, {
+						character: scene.icon,
+						className: "me-1"
+					}), scene.friendly_name]
 				})
 			]
 		})

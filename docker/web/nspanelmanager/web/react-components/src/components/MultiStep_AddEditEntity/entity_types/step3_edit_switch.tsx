@@ -5,6 +5,7 @@ import { type IOptionType } from "../../../stores/AvailableEntitiesStore";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
+import { CustomIconPicker } from "../../CustomIcons/CustomIcons";
 import { useEntitiesPagesStore } from "../../../stores/EntitiesPagesStore";
 import { useEffect } from "react";
 import { Notify } from "../..//NSPanelToastContainer";
@@ -17,6 +18,8 @@ const schema = z.object({
   entities_page_id: z.number(),
   room_view_position: z.number(),
   friendly_name: z.string().min(1),
+  icon: z.string().optional(), // Custom icon character when on, or "" for the toggle switch icon
+  icon_off: z.string().optional(), // Custom icon character when off, or "" for the toggle switch off icon
   controller: z.string(),
   home_assistant_name: z.string().optional(),
   openhab_item_switch: z.string().optional(),
@@ -61,6 +64,7 @@ const MultiStep_AddEditEntity_Step3_Switch = ({
     reset,
     getValues,
     setValue,
+    watch,
     formState: { isValid },
   } = useForm<SwitchFormData>({
     resolver: zodResolver(schema),
@@ -157,6 +161,22 @@ const MultiStep_AddEditEntity_Step3_Switch = ({
                 required
               />
             </div>
+          </div>
+        </div>
+
+        {/* Icons: lights and switches show whether they are on or off with their icon */}
+        <div className="w-full mb-4 flex flex-wrap gap-6">
+          <div>
+            <label className="block mb-2 text-sm font-medium">Icon on the panel when on</label>
+            <CustomIconPicker value={watch("icon")} onChange={(icon) => setValue("icon", icon, { shouldDirty: true })} defaultIcon="toggle-switch" />
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium">Icon on the panel when off</label>
+            <CustomIconPicker
+              value={watch("icon_off")}
+              onChange={(icon) => setValue("icon_off", icon, { shouldDirty: true })}
+              defaultIcon="toggle-switch-off"
+            />
           </div>
         </div>
 

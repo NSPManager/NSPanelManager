@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import api, background, htmx, rest, views
+from . import api, background, htmx, icon_pack, rest, views
 from .rest_v2 import global_settings as rest_v2_settings
 from .rest_v2 import rooms as rest_v2_rooms
 
@@ -22,6 +22,7 @@ urlpatterns = [
     path("download_data_file", views.download_data_file, name="download_data_file"),
     path("download_tft/<int:panel_id>", views.download_tft, name="download_tft"),
     path("download_background/<int:panel_id>", background.download_background, name="download_background"),
+    path("download_icon_pack/<int:panel_id>", icon_pack.download_icon_pack, name="download_icon_pack"),
     path("checksum_firmware", views.checksum_firmware, name="checksum_firmware"),
     path("checksum_data_file", views.checksum_data_file, name="checksum_data_file"),
     path("checksum_tft_file/<int:panel_id>", views.checksum_tft_file, name="checksum_tft_file"),
@@ -81,6 +82,8 @@ urlpatterns = [
     path("rest/v2/rooms", rest_v2_rooms.RoomListView.as_view(), name="rest_v2_rooms"),
     path("rest/v2/rooms/<int:pk>", rest_v2_rooms.RoomDetailView.as_view(), name="rest_v2_rooms_detail"),
     # Scene URLs
+    path("rest/icons", icon_pack.icons, name="rest_icons"),
+    path("rest/icons/available", icon_pack.available_icons, name="rest_available_icons"),
     path("rest/scenes", rest.scenes, name="rest_lights"),
     # Misc
     path("rest/get_ip_by_hostname", rest.get_ip_by_hostname, name="get_ip_by_hostname"),

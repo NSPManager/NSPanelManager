@@ -1,4 +1,4 @@
-import { c as __toESM, n as require_react_dom, r as require_react, t as require_jsx_runtime } from "./main-BX5WWnL7.js";
+import { c as __toESM, n as require_react_dom, r as require_react, t as require_jsx_runtime } from "./main-BFg3H8gZ.js";
 //#region node_modules/@preact/signals-core/dist/signals-core.module.js
 var import_react = /* @__PURE__ */ __toESM(require_react(), 1);
 var i = Symbol.for("preact-signals");

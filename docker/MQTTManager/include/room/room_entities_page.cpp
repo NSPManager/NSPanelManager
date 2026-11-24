@@ -18,6 +18,7 @@
 #include <exception>
 #include <fmt/format.h>
 #include <google/protobuf/util/message_differencer.h>
+#include <nlohmann/json.hpp>
 #include <memory>
 #include <mutex>
 #include <protobuf/protobuf_general.pb.h>
@@ -60,6 +61,33 @@ void RoomEntitiesPage::reload_config(bool send_state_update) {
       this->_page_settings = db_room;
 
       this->_mqtt_state_topic = fmt::format("nspanel/mqttmanager_{}/entity_pages/{}/state", MqttManagerConfig::get_setting_with_default<std::string>(MQTT_MANAGER_SETTING::MANAGER_ADDRESS), this->_id);
+    }
+
+    // Custom icons chosen in the web interface. Read here, as pages are reloaded whenever an entity or scene is saved.
+    {
+      std::map<std::pair<bool, int>, CustomIcons> custom_icons;
+      auto entities = database_manager::database.get_all<database_manager::Entity>(sqlite_orm::where(sqlite_orm::c(&database_manager::Entity::entities_page_id) == (int)this->_id));
+      for (const auto &db_entity : entities) {
+        nlohmann::json data = db_entity.get_entity_data_json();
+        CustomIcons icons;
+        if (data.contains("icon") && data["icon"].is_string()) {
+          icons.icon = data["icon"].get<std::string>();
+        }
+        if (data.contains("icon_off") && data["icon_off"].is_string()) {
+          icons.icon_off = data["icon_off"].get<std::string>();
+        }
+        if (!icons.icon.empty() || !icons.icon_off.empty()) {
+          custom_icons[{false, db_entity.id}] = icons;
+        }
+      }
+      auto scenes = database_manager::database.get_all<database_manager::Scene>(sqlite_orm::where(sqlite_orm::c(&database_manager::Scene::entities_page_id) == (int)this->_id));
+      for (const auto &db_scene : scenes) {
+        if (!db_scene.icon.empty()) {
+          custom_icons[{true, db_scene.id}] = CustomIcons{db_scene.icon, ""};
+        }
+      }
+      std::lock_guard<std::mutex> lock_guard(this->_entities_mutex);
+      this->_custom_icons = std::move(custom_icons);
     }
 
     SPDLOG_DEBUG("RoomEntitiesPage {} loaded successfully.", this->_id);
@@ -259,6 +287,18 @@ void RoomEntitiesPage::_send_mqtt_state_update() {
       entity_slot->set_id(media_player->get_id());
     } else {
       SPDLOG_ERROR("Unknown entity type {} while processing EntityWrapper while building NSPanelRoomEntitiesPage protobuf object.", (int)entity->get_type());
+      continue;
+    }
+
+    // A custom icon replaces the built-in one. Lights and switches show their state with the toggle
+    // switch on and off icons, so for them the "on" icon replaces the one and the "off" icon the other.
+    auto custom_icons = this->_custom_icons.find({entity->get_type() == MQTT_MANAGER_ENTITY_TYPE::SCENE, (int)entity->get_id()});
+    if (custom_icons != this->_custom_icons.end() && proto_state.entities_size() > 0) {
+      auto *slot = proto_state.mutable_entities(proto_state.entities_size() - 1);
+      const std::string &custom = slot->icon() == EntityIcons::entity_icon_switch_off ? custom_icons->second.icon_off : custom_icons->second.icon;
+      if (!custom.empty()) {
+        slot->set_icon(custom);
+      }
     }
   }
 

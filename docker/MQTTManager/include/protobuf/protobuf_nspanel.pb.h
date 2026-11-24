@@ -259,6 +259,40 @@ inline bool NSPanelConfig_NSPanelSoundEvent_Parse(absl::string_view name, NSPane
   return ::google::protobuf::internal::ParseNamedEnum<NSPanelConfig_NSPanelSoundEvent>(
       NSPanelConfig_NSPanelSoundEvent_descriptor(), name, value);
 }
+enum NSPanelConfig_NSPanelDisplayOrientation : int {
+  NSPanelConfig_NSPanelDisplayOrientation_LANDSCAPE = 0,
+  NSPanelConfig_NSPanelDisplayOrientation_LANDSCAPE_MIRRORED = 1,
+  NSPanelConfig_NSPanelDisplayOrientation_PORTRAIT = 2,
+  NSPanelConfig_NSPanelDisplayOrientation_NSPanelConfig_NSPanelDisplayOrientation_INT_MIN_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::min(),
+  NSPanelConfig_NSPanelDisplayOrientation_NSPanelConfig_NSPanelDisplayOrientation_INT_MAX_SENTINEL_DO_NOT_USE_ =
+      std::numeric_limits<::int32_t>::max(),
+};
+
+bool NSPanelConfig_NSPanelDisplayOrientation_IsValid(int value);
+extern const uint32_t NSPanelConfig_NSPanelDisplayOrientation_internal_data_[];
+constexpr NSPanelConfig_NSPanelDisplayOrientation NSPanelConfig_NSPanelDisplayOrientation_NSPanelDisplayOrientation_MIN = static_cast<NSPanelConfig_NSPanelDisplayOrientation>(0);
+constexpr NSPanelConfig_NSPanelDisplayOrientation NSPanelConfig_NSPanelDisplayOrientation_NSPanelDisplayOrientation_MAX = static_cast<NSPanelConfig_NSPanelDisplayOrientation>(2);
+constexpr int NSPanelConfig_NSPanelDisplayOrientation_NSPanelDisplayOrientation_ARRAYSIZE = 2 + 1;
+const ::google::protobuf::EnumDescriptor*
+NSPanelConfig_NSPanelDisplayOrientation_descriptor();
+template <typename T>
+const std::string& NSPanelConfig_NSPanelDisplayOrientation_Name(T value) {
+  static_assert(std::is_same<T, NSPanelConfig_NSPanelDisplayOrientation>::value ||
+                    std::is_integral<T>::value,
+                "Incorrect type passed to NSPanelDisplayOrientation_Name().");
+  return NSPanelConfig_NSPanelDisplayOrientation_Name(static_cast<NSPanelConfig_NSPanelDisplayOrientation>(value));
+}
+template <>
+inline const std::string& NSPanelConfig_NSPanelDisplayOrientation_Name(NSPanelConfig_NSPanelDisplayOrientation value) {
+  return ::google::protobuf::internal::NameOfDenseEnum<NSPanelConfig_NSPanelDisplayOrientation_descriptor,
+                                                 0, 2>(
+      static_cast<int>(value));
+}
+inline bool NSPanelConfig_NSPanelDisplayOrientation_Parse(absl::string_view name, NSPanelConfig_NSPanelDisplayOrientation* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<NSPanelConfig_NSPanelDisplayOrientation>(
+      NSPanelConfig_NSPanelDisplayOrientation_descriptor(), name, value);
+}
 enum NSPanelStatusReport_state : int {
   NSPanelStatusReport_state_ONLINE = 0,
   NSPanelStatusReport_state_OFFLINE = 1,
@@ -5739,6 +5773,26 @@ class NSPanelConfig final : public ::google::protobuf::Message
   static inline bool NSPanelSoundEvent_Parse(absl::string_view name, NSPanelSoundEvent* value) {
     return NSPanelConfig_NSPanelSoundEvent_Parse(name, value);
   }
+  using NSPanelDisplayOrientation = NSPanelConfig_NSPanelDisplayOrientation;
+  static constexpr NSPanelDisplayOrientation LANDSCAPE = NSPanelConfig_NSPanelDisplayOrientation_LANDSCAPE;
+  static constexpr NSPanelDisplayOrientation LANDSCAPE_MIRRORED = NSPanelConfig_NSPanelDisplayOrientation_LANDSCAPE_MIRRORED;
+  static constexpr NSPanelDisplayOrientation PORTRAIT = NSPanelConfig_NSPanelDisplayOrientation_PORTRAIT;
+  static inline bool NSPanelDisplayOrientation_IsValid(int value) {
+    return NSPanelConfig_NSPanelDisplayOrientation_IsValid(value);
+  }
+  static constexpr NSPanelDisplayOrientation NSPanelDisplayOrientation_MIN = NSPanelConfig_NSPanelDisplayOrientation_NSPanelDisplayOrientation_MIN;
+  static constexpr NSPanelDisplayOrientation NSPanelDisplayOrientation_MAX = NSPanelConfig_NSPanelDisplayOrientation_NSPanelDisplayOrientation_MAX;
+  static constexpr int NSPanelDisplayOrientation_ARRAYSIZE = NSPanelConfig_NSPanelDisplayOrientation_NSPanelDisplayOrientation_ARRAYSIZE;
+  static inline const ::google::protobuf::EnumDescriptor* NSPanelDisplayOrientation_descriptor() {
+    return NSPanelConfig_NSPanelDisplayOrientation_descriptor();
+  }
+  template <typename T>
+  static inline const std::string& NSPanelDisplayOrientation_Name(T value) {
+    return NSPanelConfig_NSPanelDisplayOrientation_Name(value);
+  }
+  static inline bool NSPanelDisplayOrientation_Parse(absl::string_view name, NSPanelDisplayOrientation* value) {
+    return NSPanelConfig_NSPanelDisplayOrientation_Parse(name, value);
+  }
 
   // accessors -------------------------------------------------------
   enum : int {
@@ -5782,6 +5836,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     kButton1UpperTemperatureFieldNumber = 42,
     kButton2LowerTemperatureFieldNumber = 43,
     kButton2UpperTemperatureFieldNumber = 44,
+    kDisplayOrientationFieldNumber = 49,
   };
   // repeated .NSPanelConfig.RoomInfo room_infos = 17;
   int room_infos_size() const;
@@ -6251,13 +6306,23 @@ class NSPanelConfig final : public ::google::protobuf::Message
   void _internal_set_button2_upper_temperature(::int32_t value);
 
   public:
+  // .NSPanelConfig.NSPanelDisplayOrientation display_orientation = 49;
+  void clear_display_orientation() ;
+  ::NSPanelConfig_NSPanelDisplayOrientation display_orientation() const;
+  void set_display_orientation(::NSPanelConfig_NSPanelDisplayOrientation value);
+
+  private:
+  ::NSPanelConfig_NSPanelDisplayOrientation _internal_display_orientation() const;
+  void _internal_set_display_orientation(::NSPanelConfig_NSPanelDisplayOrientation value);
+
+  public:
   // @@protoc_insertion_point(class_scope:NSPanelConfig)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      5, 40, 2,
-      160, 7>
+      5, 41, 2,
+      160, 9>
       _table_;
 
   static constexpr const void* _raw_default_instance_ =
@@ -6320,6 +6385,7 @@ class NSPanelConfig final : public ::google::protobuf::Message
     ::int32_t button1_upper_temperature_;
     ::int32_t button2_lower_temperature_;
     ::int32_t button2_upper_temperature_;
+    int display_orientation_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -7676,6 +7742,28 @@ inline void NSPanelConfig::set_allocated_button2_entity_page_topic(std::string* 
         }
   #endif  // PROTOBUF_FORCE_COPY_DEFAULT_STRING
   // @@protoc_insertion_point(field_set_allocated:NSPanelConfig.button2_entity_page_topic)
+}
+
+// .NSPanelConfig.NSPanelDisplayOrientation display_orientation = 49;
+inline void NSPanelConfig::clear_display_orientation() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.display_orientation_ = 0;
+}
+inline ::NSPanelConfig_NSPanelDisplayOrientation NSPanelConfig::display_orientation() const {
+  // @@protoc_insertion_point(field_get:NSPanelConfig.display_orientation)
+  return _internal_display_orientation();
+}
+inline void NSPanelConfig::set_display_orientation(::NSPanelConfig_NSPanelDisplayOrientation value) {
+  _internal_set_display_orientation(value);
+  // @@protoc_insertion_point(field_set:NSPanelConfig.display_orientation)
+}
+inline ::NSPanelConfig_NSPanelDisplayOrientation NSPanelConfig::_internal_display_orientation() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::NSPanelConfig_NSPanelDisplayOrientation>(_impl_.display_orientation_);
+}
+inline void NSPanelConfig::_internal_set_display_orientation(::NSPanelConfig_NSPanelDisplayOrientation value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.display_orientation_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -11687,6 +11775,12 @@ struct is_proto_enum<::NSPanelConfig_NSPanelSoundEvent> : std::true_type {};
 template <>
 inline const EnumDescriptor* GetEnumDescriptor<::NSPanelConfig_NSPanelSoundEvent>() {
   return ::NSPanelConfig_NSPanelSoundEvent_descriptor();
+}
+template <>
+struct is_proto_enum<::NSPanelConfig_NSPanelDisplayOrientation> : std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor<::NSPanelConfig_NSPanelDisplayOrientation>() {
+  return ::NSPanelConfig_NSPanelDisplayOrientation_descriptor();
 }
 template <>
 struct is_proto_enum<::NSPanelStatusReport_state> : std::true_type {};

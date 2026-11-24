@@ -5,6 +5,7 @@ import { type IOptionType } from "../../../stores/AvailableEntitiesStore";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
+import { CustomIconPicker } from "../../CustomIcons/CustomIcons";
 import { useEntitiesPagesStore } from "../../../stores/EntitiesPagesStore";
 import { useEffect } from "react";
 import { Notify } from "../../NSPanelToastContainer";
@@ -18,6 +19,7 @@ const schema = z.object({
   entities_page_id: z.number(),
   room_view_position: z.number(),
   friendly_name: z.string().min(1),
+  icon: z.string().optional(), // A custom icon character, or "" for the default icon
   backend_name: z.string().optional(),
 });
 export type SceneFormData = z.infer<typeof schema>;
@@ -60,6 +62,7 @@ const MultiStep_AddEditEntity_Step3_Scene = ({
     reset,
     getValues,
     setValue,
+    watch,
     formState: { isValid },
   } = useForm<SceneFormData>({
     resolver: zodResolver(schema),
@@ -163,6 +166,12 @@ const MultiStep_AddEditEntity_Step3_Scene = ({
               />
             </div>
           </div>
+        </div>
+
+        {/* Icon */}
+        <div className="w-full mb-4">
+          <label className="block mb-2 text-sm font-medium">Icon on the panel</label>
+          <CustomIconPicker value={watch("icon")} onChange={(icon) => setValue("icon", icon, { shouldDirty: true })} />
         </div>
 
         {controller == "home_assistant" && (

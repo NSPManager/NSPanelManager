@@ -5,6 +5,8 @@ import { type IOptionType } from "../../../stores/AvailableEntitiesStore";
 import { useFieldArray, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
+import { CustomIcon, CustomIconDialog, CustomIconPicker } from "../../CustomIcons/CustomIcons";
+import { isCustomIcon } from "../../../stores/CustomIconsStore";
 import { useEntitiesPagesStore } from "../../../stores/EntitiesPagesStore";
 import { useEffect, useState, useRef } from "react";
 import { Notify } from "../../NSPanelToastContainer";
@@ -17,6 +19,7 @@ const schema = z.object({
   entities_page_id: z.number(),
   room_view_position: z.number(),
   friendly_name: z.string().min(1),
+  icon: z.string().optional(), // A custom icon character, or "" for the default icon
   step_size: z.float32(),
   controller: z.string(),
   use_current_temperature: z.string(),
@@ -194,6 +197,7 @@ const IconSelector = ({ value, onChange }: { value: string; onChange: (icon: str
   ];
   const [selectedIcon, setSelectedIcon] = useState(value);
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [customDialogOpen, setCustomDialogOpen] = useState(false);
   const ref = useRef<HTMLDetailsElement | null>(null);
 
   const select_icon = (icon: string) => {
@@ -215,6 +219,7 @@ const IconSelector = ({ value, onChange }: { value: string; onChange: (icon: str
   }, [ref, detailsOpen]);
 
   return (
+    <>
     <details
       open={detailsOpen}
       onToggle={(e) => setDetailsOpen(e.currentTarget.open)}
@@ -223,7 +228,7 @@ const IconSelector = ({ value, onChange }: { value: string; onChange: (icon: str
       ref={ref}
     >
       <summary id="icon_selector_button" title="Select icon" className="btn rounded-box h-full border-neutral border-y border-x-0 font-nspm-mdi w-full">
-        {selectedIcon}
+        {isCustomIcon(selectedIcon) ? <CustomIcon character={selectedIcon} className="text-xl" /> : selectedIcon}
       </summary>
       <div className="dropdown-content bg-base-100 text-base-content rounded-box rounded-tr-none w-56 border border-primary">
         <div className="flex justify-center pb-1 mb-2 mt-1 border-b border-primary">
@@ -244,8 +249,21 @@ const IconSelector = ({ value, onChange }: { value: string; onChange: (icon: str
             </button>
           ))}
         </div>
+        {/* Any Material Design Icon, drawn on the panel from the icon pack */}
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm w-full rounded-t-none border-t border-primary"
+          onClick={() => {
+            setDetailsOpen(false);
+            setCustomDialogOpen(true);
+          }}
+        >
+          More icons...
+        </button>
       </div>
     </details>
+    <CustomIconDialog open={customDialogOpen} onClose={() => setCustomDialogOpen(false)} onSelect={select_icon} selected={selectedIcon} />
+    </>
   );
 };
 
@@ -492,6 +510,12 @@ const MultiStep_AddEditEntity_Step3_Thermostat = ({
               />
             </div>
           </div>
+        </div>
+
+        {/* Icon */}
+        <div className="w-full mb-4">
+          <label className="block mb-2 text-sm font-medium">Icon on the panel</label>
+          <CustomIconPicker value={watch("icon")} onChange={(icon) => setValue("icon", icon, { shouldDirty: true })} />
         </div>
 
         <div className="mb-4">

@@ -19,6 +19,7 @@ from web.settings_helper import (
 )
 
 from .apps import create_entity_pages_for_room, send_mqttmanager_reload_command
+from .icon_pack import clean_icon
 from .models import Entity, LightState, NSPanel, RelayGroup, Room, RoomEntitiesPage, Scene, Settings
 
 ########################
@@ -606,6 +607,7 @@ def get_rest_scene_representation(scene_id):
         "controller": scene.scene_type,
         "scene_type": scene.scene_type,
         "backend_name": scene.backend_name,  # Name for OpenHAB or Home Assistant entity to activate
+        "icon": scene.icon,  # A custom icon, or "" for the default one
         "light_states": [],
     }
     for state in scene.lightstate_set.all():
@@ -866,6 +868,9 @@ def put_light_entity(request):
             return JsonResponse({"status": "error", "message": controller_error}, status=400)
 
         entity_data = {
+            # Custom icons when on and when off, or "" for the built-in toggle switch icons
+            "icon": clean_icon(data.get("icon", "")),
+            "icon_off": clean_icon(data.get("icon_off", "")),
             "controller": data["controller"],
             "home_assistant_name": data.get("home_assistant_name", ""),
             "openhab_control_mode": "dimmer" if data.get("can_dim", False) else "switch",
@@ -944,6 +949,9 @@ def put_switch_entity(request):
             return JsonResponse({"status": "error", "message": controller_error}, status=400)
 
         entity_data = {
+            # Custom icons when on and when off, or "" for the built-in toggle switch icons
+            "icon": clean_icon(data.get("icon", "")),
+            "icon_off": clean_icon(data.get("icon_off", "")),
             "openhab_item_switch": data.get("openhab_item_switch", ""),
             "home_assistant_name": data.get("home_assistant_name", ""),
             "controller": data["controller"],
@@ -1014,6 +1022,7 @@ def put_button_entity(request):
             return JsonResponse({"status": "error", "message": controller_error}, status=400)
 
         entity_data = {
+            "icon": clean_icon(data.get("icon", "")),  # A custom icon, or "" for the default one
             "mqtt_topic": data.get("mqtt_topic", ""),
             "mqtt_payload": data.get("mqtt_payload", ""),
             "home_assistant_name": data.get("home_assistant_name", ""),
@@ -1105,6 +1114,7 @@ def put_thermostat_entity(request):
             return JsonResponse({"status": "error", "message": controller_error}, status=400)
 
         entity_data = {
+            "icon": clean_icon(data.get("icon", "")),  # A custom icon, or "" for the default one
             "controller": data.get("controller", ""),
             "fan_modes": data.get("fan_modes", []),
             "hvac_modes": data.get("hvac_modes", []),
@@ -1274,6 +1284,7 @@ def put_media_player_entity(request):
         # Only store the config of the selected controller. entity_data is replaced as a whole, so switching
         # controller on an existing media player never leaves the old controller's config behind.
         entity_data = {
+            "icon": clean_icon(data.get("icon", "")),  # A custom icon, or "" for the default one
             "controller": controller,
             "source_volume_strategy": source_volume_strategy,
             "source_entity_attribute": source_entity_attribute,
@@ -1396,6 +1407,7 @@ def put_cover_entity(request):
             return JsonResponse({"status": "error", "message": placement_error}, status=400)
 
         entity_data = {
+            "icon": clean_icon(data.get("icon", "")),  # A custom icon, or "" for the default one
             "controller": data["controller"],
             "home_assistant_name": home_assistant_name,
             "openhab_item": openhab_item,
@@ -1481,6 +1493,7 @@ def put_scene_entity(request):
 
         new_scene.scene_type = data.get("scene_type", "")
         new_scene.backend_name = data.get("backend_name", "")
+        new_scene.icon = clean_icon(data.get("icon", ""))
         new_scene.save()
         send_mqttmanager_reload_command()
 

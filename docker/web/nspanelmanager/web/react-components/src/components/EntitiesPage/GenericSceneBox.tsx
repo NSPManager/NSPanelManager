@@ -3,6 +3,7 @@ import MultiStep_AddOrEditEntity from "../MultiStep_AddEditEntity/MultiStep_AddE
 import type { IDragingItemData, IEntityOrSceneData } from "../../stores/EntitiesPagesStore";
 import { useEntitiesPagesStore } from "../../stores/EntitiesPagesStore";
 import { useRef, useState } from "react";
+import { CustomIcon } from "../CustomIcons/CustomIcons";
 // import Step2 from "./step2_select_controller";
 // import Step3 from "./Step3";
 
@@ -123,7 +124,10 @@ const GenericSceneBox = ({ scene, draging_item }: { scene: IEntityOrSceneData; d
             return <div className="status status-error animate-ping absolute top-2 left-2 cursor-default" title="Unknown controller"></div>;
           }
         })()}
-        <span className="text-sm m-2">{scene.friendly_name}</span>
+        <span className="text-sm m-2">
+          <CustomIcon character={scene.icon} className="me-1" />
+          {scene.friendly_name}
+        </span>
       </div>
     </>
   );

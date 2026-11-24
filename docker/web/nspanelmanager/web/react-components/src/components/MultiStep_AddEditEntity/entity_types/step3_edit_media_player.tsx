@@ -5,6 +5,7 @@ import { type IOptionType } from "../../../stores/AvailableEntitiesStore";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
+import { CustomIconPicker } from "../../CustomIcons/CustomIcons";
 import { useEntitiesPagesStore } from "../../../stores/EntitiesPagesStore";
 import { useEffect, useState } from "react";
 import { Notify } from "../../NSPanelToastContainer";
@@ -19,6 +20,7 @@ const schema = z
     entities_page_id: z.number(),
     room_view_position: z.number(),
     friendly_name: z.string().min(1),
+    icon: z.string().optional(), // A custom icon character, or "" for the default icon
     controller: z.string(),
     home_assistant_name: z.string(),
     openhab_item_control: z.string(),
@@ -281,6 +283,12 @@ const MultiStep_AddEditEntity_Step3_MediaPlayer = ({
               <input className={text_input_class} type="text" id="add_new_media_player_name" {...register("friendly_name")} required />
             </div>
           </div>
+        </div>
+
+        {/* Icon */}
+        <div className="w-full mb-4">
+          <label className="block mb-2 text-sm font-medium">Icon on the panel</label>
+          <CustomIconPicker value={watch("icon")} onChange={(icon) => setValue("icon", icon, { shouldDirty: true })} />
         </div>
 
         {controller == "home_assistant" && (

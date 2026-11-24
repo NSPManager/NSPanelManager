@@ -3,6 +3,7 @@ import { type ClassNamesConfig, type GroupBase } from "react-select";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import z from "zod";
+import { CustomIconPicker } from "../../CustomIcons/CustomIcons";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAvailableEntitiesStore } from "../../../stores/AvailableEntitiesStore";
 import { type IOptionType } from "../../../stores/AvailableEntitiesStore";
@@ -17,6 +18,8 @@ const schema = z.object({
   entities_page_id: z.number(),
   room_view_position: z.number(),
   friendly_name: z.string().min(1),
+  icon: z.string().optional(), // Custom icon character when on, or "" for the toggle switch icon
+  icon_off: z.string().optional(), // Custom icon character when off, or "" for the toggle switch off icon
   controller: z.string(),
   can_color_temperature: z.boolean().optional(),
   can_dim: z.boolean().optional(),
@@ -69,6 +72,7 @@ const MultiStep_AddEditEntity_Step3_Light = ({
     reset,
     getValues,
     setValue,
+    watch,
     formState: { isValid },
   } = useForm<LightFormData>({
     resolver: zodResolver(schema),
@@ -185,6 +189,22 @@ const MultiStep_AddEditEntity_Step3_Light = ({
                 required
               />
             </div>
+          </div>
+        </div>
+
+        {/* Icons: lights and switches show whether they are on or off with their icon */}
+        <div className="w-full mb-4 flex flex-wrap gap-6">
+          <div>
+            <label className="block mb-2 text-sm font-medium">Icon on the panel when on</label>
+            <CustomIconPicker value={watch("icon")} onChange={(icon) => setValue("icon", icon, { shouldDirty: true })} defaultIcon="toggle-switch" />
+          </div>
+          <div>
+            <label className="block mb-2 text-sm font-medium">Icon on the panel when off</label>
+            <CustomIconPicker
+              value={watch("icon_off")}
+              onChange={(icon) => setValue("icon_off", icon, { shouldDirty: true })}
+              defaultIcon="toggle-switch-off"
+            />
           </div>
         </div>
 

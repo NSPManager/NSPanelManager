@@ -1,4 +1,5 @@
 #pragma once
+#include <map>
 #include "database_manager/database_manager.hpp"
 #include "entity/entity.hpp"
 #include "protobuf_nspanel.pb.h"
@@ -114,5 +115,13 @@ private:
 
   // Entities registered to this page
   std::mutex _entities_mutex;
+
+  // Custom icons of the entities and scenes on this page, by (is a scene, ID). They replace the
+  // built-in icon characters; see the web interface's icon_pack.py. Guarded by _entities_mutex.
+  struct CustomIcons {
+    std::string icon;     // Replaces the built-in icon, or for lights and switches the "on" toggle switch icon
+    std::string icon_off; // Lights and switches: replaces the "off" toggle switch icon
+  };
+  std::map<std::pair<bool, int>, CustomIcons> _custom_icons;
   std::vector<std::shared_ptr<MqttManagerEntity>> _entities;
 };
