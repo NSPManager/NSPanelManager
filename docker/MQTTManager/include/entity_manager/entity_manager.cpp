@@ -11,6 +11,7 @@
 #include "light/openhab_light.hpp"
 #include "media_player/home_assistant_media_player.hpp"
 #include "media_player/media_player.hpp"
+#include "media_player/openhab_media_player.hpp"
 #include "mqtt_manager/mqtt_manager.hpp"
 #include "protobuf_nspanel.pb.h"
 #include "room/room.hpp"
@@ -349,7 +350,9 @@ void EntityManager::load_media_players() {
             SPDLOG_INFO("Media player {}::{} was found in database but not in config. Creating media player.", media_player_entity->get_id(), media_player_entity->get_name());
             EntityManager::_entities.push_back(media_player_entity);
           } else if (controller.compare("openhab") == 0) {
-            SPDLOG_ERROR("Media player {}::{} is controlled by OpenHAB, which is not implemented for media players. Will ignore entity.", media_player_settings.id, media_player_settings.friendly_name);
+            std::shared_ptr<MediaPlayerEntity> media_player_entity = std::make_shared<OpenhabMediaPlayer>(media_player_settings.id);
+            SPDLOG_INFO("Media player {}::{} was found in database but not in config. Creating media player.", media_player_entity->get_id(), media_player_entity->get_name());
+            EntityManager::_entities.push_back(media_player_entity);
           } else {
             SPDLOG_ERROR("Unknown media player type '{}'. Will ignore entity.", controller);
           }

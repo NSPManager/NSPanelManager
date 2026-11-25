@@ -1,11 +1,11 @@
-import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-FKp56mKw.js";
-import { t as create } from "./react-Cm4z11-B.js";
-import { t as useSettingsStore } from "./SettingsStore-msVzBcHM.js";
-import { t as StateManagedSelect$1 } from "./react-select.esm-CbdimKhg.js";
-import { a as set, i as get, o as useFieldArray, r as appendErrors, s as useForm } from "./index.esm-CnTf2rLv.js";
-import { n as Notify } from "./NSPanelToastContainer-D677tDZJ.js";
-import { t as motion } from "./proxy-BQYsYRjY.js";
-import { t as AnimatePresence } from "./AnimatePresence-CpnHckGS.js";
+import { c as __toESM, o as __exportAll, r as require_react, t as require_jsx_runtime } from "./main-BX5WWnL7.js";
+import { t as create } from "./react-DewMULbh.js";
+import { t as useSettingsStore } from "./SettingsStore-C8HLU8jh.js";
+import { t as StateManagedSelect$1 } from "./react-select.esm-h_TeG1zc.js";
+import { a as set, i as get, o as useFieldArray, r as appendErrors, s as useForm } from "./index.esm-DhiAim-D.js";
+import { n as Notify } from "./NSPanelToastContainer-DGRdX11E.js";
+import { t as motion } from "./proxy-BgaTkGUO.js";
+import { t as AnimatePresence } from "./AnimatePresence-Cjr4XULy.js";
 //#region src/stores/EntitiesPagesStore.ts
 function getCookie$1(name) {
 	let cookieValue = "";
@@ -236,7 +236,7 @@ var MultiStep_AddEditEntity_Step2 = ({ handleButtonSelectEvent, entity_type, nex
 		switch: ["home_assistant", "openhab"],
 		button: ["home_assistant", "nspm"],
 		thermostat: ["home_assistant", "openhab"],
-		media_player: ["home_assistant"],
+		media_player: ["home_assistant", "openhab"],
 		cover: ["home_assistant", "openhab"],
 		scene: [
 			"home_assistant",
@@ -7726,7 +7726,9 @@ var schema$1 = object({
 	room_view_position: number(),
 	friendly_name: string().min(1),
 	controller: string(),
-	home_assistant_name: string().min(1),
+	home_assistant_name: string(),
+	openhab_item_control: string(),
+	openhab_item_volume: string(),
 	volume_step: number().int().min(1).max(100),
 	source_volume_strategy: _enum([
 		"none",
@@ -7736,6 +7738,23 @@ var schema$1 = object({
 	source_entity_attribute: string(),
 	source_volume_attribute: string()
 }).superRefine((data, ctx) => {
+	if (data.controller == "home_assistant" && data.home_assistant_name.trim() == "") ctx.addIssue({
+		code: "custom",
+		path: ["home_assistant_name"],
+		message: "Required"
+	});
+	if (data.controller == "openhab") {
+		if (data.openhab_item_control.trim() == "") ctx.addIssue({
+			code: "custom",
+			path: ["openhab_item_control"],
+			message: "Required"
+		});
+		if (data.openhab_item_volume.trim() == "") ctx.addIssue({
+			code: "custom",
+			path: ["openhab_item_volume"],
+			message: "Required"
+		});
+	}
 	if (data.source_volume_strategy != "none" && data.source_entity_attribute.trim() == "") ctx.addIssue({
 		code: "custom",
 		path: ["source_entity_attribute"],
@@ -7776,6 +7795,8 @@ var MultiStep_AddEditEntity_Step3_MediaPlayer = ({ controller, room_id, entities
 		entities_page_id,
 		room_view_position,
 		home_assistant_name: "",
+		openhab_item_control: "",
+		openhab_item_volume: "",
 		volume_step: 5,
 		source_volume_strategy: "none",
 		source_entity_attribute: "",
@@ -7787,6 +7808,8 @@ var MultiStep_AddEditEntity_Step3_MediaPlayer = ({ controller, room_id, entities
 		defaultValues
 	});
 	const home_assistant_name = watch("home_assistant_name");
+	const openhab_item_control = watch("openhab_item_control");
+	const openhab_item_volume = watch("openhab_item_volume");
 	const source_volume_strategy = watch("source_volume_strategy");
 	const [multiRoom, setMultiRoom] = (0, import_react.useState)(false);
 	const selectMultiRoom = (multi_room) => {
@@ -7819,6 +7842,18 @@ var MultiStep_AddEditEntity_Step3_MediaPlayer = ({ controller, room_id, entities
 		}
 	}, [id, useEntitiesPagesStore.getState().entities]);
 	function saveEntity(data) {
+		if (data.controller != "home_assistant") data = {
+			...data,
+			home_assistant_name: "",
+			source_volume_strategy: "none",
+			source_entity_attribute: "",
+			source_volume_attribute: ""
+		};
+		if (data.controller != "openhab") data = {
+			...data,
+			openhab_item_control: "",
+			openhab_item_volume: ""
+		};
 		if (data.source_volume_strategy == "none") data = {
 			...data,
 			source_entity_attribute: "",
@@ -7859,7 +7894,49 @@ var MultiStep_AddEditEntity_Step3_MediaPlayer = ({ controller, room_id, entities
 		menu: () => "bg-base-300 p-2.5 rounded-box",
 		option: (state) => `p-1 ${state.isSelected ? "bg-primary/20 rounded-sm" : ""} ${state.isFocused ? "bg-primary/20 rounded-sm" : ""}`
 	};
+	const select_styles = {
+		input: (base) => ({
+			...base,
+			"input:focus": { boxShadow: "none" }
+		}),
+		multiValueLabel: (base) => ({
+			...base,
+			whiteSpace: "normal",
+			overflow: "visible"
+		}),
+		control: (base) => ({
+			...base,
+			transition: "none"
+		})
+	};
 	const text_input_class = "outline-none bg-base-300 border-neutral rounded-md border focus:ring-0 focus:border-accent block flex-1 min-w-0 w-full text-sm p-2.5";
+	const renderOpenhabItemSelect = (field, label, help, current_value) => {
+		const options = useAvailableEntitiesStore.getState().openhab_options;
+		return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+			className: "mb-4",
+			children: [
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+					className: "block mb-2 text-sm font-medium",
+					children: label
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)(StateManagedSelect$1, {
+					options,
+					classNames,
+					onChange: (newValue) => {
+						setValue(field, newValue ? newValue.value : "", { shouldValidate: true });
+					},
+					unstyled: true,
+					components: select_components$1,
+					value: options.find((option) => option.value === current_value) ?? null,
+					styles: select_styles
+				}),
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "block mt-1 text-xs text-base-content/50",
+					children: help
+				})
+			]
+		});
+	};
 	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
 		onSubmit: handleSubmit(saveEntity),
 		children: [
@@ -7928,23 +8005,10 @@ var MultiStep_AddEditEntity_Step3_MediaPlayer = ({ controller, room_id, entities
 							unstyled: true,
 							components: select_components$1,
 							value: useAvailableEntitiesStore.getState().home_assistant_options.find((option) => option.value === home_assistant_name) ?? null,
-							styles: {
-								input: (base) => ({
-									...base,
-									"input:focus": { boxShadow: "none" }
-								}),
-								multiValueLabel: (base) => ({
-									...base,
-									whiteSpace: "normal",
-									overflow: "visible"
-								}),
-								control: (base) => ({
-									...base,
-									transition: "none"
-								})
-							}
+							styles: select_styles
 						})]
 					}),
+					controller == "openhab" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [renderOpenhabItemSelect("openhab_item_control", "Control item", "A Player item used for play, pause, next and previous.", openhab_item_control), renderOpenhabItemSelect("openhab_item_volume", "Volume item", "A Dimmer or Number item used to read and change the volume.", openhab_item_volume)] }),
 					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "mb-4",
 						children: [
@@ -7972,146 +8036,143 @@ var MultiStep_AddEditEntity_Step3_MediaPlayer = ({ controller, room_id, entities
 							})
 						]
 					}),
-					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+					controller == "home_assistant" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 						className: "mt-4 border border-primary rounded-box p-4 pt-2",
-						children: [
-							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-								className: "text-lg",
-								children: "Setup"
-							}),
-							/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-								className: "mt-2 w-full text-sm font-medium border border-neutral rounded-lg bg-base-300",
-								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center ps-3 w-full",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-										type: "radio",
-										id: "media_player_setup_standalone",
-										name: "media_player_setup",
-										checked: !multiRoom,
-										onChange: () => selectMultiRoom(false),
-										className: "w-4 h-4 radio radio-accent"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-										htmlFor: "media_player_setup_standalone",
-										className: "w-full py-3 ms-2 text-sm font-medium cursor-pointer",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "block text-sm font-medium",
-											children: "Standalone device"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "block text-xs text-base-content/50",
-											children: "The panel controls this media player's own volume and sources."
-										})]
-									})]
-								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "flex items-center ps-3 w-full",
-									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-										type: "radio",
-										id: "media_player_setup_multi_room",
-										name: "media_player_setup",
-										checked: multiRoom,
-										onChange: () => selectMultiRoom(true),
-										className: "w-4 h-4 radio radio-accent"
-									}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-										htmlFor: "media_player_setup_multi_room",
-										className: "w-full py-3 ms-2 text-sm font-medium cursor-pointer",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "block text-sm font-medium",
-											children: "Part of a multi-room audio setup"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "block text-xs text-base-content/50",
-											children: "Another media player, the source player, feeds this room, for example through an audio matrix. The panel can also control the source player's volume and select between its sources."
-										})]
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "text-lg",
+							children: "Setup"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "mt-2 w-full text-sm font-medium border border-neutral rounded-lg bg-base-300",
+							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center ps-3 w-full",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "radio",
+									id: "media_player_setup_standalone",
+									name: "media_player_setup",
+									checked: !multiRoom,
+									onChange: () => selectMultiRoom(false),
+									className: "w-4 h-4 radio radio-accent"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+									htmlFor: "media_player_setup_standalone",
+									className: "w-full py-3 ms-2 text-sm font-medium cursor-pointer",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "block text-sm font-medium",
+										children: "Standalone device"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "block text-xs text-base-content/50",
+										children: "The panel controls this media player's own volume and sources."
 									})]
 								})]
-							}),
-							multiRoom && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+							}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center ps-3 w-full",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "radio",
+									id: "media_player_setup_multi_room",
+									name: "media_player_setup",
+									checked: multiRoom,
+									onChange: () => selectMultiRoom(true),
+									className: "w-4 h-4 radio radio-accent"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+									htmlFor: "media_player_setup_multi_room",
+									className: "w-full py-3 ms-2 text-sm font-medium cursor-pointer",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "block text-sm font-medium",
+										children: "Part of a multi-room audio setup"
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "block text-xs text-base-content/50",
+										children: "Another media player, the source player, feeds this room, for example through an audio matrix. The panel can also control the source player's volume and select between its sources."
+									})]
+								})]
+							})]
+						})]
+					}),
+					controller == "home_assistant" && multiRoom && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+							className: "block mt-4 mb-2 text-sm font-medium",
+							children: "How does Home Assistant tell which source player feeds this room?"
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+							className: "w-full text-sm font-medium border border-neutral rounded-lg bg-base-300",
+							children: multi_room_strategies.map((strategy) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+								className: "flex items-center ps-3 w-full",
+								children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "radio",
+									id: `media_player_source_volume_${strategy.value}`,
+									value: strategy.value,
+									...register("source_volume_strategy"),
+									className: "w-4 h-4 radio radio-accent"
+								}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
+									htmlFor: `media_player_source_volume_${strategy.value}`,
+									className: "w-full py-3 ms-2 text-sm font-medium cursor-pointer",
+									children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "block text-sm font-medium",
+										children: strategy.label
+									}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+										className: "block text-xs text-base-content/50",
+										children: strategy.description
+									})]
+								})]
+							}, strategy.value))
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("datalist", {
+							id: "media_player_attribute_names",
+							children: attribute_names.map((attribute) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: attribute }, attribute))
+						}),
+						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "mt-4",
+							children: [
 								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-									className: "block mt-4 mb-2 text-sm font-medium",
-									children: "How does Home Assistant tell which source player feeds this room?"
+									htmlFor: "add_new_media_player_source_entity_attribute",
+									className: "block mb-2 text-sm font-medium",
+									children: "Source player attribute"
 								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-									className: "w-full text-sm font-medium border border-neutral rounded-lg bg-base-300",
-									children: multi_room_strategies.map((strategy) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-										className: "flex items-center ps-3 w-full",
-										children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-											type: "radio",
-											id: `media_player_source_volume_${strategy.value}`,
-											value: strategy.value,
-											...register("source_volume_strategy"),
-											className: "w-4 h-4 radio radio-accent"
-										}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("label", {
-											htmlFor: `media_player_source_volume_${strategy.value}`,
-											className: "w-full py-3 ms-2 text-sm font-medium cursor-pointer",
-											children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "block text-sm font-medium",
-												children: strategy.label
-											}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-												className: "block text-xs text-base-content/50",
-												children: strategy.description
-											})]
-										})]
-									}, strategy.value))
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "text",
+									id: "add_new_media_player_source_entity_attribute",
+									className: text_input_class,
+									list: "media_player_attribute_names",
+									...register("source_entity_attribute")
 								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("datalist", {
-									id: "media_player_attribute_names",
-									children: attribute_names.map((attribute) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", { value: attribute }, attribute))
-								}),
-								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "mt-4",
+								/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
+									className: "block mt-1 text-xs text-base-content/50",
 									children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-											htmlFor: "add_new_media_player_source_entity_attribute",
-											className: "block mb-2 text-sm font-medium",
-											children: "Source player attribute"
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-											type: "text",
-											id: "add_new_media_player_source_entity_attribute",
-											className: text_input_class,
-											list: "media_player_attribute_names",
-											...register("source_entity_attribute")
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("span", {
-											className: "block mt-1 text-xs text-base-content/50",
-											children: [
-												"Name of the attribute on the room player holding the entity ID of the source player, for example ",
-												/* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "source_entity_id" }),
-												"."
-											]
-										}),
-										errors.source_entity_attribute && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "block mt-1 text-xs text-error",
-											children: errors.source_entity_attribute.message
-										})
+										"Name of the attribute on the room player holding the entity ID of the source player, for example ",
+										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("code", { children: "source_entity_id" }),
+										"."
 									]
 								}),
-								source_volume_strategy == "player_attributes" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-									className: "mt-4",
-									children: [
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
-											htmlFor: "add_new_media_player_source_volume_attribute",
-											className: "block mb-2 text-sm font-medium",
-											children: "Source volume attribute"
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-											type: "text",
-											id: "add_new_media_player_source_volume_attribute",
-											className: text_input_class,
-											list: "media_player_attribute_names",
-											...register("source_volume_attribute")
-										}),
-										/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "block mt-1 text-xs text-base-content/50",
-											children: "Name of the attribute on the room player holding the source volume, from 0.0 to 1.0. Volume changes are sent to the source player."
-										}),
-										errors.source_volume_attribute && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
-											className: "block mt-1 text-xs text-error",
-											children: errors.source_volume_attribute.message
-										})
-									]
+								errors.source_entity_attribute && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "block mt-1 text-xs text-error",
+									children: errors.source_entity_attribute.message
 								})
-							] })
-						]
-					})
+							]
+						}),
+						source_volume_strategy == "player_attributes" && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+							className: "mt-4",
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("label", {
+									htmlFor: "add_new_media_player_source_volume_attribute",
+									className: "block mb-2 text-sm font-medium",
+									children: "Source volume attribute"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+									type: "text",
+									id: "add_new_media_player_source_volume_attribute",
+									className: text_input_class,
+									list: "media_player_attribute_names",
+									...register("source_volume_attribute")
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "block mt-1 text-xs text-base-content/50",
+									children: "Name of the attribute on the room player holding the source volume, from 0.0 to 1.0. Volume changes are sent to the source player."
+								}),
+								errors.source_volume_attribute && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+									className: "block mt-1 text-xs text-error",
+									children: errors.source_volume_attribute.message
+								})
+							]
+						})
+					] })
 				]
 			}),
 			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {

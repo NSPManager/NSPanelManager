@@ -1175,22 +1175,34 @@ def entities_media_players(request):
 
 def put_media_player_entity(request):
     try:
-        required_fields = [  # Fields required for media player entities
+        required_fields = [  # Fields required for media player entities, whichever controller is used
             "room_id",
             "entities_page_id",
             "room_view_position",
             "controller",
             "friendly_name",
-            "home_assistant_name",
         ]
+
+        # Fields the controller itself needs to find the media player.
+        controller_required_fields = {
+            "home_assistant": ["home_assistant_name"],
+            "openhab": ["openhab_item_control", "openhab_item_volume"],
+        }
 
         data = json.loads(request.body)
         for field in required_fields:
             if field not in data:
                 return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
 
-        if data["controller"] != "home_assistant":
-            return JsonResponse({"status": "error", "message": f"Unsupported controller for media player: {data['controller']}"}, status=400)
+        controller = data["controller"]
+        if controller not in controller_required_fields:
+            return JsonResponse({"status": "error", "message": f"Unsupported controller for media player: {controller}"}, status=400)
+
+        for field in controller_required_fields[controller]:
+            if field not in data:
+                return JsonResponse({"status": "error", "message": f"Missing required field: {field}"}, status=400)
+            if not isinstance(data[field], str) or not data[field].strip():
+                return JsonResponse({"status": "error", "message": f"{field} must be a non-empty string."}, status=400)
 
         # Source volume is optional, a media player without it only has its own volume.
         source_volume_strategy = data.get("source_volume_strategy", "none")
@@ -1205,6 +1217,9 @@ def put_media_player_entity(request):
         # here rather than leaving the manager to log an error and silently fall back to no source volume.
         if source_volume_strategy not in MEDIA_PLAYER_SOURCE_VOLUME_STRATEGIES:
             return JsonResponse({"status": "error", "message": f"Unknown source volume strategy: {source_volume_strategy}. Expected one of {', '.join(MEDIA_PLAYER_SOURCE_VOLUME_STRATEGIES)}."}, status=400)
+        # Multi-room setups rely on entity attributes, which only Home Assistant has.
+        if controller != "home_assistant" and source_volume_strategy != "none":
+            return JsonResponse({"status": "error", "message": f"Source volume strategy '{source_volume_strategy}' is only supported for the home_assistant controller."}, status=400)
         if source_volume_strategy != "none" and not source_entity_attribute:
             return JsonResponse({"status": "error", "message": f"Source volume strategy '{source_volume_strategy}' requires source_entity_attribute."}, status=400)
         if source_volume_strategy == "player_attributes" and not source_volume_attribute:
@@ -1256,14 +1271,21 @@ def put_media_player_entity(request):
         if volume_step is None:
             volume_step = new_media_player.entity_data.get("volume_step", MEDIA_PLAYER_DEFAULT_VOLUME_STEP)
 
+        # Only store the config of the selected controller. entity_data is replaced as a whole, so switching
+        # controller on an existing media player never leaves the old controller's config behind.
         entity_data = {
-            "controller": data["controller"],
-            "home_assistant_name": data["home_assistant_name"],
+            "controller": controller,
             "source_volume_strategy": source_volume_strategy,
             "source_entity_attribute": source_entity_attribute,
             "source_volume_attribute": source_volume_attribute,
             "volume_step": volume_step,
         }
+        if controller == "home_assistant":
+            entity_data["home_assistant_name"] = data["home_assistant_name"].strip()
+        elif controller == "openhab":
+            entity_data["openhab_item_control"] = data["openhab_item_control"].strip()
+            entity_data["openhab_item_volume"] = data["openhab_item_volume"].strip()
+
         new_media_player.friendly_name = data["friendly_name"]
         new_media_player.room = room
         new_media_player.entities_page = entities_page

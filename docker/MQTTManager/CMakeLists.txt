@@ -12,15 +12,15 @@ set(PROTOBUF_SRC_DIRECTORY /MQTTManager/include/protobuf)
 add_compile_options(-rdynamic -g)
 add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE BOOST_STACKTRACE_USE_BACKTRACE BOOST_BIND_GLOBAL_PLACEHOLDERS BOOST_STACKTRACE_LIBCXX_RUNTIME_MAY_CAUSE_MEMORY_LEAK)
 if(NSPM_BUILD_TESTS)
-    add_compile_definitions(TEST_MODE=1)
+  add_compile_definitions(TEST_MODE=1)
 else()
-    add_compile_definitions(TEST_MODE=0)
+  add_compile_definitions(TEST_MODE=0)
 endif()
 
 # Statically link libraries
 IF(DEFINED ENV{STRIP})
-    MESSAGE("Will build as static binary!")
-    ADD_LINK_OPTIONS(-static)
+  MESSAGE("Will build as static binary!")
+  ADD_LINK_OPTIONS(-static)
 ENDIF()
 
 # The following two lines are to check for address sanitazation.
@@ -115,10 +115,10 @@ set_target_properties(MQTTManager_Thermostat PROPERTIES PUBLIC_HEADER ${CMAKE_IN
 target_include_directories(MQTTManager_Thermostat PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
 target_link_libraries(MQTTManager_Thermostat MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager gtest::gtest)
 
-add_library(MQTTManager_MediaPlayer STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/media_player.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/media_player.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_media_player.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_media_player.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_source_volume.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_source_volume.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_source_player.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_source_player.cpp)
+add_library(MQTTManager_MediaPlayer STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/media_player.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/media_player.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_media_player.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_media_player.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_source_volume.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_source_volume.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_source_player.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/home_assistant_source_player.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/openhab_media_player.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/openhab_media_player.cpp)
 set_target_properties(MQTTManager_MediaPlayer PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/media_player/media_player.hpp)
 target_include_directories(MQTTManager_MediaPlayer PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY})
-target_link_libraries(MQTTManager_MediaPlayer MQTTManager_HomeAssistantManager MQTTManager_WebHelper spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager date::date Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager gtest::gtest)
+target_link_libraries(MQTTManager_MediaPlayer MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_WebHelper spdlog::spdlog nlohmann_json::nlohmann_json MQTT_Manager date::date Boost::boost MQTTManager_Entity Protobuf_MQTTManager MQTTManager_CommandManager gtest::gtest)
 
 add_library(MQTTManager_Cover STATIC ${CMAKE_INCLUDE_SRC_DIRECTORY}/cover/cover.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/cover/cover.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/cover/home_assistant_cover.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/cover/home_assistant_cover.cpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/cover/openhab_cover.hpp ${CMAKE_INCLUDE_SRC_DIRECTORY}/cover/openhab_cover.cpp)
 set_target_properties(MQTTManager_Cover PROPERTIES PUBLIC_HEADER ${CMAKE_INCLUDE_SRC_DIRECTORY}/cover/cover.hpp)
@@ -169,6 +169,6 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_INCLUDE_SRC_DIRECTORY}
 target_link_libraries(${PROJECT_NAME} MQTT_Manager MQTTManager_ManagerClock MQTTManager_Config MQTTManager_HomeAssistantManager MQTTManager_OpenhabManager MQTTManager_EntityManager MQTTManager_NextionImageServer MQTTManager_Scene MQTTManager_Room MQTTManager_WebsocketServer MQTTManager_CommandManager gtest::gtest)
 
 if(NSPM_BUILD_TESTS)
-    enable_testing()
-    add_subdirectory(tests)
+  enable_testing()
+  add_subdirectory(tests)
 endif()
