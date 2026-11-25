@@ -590,7 +590,7 @@
 		(gimp-image-merge-visible-layers newImage 1)
 		(let*
 		((activeLayer (car (gimp-image-get-active-layer newImage))))
-		(gimp-file-save RUN-NONINTERACTIVE image activeLayer "pictures_tft3/181_blinds_depress.bmp" "pictures_tft3/181_blinds_depress.bmp")
+		(gimp-file-save RUN-NONINTERACTIVE image activeLayer "pictures_tft3/185_blinds_depress.bmp" "pictures_tft3/185_blinds_depress.bmp")
 		)
 	(gimp-image-delete newImage)
 	)
@@ -603,7 +603,7 @@
 		(gimp-image-merge-visible-layers newImage 1)
 		(let*
 		((activeLayer (car (gimp-image-get-active-layer newImage))))
-		(gimp-file-save RUN-NONINTERACTIVE image activeLayer "pictures_tft3/182_blinds_press.bmp" "pictures_tft3/182_blinds_press.bmp")
+		(gimp-file-save RUN-NONINTERACTIVE image activeLayer "pictures_tft3/186_blinds_press.bmp" "pictures_tft3/186_blinds_press.bmp")
 		)
 	(gimp-image-delete newImage)
 	)

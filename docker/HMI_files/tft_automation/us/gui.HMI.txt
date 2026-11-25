@@ -20,6 +20,7 @@ direction 180
 14  arrows30 30
 15  arrows40 40
 16  thermostat30NEW 30
+17  mdi_media_h48 48
 
 ## Program.s
     //The following code is only run once when power on, and is generally used for global variable definition and power on initialization data
@@ -5241,14 +5242,319 @@ direction 180
     txt = ''
     txt_maxl = 5
 
-## page 12 blinds
+## page 12 mediaplayer
+[0] mediaplayer  page
+    sta = 2
+    up = 255
+    down = 255
+    left = 255
+    right = 255
+    pic = 180 (320x480)
+    bco = 0
+    on load:
+        sleep_display.tim=home.sleep_display.tim
+        vis p_volume,0
+[1] home  button  global  sendkey=release
+    at 0,0  320x480
+    sta = 0
+    val = 0
+    txt = ''
+    txt_maxl = 10
+    style = 4
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    pic2 = none
+    picc = 67 (320x480)
+    picc2 = 68 (320x480)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[2] t_time  text  global  sendkey=release
+    at 213,4  103x50
+    sta = 0
+    txt = ''
+    txt_maxl = 10
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 180 (320x480)
+    bco = 65535
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[3] sleep_display  timer  global
+    en = 1
+    tim = 30000
+    on timer:
+        printh 92 FF FF FF
+[4] tc0  touchcap
+    val = 0
+    on down:
+        va1.val=tch1
+        tm0.en=1
+    on up:
+        //dim=100
+        //vis wake_up_button,0
+        sleep_display.en=1 //screensaver timer
+        //Swipedetection
+        tm0.en=0
+        if(tch1==0)
+        // When this is zero we can interpret that as the real end of the drag event
+        {
+          if(va2.val!=0)
+          {
+            va0.val=va1.val-va2.val
+            if(va0.val>20)
+            {
+              //Up swipe
+              //page partytime
+            }else if(va0.val<-20)
+            {
+              //Down swipe"
+              page dropdown
+            }
+            va2.val=0
+          }
+        }
+[5] tm0  timer
+    en = 0
+    tim = 100
+    on timer:
+        if(tch1!=0)
+        {
+          va2.val=tch1
+        }
+        tm0.en=0
+[6] va0  variable
+    sta = 0
+    val = 0
+    txt = 'newtxt'
+    txt_maxl = 10
+[7] va1  variable
+    sta = 0
+    val = 0
+    txt = 'newtxt'
+    txt_maxl = 10
+[8] va2  variable
+    sta = 0
+    val = 0
+    txt = 'newtxt'
+    txt_maxl = 10
+[9] tc1  touchcap
+    val = 0
+[10] song  scrolling text
+    at 12,216  296x24
+    sta = 0
+    txt = 'newtxt'
+    txt_maxl = 100
+    en = 1
+    tim = 80
+    dis = 4
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 180 (320x480)
+    bco = 65535
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+    dir = 1
+    vvs2 = 0
+    vvs3 = 0
+[11] artist  scrolling text
+    at 12,240  296x24
+    sta = 0
+    txt = 'newtxt'
+    txt_maxl = 100
+    en = 1
+    tim = 80
+    dis = 4
+    style = 0
+    font = 0 (hamlin18_latA 18)
+    pic = none
+    picc = 180 (320x480)
+    bco = 65535
+    pco = 65535
+    xcen = 1
+    ycen = 1
+    isbr = 0
+    dir = 1
+    vvs2 = 0
+    vvs3 = 0
+[12] b_prev  button  sendkey=release
+    at 20,165  100x52
+    sta = 0
+    val = 0
+    txt = 'F'
+    txt_maxl = 2
+    style = 4
+    font = 17 (mdi_media_h48 48)
+    pic = none
+    pic2 = none
+    picc = 180 (320x480)
+    picc2 = 180 (320x480)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[13] b_next  button  sendkey=release
+    at 220,165  100x52
+    sta = 0
+    val = 0
+    txt = 'E'
+    txt_maxl = 2
+    style = 4
+    font = 17 (mdi_media_h48 48)
+    pic = none
+    pic2 = none
+    picc = 180 (320x480)
+    picc2 = 180 (320x480)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[14] b_play  button  sendkey=release
+    at 121,165  100x52
+    sta = 0
+    val = 0
+    txt = 'A'
+    txt_maxl = 2
+    style = 4
+    font = 17 (mdi_media_h48 48)
+    pic = none
+    pic2 = none
+    picc = 180 (320x480)
+    picc2 = 180 (320x480)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[15] b_vol  button  sendkey=release
+    at 89,60  75x60
+    sta = 0
+    val = 0
+    txt = 'X'
+    txt_maxl = 10
+    style = 4
+    font = 17 (mdi_media_h48 48)
+    pic = none
+    pic2 = none
+    picc = 180 (320x480)
+    picc2 = 180 (320x480)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[16] b_srcswitch  button  sendkey=release
+    at 16,60  75x60
+    sta = 0
+    val = 0
+    txt = 'n'
+    txt_maxl = 2
+    style = 4
+    font = 17 (mdi_media_h48 48)
+    pic = none
+    pic2 = none
+    picc = 180 (320x480)
+    picc2 = 180 (320x480)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[17] b_vol_up  button  sendkey=release
+    at 243,60  75x60
+    sta = 0
+    val = 0
+    txt = 'd'
+    txt_maxl = 10
+    style = 4
+    font = 17 (mdi_media_h48 48)
+    pic = none
+    pic2 = none
+    picc = 180 (320x480)
+    picc2 = 180 (320x480)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[18] b_vol_down  button  sendkey=release
+    at 168,60  75x60
+    sta = 0
+    val = 0
+    txt = 'e'
+    txt_maxl = 2
+    style = 4
+    font = 17 (mdi_media_h48 48)
+    pic = none
+    pic2 = none
+    picc = 180 (320x480)
+    picc2 = 180 (320x480)
+    bco = 50712
+    bco2 = 1024
+    pco = 65535
+    pco2 = 65024
+    xcen = 1
+    ycen = 1
+    isbr = 0
+[19] p_pos  progress bar
+    at 15,458  286x10
+    sta = 1
+    val = 50
+    dis = 25
+    bpic = 181 (286x10)
+    ppic = 182 (286x10)
+    bco = 0
+    pco = 50744
+[20] p_volume  progress bar
+    at 158,134  150x10
+    sta = 1
+    val = 50
+    dis = 25
+    bpic = 183 (150x10)
+    ppic = 184 (150x10)
+    bco = 0
+    pco = 50744
+[21] h_art  hotspot  sendkey=release
+    at 70,271  180x180
+[22] tm_vol  timer
+    en = 0
+    tim = 1000
+    on timer:
+        vis p_volume,0
+        tm_vol.en=0
+
+## page 13 blinds
 [0] blinds  page
     sta = 2
     up = 255
     down = 255
     left = 255
     right = 255
-    pic = 181 (320x480)
+    pic = 185 (320x480)
     bco = 0
     on load:
         sleep_display.tim=home.sleep_display.tim
@@ -5308,8 +5614,8 @@ direction 180
     font = 14 (arrows30 30)
     pic = none
     pic2 = none
-    picc = 181 (320x480)
-    picc2 = 182 (320x480)
+    picc = 185 (320x480)
+    picc2 = 186 (320x480)
     bco = 50712
     bco2 = 1024
     pco = 65535
@@ -5614,8 +5920,8 @@ direction 180
     font = 0 (hamlin18_latA 18)
     pic = none
     pic2 = none
-    picc = 181 (320x480)
-    picc2 = 182 (320x480)
+    picc = 185 (320x480)
+    picc2 = 186 (320x480)
     bco = 50712
     bco2 = 1024
     pco = 65535
@@ -5633,8 +5939,8 @@ direction 180
     font = 0 (hamlin18_latA 18)
     pic = none
     pic2 = none
-    picc = 181 (320x480)
-    picc2 = 182 (320x480)
+    picc = 185 (320x480)
+    picc2 = 186 (320x480)
     bco = 50712
     bco2 = 1024
     pco = 65535
@@ -5652,8 +5958,8 @@ direction 180
     font = 0 (hamlin18_latA 18)
     pic = none
     pic2 = none
-    picc = 181 (320x480)
-    picc2 = 182 (320x480)
+    picc = 185 (320x480)
+    picc2 = 186 (320x480)
     bco = 50712
     bco2 = 1024
     pco = 65535
@@ -5671,8 +5977,8 @@ direction 180
     font = 9 (newfont9 50)
     pic = none
     pic2 = none
-    picc = 181 (320x480)
-    picc2 = 182 (320x480)
+    picc = 185 (320x480)
+    picc2 = 186 (320x480)
     bco = 50712
     bco2 = 1024
     pco = 65535
@@ -5690,8 +5996,8 @@ direction 180
     font = 9 (newfont9 50)
     pic = none
     pic2 = none
-    picc = 181 (320x480)
-    picc2 = 182 (320x480)
+    picc = 185 (320x480)
+    picc2 = 186 (320x480)
     bco = 50712
     bco2 = 1024
     pco = 65535
@@ -5709,8 +6015,8 @@ direction 180
     font = 9 (newfont9 50)
     pic = none
     pic2 = none
-    picc = 181 (320x480)
-    picc2 = 182 (320x480)
+    picc = 185 (320x480)
+    picc2 = 186 (320x480)
     bco = 50712
     bco2 = 1024
     pco = 65535
@@ -5731,8 +6037,8 @@ direction 180
     pic = 81 (307x135)
     pic1 = 80 (307x135)
     pic2 = 75 (320x480)
-    picc = 182 (320x480)
-    picc1 = 181 (320x480)
+    picc = 186 (320x480)
+    picc1 = 185 (320x480)
     bco = 30175
     bco1 = 65504
     pco = 65535
@@ -5746,8 +6052,8 @@ direction 180
     font = 0 (hamlin18_latA 18)
     pic = none
     pic2 = none
-    picc = 181 (320x480)
-    picc2 = 182 (320x480)
+    picc = 185 (320x480)
+    picc2 = 186 (320x480)
     bco = 50712
     bco2 = 1024
     pco = 65535
@@ -5765,8 +6071,8 @@ direction 180
     font = 0 (hamlin18_latA 18)
     pic = none
     pic2 = none
-    picc = 181 (320x480)
-    picc2 = 182 (320x480)
+    picc = 185 (320x480)
+    picc2 = 186 (320x480)
     bco = 50712
     bco2 = 1024
     pco = 65535
@@ -5784,8 +6090,8 @@ direction 180
     font = 0 (hamlin18_latA 18)
     pic = none
     pic2 = none
-    picc = 181 (320x480)
-    picc2 = 182 (320x480)
+    picc = 185 (320x480)
+    picc2 = 186 (320x480)
     bco = 50712
     bco2 = 1024
     pco = 65535
@@ -5803,8 +6109,8 @@ direction 180
     font = 9 (newfont9 50)
     pic = none
     pic2 = none
-    picc = 181 (320x480)
-    picc2 = 182 (320x480)
+    picc = 185 (320x480)
+    picc2 = 186 (320x480)
     bco = 50712
     bco2 = 1024
     pco = 65535
@@ -5822,8 +6128,8 @@ direction 180
     font = 9 (newfont9 50)
     pic = none
     pic2 = none
-    picc = 181 (320x480)
-    picc2 = 182 (320x480)
+    picc = 185 (320x480)
+    picc2 = 186 (320x480)
     bco = 50712
     bco2 = 1024
     pco = 65535
@@ -5841,8 +6147,8 @@ direction 180
     font = 9 (newfont9 50)
     pic = none
     pic2 = none
-    picc = 181 (320x480)
-    picc2 = 182 (320x480)
+    picc = 185 (320x480)
+    picc2 = 186 (320x480)
     bco = 50712
     bco2 = 1024
     pco = 65535
@@ -5863,8 +6169,8 @@ direction 180
     pic = 81 (307x135)
     pic1 = 80 (307x135)
     pic2 = 75 (320x480)
-    picc = 182 (320x480)
-    picc1 = 181 (320x480)
+    picc = 186 (320x480)
+    picc1 = 185 (320x480)
     bco = 30175
     bco1 = 65504
     pco = 65535
@@ -5879,7 +6185,7 @@ direction 180
     txt = ''
     txt_maxl = 15
 
-## page 13 PAGETEMPLATE
+## page 14 PAGETEMPLATE
 [0] PAGETEMPLATE  page
     sta = 2
     up = 255
