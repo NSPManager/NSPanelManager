@@ -1,7 +1,9 @@
 #include "fake_http_server.hpp"
 #include "test_helpers.hpp"
 #include <cover/openhab_cover.hpp>
+#include <functional>
 #include <gtest/gtest.h>
+#include <media_player/openhab_media_player.hpp>
 #include <protobuf_nspanel_entity.pb.h>
 #include <scenes/openhab_scene.hpp>
 #include <set>
@@ -9,9 +11,11 @@
 #include <thermostat/openhab_thermostat.hpp>
 
 using nspm_test::django_cover_data;
+using nspm_test::django_openhab_media_player_data;
 using nspm_test::django_switch_data;
 using nspm_test::FakeHttpServer;
 using nspm_test::ScopedEntity;
+using nspm_test::ScopedErrorLog;
 using nspm_test::ScopedScene;
 using nspm_test::thermostat_mode;
 
@@ -473,4 +477,349 @@ TEST_F(OpenhabThermostatTest, callbacks_ignore_a_topic_without_an_item) {
   thermostat->openhab_swingh_event_callback(event);
 
   EXPECT_FLOAT_EQ(thermostat->get_temperature(), temperature_before);
+}
+
+// ---------------------------------------------------------------------------------------------
+// Media players (an OpenHAB Player item for transport and a Dimmer/Number item for volume)
+
+class OpenhabMediaPlayerTest : public OpenhabTest {
+protected:
+  void create_player(const std::string &control_state = "PAUSE", const std::string &volume_state = "40") {
+    server.respond("/rest/items/Lounge_Control", rest_item("Lounge_Control", "Player", control_state));
+    server.respond("/rest/items/Lounge_Volume", rest_item("Lounge_Volume", "Dimmer", volume_state));
+    row = std::make_unique<ScopedEntity>("media_player", "Lounge speaker", django_openhab_media_player_data("Lounge_Control", "Lounge_Volume", 10), 5, 11, 4);
+    player = std::make_unique<OpenhabMediaPlayer>(row->id);
+  }
+
+  void TearDown() override {
+    player.reset();
+    row.reset();
+    OpenhabTest::TearDown();
+  }
+
+  // The last state published for the NSPanels since the previous call.
+  std::optional<NSPanelEntityState_MediaPlayer> last_published_state() {
+    auto messages = nspm_test::mqtt_published_to(player->get_mqtt_state_topic());
+    if (messages.empty()) {
+      return std::nullopt;
+    }
+    EXPECT_TRUE(messages.back().retain);
+    NSPanelEntityState state;
+    EXPECT_TRUE(state.ParseFromString(messages.back().payload));
+    return state.media_player();
+  }
+
+  void send_panel_command(const std::function<void(NSPanelMQTTManagerCommand_MediaPlayerCommand *)> &fill) {
+    NSPanelMQTTManagerCommand command;
+    auto *media_player_command = command.mutable_media_player_command();
+    media_player_command->set_media_player_id(row->id);
+    fill(media_player_command);
+    player->command_callback(command);
+  }
+
+  std::unique_ptr<ScopedEntity> row;
+  std::unique_ptr<OpenhabMediaPlayer> player;
+};
+
+TEST_F(OpenhabMediaPlayerTest, loads_config_and_fetches_the_initial_state_over_rest) {
+  create_player("PLAY", "40");
+
+  EXPECT_EQ(player->get_name(), "Lounge speaker");
+  EXPECT_EQ(player->get_room_id(), 5);
+  EXPECT_EQ(player->get_entity_page_id(), 11);
+  EXPECT_EQ(player->get_entity_page_slot(), 4);
+  EXPECT_EQ(player->get_type(), MQTT_MANAGER_ENTITY_TYPE::MEDIA_PLAYER);
+  EXPECT_EQ(player->get_controller(), MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB);
+
+  std::set<std::string> paths;
+  for (auto &request : server.requests()) {
+    EXPECT_EQ(request.method, "GET");
+    EXPECT_EQ(request.headers["authorization"], "Bearer test-token");
+    paths.insert(request.path);
+  }
+  EXPECT_EQ(paths, std::set<std::string>({"/rest/items/Lounge_Control", "/rest/items/Lounge_Volume"}));
+
+  auto state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_EQ(state->media_player_id(), row->id);
+  EXPECT_EQ(state->name(), "Lounge speaker");
+  EXPECT_EQ(state->state(), NSPanelEntityState_MediaPlayer_PlaybackState_PLAYING);
+  EXPECT_EQ(state->volume(), 40);
+  EXPECT_EQ(state->volume_step(), 10);
+}
+
+TEST_F(OpenhabMediaPlayerTest, offers_only_what_the_two_items_can_do) {
+  create_player();
+
+  auto state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_TRUE(state->can_play());
+  EXPECT_TRUE(state->can_pause());
+  EXPECT_TRUE(state->can_next_track());
+  EXPECT_TRUE(state->can_previous_track());
+  EXPECT_TRUE(state->can_set_volume());
+  EXPECT_FALSE(state->can_mute());
+  EXPECT_FALSE(state->has_source_volume());
+  EXPECT_FALSE(state->has_media_position());
+  EXPECT_EQ(state->player_sources().sources_size(), 0);
+  EXPECT_FALSE(state->has_source_player_sources());
+}
+
+TEST_F(OpenhabMediaPlayerTest, follows_control_item_state_changes) {
+  create_player("PAUSE");
+  last_published_state();
+
+  OpenhabManager::test_process_websocket_message(item_state_changed("Lounge_Control", "PlayPause", "PLAY"));
+  auto state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_EQ(state->state(), NSPanelEntityState_MediaPlayer_PlaybackState_PLAYING);
+
+  OpenhabManager::test_process_websocket_message(item_state_changed("Lounge_Control", "PlayPause", "PAUSE"));
+  state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_EQ(state->state(), NSPanelEntityState_MediaPlayer_PlaybackState_PAUSED);
+}
+
+TEST_F(OpenhabMediaPlayerTest, control_states_without_a_playback_state_become_unknown) {
+  create_player("PLAY");
+  for (const std::string &control_state : {"NULL", "UNDEF", "REWIND", "FASTFORWARD"}) {
+    SCOPED_TRACE(control_state);
+    OpenhabManager::test_process_websocket_message(item_state_changed("Lounge_Control", "PlayPause", "PLAY"));
+    last_published_state();
+
+    OpenhabManager::test_process_websocket_message(item_state_changed("Lounge_Control", "PlayPause", control_state));
+
+    auto state = last_published_state();
+    ASSERT_TRUE(state.has_value());
+    EXPECT_EQ(state->state(), NSPanelEntityState_MediaPlayer_PlaybackState_UNKNOWN);
+  }
+}
+
+TEST_F(OpenhabMediaPlayerTest, follows_volume_item_state_changes) {
+  create_player("PLAY", "40");
+  last_published_state();
+
+  OpenhabManager::test_process_websocket_message(item_state_changed("Lounge_Volume", "Percent", "55"));
+
+  auto state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_EQ(state->volume(), 55);
+  EXPECT_EQ(state->state(), NSPanelEntityState_MediaPlayer_PlaybackState_PLAYING);
+}
+
+TEST_F(OpenhabMediaPlayerTest, volume_is_rounded_and_clamped) {
+  create_player("PLAY", "40");
+
+  OpenhabManager::test_process_websocket_message(item_state_changed("Lounge_Volume", "Decimal", "33.6"));
+  auto state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_EQ(state->volume(), 34);
+
+  OpenhabManager::test_process_websocket_message(item_state_changed("Lounge_Volume", "Decimal", "150"));
+  state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_EQ(state->volume(), 100);
+
+  OpenhabManager::test_process_websocket_message(item_state_changed("Lounge_Volume", "Decimal", "-5"));
+  state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_EQ(state->volume(), 0);
+}
+
+TEST_F(OpenhabMediaPlayerTest, volume_that_is_not_a_number_keeps_the_last_volume) {
+  create_player("PLAY", "40");
+  last_published_state();
+
+  OpenhabManager::test_process_websocket_message(item_state_changed("Lounge_Volume", "UnDef", "NULL"));
+
+  EXPECT_FALSE(last_published_state().has_value());
+}
+
+TEST_F(OpenhabMediaPlayerTest, initial_volume_that_is_not_a_number_is_ignored) {
+  create_player("PLAY", "NULL");
+
+  auto state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_EQ(state->state(), NSPanelEntityState_MediaPlayer_PlaybackState_PLAYING);
+  EXPECT_EQ(state->volume(), 0);
+}
+
+TEST_F(OpenhabMediaPlayerTest, ignores_state_changes_for_other_items) {
+  create_player();
+  last_published_state();
+
+  OpenhabManager::test_process_websocket_message(item_state_changed("Kitchen_Control", "PlayPause", "PLAY"));
+  OpenhabManager::test_process_websocket_message(item_state_changed("Kitchen_Volume", "Percent", "90"));
+
+  EXPECT_FALSE(last_published_state().has_value());
+}
+
+TEST_F(OpenhabMediaPlayerTest, unchanged_state_is_not_published_again) {
+  create_player("PLAY", "40");
+  last_published_state();
+
+  OpenhabManager::test_process_websocket_message(item_state_changed("Lounge_Control", "PlayPause", "PLAY"));
+  OpenhabManager::test_process_websocket_message(item_state_changed("Lounge_Volume", "Percent", "40"));
+
+  EXPECT_FALSE(last_published_state().has_value());
+}
+
+TEST_F(OpenhabMediaPlayerTest, malformed_events_are_ignored) {
+  create_player();
+  last_published_state();
+
+  // No payload, a payload that is not JSON, a payload without a value and a topic without an item.
+  OpenhabManager::test_process_websocket_message(nlohmann::json({{"type", "ItemStateChangedEvent"}, {"topic", "openhab/items/Lounge_Control/statechanged"}}).dump());
+  OpenhabManager::test_process_websocket_message(nlohmann::json({{"type", "ItemStateChangedEvent"}, {"topic", "openhab/items/Lounge_Control/statechanged"}, {"payload", "not json"}}).dump());
+  OpenhabManager::test_process_websocket_message(nlohmann::json({{"type", "ItemStateChangedEvent"}, {"topic", "openhab/items/Lounge_Control/statechanged"}, {"payload", nlohmann::json({{"type", "PlayPause"}}).dump()}}).dump());
+  player->openhab_event_callback({{"type", "ItemStateChangedEvent"}, {"topic", "openhab"}, {"payload", nlohmann::json({{"type", "PlayPause"}, {"value", "PLAY"}}).dump()}});
+  player->openhab_event_callback({{"topic", "openhab/items/Lounge_Control/statechanged"}});
+
+  EXPECT_FALSE(last_published_state().has_value());
+}
+
+TEST_F(OpenhabMediaPlayerTest, playback_and_volume_commands_go_to_their_items) {
+  create_player();
+  item_commands();
+
+  player->play();
+  player->pause();
+  player->next_track();
+  player->previous_track();
+  player->set_volume(35);
+
+  auto commands = item_commands();
+  ASSERT_EQ(commands.size(), 5);
+  EXPECT_EQ(commands[0], std::make_pair(std::string("Lounge_Control"), nlohmann::json({{"type", "PlayPause"}, {"value", "PLAY"}})));
+  EXPECT_EQ(commands[1], std::make_pair(std::string("Lounge_Control"), nlohmann::json({{"type", "PlayPause"}, {"value", "PAUSE"}})));
+  EXPECT_EQ(commands[2], std::make_pair(std::string("Lounge_Control"), nlohmann::json({{"type", "NextPrevious"}, {"value", "NEXT"}})));
+  EXPECT_EQ(commands[3], std::make_pair(std::string("Lounge_Control"), nlohmann::json({{"type", "NextPrevious"}, {"value", "PREVIOUS"}})));
+  EXPECT_EQ(commands[4], std::make_pair(std::string("Lounge_Volume"), nlohmann::json({{"type", "Percent"}, {"value", 35}})));
+}
+
+TEST_F(OpenhabMediaPlayerTest, panel_commands_are_sent_to_openhab) {
+  create_player();
+  item_commands();
+
+  send_panel_command([](auto *command) { command->set_playback_action(NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_PLAY); });
+  send_panel_command([](auto *command) { command->set_playback_action(NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_NEXT_TRACK); });
+  send_panel_command([](auto *command) {
+    command->set_has_volume(true);
+    command->set_volume(150);
+  });
+
+  auto commands = item_commands();
+  ASSERT_EQ(commands.size(), 3);
+  EXPECT_EQ(commands[0], std::make_pair(std::string("Lounge_Control"), nlohmann::json({{"type", "PlayPause"}, {"value", "PLAY"}})));
+  EXPECT_EQ(commands[1], std::make_pair(std::string("Lounge_Control"), nlohmann::json({{"type", "NextPrevious"}, {"value", "NEXT"}})));
+  EXPECT_EQ(commands[2], std::make_pair(std::string("Lounge_Volume"), nlohmann::json({{"type", "Percent"}, {"value", 100}})));
+}
+
+TEST_F(OpenhabMediaPlayerTest, unsupported_panel_commands_send_nothing) {
+  create_player();
+  item_commands();
+
+  send_panel_command([](auto *command) {
+    command->set_has_muted(true);
+    command->set_muted(true);
+  });
+  send_panel_command([](auto *command) {
+    command->set_has_source_volume(true);
+    command->set_source_volume(20);
+  });
+  send_panel_command([](auto *command) { command->set_select_player_source("Radio"); });
+  send_panel_command([](auto *command) { command->set_select_source_player_source("Spotify"); });
+
+  EXPECT_TRUE(item_commands().empty());
+}
+
+TEST_F(OpenhabMediaPlayerTest, commands_for_other_media_players_are_ignored) {
+  create_player();
+  item_commands();
+
+  NSPanelMQTTManagerCommand command;
+  command.mutable_media_player_command()->set_media_player_id(row->id + 1000);
+  command.mutable_media_player_command()->set_playback_action(NSPanelMQTTManagerCommand_MediaPlayerCommand_PlaybackAction_PLAY);
+  player->command_callback(command);
+
+  EXPECT_TRUE(item_commands().empty());
+}
+
+TEST_F(OpenhabMediaPlayerTest, reload_with_new_items_follows_the_new_items) {
+  create_player("PLAY", "40");
+  server.respond("/rest/items/Kitchen_Control", rest_item("Kitchen_Control", "Player", "PAUSE"));
+  server.respond("/rest/items/Kitchen_Volume", rest_item("Kitchen_Volume", "Dimmer", "20"));
+  row->update_entity_data(django_openhab_media_player_data("Kitchen_Control", "Kitchen_Volume"));
+  last_published_state();
+
+  player->reload_config();
+
+  auto state = last_published_state();
+  ASSERT_TRUE(state.has_value());
+  EXPECT_EQ(state->state(), NSPanelEntityState_MediaPlayer_PlaybackState_PAUSED);
+  EXPECT_EQ(state->volume(), 20);
+
+  // The previous items are no longer observed.
+  OpenhabManager::test_process_websocket_message(item_state_changed("Lounge_Control", "PlayPause", "PLAY"));
+  EXPECT_FALSE(last_published_state().has_value());
+
+  item_commands();
+  player->play();
+  auto commands = item_commands();
+  ASSERT_EQ(commands.size(), 1);
+  EXPECT_EQ(commands[0].first, "Kitchen_Control");
+}
+
+TEST_F(OpenhabMediaPlayerTest, reload_with_the_same_items_keeps_the_state) {
+  create_player("PLAY", "40");
+  last_published_state();
+  size_t requests_before_reload = server.requests().size();
+
+  player->reload_config();
+
+  // Not reattached, so nothing is fetched again and the known state is kept.
+  EXPECT_EQ(server.requests().size(), requests_before_reload);
+  EXPECT_FALSE(last_published_state().has_value());
+}
+
+static bool any_line_contains(const std::vector<std::string> &lines, const std::string &text) {
+  return std::any_of(lines.begin(), lines.end(), [&text](const std::string &line) { return line.find(text) != std::string::npos; });
+}
+
+TEST_F(OpenhabMediaPlayerTest, missing_items_are_logged_and_nothing_is_sent) {
+  // rest.py requires both items, but the row may have been saved without them by an older version.
+  nlohmann::json entity_data = django_openhab_media_player_data("", "");
+  entity_data.erase("openhab_item_control");
+  entity_data.erase("openhab_item_volume");
+  ScopedErrorLog errors;
+  row = std::make_unique<ScopedEntity>("media_player", "Lounge speaker", entity_data);
+  player = std::make_unique<OpenhabMediaPlayer>(row->id);
+
+  EXPECT_TRUE(any_line_contains(errors.errors(), "No openhab control item"));
+  EXPECT_TRUE(any_line_contains(errors.errors(), "No openhab volume item"));
+  EXPECT_TRUE(server.requests().empty());
+
+  player->play();
+  player->set_volume(50);
+  EXPECT_TRUE(item_commands().empty());
+  EXPECT_TRUE(any_line_contains(errors.errors(), "no item configured"));
+}
+
+TEST_F(OpenhabMediaPlayerTest, empty_items_are_not_observed_and_nothing_is_sent) {
+  row = std::make_unique<ScopedEntity>("media_player", "Lounge speaker", django_openhab_media_player_data("", ""));
+  player = std::make_unique<OpenhabMediaPlayer>(row->id);
+
+  EXPECT_TRUE(server.requests().empty());
+  player->play();
+  player->set_volume(50);
+  EXPECT_TRUE(item_commands().empty());
+}
+
+TEST_F(OpenhabMediaPlayerTest, destroyed_player_stops_observing_openhab) {
+  create_player();
+  player.reset();
+
+  // Would call into the destroyed player if its observers were still attached.
+  OpenhabManager::test_process_websocket_message(item_state_changed("Lounge_Control", "PlayPause", "PLAY"));
+  OpenhabManager::test_process_websocket_message(item_state_changed("Lounge_Volume", "Percent", "10"));
 }

@@ -4,6 +4,7 @@
 #include <entity_manager/entity_manager.hpp>
 #include <gtest/gtest.h>
 #include <media_player/media_player.hpp>
+#include <media_player/openhab_media_player.hpp>
 #include <nspanel/nspanel.hpp>
 #include <room/room.hpp>
 #include <scenes/scene.hpp>
@@ -134,17 +135,19 @@ TEST_F(EntityManagerTest, buttons_are_created_for_their_controller) {
 TEST_F(EntityManagerTest, loads_thermostats_and_media_players) {
   ScopedEntity thermostat("thermostat", "Heat pump", django_thermostat_data("climate.hallway"));
   ScopedEntity speaker("media_player", "Speaker", django_media_player_data("media_player.lounge"));
-  nlohmann::json openhab_speaker_data = django_media_player_data("");
-  openhab_speaker_data["controller"] = "openhab";
-  ScopedEntity openhab_speaker("media_player", "OpenHAB speaker", openhab_speaker_data);
+  ScopedEntity openhab_speaker("media_player", "OpenHAB speaker", nspm_test::django_openhab_media_player_data("Speaker_Control", "Speaker_Volume"));
 
   EntityManager::load_thermostats();
   EntityManager::load_media_players();
 
   EXPECT_TRUE(EntityManager::get_entity_by_id<ThermostatEntity>(MQTT_MANAGER_ENTITY_TYPE::THERMOSTAT, thermostat.id).has_value());
-  EXPECT_TRUE(EntityManager::get_entity_by_id<MediaPlayerEntity>(MQTT_MANAGER_ENTITY_TYPE::MEDIA_PLAYER, speaker.id).has_value());
-  // OpenHAB media players are not implemented, so none is created.
-  EXPECT_FALSE(EntityManager::get_entity_by_id<MediaPlayerEntity>(MQTT_MANAGER_ENTITY_TYPE::MEDIA_PLAYER, openhab_speaker.id).has_value());
+  auto ha_speaker = EntityManager::get_entity_by_id<MediaPlayerEntity>(MQTT_MANAGER_ENTITY_TYPE::MEDIA_PLAYER, speaker.id);
+  auto oh_speaker = EntityManager::get_entity_by_id<MediaPlayerEntity>(MQTT_MANAGER_ENTITY_TYPE::MEDIA_PLAYER, openhab_speaker.id);
+  ASSERT_TRUE(ha_speaker.has_value());
+  ASSERT_TRUE(oh_speaker.has_value());
+  EXPECT_EQ((*ha_speaker)->get_controller(), MQTT_MANAGER_ENTITY_CONTROLLER::HOME_ASSISTANT);
+  EXPECT_EQ((*oh_speaker)->get_controller(), MQTT_MANAGER_ENTITY_CONTROLLER::OPENHAB);
+  EXPECT_NE(std::dynamic_pointer_cast<OpenhabMediaPlayer>(*oh_speaker), nullptr);
 }
 
 TEST_F(EntityManagerTest, loads_covers_for_home_assistant_and_openhab) {

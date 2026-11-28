@@ -42,6 +42,13 @@ public:
   ScopedEntity(const ScopedEntity &) = delete;
   ScopedEntity &operator=(const ScopedEntity &) = delete;
 
+  // Replaces entity_data the way the web interface does when the entity is saved again.
+  void update_entity_data(const nlohmann::json &entity_data) {
+    auto entity = database_manager::database.get<database_manager::Entity>(id);
+    entity.entity_data = entity_data.dump();
+    database_manager::database.update(entity);
+  }
+
   int id;
 };
 
@@ -177,6 +184,20 @@ inline nlohmann::json django_media_player_data(const std::string &home_assistant
       {"source_entity_attribute", ""},
       {"source_volume_attribute", ""},
       {"volume_step", volume_step},
+  };
+}
+
+// entity_data for an OpenHAB media player exactly as web/rest.py put_media_player_entity() stores it.
+inline nlohmann::json django_openhab_media_player_data(const std::string &openhab_item_control, const std::string &openhab_item_volume, int volume_step = 5) {
+  return {
+      {"icon", ""},
+      {"controller", "openhab"},
+      {"source_volume_strategy", "none"},
+      {"source_entity_attribute", ""},
+      {"source_volume_attribute", ""},
+      {"volume_step", volume_step},
+      {"openhab_item_control", openhab_item_control},
+      {"openhab_item_volume", openhab_item_volume},
   };
 }
 

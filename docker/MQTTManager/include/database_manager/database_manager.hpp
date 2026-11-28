@@ -108,9 +108,7 @@ struct Entity {
 // failing with "database is locked". Matches the "timeout" the web interface uses (settings.py).
 static constexpr int DATABASE_BUSY_TIMEOUT_MS = 20000;
 
-// `database` below is static, so each translation unit that includes this header has its own
-// storage, with its own connections. Anything that must apply to every connection is set
-// here, where each of those copies is made.
+// Anything that must apply to every connection is set here.
 static inline auto make_database() {
 #if defined(TEST_MODE) && TEST_MODE == 1
   auto storage = sqlite_orm::make_storage("/tmp/nspanelmanager_db_test.sqlite3",
@@ -193,9 +191,17 @@ static inline auto make_database() {
   return storage;
 }
 
-static inline auto database = make_database();
+// One storage, with one connection that stays open, for the whole program (an inline variable,
+// not static, so every translation unit shares it). It used to be static, so every translation
+// unit had its own storage, and only the one in main.cpp was opened forever by init(). The rest
+// opened and closed a connection per query, and sqlite_orm (1.9) does not do that safely when
+// threads share a storage: a thread can query while another thread is still opening or has just
+// closed the connection. SQLite then reports "out of memory" for the missing connection, which
+// aborted MQTTManager with std::system_error, mostly during reloads where many threads query at once.
+// SQLite is built thread safe (serialized), so one connection can be shared between threads.
+inline auto database = make_database();
 
-static void init() {
+inline void init() {
 
 #if defined(TEST_MODE) && TEST_MODE == 1
   SPDLOG_INFO("Running database /tmp/nspanelmanager_db_test.sqlite3 as it's in TEST_MODE. Syncing schema...");
@@ -223,6 +229,7 @@ static void init() {
       break;
     }
   }
+  database_manager::database.open_forever();
 #else
   while (true) {
     try {
